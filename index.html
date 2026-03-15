@@ -190,7 +190,7 @@ function bal(n,excludePending=false){
     if(rs){
       // Resolved bet
       const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
-      if(w){const py=bt.am/od;b+=py;if(mh)b+=(bt.am*MOMB)/od;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      if(w){const py=bt.am/od;b+=py;if(mh)b+=bt.am*MOMB;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
       else{if(!mh)b-=bt.am}
     } else if(!excludePending){
       // Pending bet — deduct from available balance
@@ -222,7 +222,7 @@ function rawBal(n){
     const rs=S.r[bt.mid];
     if(rs){
       const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
-      if(w){const py=bt.am/od;b+=py;if(mh)b+=(bt.am*MOMB)/od;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      if(w){const py=bt.am/od;b+=py;if(mh)b+=bt.am*MOMB;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
       else{if(!mh)b-=bt.am}
     } else {b-=bt.am}
   });
@@ -322,7 +322,7 @@ function getBalBreakdown(n){
     let change=0,detail='';
     if(won){
       const py=Math.round(bt.am/od);change=py;detail=`Won ₹${py.toLocaleString()} (₹${bt.am.toLocaleString()} ÷ ${od})`;
-      if(momH){const mb=Math.round((bt.am*MOMB)/od);change+=mb;detail+=` + MoM ₹${mb.toLocaleString()}`}
+      if(momH){const mb=Math.round(bt.am*MOMB);change+=mb;detail+=` + MoM ₹${mb.toLocaleString()}`}
       if(momH&&bt.mt&&bt.mt!==bt.tm){change+=py;detail+=` + Jackpot ₹${py.toLocaleString()}`}
     }else{
       if(momH){change=0;detail='MoM save — no loss'}
@@ -637,21 +637,25 @@ function oBF(id,prefill){
   <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(1/${mo[m.a]||'?'})</span></button>
   </div></div>
   <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="number" id="am-${id}" min="500" step="500" value="${prefill?prefill.am:''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="$('am-${id}').value=${v};calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="$('am-${id}').value=${b};calcWin(${id})">ALL IN 🔥</button></div>
-  <div id="wc-${id}" style="margin-top:10px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:none">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-      <div style="font-size:13px;color:var(--t4)">If you win:</div>
-      <div style="font-size:18px;font-weight:900;color:var(--grn);font-family:var(--ff)" id="wc-win-${id}"></div>
+  <div id="wc-${id}" style="margin-top:10px;padding:14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:none;font-size:13px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--t2)">✅ Win</span>
+      <span style="font-weight:800;color:var(--t1);font-family:var(--ff);font-size:15px" id="wc-win-${id}"></span>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:4px">
-      <div style="font-size:13px;color:var(--t4)">If you lose:</div>
-      <div style="font-size:18px;font-weight:900;color:var(--red);font-family:var(--ff)" id="wc-lose-${id}"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--t2)">🎯 Win + MoM bonus</span>
+      <span style="font-weight:800;color:var(--acc);font-family:var(--ff);font-size:15px" id="wc-momv-${id}"></span>
     </div>
-    <div id="wc-mom-${id}" style="margin-top:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-      <div style="font-size:13px;color:var(--t4)">If you win + MoM correct:</div>
-      <div style="font-size:18px;font-weight:900;color:var(--yel);font-family:var(--ff)" id="wc-momv-${id}"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--t2)">❌ Lose</span>
+      <span style="font-weight:800;color:var(--t1);font-family:var(--ff);font-size:15px" id="wc-lose-${id}"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
+      <span style="color:var(--t2)">🛡️ Team lost, but MoM pick was right — you lose nothing</span>
+      <span style="font-weight:800;color:var(--t4);font-family:var(--ff);font-size:15px">₹0</span>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Man of the Match (optional +20%)</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% of bet amount as bonus)</div>${momDropdown('mo-'+id,id)}</div>
   <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'✅ Confirm Bet'}</button></div></div>`;
   // Pre-select team and MoM if editing
   if(prefill){
@@ -681,10 +685,10 @@ function calcWin(id){
   wc.style.display='block';
   const od=parseFloat(mo[f.tm]);
   const win=Math.round(am/od);
-  const momWin=Math.round((am+(am*MOMB))/od);
+  const momBonus=Math.round(am*MOMB);
   $('wc-win-'+id).textContent='+₹'+win.toLocaleString();
   $('wc-lose-'+id).textContent='-₹'+am.toLocaleString();
-  $('wc-momv-'+id).textContent='+₹'+momWin.toLocaleString();
+  $('wc-momv-'+id).textContent='+₹'+win.toLocaleString()+' + ₹'+momBonus.toLocaleString()+' = +₹'+(win+momBonus).toLocaleString();
 }
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
@@ -896,19 +900,33 @@ function rRu(){
   <!-- Rule 5: Man of the Match -->
   <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🎯</span><span class="ct" style="font-size:15px">MAN OF THE MATCH (OPTIONAL)</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Along with your team pick, you can optionally predict the <strong style="color:var(--yel)">Man of the Match</strong>. If correct, you get a <strong style="color:var(--yel)">20% bonus</strong> on your bet.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Along with your team pick, you can optionally predict the <strong style="color:var(--yel)">Man of the Match</strong>. If correct, you get a flat <strong style="color:var(--yel)">20% bonus on your bet amount</strong> — regardless of odds.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example:</strong> RCB vs MI — Odds: RCB 1/2, MI 1/5<br>
-      You bet: <strong>₹10,000 on RCB</strong> | MoM pick: <strong>Virat Kohli</strong><br><br>
-      <span style="color:var(--grn)">✅ Scenario A — RCB wins, Kohli not MoM:</span><br>
-      You win ₹10,000 ÷ 2 = <strong>₹5,000</strong><br><br>
-      <span style="color:var(--red)">❌ Scenario B — RCB loses, Kohli not MoM:</span><br>
-      You lose your ₹10,000 bet<br><br>
-      <span style="color:var(--grn)">✅ Scenario C — RCB wins + Kohli IS MoM:</span><br>
-      Bet becomes ₹10,000 + 20% = ₹12,000<br>
-      You win ₹12,000 ÷ 2 = <strong>₹6,000</strong><br><br>
-      <span style="color:var(--yel)">🛡️ Scenario D — RCB loses + Kohli IS MoM:</span><br>
-      <strong>No deduction!</strong> Your MoM pick saves you.
+      <strong style="color:var(--acc)">Example 1:</strong> RCB vs SRH — Odds: RCB 1/1.9, SRH 1/2.2<br>
+      You bet: <strong>₹10,000 on SRH</strong> | MoM pick: <strong>Travis Head</strong><br><br>
+
+      <span style="color:var(--grn)">✅ Scenario A — SRH wins, Head is NOT MoM:</span><br>
+      Win = ₹10,000 ÷ 2.2 = <strong>+₹4,545</strong><br><br>
+
+      <span style="color:var(--grn)">🎯 Scenario C — SRH wins + Head IS MoM:</span><br>
+      Win = ₹10,000 ÷ 2.2 = ₹4,545<br>
+      MoM bonus = 20% of ₹10,000 = <strong>₹2,000</strong><br>
+      Total = <strong style="color:var(--yel)">+₹6,545</strong><br><br>
+
+      <span style="color:var(--red)">❌ Scenario B — SRH loses, Head is NOT MoM:</span><br>
+      You lose your bet = <strong>-₹10,000</strong><br><br>
+
+      <span style="color:var(--yel)">🛡️ Scenario D — SRH loses + Head IS MoM:</span><br>
+      <strong>No deduction!</strong> Your MoM pick saves you = <strong>₹0</strong>
+    </div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
+      <strong style="color:var(--acc)">Example 2:</strong> MI vs KKR — Odds: MI 1/3, KKR 1/1.5<br>
+      You bet: <strong>₹5,000 on MI</strong> | MoM pick: <strong>Jasprit Bumrah</strong><br><br>
+
+      <span style="color:var(--grn)">✅ MI wins, Bumrah not MoM:</span> ₹5,000 ÷ 3 = <strong>+₹1,667</strong><br>
+      <span style="color:var(--yel)">🎯 MI wins + Bumrah IS MoM:</span> ₹1,667 + (20% of ₹5,000) = ₹1,667 + ₹1,000 = <strong>+₹2,667</strong><br>
+      <span style="color:var(--red)">❌ MI loses, Bumrah not MoM:</span> <strong>-₹5,000</strong><br>
+      <span style="color:var(--t2)">🛡️ MI loses + Bumrah IS MoM:</span> <strong>₹0 (saved!)</strong>
     </div>
   </div>
 
@@ -917,24 +935,39 @@ function rRu(){
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">The ultimate power move. If you bet on the <strong style="color:var(--grn)">winning team</strong> AND correctly predict the MoM from the <strong style="color:var(--hot)">losing team</strong>, you get an <strong style="color:var(--yel)">extra 100% of your winnings</strong>!</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example:</strong> You bet ₹10,000 on MI (odds 1/5)<br>
-      MoM pick: Virat Kohli (RCB — the losing team)<br>
+      <strong style="color:var(--acc)">Example 1:</strong> RCB vs MI — Odds: RCB 1/2, MI 1/3<br>
+      You bet: <strong>₹10,000 on MI</strong> | MoM pick: <strong>Virat Kohli (RCB — the losing team!)</strong><br>
       MI wins AND Kohli is MoM!<br><br>
-      Normal win: ₹10,000 ÷ 5 = ₹2,000<br>
-      Jackpot bonus: extra ₹2,000 (100% of winnings)<br>
-      <strong style="color:var(--yel)">Total earned: ₹4,000! 🔥</strong>
+      Normal win: ₹10,000 ÷ 3 = ₹3,333<br>
+      Jackpot bonus: extra 100% of winnings = ₹3,333<br>
+      <strong style="color:var(--yel)">Total earned: +₹6,667! 🔥</strong>
+    </div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
+      <strong style="color:var(--acc)">Example 2:</strong> CSK vs PBKS — Odds: CSK 1/1.5, PBKS 1/3<br>
+      You bet: <strong>₹8,000 on CSK</strong> | MoM pick: <strong>Arshdeep Singh (PBKS — the losing team!)</strong><br>
+      CSK wins AND Arshdeep is MoM!<br><br>
+      Normal win: ₹8,000 ÷ 1.5 = ₹5,333<br>
+      Jackpot bonus: extra ₹5,333<br>
+      <strong style="color:var(--yel)">Total earned: +₹10,667! 🔥🔥</strong>
+    </div>
+    <div style="margin-top:10px;padding:10px;background:#F59E0B08;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--t4)">
+      💡 <strong>How to trigger the Jackpot:</strong> When placing your bet, pick your MoM from the opponent's team. It's risky — you're predicting the losing team's best player — but the reward is massive.
     </div>
   </div>
 
   <!-- Rule 7: Odds -->
   <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. They represent the payout ratio — your winnings = bet amount ÷ odds.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div style="padding:10px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:18px">1/2</div><div style="font-size:12px;color:var(--t4)">Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹5K</div></div>
-      <div style="padding:10px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:18px">1/5</div><div style="font-size:12px;color:var(--t4)">Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹2K</div></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your winnings = bet amount ÷ odds. Lower odds = favourite (safe bet, lower return). Higher odds = underdog (risky, higher return).</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">1/1.5</div><div style="font-size:12px;color:var(--t4)">Strong Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹6,667</div></div>
+      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">1/2</div><div style="font-size:12px;color:var(--t4)">Slight Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹5,000</div></div>
+      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">1/3</div><div style="font-size:12px;color:var(--t4)">Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹3,333</div></div>
+      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">1/5</div><div style="font-size:12px;color:var(--t4)">Big Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹2,000</div></div>
     </div>
-    <div style="font-size:12px;color:var(--t3);margin-top:8px">Lower odds = safer bet, lower payout. Higher odds = riskier bet, but your money goes further if the underdog wins.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Strategy tip:</strong> Betting on the underdog means lower winnings per rupee, but if you believe in an upset, your full bet amount is at stake either way. The favourite gives you a bigger return relative to the risk.
+    </div>
   </div>
 
   <!-- Rule 8: Crystal Ball -->
