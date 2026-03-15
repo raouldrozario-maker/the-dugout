@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Dugout — IPL 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏏</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060C1A;--card:#0B1426;--inp:#0F172A;--bdr:#1E293B;--bdr2:#2D3F5E;--t1:#E2E8F0;--t2:#94A3B8;--t3:#475569;--t4:#64748B;--acc:#F59E0B;--hot:#EF4444;--grad:linear-gradient(135deg,#F59E0B,#EF4444);--grn:#34D399;--red:#F87171;--yel:#FBBF24;--ff:'Oswald',sans-serif;--fb:'Source Sans 3',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px #F59E0B22}50%{box-shadow:0 0 40px #F59E0B44}}
+#toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:9999;padding:10px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;box-shadow:0 8px 32px #00000088;transition:transform .3s;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+header{background:linear-gradient(180deg,#0B1426,var(--bg));border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100}
+.hi{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.brand-n{font-family:var(--ff);font-size:24px;font-weight:700;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.brand-t{font-size:9px;letter-spacing:3px;color:var(--t3);font-weight:700}
+.upill{display:flex;align-items:center;gap:8px;background:var(--inp);border:1px solid var(--bdr);border-radius:24px;padding:4px 14px 4px 4px}
+.udot{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px}
+nav{display:flex;justify-content:center;gap:2px;padding:0 12px 8px;max-width:900px;margin:0 auto;overflow-x:auto}
+.nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;background:0;border:0;color:var(--t3);cursor:pointer;padding:8px 4px;border-radius:8px;font-size:18px;transition:.2s;white-space:nowrap}
+.nb.on{color:var(--acc);background:#F59E0B12}
+.nb span:last-child{font-size:11px;font-weight:700;letter-spacing:.5px}
+main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:24px;margin-bottom:20px;animation:fadeUp .4s}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.ct{font-family:var(--ff);font-size:18px;font-weight:700;color:var(--acc);letter-spacing:1px}
+.hero{position:relative;background:linear-gradient(135deg,#0B1426,#162040);border:1px solid #F59E0B22;border-radius:20px;padding:28px 20px;margin-bottom:20px;text-align:center;overflow:hidden;animation:glow 3s infinite}
+.bdg-c{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--ff);letter-spacing:1px;margin:0 auto;color:#fff}
+.bdg-n{margin-top:6px;font-size:11px;color:var(--t2);font-weight:600;text-align:center}
+.cg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{display:flex;align-items:center;gap:10px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;cursor:pointer;transition:.2s;color:#CBD5E1}
+.chip:hover{border-color:var(--bdr2)}.chip.on{border-color:var(--acc);background:#F59E0B10}
+.ca{width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:14px;flex-shrink:0}
+.ar{display:flex;gap:8px}
+.inp{flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;color:var(--t1);font-size:15px;outline:0}
+.inp:focus{border-color:var(--bdr2)}
+.bp{background:var(--grad);border:0;border-radius:12px;padding:12px 22px;color:#000;font-weight:800;cursor:pointer;font-size:15px;white-space:nowrap}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
+.rc{background:var(--inp);border-radius:12px;padding:14px;border:1px solid var(--bdr)}
+.rc-t{font-size:13px;font-weight:800;color:var(--acc);margin-bottom:4px}.rc-d{font-size:12px;color:var(--t4);line-height:1.4}
+.sr{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E293B10}
+.bb{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px 20px;margin-bottom:18px}
+.bb-d{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:18px}
+.bb-a{font-size:24px;font-weight:900;font-family:var(--ff)}
+.fr{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.fb{flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;font-size:14px;cursor:pointer;transition:.2s;min-width:60px}
+.fb.on{background:#F59E0B15;border-color:#F59E0B44;color:var(--acc)}
+.mc{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;animation:fadeUp .3s}
+.mc.lk{border-left-color:var(--t3)}.mc.dn{border-left-color:var(--grn)}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.mm{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mn{font-weight:800;font-size:13px;color:var(--acc);font-family:var(--ff)}
+.md{font-size:13px;color:var(--t4)}
+.ms{padding:4px 12px;border-radius:16px;font-size:12px;font-weight:800}
+.mt{display:flex;align-items:center;justify-content:space-around;padding:8px 0}
+.mvs{font-family:var(--ff);font-size:22px;font-weight:700;color:var(--acc)}
+.mv{font-size:11px;color:var(--t3);text-align:center;max-width:130px}
+.rb{margin-top:12px;padding:10px 16px;background:#10B98115;border:1px solid #10B98130;border-radius:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--grn)}
+.mb{margin-top:12px;padding:10px 16px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:14px;color:var(--yel)}
+.ob{margin-top:12px;width:100%;padding:14px;background:#F59E0B10;border:1px dashed #F59E0B44;border-radius:12px;color:var(--acc);font-weight:800;font-size:15px;cursor:pointer}
+.bf{margin-top:14px;padding:18px;background:var(--inp);border:1px solid var(--bdr2);border-radius:14px;animation:fadeUp .3s}
+.bf-t{font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:16px}
+.bf-s{margin-bottom:16px}
+.bf-l{font-size:12px;color:var(--t4);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.bf-tr{display:flex;gap:8px}
+.bf-tb{padding:10px 20px;border-radius:10px;border:2px solid;font-weight:800;font-size:15px;cursor:pointer;transition:.15s;font-family:var(--ff);background:0}
+.bf-i{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;color:var(--t1);font-size:15px;outline:0}
+.bf-i:focus{border-color:var(--bdr2)}
+.bf-h{font-size:12px;color:var(--t3);margin-top:6px}
+.bf-q{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.bf-qb{padding:6px 14px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg);color:var(--t2);font-size:13px;cursor:pointer;font-weight:700}
+.bf-qb.ai{background:#EF444420;color:var(--red);border-color:var(--hot)}
+.bf-a{display:flex;gap:8px;margin-top:14px}
+.bf-cn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;cursor:pointer;font-size:14px}
+.bf-cf{flex:2;padding:12px;border-radius:10px;border:0;background:var(--grad);color:#000;font-weight:800;cursor:pointer;font-size:15px}
+.tb{background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;font-weight:700;padding:4px 0;margin-top:10px}
+.bi{display:flex;gap:10px;align-items:center;font-size:13px;padding:8px 12px;background:var(--inp);border-radius:10px;margin-bottom:6px;flex-wrap:wrap}
+.bi-u{font-weight:800;color:var(--t2);min-width:70px}
+.lb-r{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;margin-bottom:8px}
+.lb-a{font-size:20px;font-weight:900;font-family:var(--ff)}
+.mbc{background:var(--inp);border:1px solid var(--bdr);border-left:4px solid var(--acc);border-radius:10px;padding:14px;margin-bottom:10px}
+.mtag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:1px;margin-left:8px}
+.stat-card{background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:16px;text-align:center}
+.stat-val{font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc)}
+.stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
+select.bf-i{appearance:auto;cursor:pointer}
+@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="app">
+<header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#F59E0B22;color:#F59E0B">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
+<nav>
+<button class="nb on" data-v="home" onclick="nav('home')"><span>🏠</span><span>Home</span></button>
+<button class="nb" data-v="matches" onclick="nav('matches')"><span>📅</span><span>Matches</span></button>
+<button class="nb" data-v="board" onclick="nav('board')"><span>🏆</span><span>Board</span></button>
+<button class="nb" data-v="rules" onclick="nav('rules')"><span>📋</span><span>Rules</span></button>
+<button class="nb" data-v="teams" onclick="nav('teams')"><span>🏏</span><span>Teams</span></button>
+<button class="nb" data-v="analytics" onclick="nav('analytics')"><span>📊</span><span>Stats</span></button>
+<button class="nb" data-v="admin" onclick="nav('admin')"><span>⚙️</span><span>Admin</span></button>
+</nav></header>
+<main>
+<div id="v-home" class="ctr"></div>
+<div id="v-matches" class="ctr" style="display:none"></div>
+<div id="v-board" class="ctr" style="display:none"></div>
+<div id="v-rules" class="ctr" style="display:none"></div>
+<div id="v-teams" class="ctr" style="display:none"></div>
+<div id="v-analytics" class="ctr" style="display:none"></div>
+<div id="v-admin" class="ctr" style="display:none"></div>
+</main>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const T={
+CSK:{n:"Chennai Super Kings",s:"CSK",c:"#F9CD05",a:"#0D47A1",cap:"Ruturaj Gaikwad",sq:["Ruturaj Gaikwad","Ayush Mhatre","Sarfaraz Khan","Dewald Brevis","Sanju Samson","Kartik Sharma","MS Dhoni","Urvil Patel","Shivam Dube","Prashant Veer","Anshul Kamboj","Aman Khan","Matthew William Short","Jamie Overton","Zak Foulkes","Khaleel Ahmed","Noor Ahmad","Rahul Chahar","Mukesh Choudhary","Shreyas Gopal","Gurjapneet Singh","Ramakrishna Ghosh","Matt Henry","Akeal Hosein","Nathan Ellis"]},
+DC:{n:"Delhi Capitals",s:"DC",c:"#17479E",a:"#EF1B23",cap:"Axar Patel",sq:["Axar Patel","KL Rahul","Prithvi Shaw","Karun Nair","Ashutosh Sharma","Sameer Rizvi","Sahil Parakh","Ben Duckett","Tristan Stubbs","Pathum Nissanka","David Miller","Abishek Porel","Nitish Rana","Vipraj Nigam","Madhav Tiwari","Tripurana Vijay","Ajay Mandal","Auqib Dar","Kuldeep Yadav","T. Natarajan","Mukesh Kumar","Mitchell Starc","Lungisani Ngidi","Kyle Jamieson","Dushmantha Chameera"]},
+GT:{n:"Gujarat Titans",s:"GT",c:"#B88746",a:"#1C1C2B",cap:"Shubman Gill",sq:["Shubman Gill","Sai Sudharsan","Shahrukh Khan","Jos Buttler","Anuj Rawat","Kumar Kushagra","Tom Banton","Washington Sundar","Rahul Tewatia","Jayant Yadav","Nishant Sindhu","Mohd. Arshad Khan","Glenn Phillips","Jason Holder","Rashid Khan","Mohammed Siraj","Prasidh Krishna","Kagiso Rabada","Sai Kishore","Manav Suthar","Gurnoor Singh Brar","Ishant Sharma","Prithvi Raj Yarra","Ashok Sharma","Luke Wood"]},
+KKR:{n:"Kolkata Knight Riders",s:"KKR",c:"#3A225D",a:"#E8C547",cap:"Ajinkya Rahane",sq:["Ajinkya Rahane","Angkrish Raghuvanshi","Rinku Singh","Manish Pandey","Rahul Tripathi","Rovman Powell","Finn Allen","Tim Seifert","Tejasvi Singh","Cameron Green","Sunil Narine","Rachin Ravindra","Ramandeep Singh","Anukul Roy","Daksh Kamra","Sarthak Ranjan","Varun Chakaravarthy","Harshit Rana","Akash Deep","Matheesha Pathirana","Vaibhav Arora","Kartik Tyagi","Prashant Solanki","Umran Malik","Blessing Muzarabani"]},
+LSG:{n:"Lucknow Super Giants",s:"LSG",c:"#A72056",a:"#FFCC00",cap:"Rishabh Pant",sq:["Rishabh Pant","Ayush Badoni","Himmat Singh","Aiden Markram","Matthew Breetzke","Akshat Raghuwanshi","Nicholas Pooran","Josh Inglis","Mukul Choudhary","Mitchell Marsh","Wanindu Hasaranga","Shahbaz Ahamad","Arshin Kulkarni","Abdul Samad","Arjun Tendulkar","Mohammad Shami","Mayank Yadav","Avesh Khan","Anrich Nortje","Mohsin Khan","Akash Singh","Digvesh Singh","M. Siddharth","Naman Tiwari","Prince Yadav"]},
+MI:{n:"Mumbai Indians",s:"MI",c:"#004BA0",a:"#D4A843",cap:"Hardik Pandya",sq:["Rohit Sharma","Surya Kumar Yadav","N. Tilak Varma","Danish Malewar","Sherfane Rutherford","Hardik Pandya","Quinton De Kock","Ryan Rickelton","Robin Minz","Will Jacks","Mitchell Santner","Corbin Bosch","Naman Dhir","Raj Angad Bawa","Atharva Ankolekar","Mayank Rawat","Jasprit Bumrah","Trent Boult","Deepak Chahar","Shardul Thakur","Allah Ghazanfar","Ashwani Kumar","Mayank Markande","Mohammad Izhar","Raghu Sharma"]},
+PBKS:{n:"Punjab Kings",s:"PBKS",c:"#DD1F2D",a:"#A7A9AC",cap:"Shreyas Iyer",sq:["Shreyas Iyer","Priyansh Arya","Nehal Wadhera","Shashank Singh","Musheer Khan","Harnoor Pannu","Pyla Avinash","Mitch Owen","Prabhsimran Singh","Vishnu Vinod","Marcus Stoinis","Marco Jansen","Cooper Connolly","Azmatullah Omarzai","Harpreet Brar","Suryansh Shedge","Arshdeep Singh","Yuzvendra Chahal","Lockie Ferguson","Xavier Bartlett","Ben Dwarshuis","Vyshak Vijaykumar","Yash Thakur","Pravin Dubey","Vishal Nishad"]},
+RR:{n:"Rajasthan Royals",s:"RR",c:"#254AA5",a:"#E73895",cap:"Riyan Parag",sq:["Yashasvi Jaiswal","Vaibhav Suryavanshi","Shubham Dubey","Aman Rao Perala","Shimron Hetmyer","Riyan Parag","Ravindra Jadeja","Sam Curran","Dhruv Jurel","Ravi Singh","Donovan Ferreira","Lhuan-Dre Pretorius","Ravi Bishnoi","Jofra Archer","Tushar Deshpande","Sandeep Sharma","Adam Milne","Nandre Burger","Kwena Maphaka","Sushant Mishra","Kuldeep Sen","Brijesh Sharma","Vignesh Puthur","Yash Raj Punja","Yudhvir Singh Charak"]},
+RCB:{n:"Royal Challengers Bengaluru",s:"RCB",c:"#E4002B",a:"#C8A951",cap:"Rajat Patidar",sq:["Virat Kohli","Rajat Patidar","Devdutt Padikkal","Satvik Deswal","Tim David","Phil Salt","Jitesh Sharma","Jordan Cox","Venkatesh Iyer","Krunal Pandya","Jacob Bethell","Romario Shepherd","Swapnil Singh","Vicky Ostwal","Mangesh Yadav","Kanishk Chouhan","Vihaan Malhotra","Josh Hazlewood","Bhuvneshwar Kumar","Yash Dayal","Nuwan Thushara","Jacob Duffy","Rasikh Dar","Suyash Sharma","Abhinandan Singh"]},
+SRH:{n:"Sunrisers Hyderabad",s:"SRH",c:"#FF822A",a:"#1a1a2e",cap:"Pat Cummins",sq:["Travis Head","Abhishek Sharma","Aniket Verma","Smaran Ravichandran","Pat Cummins","Heinrich Klaasen","Ishan Kishan","Salil Arora","Nitish Kumar Reddy","Kamindu Mendis","Liam Livingstone","Brydon Carse","Jack Edwards","Harsh Dubey","Harshal Patel","Jaydev Unadkat","Shivam Mavi","Eshan Malinga","Zeeshan Ansari","Shivang Kumar","Sakib Hussain","Onkar Tarmale","Amit Kumar","Praful Hinge","Krains Fuletra"]}
+};
+
+const MM=[
+{id:1,d:"2026-03-28",t:"19:30",h:"RCB",a:"SRH",v:"Chinnaswamy, Bengaluru"},
+{id:2,d:"2026-03-29",t:"19:30",h:"MI",a:"KKR",v:"Wankhede, Mumbai"},
+{id:3,d:"2026-03-30",t:"19:30",h:"RR",a:"CSK",v:"Barsapara, Guwahati"},
+{id:4,d:"2026-03-31",t:"19:30",h:"PBKS",a:"GT",v:"PCA, Chandigarh"},
+{id:5,d:"2026-04-01",t:"19:30",h:"LSG",a:"DC",v:"Ekana, Lucknow"},
+{id:6,d:"2026-04-02",t:"19:30",h:"KKR",a:"SRH",v:"Eden Gardens, Kolkata"},
+{id:7,d:"2026-04-03",t:"19:30",h:"CSK",a:"PBKS",v:"Chepauk, Chennai"},
+{id:8,d:"2026-04-04",t:"15:30",h:"DC",a:"MI",v:"Arun Jaitley, Delhi"},
+{id:9,d:"2026-04-04",t:"19:30",h:"GT",a:"RR",v:"Motera, Ahmedabad"},
+{id:10,d:"2026-04-05",t:"15:30",h:"SRH",a:"LSG",v:"Rajiv Gandhi, Hyderabad"},
+{id:11,d:"2026-04-05",t:"19:30",h:"RCB",a:"CSK",v:"Chinnaswamy, Bengaluru"},
+{id:12,d:"2026-04-06",t:"19:30",h:"KKR",a:"PBKS",v:"Eden Gardens, Kolkata"},
+{id:13,d:"2026-04-07",t:"19:30",h:"RR",a:"MI",v:"Barsapara, Guwahati"},
+{id:14,d:"2026-04-08",t:"19:30",h:"DC",a:"GT",v:"Arun Jaitley, Delhi"},
+{id:15,d:"2026-04-09",t:"19:30",h:"KKR",a:"LSG",v:"Eden Gardens, Kolkata"},
+{id:16,d:"2026-04-10",t:"19:30",h:"RR",a:"RCB",v:"Barsapara, Guwahati"},
+{id:17,d:"2026-04-11",t:"15:30",h:"PBKS",a:"SRH",v:"PCA, Chandigarh"},
+{id:18,d:"2026-04-11",t:"19:30",h:"CSK",a:"DC",v:"Chepauk, Chennai"},
+{id:19,d:"2026-04-12",t:"15:30",h:"LSG",a:"GT",v:"Ekana, Lucknow"},
+{id:20,d:"2026-04-12",t:"19:30",h:"MI",a:"RCB",v:"Wankhede, Mumbai"},
+// Playoff placeholders — admin updates teams once qualified
+{id:91,d:"2026-05-27",t:"19:30",h:"TBD",a:"TBD",v:"Qualifier 1",playoff:true},
+{id:92,d:"2026-05-28",t:"19:30",h:"TBD",a:"TBD",v:"Eliminator",playoff:true},
+{id:93,d:"2026-05-29",t:"19:30",h:"TBD",a:"TBD",v:"Qualifier 2",playoff:true},
+{id:94,d:"2026-05-31",t:"19:30",h:"TBD",a:"TBD",v:"🏆 FINAL",playoff:true}
+];
+
+const ST=10000,MINB=2000,MOMB=.2;
+let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={};
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════
+function dl(m){const[h,mn]=m.t.split(':').map(Number);const d=new Date(m.d+'T00:00:00+05:30');d.setHours(h,mn,0,0);d.setMinutes(d.getMinutes()-40);return d}
+function lk(m){return new Date()>=dl(m)}
+function fd(s){return new Date(s+'T00:00:00+05:30').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
+function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m} ${hr>=12?'PM':'AM'}`}
+function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.floor(df/864e5),h=Math.floor((df%864e5)/36e5),mn=Math.floor((df%36e5)/6e4);return d>0?d+'d '+h+'h':h>0?h+'h '+mn+'m':mn+'m'}
+function $(id){return document.getElementById(id)}
+// Get match with playoff team overrides
+function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
+function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
+function toast(m,t='ok'){const e=$('toast');e.textContent=m;e.style.background=t==='err'?'#EF4444':'#10B981';e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3000)}
+
+// Balance: auto top-up to 2K if at 0
+// Balance calculation: resolved P&L + pending bets deducted + weekly penalty
+function bal(n,excludePending=false){
+  let b=ST;
+  const userBets=Object.values(S.b).filter(x=>x.u===n);
+  userBets.forEach(bt=>{
+    const rs=S.r[bt.mid];
+    if(rs){
+      // Resolved bet
+      const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
+      if(w){const py=bt.am/od;b+=py;if(mh)b+=(bt.am*MOMB)/od;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      else{if(!mh)b-=bt.am}
+    } else if(!excludePending){
+      // Pending bet — deduct from available balance
+      b-=bt.am;
+    }
+  });
+  // Crystal Ball — excluded from balance. Admin adjusts manually after event.
+  // const ko=S.ko?.[n]; (disabled)
+  // Weekly penalty: check if player bet at least once in the current Wed→Tue window
+  let pen=weeklyPenalty(n);
+  // Check for waived penalties
+  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+  pen=Math.max(pen-waived,0);
+  b-=pen;
+  // Manual adjustments
+  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+    if(a.type==='add')b+=a.amount;
+    else if(a.type==='deduct')b-=a.amount;
+  });
+  if(b<MINB)b=MINB;
+  return Math.round(b);
+}
+
+// Final balance including Crystal Ball — admin eyes only
+function finalBal(n){
+  let b=bal(n);
+  const ko=S.ko?.[n];
+  if(ko&&S.koRevealed&&S.koWinner){
+    if(ko.team===S.koWinner)b+=ko.amount;else b-=ko.amount;
+  }
+  if(b<MINB)b=MINB;
+  return Math.round(b);
+}
+
+// Balance without pending deductions (for showing "if all bets win" scenario)
+function balResolved(n){return bal(n,true)}
+
+// Weekly penalty: 20% if no bet placed Wed→Tue
+function weeklyPenalty(n){
+  if(!S.p[n])return 0;
+  const userBets=Object.values(S.b).filter(x=>x.u===n);
+  const firstMatch=new Date('2026-03-28T00:00:00+05:30');
+  const now=new Date();
+  if(now<firstMatch)return 0;
+  // No penalty if no results exist at all (tournament hasn't effectively started)
+  if(Object.keys(S.r).length===0)return 0;
+  let penalty=0;
+  let weekStart=new Date('2026-03-26T00:00:00+05:30');
+  while(weekStart<now){
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
+    if(weekEnd>now)break;
+    const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
+    // Only penalize if matches happened AND at least one result was recorded that week
+    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]);
+    if(matchesThisWeek.length>0&&resultsThisWeek.length>0){
+      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+      if(!betThisWeek)penalty+=Math.round(ST*0.2);
+    }
+    weekStart=new Date(weekEnd);
+  }
+  return penalty;
+}
+
+// Detailed penalty breakdown for Stats transparency
+function getPenaltyBreakdown(){
+  const players=Object.keys(S.p);
+  const firstMatch=new Date('2026-03-28T00:00:00+05:30');
+  const now=new Date();
+  const weeks=[];
+  const totals={};
+  if(now<firstMatch||Object.keys(S.r).length===0)return {weeks,totals};
+  let weekStart=new Date('2026-03-26T00:00:00+05:30');
+  let weekNum=0;
+  while(weekStart<now){
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
+    if(weekEnd>now)break;
+    const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
+    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]);
+    if(matchesThisWeek.length>0&&resultsThisWeek.length>0){
+      weekNum++;
+      const wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+      const weLabel=new Date(weekEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+      const defaulters=[];
+      players.forEach(n=>{
+        const userBets=Object.values(S.b).filter(x=>x.u===n);
+        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+        if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+Math.round(ST*0.2)}
+      });
+      weeks.push({label:`Week ${weekNum} (${wsLabel} – ${weLabel})`,defaulters,matchCount:matchesThisWeek.length});
+    }
+    weekStart=new Date(weekEnd);
+  }
+  return {weeks,totals};
+}
+
+function LB(){return Object.keys(S.p).map(n=>({n,b:bal(n)})).sort((a,b)=>b.b-a.b)}
+
+function getBalBreakdown(n){
+  let h=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--t2)">Starting balance</span><span style="color:var(--grn)">₹${ST.toLocaleString()}</span></div>`;
+  const ub=Object.values(S.b).filter(x=>x.u===n);
+  ub.forEach(bt=>{
+    const rs=S.r[bt.mid];if(!rs)return;
+    const m=gm(bt.mid);
+    const won=bt.tm===rs.w;
+    const momH=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
+    const od=parseFloat(bt.od)||2;
+    let change=0,detail='';
+    if(won){
+      const py=Math.round(bt.am/od);change=py;detail=`Won ₹${py.toLocaleString()} (₹${bt.am.toLocaleString()} ÷ ${od})`;
+      if(momH){const mb=Math.round((bt.am*MOMB)/od);change+=mb;detail+=` + MoM ₹${mb.toLocaleString()}`}
+      if(momH&&bt.mt&&bt.mt!==bt.tm){change+=py;detail+=` + Jackpot ₹${py.toLocaleString()}`}
+    }else{
+      if(momH){change=0;detail='MoM save — no loss'}
+      else{change=-bt.am;detail=`Lost ₹${bt.am.toLocaleString()}`}
+    }
+    const clr=change>0?'var(--grn)':change<0?'var(--red)':'var(--yel)';
+    h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);gap:8px"><span style="color:var(--t4)">M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${detail}</span><span style="color:${clr};font-weight:700;white-space:nowrap">${change>=0?'+':''}₹${change.toLocaleString()}</span></div>`;
+  });
+  // Crystal Ball — not shown in breakdown (admin settles manually)
+  // Weekly penalty
+  const pen=weeklyPenalty(n);
+  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+  const netPen=Math.max(pen-waived,0);
+  if(pen>0){h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--red)">⚠️ Weekly penalty${waived>0?' (₹'+waived.toLocaleString()+' waived)':''}</span><span style="color:var(--red);font-weight:700">-₹${netPen.toLocaleString()}</span></div>`}
+  // Manual adjustments
+  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+    h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Admin adjustment'}</span><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">₹${a.type==='add'?'+':'-'}${a.amount.toLocaleString()}</span></div>`});
+  // Final
+  h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;margin-top:4px;font-weight:800"><span style="color:var(--t1)">Current Balance</span><span style="color:var(--acc)">₹${bal(n).toLocaleString()}</span></div>`;
+  return h;
+}
+
+function bdg(t,sz=48,nm=false){
+  if(t==='TBD')return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:var(--bdr);font-size:${sz*.25}px;border:2px solid var(--t3)">?</div>${nm?'<div class="bdg-n">TBD</div>':''}</div>`;
+  const x=T[t];return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${x.c},${x.c}CC);border:2px solid ${x.a};box-shadow:0 0 20px ${x.c}44;font-size:${sz*.25}px">${x.s}</div>${nm?`<div class="bdg-n">${x.n}</div>`:''}</div>`
+}
+
+function momDropdown(id,matchId,both=false){
+  const m=gm(matchId);if(!m)return'';
+  let options='';
+  const hSq=typeof getSquad==='function'?getSquad(m.h):(T[m.h]?.sq||[]);
+  const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
+  if(hSq.length)options+=hSq.map(p=>`<option value="${p}" data-team="${m.h}">${p} (${T[m.h].s})</option>`).join('');
+  if(aSq.length)options+=aSq.map(p=>`<option value="${p}" data-team="${m.a}">${p} (${T[m.a].s})</option>`).join('');
+  return`<input class="bf-i" id="${id}" list="${id}-dl" placeholder="Type to search player..." autocomplete="off"><datalist id="${id}-dl">${options}</datalist>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// STORAGE — Firebase sync fix: never overwrite remote with empty local
+// ══════════════════════════════════════════════════════════════
+function sv(){localStorage.setItem('dg-s',JSON.stringify(S));if(db)db.ref('dugout').set(S);ren();uh()}
+
+function ld(){
+  // Load local state
+  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
+  // Try Firebase
+  const cfg=localStorage.getItem('dg-fb');
+  if(cfg&&typeof firebase!=='undefined'){try{
+    const c=JSON.parse(cfg);
+    if(!firebase.apps.length)firebase.initializeApp(c);
+    db=firebase.database();
+    // SYNC FIX: Read remote first, only then listen
+    db.ref('dugout').once('value').then(snap=>{
+      const d=snap.val();
+      if(d&&Object.keys(d.p||{}).length>0){
+        // Remote has data — use it (don't overwrite with empty local)
+        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        localStorage.setItem('dg-s',JSON.stringify(S));
+      }else if(Object.keys(S.p).length>0){
+        // Remote empty but local has data — push local to remote
+        db.ref('dugout').set(S);
+      }
+      // Now start real-time listener
+      db.ref('dugout').on('value',sn=>{
+        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        localStorage.setItem('dg-s',JSON.stringify(S));ren();uh();
+      });
+      ren();uh();
+    });
+    $('mtag').textContent='LIVE';$('mtag').style.background='#10B98122';$('mtag').style.color='#34D399';
+  }catch(e){console.log('FB fail:',e)}}
+  if(me&&!S.p[me])me=null;
+  uh();nav('home');
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren()}
+function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,admin:rA})[vw]?.()}
+function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
+
+// ══════════════════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════════════════
+function rH(){
+  const el=$('v-home'),ns=Object.keys(S.p),L=LB(),allMatches=gms(),nx=allMatches.find(m=>!m.playoff&&!lk(m))||allMatches.find(m=>m.playoff&&m.h!=='TBD'&&!S.r[m.id])||allMatches[allMatches.length-1];
+  let h='';
+  const totalBets=Object.keys(S.b).length,totalResolved=Object.keys(S.r).length;
+  const tourneyStarted=totalResolved>0;
+
+  // ─── HERO: Next Match or Countdown ───
+  if(nx&&ns.length){
+    const l=lk(nx);
+    h+=`<div class="hero">
+    <div style="font-size:10px;letter-spacing:5px;color:var(--acc);font-weight:800;margin-bottom:16px">${nx.playoff?'PLAYOFF':'NEXT MATCH'}</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:24px">
+      ${bdg(nx.h,60,true)}
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div style="font-family:var(--ff);font-size:32px;font-weight:700;color:var(--acc)">VS</div>
+        <div style="font-size:14px;color:var(--t2);font-weight:600">${fd(nx.d)}</div>
+        <div style="font-size:12px;color:var(--t4)">${ft(nx.t)} IST</div>
+        <div style="margin-top:8px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:800;display:inline-block;background:${l?'#EF444422':'#F59E0B22'};color:${l?'var(--red)':'var(--yel)'}">${l?'🔒 LOCKED':'⏱️ '+cd(nx)}</div>
+      </div>
+      ${bdg(nx.a,60,true)}
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--t3)">📍 ${nx.v}</div>
+    ${me&&!l&&S.odds[nx.id]&&!S.b[nx.id+'-'+me]?`<button style="margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px 28px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="nav('matches')">💰 Place Your Bet</button>`:''}
+    </div>`;
+  } else if(!ns.length){
+    // Welcome hero for empty state
+    h+=`<div class="hero" style="padding:40px 20px">
+    <div style="font-size:56px;margin-bottom:12px">🏏</div>
+    <div style="font-family:var(--ff);font-size:32px;font-weight:700;letter-spacing:5px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">THE DUGOUT</div>
+    <div style="font-size:15px;color:var(--t2);margin-top:10px;line-height:1.6">IPL 2026 Betting League</div>
+    <div style="font-size:13px;color:var(--t4);margin-top:4px">No real money — just bragging rights, trash talk, and glory.</div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap">
+      <div style="background:#ffffff08;border:1px solid #ffffff12;border-radius:10px;padding:10px 18px;font-size:13px"><span style="color:var(--acc);font-weight:800;font-family:var(--ff)">₹10K</span><span style="color:var(--t4)"> start</span></div>
+      <div style="background:#ffffff08;border:1px solid #ffffff12;border-radius:10px;padding:10px 18px;font-size:13px"><span style="color:var(--acc);font-weight:800;font-family:var(--ff)">84</span><span style="color:var(--t4)"> matches</span></div>
+      <div style="background:#ffffff08;border:1px solid #ffffff12;border-radius:10px;padding:10px 18px;font-size:13px"><span style="color:var(--acc);font-weight:800;font-family:var(--ff)">1</span><span style="color:var(--t4)"> champion</span></div>
+    </div></div>`;
+  }
+
+  // ─── BROADCAST ───
+  if(S.announce){h+=`<div style="background:#F59E0B12;border:1px solid #F59E0B33;border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">📢</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">ANNOUNCEMENT</span></div><div style="font-size:14px;color:var(--t1);line-height:1.5">${S.announce.msg}</div><div style="font-size:11px;color:var(--t3);margin-top:6px">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>`}
+
+  // ─── PROFILE (logged in) ───
+  if(me){
+    const b=bal(me),diff=b-ST,myBets=Object.values(S.b).filter(x=>x.u===me),myWins=myBets.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length,myLosses=myBets.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length,rank=L.findIndex(x=>x.n===me)+1;
+    h+=`<div style="background:linear-gradient(135deg,#0D1B3E,#162040);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:24px;font-family:var(--ff);flex-shrink:0">${me[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:18px;color:var(--t1)">${me}</div>
+        <div style="font-size:12px;color:var(--t4);margin-top:2px">Rank #${rank} of ${ns.length}</div>
+      </div>
+      <button style="background:#EF444415;border:1px solid #EF444433;border-radius:10px;padding:6px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="logout()">Logout</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="flex:1;min-width:90px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${b.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:2px">Balance</div>
+      </div>
+      <div style="flex:1;min-width:90px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:${diff>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">${diff>=0?'+':''}${diff.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:2px">P&L</div>
+      </div>
+      <div style="flex:1;min-width:90px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:24px;font-weight:900;color:var(--yel);font-family:var(--ff)">${myBets.length}</div>
+        <div style="font-size:11px;color:var(--t4);margin-top:2px">Bets (${myWins}W/${myLosses}L)</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="flex:1;background:var(--grad);border:0;border-radius:10px;padding:12px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="nav('matches')">💰 Bet Now</button>
+      <button style="flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;padding:12px;color:var(--acc);font-weight:700;cursor:pointer;font-size:14px" onclick="nav('board')">🏆 Leaderboard</button>
+    </div></div>`;
+  }
+
+  // ─── LOGIN (not logged in) ───
+  if(!me){
+    h+=`<div class="card"><div class="ch"><span style="font-size:18px">👤</span><span class="ct">JOIN THE DUGOUT</span></div>`;
+    if(ns.length){h+=`<div style="font-size:13px;color:var(--t4);margin-bottom:10px">Tap your name to log in:</div><div class="cg">`;ns.forEach(n=>{const b=bal(n);h+=`<div class="chip" onclick="promptLogin('${n.replace(/'/g,"\\'")}')"><div class="ca">${n[0].toUpperCase()}</div><div><div style="font-weight:700;font-size:13px">${n}</div><div style="font-size:12px;font-weight:700;color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div></div></div>`});h+=`</div>`}
+    h+=`<div id="login-prompt" style="display:none;margin-bottom:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <span id="login-prompt-name"></span></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
+    h+=`<div style="border-top:1px solid var(--bdr);padding-top:12px;margin-top:12px"><div style="font-size:12px;color:var(--t4);margin-bottom:8px">New player? Register below:</div><div class="ar"><input class="inp" id="inp-n" placeholder="Your name..." onkeydown="if(event.key==='Enter')showRegister()"><button class="bp" onclick="showRegister()">Join</button></div></div>`;
+    h+=`<div id="register-prompt" style="display:none;margin-top:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Set your PIN</div><div style="font-size:12px;color:var(--t4);margin-bottom:8px">You'll need this every time you log in. Don't forget it!</div><div class="ar"><input class="inp" type="password" id="reg-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')addP()"><button class="bp" onclick="addP()">Register</button></div><div id="reg-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
+    h+=`</div>`;
+  }
+
+  // ─── LEAGUE STATS (always visible) ───
+  if(ns.length>1){
+    h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px">
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:28px;font-weight:900;color:var(--acc);font-family:var(--ff)">${ns.length}</div>
+      <div style="font-size:12px;color:var(--t4);margin-top:2px">Players</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:28px;font-weight:900;color:var(--yel);font-family:var(--ff)">${totalBets}</div>
+      <div style="font-size:12px;color:var(--t4);margin-top:2px">Bets Placed</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
+      <div style="font-size:28px;font-weight:900;color:var(--grn);font-family:var(--ff)">${totalResolved}/${allMatches.filter(m=>m.h!=='TBD').length}</div>
+      <div style="font-size:12px;color:var(--t4);margin-top:2px">Matches Done</div>
+    </div>
+    </div>`;
+  }
+
+  // ─── STANDINGS ───
+  if(L.length>1){
+    const hasDiff=L.some(p=>p.b!==ST);
+    h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">STANDINGS</span></div>`;
+    if(!hasDiff){h+=`<div style="text-align:center;padding:12px;color:var(--t3);font-size:13px">Everyone starts equal at ₹${ST.toLocaleString()} — standings update after the first results come in!</div>`}
+    else{L.slice(0,5).forEach((p,i)=>{const c=['#FBBF24','#94A3B8','#D97706'][i]||'#475569';const df=p.b-ST;h+=`<div class="sr"><span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${c}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span><span style="flex:1;font-weight:700;font-size:14px">${p.n}</span><div style="text-align:right"><div style="font-weight:800;font-size:14px;color:${p.b>=ST?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div><div style="font-size:11px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div></div></div>`});if(L.length>5)h+=`<button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:13px;font-weight:700;margin-top:12px" onclick="nav('board')">View full leaderboard →</button>`}
+    h+=`</div>`;
+  }
+
+  // ─── PLAYERS ───
+  if(ns.length){
+    h+=`<div class="card"><div class="ch"><span style="font-size:18px">👥</span><span class="ct">PLAYERS (${ns.length})</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">`;
+    ns.forEach(n=>{
+      const isMe=me===n;
+      h+=`<div style="display:flex;align-items:center;gap:8px;background:${isMe?'#F59E0B10':'var(--inp)'};border:1px solid ${isMe?'#F59E0B33':'var(--bdr)'};border-radius:10px;padding:6px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:11px">${n[0].toUpperCase()}</div>
+      <span style="font-size:13px;font-weight:${isMe?'800':'600'};color:${isMe?'var(--acc)':'var(--t1)'}">${n}</span></div>`;
+    });
+    h+=`</div></div>`;
+  }
+
+  // ─── FIREBASE ───
+  if(!db){h+=`<div class="card"><div class="ch"><span style="font-size:18px">🔗</span><span class="ct">CONNECT TO LEAGUE</span></div><div style="font-size:13px;color:var(--t4);margin-bottom:12px">Paste the config code shared by your league admin to sync your bets across all devices.</div><textarea class="inp" id="fb-cfg" rows="2" style="width:100%;font-family:monospace;font-size:11px" placeholder='Paste the code from your WhatsApp group here...'></textarea><button class="bp" style="width:100%;margin-top:8px" onclick="cFB()">🔌 Connect</button><div id="fb-err" style="color:var(--red);font-size:12px;margin-top:8px"></div></div>`}
+  else{h+=`<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#10B98110;border:1px solid #10B98125;border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--grn)">✅ Connected — bets sync across all devices</div>`}
+
+  el.innerHTML=h;
+}
+
+// ══════════════════════════════════════════════════════════════
+// MATCHES
+// ══════════════════════════════════════════════════════════════
+function rM(){
+  const el=$('v-matches');
+  if(!me){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
+  const b=bal(me);
+  const allM=gms().filter(m=>!m.playoff||m.h!=='TBD'); // only show playoffs with assigned teams
+  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+me]):allM;
+  let h=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div></div></div>
+  <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
+  if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
+  fm.forEach(m=>{
+    const l=lk(m),bk=m.id+'-'+me,my=S.b[bk],rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
+    h+=`<div class="mc ${rs?'dn':l?'lk':''}"><div class="mh"><div class="mm"><span class="mn">${m.playoff?m.v:'#'+m.id}</span>${dh&&!m.playoff?'<span style="background:#EF444420;color:var(--hot);padding:1px 8px;border-radius:6px;font-size:9px;font-weight:800">2x</span>':''}<span class="md">${fd(m.d)} · ${ft(m.t)}</span></div><div class="ms" style="background:${rs?'#10B98120':l?'#EF444420':'#F59E0B20'};color:${rs?'var(--grn)':l?'var(--red)':'var(--yel)'}">${rs?'✅ DONE':l?'🔒 LOCKED':'⏱️ '+cd(m)}</div></div>
+    <div class="mt">${bdg(m.h,44)}<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div class="mvs">VS</div><div class="mv">${m.playoff?m.v:m.v}</div></div>${bdg(m.a,44)}</div>`;
+    // Odds display
+    if(mo&&T[m.h]){h+=`<div style="display:flex;justify-content:center;gap:20px;margin-top:10px;padding:8px;background:var(--inp);border-radius:10px;font-size:13px"><span style="color:${T[m.h].c};font-weight:800">${T[m.h].s}: <span style="color:var(--yel)">1/${mo[m.h]}</span></span><span style="color:${T[m.a].c};font-weight:800">${T[m.a].s}: <span style="color:var(--yel)">1/${mo[m.a]}</span></span></div>`}
+    else if(!rs&&!l&&T[m.h]){h+=`<div style="text-align:center;margin-top:10px;padding:8px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t3)">⏳ Waiting for admin to set odds</div>`}
+    if(rs)h+=`<div class="rb"><span>🏆 <strong>${T[rs.w]?.s||rs.w}</strong> won</span>${rs.mom?`<span>🏅 MoM: <strong>${rs.mom}</strong></span>`:''}</div>`;
+    if(my){
+      const won=rs&&my.tm===rs.w;const momH=rs&&my.mom&&my.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
+      h+=`<div class="mb"><span>Your bet: <strong style="color:${T[my.tm]?.c||'var(--acc)'}">₹${my.am.toLocaleString()} on ${my.tm}</strong></span><span style="color:var(--t2)">@ 1/${my.od}</span>${my.mom?`<span style="color:var(--yel)">🎯 ${my.mom}</span>`:''}`;
+      if(rs){const py=Math.round(my.am/my.od);h+=`<span style="font-weight:800;color:${won?'var(--grn)':momH?'var(--yel)':'var(--red)'}">${won?'✅+₹'+py.toLocaleString():momH?'🛡️ MoM save':'❌-₹'+my.am.toLocaleString()}</span>`}
+      if(!l&&!rs){h+=`<button style="margin-left:auto;background:var(--inp);border:1px solid var(--bdr2);border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:700" onclick="editBet(${m.id})">✏️ Edit</button>`}
+      h+=`</div>`;
+    }
+    if(!l&&!my&&mo)h+=`<button class="ob" id="ob-${m.id}" onclick="oBF(${m.id})">💰 Place Bet</button><div id="bf-${m.id}" style="display:none"></div>`;
+    if(!l&&my&&!rs)h+=`<div id="bf-${m.id}" style="display:none"></div>`;
+    if(ab.length&&l){h+=`<button class="tb" onclick="tBL(${m.id})">👁 All bets (${ab.length})</button><div id="bl-${m.id}" style="display:none">`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span><span style="color:var(--t4)">1/${x.od}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
+    else if(ab.length&&!l){h+=`<div style="margin-top:8px;font-size:12px;color:var(--t3)">🔒 ${ab.length} bet${ab.length>1?'s':''} placed — revealed after lock</div>`}
+    if(!rs)h+=`<button style="margin-top:8px;background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;font-weight:600" onclick="shareWA(${m.id})">📤 Share on WhatsApp</button>`;
+    h+=`</div>`;
+  });
+  // Crystal Ball section
+  if(me&&S.koOpen&&!S.koRevealed){
+    if(!S.ko?.[me]){
+      h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL — SECRET PREDICTION</span></div>
+      <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Pick the team you think will <strong style="color:var(--acc)">lift the IPL trophy</strong>! This bet is <strong style="color:var(--yel)">secret</strong> — only you and the admin can see it until the tournament ends.</div>
+      <div class="bf-s"><div class="bf-l">Your pick to win IPL 2026</div><select class="bf-i" id="ko-team"><option value="">-- Pick the champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
+      <div class="bf-s"><div class="bf-l">% of your current balance to wager</div><input class="bf-i" type="number" id="ko-pct" min="1" max="100" value="25" placeholder="e.g. 50"><div style="font-size:12px;color:var(--t4);margin-top:4px">Your balance: ₹${bal(me).toLocaleString()} · 25% = ₹${Math.round(bal(me)*0.25).toLocaleString()}</div></div>
+      <button class="bp" style="width:100%" onclick="placeKO()">🔒 Lock Secret Bet</button></div>`;
+    } else {
+      const k=S.ko[me];
+      h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">YOUR CRYSTAL BALL PREDICTION</span></div>
+      <div style="font-size:14px;color:var(--yel);font-weight:700">🔒 ${T[k.team]?.n||k.team} to win IPL 2026</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:6px">₹${k.amount.toLocaleString()} wagered (${k.pct}% of balance)</div>
+      <div style="font-size:12px;color:var(--t4);margin-top:4px">Win → +₹${k.amount.toLocaleString()} · Lose → -₹${k.amount.toLocaleString()}</div>
+      <div style="margin-top:8px;padding:8px 12px;background:var(--inp);border-radius:8px;font-size:12px;color:var(--t3)">🤫 This is secret — only you and the admin can see this until the reveal.</div></div>`;
+    }
+  }
+  // After reveal — player only sees that Crystal Ball has been settled, not the details
+  if(me&&S.ko?.[me]&&S.koRevealed){
+    h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
+    <div style="font-size:14px;color:var(--t2)">Your Crystal Ball prediction has been settled. The results will be announced by the admin at the final event! 🏆</div></div>`;
+  }
+  el.innerHTML=h;
+}
+
+function placeKO(){
+  const team=$('ko-team').value,pct=parseInt($('ko-pct').value);
+  if(!team){toast('Pick a team!','err');return}
+  if(!pct||pct<1||pct>100){toast('Enter 1-100%','err');return}
+  const b=bal(me),amount=Math.round(b*pct/100);
+  if(!confirm(`🔒 SECRET BET\n\n${T[team]?.n} to win IPL 2026\n₹${amount.toLocaleString()} (${pct}% of your balance)\n\nThis is permanent — you cannot change it.\nOnly you and the admin will see this until the reveal.\n\nConfirm?`))return;
+  if(!S.ko)S.ko={};
+  S.ko[me]={team,pct,amount,ts:new Date().toISOString()};
+  sv();toast('Crystal Ball prediction locked! 🔮');rM();
+}
+
+function editBet(id){
+  // Delete current bet and reopen form (balance will restore since pending bet removed)
+  const bk=id+'-'+me;
+  const old=S.b[bk];
+  // Store old values for pre-fill
+  if(old)bfs[id]={tm:old.tm,oldAm:old.am,oldMom:old.mom,editing:true};
+  delete S.b[bk];
+  sv();
+  // Small delay to let render happen then open form
+  setTimeout(()=>oBF(id,old),100);
+}
+
+// Bet form with squad dropdown — supports edit mode
+function oBF(id,prefill){
+  const f=$('bf-'+id),btn=$('ob-'+id);
+  if(f&&f.style.display!=='none'&&!prefill){f.style.display='none';if(btn)btn.style.display='block';return}
+  if(btn)btn.style.display='none';
+  if(!f)return;
+  f.style.display='block';
+  const m=gm(id),b=bal(me),mx=b,mo=S.odds[id]||{};
+  bfs[id]=bfs[id]||{};
+  const isEdit=!!prefill;
+  const cdStr=cd(m);
+  f.innerHTML=`<div class="bf"><div class="bf-t">${isEdit?'✏️ EDIT YOUR BET':'PLACE YOUR BET'} <span style="float:right;font-size:12px;color:var(--yel);font-weight:600">⏱️ Locks in ${cdStr}</span></div>
+  <div class="bf-s"><div class="bf-l">Pick Team</div><div class="bf-tr">
+  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'}${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(1/${mo[m.h]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(1/${mo[m.a]||'?'})</span></button>
+  </div></div>
+  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="number" id="am-${id}" min="500" step="500" value="${prefill?prefill.am:''}" placeholder="Max: ₹${mx.toLocaleString()}"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="$('am-${id}').value=${v}">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="$('am-${id}').value=${b}">ALL IN 🔥</button></div></div>
+  <div class="bf-s"><div class="bf-l">Man of the Match (optional +20%)</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'✅ Confirm Bet'}</button></div></div>`;
+  // Pre-select team and MoM if editing
+  if(prefill){
+    if(prefill.tm)pk(id,prefill.tm);
+    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom}}
+  }
+}
+
+function cancelEdit(id,oldBet){
+  const f=$('bf-'+id),btn=$('ob-'+id);
+  if(f)f.style.display='none';
+  if(btn)btn.style.display='block';
+  // If was editing, restore old bet
+  if(oldBet){
+    const bk=id+'-'+me;
+    S.b[bk]=oldBet;
+    sv();
+  }
+}
+
+function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
+
+function sub(id){
+  const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
+  const f=bfs[id]||{};if(!f.tm){toast('Pick a team!','err');return}
+  const mo=S.odds[id];if(!mo||!mo[f.tm]){toast('Odds not set!','err');return}
+  const od=parseFloat(mo[f.tm]),am=parseInt($('am-'+id).value);
+  if(!am||am<500){toast('Min ₹500','err');return}
+  const b=bal(me),mx=b,ai=am>=b;
+  if(!ai&&am>mx){toast('Max: ₹'+mx.toLocaleString(),'err');return}
+  if(!ai&&am%500!==0){toast('Multiples of ₹500','err');return}
+  const momSel=$('mo-'+id);
+  const mom=momSel?momSel.value.trim():'';
+  let mt='';
+  if(mom){const mx2=gm(id);if(getSquad(mx2.h).includes(mom))mt=mx2.h;else if(getSquad(mx2.a).includes(mom))mt=mx2.a}
+  const potWin=Math.round(am/od);
+  const confirmMsg=`🏏 Confirm your bet:\n\n` +
+    `Match: ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n` +
+    `Team: ${T[f.tm]?.n||f.tm}\n` +
+    `Amount: ₹${am.toLocaleString()} @ 1/${od}\n` +
+    `Potential win: ₹${potWin.toLocaleString()}\n` +
+    (mom?`MoM pick: ${mom}\n`:'') +
+    (ai?`\n🔥 ALL IN!\n`:'') +
+    `\nPlace this bet?`;
+  if(!confirm(confirmMsg))return;
+  S.b[id+'-'+me]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
+  sv();toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];rM();
+}
+
+function shareWA(id){
+  const m=gm(id),mo=S.odds[id]||{},dl_time=getDeadlineStr(m);
+  let msg=`🏏 *THE DUGOUT — Match #${id}*\n\n`;
+  msg+=`${T[m.h]?.n||m.h} vs ${T[m.a]?.n||m.a}\n`;
+  msg+=`📅 ${fd(m.d)} · ${ft(m.t)} IST\n`;
+  msg+=`📍 ${m.v}\n\n`;
+  if(mo[m.h]&&mo[m.a])msg+=`📊 *Odds:*\n${T[m.h]?.s} → 1/${mo[m.h]}\n${T[m.a]?.s} → 1/${mo[m.a]}\n\n`;
+  msg+=`🔒 Bets lock at ${dl_time}\n\n`;
+  msg+=`💰 Place your bets now!\n`;
+  const url=window.location.href;
+  if(url&&url!=='about:blank')msg+=`👉 ${url}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+function getDeadlineStr(m){const d=dl(m);return d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true})+' IST'}
+
+function tBL(id){const e=$('bl-'+id);if(e)e.style.display=e.style.display==='none'?'block':'none'}
+
+// ══════════════════════════════════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════════════════════════════════
+function rB(){
+  const el=$('v-board'),L=LB(),rc=Object.keys(S.r).length;
+  const hasDiff=L.some(p=>p.b!==ST);
+  let h=`<div style="text-align:center;margin-bottom:24px;padding-top:8px"><div style="font-size:48px">🏆</div><div class="ct" style="font-size:26px;margin-top:10px;text-align:center">LEADERBOARD</div><div style="color:var(--t4);font-size:14px;margin-top:4px">${rc} match${rc!==1?'es':''} resolved · ${L.length} players</div></div>`;
+
+  if(!L.length)h+=`<div class="card" style="text-align:center;color:var(--t3);padding:40px">No players yet. Go Home and register!</div>`;
+  else if(!hasDiff){
+    h+=`<div class="card" style="text-align:center;padding:32px"><div style="font-size:32px;margin-bottom:12px">⏳</div><div style="font-size:16px;color:var(--t2);font-weight:600">Everyone starts at ₹${ST.toLocaleString()}</div><div style="color:var(--t4);font-size:14px;margin-top:8px">Standings will come alive once results are in!</div></div>`;
+    // Still show the list but muted
+    h+=`<div class="card">`;
+    L.forEach((p,i)=>{
+      const isMe=me===p.n;
+      h+=`<div style="display:flex;align-items:center;gap:14px;padding:14px 0;${i<L.length-1?'border-bottom:1px solid var(--bdr)':''}">
+      <div style="width:32px;text-align:center;font-weight:800;color:var(--t3);font-size:14px">#${i+1}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:1px solid ${isMe?'transparent':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:14px">${p.n[0].toUpperCase()}</div>
+      <div style="flex:1"><span style="font-weight:${isMe?'800':'600'};font-size:15px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}</span></div>
+      <span style="font-weight:800;font-size:15px;color:var(--grn);font-family:var(--ff)">₹${p.b.toLocaleString()}</span></div>`;
+    });
+    h+=`</div>`;
+  }
+  else{
+    // Top 3 podium
+    if(L.length>=3){
+      h+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-bottom:24px;padding:0 10px">`;
+      // 2nd place
+      const s=L[1],sd=s.b-ST;
+      h+=`<div style="flex:1;max-width:160px;text-align:center">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--inp);border:2px solid #94A3B8;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-weight:900;font-size:18px;margin:0 auto">${s.n[0].toUpperCase()}</div>
+      <div style="font-weight:800;font-size:14px;margin-top:8px;color:var(--t1)">${s.n}</div>
+      <div style="font-weight:900;font-size:16px;color:${sd>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${s.b.toLocaleString()}</div>
+      <div style="background:#94A3B815;border:1px solid #94A3B830;border-radius:10px 10px 0 0;padding:24px 8px 12px;margin-top:8px"><div style="font-size:24px">🥈</div></div></div>`;
+      // 1st place
+      const f=L[0],fd2=f.b-ST;
+      h+=`<div style="flex:1;max-width:180px;text-align:center">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);border:2px solid #FBBF24;display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:22px;margin:0 auto">${f.n[0].toUpperCase()}</div>
+      <div style="font-weight:800;font-size:16px;margin-top:8px;color:var(--acc)">${f.n}</div>
+      <div style="font-weight:900;font-size:20px;color:${fd2>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${f.b.toLocaleString()}</div>
+      <div style="background:#FBBF2415;border:1px solid #FBBF2430;border-radius:10px 10px 0 0;padding:36px 8px 12px;margin-top:8px"><div style="font-size:28px">👑</div></div></div>`;
+      // 3rd place
+      const t=L[2],td=t.b-ST;
+      h+=`<div style="flex:1;max-width:160px;text-align:center">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--inp);border:2px solid #D97706;display:flex;align-items:center;justify-content:center;color:#D97706;font-weight:900;font-size:18px;margin:0 auto">${t.n[0].toUpperCase()}</div>
+      <div style="font-weight:800;font-size:14px;margin-top:8px;color:var(--t1)">${t.n}</div>
+      <div style="font-weight:900;font-size:16px;color:${td>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${t.b.toLocaleString()}</div>
+      <div style="background:#D9770615;border:1px solid #D9770630;border-radius:10px 10px 0 0;padding:16px 8px 12px;margin-top:8px"><div style="font-size:24px">🥉</div></div></div>`;
+      h+=`</div>`;
+    }
+    // Full list
+    h+=`<div class="card">`;
+    L.forEach((p,i)=>{
+      const ub=Object.values(S.b).filter(x=>x.u===p.n);
+      const w=ub.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length;
+      const l=ub.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length;
+      const pending=ub.filter(x=>!S.r[x.mid]).length;
+      const df=p.b-ST;
+      const isMe=me===p.n;
+      const bg=i===0?'linear-gradient(135deg,#FBBF2408,#F59E0B10)':i===1?'linear-gradient(135deg,#94A3B808,#64748B10)':i===2?'linear-gradient(135deg,#D9770608,#92400E10)':isMe?'#F59E0B08':'transparent';
+      h+=`<div class="lb-r" style="background:${bg};border-left:4px solid ${['#FBBF24','#94A3B8','#D97706'][i]||isMe?'var(--acc)':'#1E293B'}">
+      <div style="font-size:22px;font-weight:900;width:40px;text-align:center">${i<3?['👑','🥈','🥉'][i]:'<span style="color:var(--t3)">#'+(i+1)+'</span>'}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:16px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' <span style="font-size:11px;color:var(--t3)">(you)</span>':''}</div><div style="font-size:12px;color:var(--t3);margin-top:3px">${w}W · ${l}L · ${ub.length} bets${pending?` · <span style="color:var(--yel)">${pending} pending</span>`:''}</div></div>
+      <div style="text-align:right">
+      <div class="lb-a" style="color:${df>=0?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div>
+      <div style="font-size:12px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div>
+      </div></div>
+      <button class="tb" style="margin-left:54px;margin-bottom:10px" onclick="$('bd-${i}').style.display=$('bd-${i}').style.display==='none'?'block':'none'">📊 Balance breakdown</button>
+      <div id="bd-${i}" style="display:none;margin:0 0 14px 54px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;font-size:13px">
+      ${getBalBreakdown(p.n)}
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  el.innerHTML=h;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RULES
+// ══════════════════════════════════════════════════════════════
+function rRu(){
+  const el=$('v-rules');
+  el.innerHTML=`<div class="card">
+  <div style="text-align:center;margin-bottom:24px">
+    <div style="font-size:48px;margin-bottom:8px">📋</div>
+    <div class="ct" style="font-size:24px;text-align:center">THE DUGOUT RULEBOOK</div>
+    <div style="color:var(--t4);font-size:13px;margin-top:4px">IPL 2026 Fun Betting League — No Real Money</div>
+  </div>
+
+  <!-- Rule 1: Starting Balance -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">💰</span><span class="ct" style="font-size:15px">STARTING BALANCE</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7">Everyone starts with <strong style="color:var(--acc)">₹10,000</strong> fun money. If your balance drops below ₹2,000, you'll automatically be topped up to ₹2,000 so you can keep playing throughout the tournament.</div>
+  </div>
+
+  <!-- Rule 2: Betting Window -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔒</span><span class="ct" style="font-size:15px">BETTING WINDOW</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7">Bets lock <strong style="color:var(--hot)">40 minutes before match start</strong>. No bets accepted after that — no exceptions.</div>
+    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
+      <strong style="color:var(--yel)">Example:</strong> For a 7:30 PM match → bets lock at 6:50 PM IST<br>
+      For a 3:30 PM match → bets lock at 2:50 PM IST
+    </div>
+  </div>
+
+  <!-- Rule 3: Bet Amounts -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📊</span><span class="ct" style="font-size:15px">BET AMOUNTS</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7">Bets must be in <strong style="color:var(--acc)">multiples of ₹500</strong> (e.g. ₹500, ₹1000, ₹2500, ₹5000).</div>
+    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
+      <strong style="color:var(--yel)">Exception:</strong> Going <strong>ALL IN</strong> — you can bet your entire balance regardless of the amount (e.g. ₹7,350 all-in is valid).
+    </div>
+  </div>
+
+  <!-- Rule 4: Weekly Mandatory -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⚠️</span><span class="ct" style="font-size:15px">WEEKLY MANDATORY BET</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (Wednesday to Tuesday). If you miss an entire week, you'll be penalized <strong style="color:var(--hot)">20% of starting balance (₹2,000)</strong>.</div>
+    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
+      The penalty tracker in the Stats tab shows exactly who missed which week — full transparency.
+    </div>
+  </div>
+
+  <!-- Rule 5: Man of the Match -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🎯</span><span class="ct" style="font-size:15px">MAN OF THE MATCH (OPTIONAL)</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Along with your team pick, you can optionally predict the <strong style="color:var(--yel)">Man of the Match</strong>. If correct, you get a <strong style="color:var(--yel)">20% bonus</strong> on your bet.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Example:</strong> RCB vs MI — Odds: RCB 1/2, MI 1/5<br>
+      You bet: <strong>₹10,000 on RCB</strong> | MoM pick: <strong>Virat Kohli</strong><br><br>
+      <span style="color:var(--grn)">✅ Scenario A — RCB wins, Kohli not MoM:</span><br>
+      You win ₹10,000 ÷ 2 = <strong>₹5,000</strong><br><br>
+      <span style="color:var(--red)">❌ Scenario B — RCB loses, Kohli not MoM:</span><br>
+      You lose your ₹10,000 bet<br><br>
+      <span style="color:var(--grn)">✅ Scenario C — RCB wins + Kohli IS MoM:</span><br>
+      Bet becomes ₹10,000 + 20% = ₹12,000<br>
+      You win ₹12,000 ÷ 2 = <strong>₹6,000</strong><br><br>
+      <span style="color:var(--yel)">🛡️ Scenario D — RCB loses + Kohli IS MoM:</span><br>
+      <strong>No deduction!</strong> Your MoM pick saves you.
+    </div>
+  </div>
+
+  <!-- Rule 6: Super Jackpot -->
+  <div style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">The ultimate power move. If you bet on the <strong style="color:var(--grn)">winning team</strong> AND correctly predict the MoM from the <strong style="color:var(--hot)">losing team</strong>, you get an <strong style="color:var(--yel)">extra 100% of your winnings</strong>!</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Example:</strong> You bet ₹10,000 on MI (odds 1/5)<br>
+      MoM pick: Virat Kohli (RCB — the losing team)<br>
+      MI wins AND Kohli is MoM!<br><br>
+      Normal win: ₹10,000 ÷ 5 = ₹2,000<br>
+      Jackpot bonus: extra ₹2,000 (100% of winnings)<br>
+      <strong style="color:var(--yel)">Total earned: ₹4,000! 🔥</strong>
+    </div>
+  </div>
+
+  <!-- Rule 7: Odds -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. They represent the payout ratio — your winnings = bet amount ÷ odds.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="padding:10px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:18px">1/2</div><div style="font-size:12px;color:var(--t4)">Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹5K</div></div>
+      <div style="padding:10px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:18px">1/5</div><div style="font-size:12px;color:var(--t4)">Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Win ₹2K</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--t3);margin-top:8px">Lower odds = safer bet, lower payout. Higher odds = riskier bet, but your money goes further if the underdog wins.</div>
+  </div>
+
+  <!-- Rule 8: Crystal Ball -->
+  <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Before the playoffs begin, the admin will open the <strong style="color:var(--acc)">Crystal Ball</strong> — your chance to secretly predict who will lift the IPL 2026 trophy. Choose a team and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Example:</strong> You have ₹50,000 and bet 50% on RCB to win the IPL.<br>
+      That's ₹25,000 on the line. You continue betting normally.<br><br>
+      <span style="color:var(--grn)">If RCB wins the IPL:</span> Your final score + ₹25,000<br>
+      <span style="color:var(--red)">If RCB doesn't win:</span> Your final score − ₹25,000
+    </div>
+  </div>
+
+  <!-- Dashboard Guide -->
+  <div style="border-top:2px solid var(--bdr);margin-top:24px;padding-top:24px">
+    <div style="text-align:center;margin-bottom:20px"><div style="font-size:36px">📱</div><div class="ct" style="font-size:20px;margin-top:8px;text-align:center">YOUR DASHBOARD GUIDE</div><div style="color:var(--t4);font-size:13px;margin-top:4px">Here's what you can do on each tab</div></div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">🏠</span><span class="ct" style="font-size:15px">HOME</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">Your command centre. See the next match with countdown timer, your profile with balance and P&L, quick stats for the league, current standings (top 5), and all registered players. Log in, log out, or register here.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">📅</span><span class="ct" style="font-size:15px">MATCHES</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">Where the action happens. Filter matches by Open, Locked, Results, or My Bets. Place bets (pick team, enter amount, optional MoM prediction), edit bets before lock, see odds, check results, and view everyone's bets after a match locks. Share matches to WhatsApp. The Crystal Ball prediction also appears here when open.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">🏆</span><span class="ct" style="font-size:15px">BOARD</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">The leaderboard. See who's leading the league with live rankings, W/L records, and balances. Once results are in, a podium shows the top 3. Click "Balance breakdown" on any player to see exactly how their score was calculated — every bet, bonus, penalty, and adjustment.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">📋</span><span class="ct" style="font-size:15px">RULES</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">You're here! Full rulebook with examples, scenarios, odds explanation, and this guide.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">🏏</span><span class="ct" style="font-size:15px">TEAMS</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">All 10 IPL 2026 team squads with every player listed. See who the captain is (👑). Useful when picking your Man of the Match prediction.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">📊</span><span class="ct" style="font-size:15px">STATS</span></div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">League-wide analytics: total wagered, total won, MoM accuracy, all-in count. Fun awards like Richest Player, MoM Oracle, Riskiest Bettor, and more. Your personal stats card with win rate, favourite team, biggest bet, and MoM hit rate. Also shows the weekly penalty tracker for full transparency.</div>
+    </div>
+  </div>
+
+  <!-- Glossary -->
+  <div style="border-top:2px solid var(--bdr);margin-top:24px;padding-top:24px">
+    <div style="text-align:center;margin-bottom:20px"><div style="font-size:36px">📖</div><div class="ct" style="font-size:20px;margin-top:8px;text-align:center">GLOSSARY</div></div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Odds (1/x)</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">The payout ratio set by admin. 1/2 means you win half your bet. 1/5 means you win a fifth. Lower odds = favourite, higher odds = underdog.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">MoM (Man of the Match)</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">Optional prediction of who'll be named Player of the Match. Correct pick gives a 20% bonus on winning bets, or saves you from a loss.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Super Jackpot</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">When you bet on the winning team AND correctly predict the MoM from the losing team. Earns an extra 100% of your winnings on top.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">All-In</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">Betting your entire balance on a single match. Bypasses the ₹500-multiple rule. High risk, high reward.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Lock / Locked</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">40 minutes before a match starts, betting closes. No new bets or edits after this. All bets become visible to everyone.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Weekly Penalty</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">₹2,000 deducted if you don't place at least 1 bet in a Wed–Tue window. Keeps everyone engaged throughout the tournament.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Balance Floor (₹2,000)</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">Your balance can never drop below ₹2,000. If losses would take you lower, you're automatically topped up so you can keep playing.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">🔮 Crystal Ball</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">A secret one-time prediction before the playoffs. Pick who wins the IPL and wager a % of your balance. Results revealed by the admin at the end-of-season event.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">P&L (Profit & Loss)</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">Your current balance minus the starting ₹10,000. Positive means you're in profit, negative means you're down.</div>
+    </div>
+
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Balance Breakdown</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">A detailed line-by-line view of how any player's balance was calculated — every bet result, MoM bonus, penalty, and adjustment. Available on the Board tab.</div>
+    </div>
+
+    </div>
+  </div>
+
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// TEAMS
+// ══════════════════════════════════════════════════════════════
+function rT(){
+  const el=$('v-teams');
+  let h=`<div style="text-align:center;margin-bottom:20px"><div style="font-size:48px">🏏</div><div class="ct" style="font-size:22px;margin-top:8px;text-align:center">IPL 2026 TEAMS</div><div style="color:var(--t4);font-size:13px;margin-top:4px">10 teams · 250 players · Tap to expand</div></div>`;
+
+  // Team filter
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;justify-content:center">`;
+  Object.keys(T).forEach(k=>{
+    h+=`<button style="background:${T[k].c}22;border:1px solid ${T[k].c}44;border-radius:8px;padding:6px 12px;color:${T[k].c};font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff);letter-spacing:.5px" onclick="$('team-${k}').scrollIntoView({behavior:'smooth',block:'start'})">${T[k].s}</button>`;
+  });
+  h+=`</div>`;
+
+  Object.keys(T).forEach(k=>{
+    const sq=getSquad(k);
+    const cap=getCap(k);
+    // Categorize players by role (simple heuristic from position in array + known roles)
+    const batters=[],allrounders=[],bowlers=[];
+    // We don't have role data, so show all as one squad list sorted alphabetically
+    const sorted=[...sq].sort((a,b)=>a.localeCompare(b));
+
+    h+=`<div id="team-${k}" class="card" style="border-left:4px solid ${T[k].c}">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+    ${bdg(k,52)}
+    <div style="flex:1">
+      <div style="font-family:var(--ff);font-size:18px;font-weight:700;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:2px">${sq.length} players${cap?' · Captain: <strong style="color:var(--acc)">'+cap+'</strong>':''}</div>
+    </div>
+    </div>`;
+
+    // Player grid
+    h+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    sorted.forEach(p=>{
+      const isCap=p===cap;
+      const isOverseas=!isIndian(p);
+      h+=`<div style="display:flex;align-items:center;gap:6px;background:var(--inp);border:1px solid ${isCap?T[k].c+'66':'var(--bdr)'};border-radius:8px;padding:5px 10px;font-size:12px">
+      ${isCap?'<span style="font-size:11px">👑</span>':''}
+      <span style="color:var(--t1);font-weight:${isCap?'800':'600'}">${p}</span>
+      </div>`;
+    });
+    h+=`</div></div>`;
+  });
+
+  el.innerHTML=h;
+}
+
+// Simple heuristic — not perfect but covers most overseas players
+function isIndian(name){
+  const overseas=['Jos Buttler','Glenn Phillips','Tom Banton','Jason Holder','Kagiso Rabada','Rashid Khan','Luke Wood','Matheesha Pathirana','Sunil Narine','Rachin Ravindra','Blessing Muzarabani','Rovman Powell','Finn Allen','Tim Seifert','Cameron Green','Varun Chakaravarthy','Phil Salt','Tim David','Jacob Bethell','Romario Shepherd','Jordan Cox','Josh Hazlewood','Nuwan Thushara','Jacob Duffy','Dewald Brevis','Jamie Overton','Matthew William Short','Zak Foulkes','Noor Ahmad','Akeal Hosein','Matt Henry','Nathan Ellis','David Miller','Ben Duckett','Pathum Nissanka','Tristan Stubbs','Mitchell Starc','Dushmantha Chameera','Lungisani Ngidi','Kyle Jamieson','Aiden Markram','Matthew Breetzke','Nicholas Pooran','Josh Inglis','Mitchell Marsh','Wanindu Hasaranga','Anrich Nortje','Quinton De Kock','Ryan Rickelton','Sherfane Rutherford','Mitchell Santner','Corbin Bosch','Will Jacks','Trent Boult','Allah Ghazanfar','Marcus Stoinis','Marco Jansen','Azmatullah Omarzai','Mitch Owen','Cooper Connolly','Ben Dwarshuis','Lockie Ferguson','Xavier Bartlett','Donovan Ferreira','Lhuan-Dre Pretorius','Shimron Hetmyer','Sam Curran','Jofra Archer','Kwena Maphaka','Nandre Burger','Adam Milne','Heinrich Klaasen','Travis Head','Kamindu Mendis','Brydon Carse','Liam Livingstone','Jack Edwards','Eshan Malinga','Pat Cummins','Mohammad Izhar'];
+  return !overseas.includes(name);
+}
+
+// ══════════════════════════════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════════════════════════════
+function rAn(){
+  const el=$('v-analytics');
+  const allBets=Object.values(S.b),resolved=Object.keys(S.r),players=Object.keys(S.p);
+  const totalBet=allBets.reduce((s,b)=>s+b.am,0);
+  const resolvedBets=allBets.filter(b=>S.r[b.mid]);
+  const wins=resolvedBets.filter(b=>b.tm===S.r[b.mid].w);
+  const losses=resolvedBets.filter(b=>b.tm!==S.r[b.mid].w);
+  const totalWon=wins.reduce((s,b)=>s+Math.round(b.am/b.od),0);
+  const totalLost=losses.filter(b=>!(b.mom&&b.mom.trim().toLowerCase()===(S.r[b.mid].mom||'').trim().toLowerCase())).reduce((s,b)=>s+b.am,0);
+  const momCorrect=resolvedBets.filter(b=>b.mom&&b.mom.trim().toLowerCase()===(S.r[b.mid].mom||'').trim().toLowerCase()).length;
+  const momTotal=resolvedBets.filter(b=>b.mom).length;
+
+  // Team popularity
+  const teamPop={};allBets.forEach(b=>{teamPop[b.tm]=(teamPop[b.tm]||0)+1});
+  const sortedTeams=Object.entries(teamPop).sort((a,b)=>b[1]-a[1]);
+
+  // Biggest single bet
+  const bigBet=allBets.length?allBets.reduce((max,b)=>b.am>max.am?b:max,allBets[0]):null;
+
+  // Leaderboard
+  const L=LB();const bigWinner=L.length?L[0]:null;const bigLoser=L.length>1?L[L.length-1]:null;
+
+  // Most active bettor
+  const betCounts={};allBets.forEach(b=>{betCounts[b.u]=(betCounts[b.u]||0)+1});
+  const mostActive=Object.entries(betCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  // Luckiest player (highest win %)
+  let luckiest=null,luckyPct=0;
+  players.forEach(n=>{
+    const ub=resolvedBets.filter(x=>x.u===n);
+    if(ub.length>=2){const w=ub.filter(b=>b.tm===S.r[b.mid].w).length;const pct=Math.round(w/ub.length*100);if(pct>luckyPct){luckyPct=pct;luckiest={n,pct,w,total:ub.length}}}
+  });
+
+  // MoM Oracle (best MoM prediction rate)
+  let oracle=null,oraclePct=0;
+  players.forEach(n=>{
+    const ub=resolvedBets.filter(x=>x.u===n&&x.mom);
+    if(ub.length>=1){const c=ub.filter(b=>b.mom.trim().toLowerCase()===(S.r[b.mid].mom||'').trim().toLowerCase()).length;const pct=ub.length?Math.round(c/ub.length*100):0;if(c>0&&pct>oraclePct){oraclePct=pct;oracle={n,correct:c,total:ub.length,pct}}}
+  });
+
+  // Riskiest bettor (highest avg bet)
+  let riskiest=null,riskAvg=0;
+  players.forEach(n=>{
+    const ub=allBets.filter(x=>x.u===n);
+    if(ub.length>=1){const avg=Math.round(ub.reduce((s,b)=>s+b.am,0)/ub.length);if(avg>riskAvg){riskAvg=avg;riskiest={n,avg}}}
+  });
+
+  // Win streaks
+  let bestStreak=null,streakLen=0;
+  players.forEach(n=>{
+    const ub=resolvedBets.filter(x=>x.u===n).sort((a,b)=>a.mid-b.mid);
+    let cur=0,max=0;
+    ub.forEach(b=>{if(b.tm===S.r[b.mid].w){cur++;if(cur>max)max=cur}else cur=0});
+    if(max>streakLen){streakLen=max;bestStreak={n,streak:max}}
+  });
+
+  // Biggest upset (someone won with highest odds)
+  let bigUpset=null;
+  wins.forEach(b=>{if(b.od>=(bigUpset?.od||0)){bigUpset=b}});
+
+  // All-in count
+  const allInCount=allBets.filter(b=>b.am>=ST*.8).length;
+
+  let h=`<div class="card"><div style="text-align:center;margin-bottom:20px"><div style="font-size:40px">📊</div><div class="ct" style="font-size:22px;margin-top:8px;text-align:center">THE DUGOUT STATS</div><div style="color:var(--t4);font-size:12px;margin-top:4px">${resolved.length} matches · ${allBets.length} bets · ${players.length} players</div></div>
+
+  <div class="rg" style="margin-bottom:20px">
+  <div class="stat-card"><div class="stat-val">₹${totalBet.toLocaleString()}</div><div class="stat-lbl">Total Wagered</div></div>
+  <div class="stat-card"><div class="stat-val">₹${totalWon.toLocaleString()}</div><div class="stat-lbl">Total Won</div></div>
+  <div class="stat-card"><div class="stat-val">${momTotal?Math.round(momCorrect/momTotal*100):0}%</div><div class="stat-lbl">MoM Accuracy</div></div>
+  <div class="stat-card"><div class="stat-val">${allInCount}</div><div class="stat-lbl">All-in Bets 🔥</div></div>
+  </div>`;
+
+  // Awards
+  h+=`<div style="margin-bottom:20px"><div class="ct" style="font-size:14px;margin-bottom:12px">🏆 AWARDS</div>`;
+  if(bigWinner)h+=`<div class="stat-row"><span>💰 Richest Player</span><span style="color:var(--grn);font-weight:800">${bigWinner.n} — ₹${bigWinner.b.toLocaleString()}</span></div>`;
+  if(bigLoser&&bigLoser.b<ST)h+=`<div class="stat-row"><span>😅 Needs a Comeback</span><span style="color:var(--red);font-weight:800">${bigLoser.n} — ₹${bigLoser.b.toLocaleString()}</span></div>`;
+  if(luckiest)h+=`<div class="stat-row"><span>🍀 Luckiest (Win Rate)</span><span style="color:var(--grn);font-weight:800">${luckiest.n} — ${luckiest.pct}% (${luckiest.w}/${luckiest.total})</span></div>`;
+  if(oracle)h+=`<div class="stat-row"><span>🔮 MoM Oracle</span><span style="color:var(--yel);font-weight:800">${oracle.n} — ${oracle.correct}/${oracle.total} correct</span></div>`;
+  if(riskiest)h+=`<div class="stat-row"><span>🎲 Riskiest Bettor</span><span style="color:var(--hot);font-weight:800">${riskiest.n} — avg ₹${riskiest.avg.toLocaleString()}/bet</span></div>`;
+  if(bestStreak&&bestStreak.streak>=2)h+=`<div class="stat-row"><span>🔥 Best Win Streak</span><span style="color:var(--acc);font-weight:800">${bestStreak.n} — ${bestStreak.streak} in a row!</span></div>`;
+  if(mostActive)h+=`<div class="stat-row"><span>📱 Most Active</span><span style="color:var(--t2);font-weight:800">${mostActive[0]} — ${mostActive[1]} bets</span></div>`;
+  if(bigBet)h+=`<div class="stat-row"><span>💎 Biggest Single Bet</span><span style="color:var(--acc);font-weight:800">₹${bigBet.am.toLocaleString()} by ${bigBet.u} (M#${bigBet.mid})</span></div>`;
+  if(bigUpset&&bigUpset.od>=3)h+=`<div class="stat-row"><span>🎯 Biggest Upset Win</span><span style="color:var(--grn);font-weight:800">${bigUpset.u} — ₹${bigUpset.am.toLocaleString()} at 1/${bigUpset.od}</span></div>`;
+  h+=`<div class="stat-row"><span>🏅 MoM Predictions</span><span>${momCorrect}/${momTotal} correct across all players</span></div>`;
+  if(totalBet>0)h+=`<div class="stat-row" style="border-bottom:0;padding-top:12px"><span style="color:var(--t3);font-style:italic">💸 If this was real money...</span><span style="color:var(--t3);font-style:italic">₹${totalBet.toLocaleString()} wagered total</span></div>`;
+  h+=`</div>`;
+
+  // Team popularity
+  if(sortedTeams.length){
+    h+=`<div style="margin-bottom:20px"><div class="ct" style="font-size:14px;margin-bottom:12px">🔥 MOST BACKED TEAMS</div>`;
+    sortedTeams.forEach(([tm,cnt])=>{
+      const pct=Math.round(cnt/allBets.length*100);
+      h+=`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:${T[tm]?.c||'var(--t2)'};font-weight:700">${T[tm]?.s||tm}</span><span style="color:var(--t4)">${cnt} bets (${pct}%)</span></div><div style="height:8px;background:var(--bdr);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${T[tm]?.c||'var(--acc)'};border-radius:4px;transition:width .3s"></div></div></div>`;
+    });
+    h+=`</div>`;
+  }
+
+  // Weekly penalty breakdown — transparency
+  const penaltyData=getPenaltyBreakdown();
+  if(penaltyData.weeks.length>0){
+    h+=`<div style="margin-bottom:20px"><div class="ct" style="font-size:14px;margin-bottom:12px">⚠️ WEEKLY PENALTY TRACKER</div>
+    <div style="font-size:12px;color:var(--t4);margin-bottom:12px">Rule: Place at least 1 bet per week (Wed→Tue) or face 20% penalty (₹${Math.round(ST*0.2).toLocaleString()}) per missed week.</div>`;
+    penaltyData.weeks.forEach(wk=>{
+      const hasDefaulters=wk.defaulters.length>0;
+      h+=`<div style="background:var(--inp);border:1px solid ${hasDefaulters?'#EF444433':'#10B98130'};border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${hasDefaulters?'8px':'0'}">
+        <span style="font-size:13px;font-weight:700;color:var(--t2)">${wk.label}</span>
+        <span style="font-size:12px;color:${hasDefaulters?'var(--red)':'var(--grn)'};font-weight:700">${hasDefaulters?wk.defaulters.length+' penalized':'✅ All clear'}</span>
+      </div>`;
+      if(hasDefaulters){
+        h+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;
+        wk.defaulters.forEach(name=>{
+          h+=`<span style="background:#EF444420;border:1px solid #EF444444;border-radius:8px;padding:3px 10px;font-size:12px;color:var(--red);font-weight:700">${name} — ₹${Math.round(ST*0.2).toLocaleString()}</span>`;
+        });
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    });
+    const totalPenalties=penaltyData.totals;
+    if(Object.keys(totalPenalties).length>0){
+      h+=`<div style="margin-top:12px;padding:12px;background:#EF444410;border:1px solid #EF444425;border-radius:10px"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px">TOTAL PENALTIES</div>`;
+      Object.entries(totalPenalties).sort((a,b)=>b[1]-a[1]).forEach(([name,amt])=>{
+        h+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #EF444415"><span style="color:var(--t2)">${name}</span><span style="color:var(--red);font-weight:800">-₹${amt.toLocaleString()}</span></div>`;
+      });
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  }
+
+  // Your Personal Card (only if logged in)
+  if(me){
+    const n=me,ub=allBets.filter(x=>x.u===n),rub=resolvedBets.filter(x=>x.u===n);
+    const w=rub.filter(b=>b.tm===S.r[b.mid].w).length;
+    const l=rub.filter(b=>b.tm!==S.r[b.mid].w).length;
+    const b=bal(n),wagered=ub.reduce((s,x)=>s+x.am,0);
+    const momC=rub.filter(b=>b.mom&&b.mom.trim().toLowerCase()===(S.r[b.mid].mom||'').trim().toLowerCase()).length;
+    const momT=rub.filter(b=>b.mom).length;
+    const favTeam=ub.length?Object.entries(ub.reduce((acc,b)=>{acc[b.tm]=(acc[b.tm]||0)+1;return acc},{})).sort((a,b)=>b[1]-a[1])[0]:null;
+    const winPct=rub.length?Math.round(w/rub.length*100):0;
+    const diff=b-ST;
+    const rank=LB().findIndex(x=>x.n===n)+1;
+    const allInCount=ub.filter(x=>x.am>=bal(n)*0.95||x.am>=ST).length;
+    const biggestBet=ub.length?ub.reduce((mx,x)=>x.am>mx.am?x:mx,ub[0]):null;
+
+    h+=`<div><div class="ct" style="font-size:14px;margin-bottom:12px">📊 YOUR STATS</div>
+    <div style="background:linear-gradient(135deg,var(--inp),#0D1B3E);border:1px solid var(--bdr2);border-radius:16px;padding:20px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:48px;height:48px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:20px;font-family:var(--ff)">${n[0].toUpperCase()}</div>
+        <div style="flex:1"><div style="font-weight:800;font-size:18px">${n}</div><div style="font-size:12px;color:var(--t4)">Rank #${rank} of ${players.length}</div></div>
+        <div style="text-align:right"><div style="font-size:22px;font-weight:900;color:${diff>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${b.toLocaleString()}</div><div style="font-size:12px;color:${diff>=0?'#34D39988':'#F8717188'}">${diff>=0?'+':''}${diff.toLocaleString()}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px">
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:900;color:var(--yel);font-family:var(--ff)">${ub.length}</div><div style="font-size:10px;color:var(--t4)">Bets</div></div>
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:900;color:${winPct>=50?'var(--grn)':'var(--red)'};font-family:var(--ff)">${winPct}%</div><div style="font-size:10px;color:var(--t4)">${w}W / ${l}L</div></div>
+        <div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${wagered.toLocaleString()}</div><div style="font-size:10px;color:var(--t4)">Wagered</div></div>
+        ${momT?`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:10px;text-align:center"><div style="font-size:18px;font-weight:900;color:var(--yel);font-family:var(--ff)">${momC}/${momT}</div><div style="font-size:10px;color:var(--t4)">MoM Hits</div></div>`:''}
+      </div>
+      <div style="display:flex;gap:12px;font-size:13px;color:var(--t2);flex-wrap:wrap">
+        ${favTeam?`<span>❤️ Favourite: <strong style="color:${T[favTeam[0]]?.c||'var(--acc)'}">${T[favTeam[0]]?.s||favTeam[0]}</strong> (${favTeam[1]} bets)</span>`:''}
+        ${biggestBet?`<span>💰 Biggest bet: <strong>₹${biggestBet.am.toLocaleString()}</strong> on ${T[biggestBet.tm]?.s||biggestBet.tm}</span>`:''}
+        ${allInCount?`<span>🔥 All-ins: <strong>${allInCount}</strong></span>`:''}
+      </div>
+    </div></div>`;
+  } else {
+    h+=`<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Log in to see your personal stats card here.</div>`;
+  }
+
+  h+=`</div>`;el.innerHTML=h;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════════════════════
+function rA(){
+  const el=$('v-admin');
+  if(!adm){el.innerHTML=`<div class="card" style="max-width:420px;margin:0 auto"><div class="ch"><span style="font-size:18px">${S.pin?'🔑':'⚙️'}</span><span class="ct">${S.pin?'ADMIN LOGIN':'SETUP ADMIN'}</span></div><div style="color:var(--t4);margin-bottom:16px;font-size:13px">${S.pin?'Enter PIN.':'Create a PIN — only you need this.'}</div><input class="inp" type="password" id="adm-pin" placeholder="${S.pin?'Enter PIN':'Create 4+ digit PIN'}" maxlength="8" onkeydown="if(event.key==='Enter')admL()"><button class="bp" style="margin-top:12px;width:100%" onclick="admL()">${S.pin?'Login':'Set PIN'}</button></div>`;return}
+  let h='';
+  // Admin Dashboard Summary
+  const allM=gms(),totalM=allM.filter(m=>m.h!=='TBD').length,resolved=Object.keys(S.r).length;
+  const oddsSet=Object.keys(S.odds).length,needsOdds=allM.filter(m=>!S.r[m.id]&&!S.odds[m.id]&&m.h!=='TBD'&&!lk(m));
+  const nextUnresolved=allM.find(m=>!S.r[m.id]&&lk(m)&&m.h!=='TBD');
+  const nextNeedsOdds=needsOdds.length?needsOdds[0]:null;
+  const totalPlayers=Object.keys(S.p).length,totalBets=Object.keys(S.b).length;
+  const activePlayers=new Set(Object.values(S.b).map(b=>b.u)).size;
+  const dormant=totalPlayers-activePlayers;
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📋</span><span class="ct">ADMIN DASHBOARD</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">${resolved}/${totalM}</div><div style="font-size:11px;color:var(--t4)">Matches Done</div></div>
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">${oddsSet}</div><div style="font-size:11px;color:var(--t4)">Odds Set</div></div>
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--grn);font-family:var(--ff)">${totalPlayers}</div><div style="font-size:11px;color:var(--t4)">Players</div></div>
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--t2);font-family:var(--ff)">${totalBets}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
+  </div>`;
+  // Action items
+  let actions=[];
+  if(nextUnresolved)actions.push(`📝 <strong>Record result</strong> for M#${nextUnresolved.id} ${T[nextUnresolved.h]?.s} v ${T[nextUnresolved.a]?.s}`);
+  if(nextNeedsOdds)actions.push(`📊 <strong>Set odds</strong> for M#${nextNeedsOdds.id} ${T[nextNeedsOdds.h]?.s} v ${T[nextNeedsOdds.a]?.s} (${fd(nextNeedsOdds.d)})`);
+  if(dormant>0)actions.push(`👻 <strong>${dormant} player${dormant>1?'s':''}</strong> haven't placed any bets yet`);
+  if(actions.length){h+=`<div style="margin-bottom:4px"><div style="font-size:12px;font-weight:700;color:var(--hot);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">⚡ Action Needed</div>`;actions.forEach(a=>{h+=`<div style="font-size:13px;color:var(--t2);padding:4px 0;line-height:1.6">${a}</div>`});h+=`</div>`}
+  h+=`</div>`;
+  // Set Odds
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="odds-m" onchange="oddsMC()"><option value="">-- Pick --</option>`;
+  gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.odds[m.id]?'✅':''}</option>`});
+  h+=`</select></div><div id="odds-f"></div></div>`;
+  // Record Result
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📝</span><span class="ct">RECORD RESULT</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
+  gms().filter(m=>m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.r[m.id]?'✅':''}</option>`});
+  h+=`</select></div><div id="adm-f"></div></div>`;
+  // Set Playoff Teams
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><div style="font-size:13px;color:var(--t4);margin-bottom:12px">Once top 4 are decided, assign teams to playoff matches.</div>`;
+  MM.filter(m=>m.playoff).forEach(m=>{
+    const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
+    const curH=po.h,curA=po.a;
+    h+=`<div style="margin-bottom:12px;padding:12px;background:var(--inp);border-radius:10px"><div style="font-weight:700;color:var(--acc);margin-bottom:4px">${m.v} (${fd(m.d)})</div>
+    ${curH!=='TBD'?`<div style="font-size:12px;color:var(--grn);margin-bottom:8px">✅ ${T[curH]?.s||curH} vs ${T[curA]?.s||curA}</div>`:''}
+    <div style="display:flex;gap:8px"><select class="bf-i" id="po-h-${m.id}" style="flex:1"><option value="TBD">Team 1</option>${Object.keys(T).map(k=>`<option value="${k}" ${curH===k?'selected':''}>${T[k].s}</option>`).join('')}</select>
+    <select class="bf-i" id="po-a-${m.id}" style="flex:1"><option value="TBD">Team 2</option>${Object.keys(T).map(k=>`<option value="${k}" ${curA===k?'selected':''}>${T[k].s}</option>`).join('')}</select>
+    <button class="bp" style="padding:8px 12px" onclick="setPO(${m.id})">Set</button></div></div>`;
+  });
+  h+=`</div>`;
+  // Crystal Ball Admin
+  h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manage the secret crystal ballting window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
+  // Status + toggle
+  const koCount=S.ko?Object.keys(S.ko).length:0;
+  h+=`<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koOpen?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koOpen?'OPEN':'CLOSED'}</div><div style="font-size:10px;color:var(--t4)">Betting Window</div></div>
+  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:var(--yel);font-family:var(--ff)">${koCount}</div><div style="font-size:10px;color:var(--t4)">Secret Bets</div></div>
+  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koRevealed?'var(--grn)':'var(--t3)'}";font-family:var(--ff)">${S.koRevealed?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Revealed</div></div>
+  </div>`;
+  // Toggle button
+  if(!S.koRevealed){
+    h+=`<button style="width:100%;padding:10px;background:${S.koOpen?'#EF444415':'#10B98115'};border:1px solid ${S.koOpen?'#EF444433':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
+  }
+  // Show secret bets (admin only)
+  if(koCount>0){
+    h+=`<div style="margin-top:12px"><div class="bf-l">SECRET BETS (admin eyes only 👀)</div>`;
+    Object.entries(S.ko).forEach(([name,k])=>{
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <div><span style="font-weight:700;color:var(--t1)">${name}</span></div>
+      <div><span style="color:${T[k.team]?.c||'var(--acc)'};font-weight:800">${T[k.team]?.s||k.team}</span><span style="color:var(--t4);margin-left:8px">₹${k.amount.toLocaleString()} (${k.pct}%)</span></div></div>`;
+    });
+    h+=`</div>`;
+  }
+  // Reveal section
+  if(koCount>0&&!S.koRevealed){
+    h+=`<div style="margin-top:16px;padding:14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px">
+    <div class="bf-l">REVEAL & SETTLE</div>
+    <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team and reveal all bets. Balances will be adjusted automatically.</div>
+    <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
+    <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal Predictions & Settle Balances</button></div>`;
+  }
+  if(S.koRevealed){
+    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">✅ Bets revealed! Winner: <strong>${T[S.koWinner]?.n||S.koWinner}</strong> — balances updated.</div>`;
+  }
+  h+=`</div>`;
+  // Squad Management
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏏</span><span class="ct">MANAGE SQUADS</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Update captains, add or remove players from team squads.</div>
+  <div class="bf-s"><div class="bf-l">Team</div><select class="bf-i" id="sq-team" onchange="sqTeamChange()"><option value="">-- Select --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n} (${T[k].s})</option>`).join('')}</select></div>
+  <div id="sq-panel"></div></div>`;
+  // Add Match (Phase 2)
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Add Phase 2 matches as BCCI announces them. Currently ${MM.length} matches loaded.</div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+  <div style="flex:1;min-width:70px"><div class="bf-l">Match #</div><input class="bf-i" type="number" id="nm-id" placeholder="${MM.length+1}"></div>
+  <div style="flex:1;min-width:70px"><div class="bf-l">Day</div><input class="bf-i" type="number" id="nm-day" min="1" max="31" placeholder="28"></div>
+  <div style="flex:1;min-width:70px"><div class="bf-l">Month</div><select class="bf-i" id="nm-month"><option value="03">Mar</option><option value="04" selected>Apr</option><option value="05">May</option></select></div>
+  <div style="flex:1;min-width:80px"><div class="bf-l">Year</div><input class="bf-i" type="number" id="nm-year" value="2026" readonly></div>
+  <div style="flex:1;min-width:100px"><div class="bf-l">Time (IST)</div><select class="bf-i" id="nm-time"><option value="15:30">3:30 PM</option><option value="19:30" selected>7:30 PM</option></select></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:8px">
+  <div style="flex:1"><div class="bf-l">Home Team</div><select class="bf-i" id="nm-home"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
+  <div style="flex:1"><div class="bf-l">Away Team</div><select class="bf-i" id="nm-away"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
+  </div>
+  <div class="bf-s"><div class="bf-l">Venue</div><input class="bf-i" id="nm-venue" placeholder="e.g. Wankhede, Mumbai"></div>
+  <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
+  </div>`;
+  // Manage Bets
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
+  const allBets=Object.entries(S.b);
+  if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
+  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">1/${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
+  h+=`</div>`;
+  // Broadcast Announcement
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📢</span><span class="ct">BROADCAST</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Post an announcement visible to all players on the Home screen.</div>`;
+  if(S.announce){h+=`<div style="padding:10px 14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv();toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
+  h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
+  <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
+  // Manual Balance Adjustment
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manually add/deduct points or waive weekly penalties for a player.</div>
+  <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="adj-player"><option value="">-- Select --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
+  <div class="bf-s"><div class="bf-l">Type</div><div style="display:flex;gap:8px">
+  <button class="bf-tb" id="adj-add" style="border-color:var(--grn);color:var(--grn);flex:1;font-size:13px;padding:6px" onclick="adjType='add';$('adj-add').style.background='var(--grn)';$('adj-add').style.color='#000';$('adj-ded').style.background='transparent';$('adj-ded').style.color='var(--red)';$('adj-waive').style.background='transparent';$('adj-waive').style.color='var(--yel)'">➕ Add</button>
+  <button class="bf-tb" id="adj-ded" style="border-color:var(--red);color:var(--red);flex:1;font-size:13px;padding:6px" onclick="adjType='deduct';$('adj-ded').style.background='var(--red)';$('adj-ded').style.color='#000';$('adj-add').style.background='transparent';$('adj-add').style.color='var(--grn)';$('adj-waive').style.background='transparent';$('adj-waive').style.color='var(--yel)'">➖ Deduct</button>
+  <button class="bf-tb" id="adj-waive" style="border-color:var(--yel);color:var(--yel);flex:1;font-size:13px;padding:6px" onclick="adjType='waive';$('adj-waive').style.background='var(--yel)';$('adj-waive').style.color='#000';$('adj-add').style.background='transparent';$('adj-add').style.color='var(--grn)';$('adj-ded').style.background='transparent';$('adj-ded').style.color='var(--red)'">🛡️ Waive Penalty</button>
+  </div></div>
+  <div id="adj-amt-row" class="bf-s"><div class="bf-l">Amount (₹)</div><input class="bf-i" type="number" id="adj-amt" min="1" placeholder="e.g. 2000"></div>
+  <div class="bf-s"><div class="bf-l">Reason</div><input class="bf-i" id="adj-reason" placeholder="e.g. Waived week 2 penalty — was travelling"></div>
+  <button class="bp" style="width:100%" onclick="applyAdj()">Apply</button>`;
+  // Show adjustment history
+  if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN')}</span></div></div>`});h+=`</div>`}
+  h+=`</div>`;
+  // Participants
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">👥</span><span class="ct">PARTICIPANTS</span></div>`;
+  Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#254AA515;border:1px solid #254AA544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#F59E0B15;border:1px solid #F59E0B44;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 PIN</button><button style="background:#EF444420;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
+  h+=`</div>`;
+  // Final Standings (admin only — includes Crystal Ball)
+  if(S.koRevealed&&S.koWinner&&S.ko&&Object.keys(S.ko).length){
+    const finalL=Object.keys(S.p).map(n=>({n,pub:bal(n),fin:finalBal(n),ko:S.ko[n]||null})).sort((a,b)=>b.fin-a.fin);
+    h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">FINAL STANDINGS (ADMIN ONLY)</span></div>
+    <div style="font-size:13px;color:var(--t4);margin-bottom:14px">Includes Crystal Ball results. Players cannot see this. IPL Winner: <strong style="color:var(--acc)">${T[S.koWinner]?.n||S.koWinner}</strong></div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <tr style="border-bottom:2px solid var(--bdr)">
+      <th style="text-align:left;padding:8px 6px;color:var(--t4);font-size:11px">#</th>
+      <th style="text-align:left;padding:8px 6px;color:var(--t4);font-size:11px">PLAYER</th>
+      <th style="text-align:right;padding:8px 6px;color:var(--t4);font-size:11px">REGULAR</th>
+      <th style="text-align:center;padding:8px 6px;color:var(--t4);font-size:11px">🔮 PICK</th>
+      <th style="text-align:right;padding:8px 6px;color:var(--t4);font-size:11px">🔮 +/-</th>
+      <th style="text-align:right;padding:8px 6px;color:var(--acc);font-size:11px;font-weight:800">FINAL</th>
+    </tr>`;
+    finalL.forEach((p,i)=>{
+      const koDiff=p.fin-p.pub;
+      const won=p.ko&&p.ko.team===S.koWinner;
+      h+=`<tr style="border-bottom:1px solid var(--bdr)">
+        <td style="padding:10px 6px;font-weight:800;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</td>
+        <td style="padding:10px 6px;font-weight:700;color:var(--t1)">${p.n}</td>
+        <td style="padding:10px 6px;text-align:right;color:var(--t2)">₹${p.pub.toLocaleString()}</td>
+        <td style="padding:10px 6px;text-align:center;color:${p.ko?T[p.ko.team]?.c||'var(--acc)':'var(--t3)'};font-weight:700">${p.ko?T[p.ko.team]?.s||p.ko.team:'—'}</td>
+        <td style="padding:10px 6px;text-align:right;color:${koDiff>0?'var(--grn)':koDiff<0?'var(--red)':'var(--t3)'};font-weight:700">${p.ko?(koDiff>=0?'+':'')+koDiff.toLocaleString():'—'}</td>
+        <td style="padding:10px 6px;text-align:right;font-weight:900;color:var(--acc);font-family:var(--ff);font-size:15px">₹${p.fin.toLocaleString()}</td>
+      </tr>`;
+    });
+    h+=`</table></div></div>`;
+  }
+  // Danger
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🗑️</span><span class="ct">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:8px">
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets?')){S.b={};sv();toast('Bets cleared');rA()}">🎰 Clear All Bets</button>
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results?')){S.r={};sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
+  <button style="width:100%;padding:12px;background:#EF444420;border:1px solid #EF444444;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
+  el.innerHTML=h;
+}
+
+// Admin sub-functions
+// Simple hash for PIN (not cryptographic, but hides plain text from Firebase)
+async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
+
+function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
+f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (1/x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (1/x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><button class="bp" style="width:100%;margin-top:12px" onclick="sOdds(${id})">📊 Publish</button>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} 1/${ex[m.h]} · ${T[m.a]?.s} 1/${ex[m.a]}</div>`:''}`}
+
+function sOdds(id){const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
+  const existingBets=Object.values(S.b).filter(x=>x.mid===id);
+  if(existingBets.length>0&&S.odds[id]){if(!confirm(`⚠️ ${existingBets.length} bet(s) already placed on this match! Changing odds will affect existing bets. Existing bets keep their OLD odds. Continue?`))return}
+  S.odds[id]={};S.odds[id][m.h]=hv;S.odds[id][m.a]=av;sv();toast('Odds published! 📊');oddsMC()}
+
+function admMC(){const id=parseInt($('adm-m').value),f=$('adm-f');if(!id){f.innerHTML='';return}const m=gm(id);admW={};
+let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><div class="bf-tr">
+<button class="bf-tb" id="aw-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'}" onclick="apw(${id},'${m.h}')">${T[m.h]?.s||m.h}</button>
+<button class="bf-tb" id="aw-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}" onclick="apw(${id},'${m.a}')">${T[m.a]?.s||m.a}</button>
+</div></div>
+<div class="bf-s"><div class="bf-l">Man of the Match</div>${momDropdown('amm-'+id,id)}</div>
+<button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>`;
+// Show clear result if already recorded
+if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--grn)">✅ Result: ${T[S.r[id].w]?.s||S.r[id].w} won${S.r[id].mom?' · MoM: '+S.r[id].mom:''}</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
+const ab=Object.values(S.b).filter(x=>x.mid===id);
+if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
+f.innerHTML=h}
+
+function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
+
+function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv();toast('Result saved! 📝');delete admW[id];rA()}
+
+function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k].sq}
+function getCap(k){return(S.capEdits&&S.capEdits[k])||T[k].cap||''}
+function sqTeamChange(){
+  const k=$('sq-team').value,p=$('sq-panel');
+  if(!k){p.innerHTML='';return}
+  const sq=getSquad(k),cap=getCap(k);
+  let h=`<div style="margin-top:12px">`;
+  // Captain
+  h+=`<div class="bf-s"><div class="bf-l" style="color:var(--acc)">Captain</div><div style="display:flex;gap:8px"><select class="bf-i" id="sq-cap" style="flex:1"><option value="">-- Select captain --</option>${sq.map(p=>`<option value="${p}" ${p===cap?'selected':''}>${p}</option>`).join('')}</select><button class="bp" style="padding:8px 14px" onclick="setCap('${k}')">Set</button></div></div>`;
+  // Current squad
+  h+=`<div class="bf-l" style="margin-top:12px">Squad (${sq.length} players)</div>`;
+  sq.forEach((p,i)=>{
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
+    <span style="font-size:13px;color:var(--t1)">${p===cap?'👑 ':''}<strong>${p}</strong></span>
+    <button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="sqRemove('${k}','${p.replace(/'/g,"\\'")}')">✕</button></div>`;
+  });
+  // Add player
+  h+=`<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="sq-new" placeholder="New player name..." style="flex:1"><button class="bp" style="padding:8px 14px" onclick="sqAdd('${k}')">+ Add</button></div>`;
+  h+=`</div>`;
+  p.innerHTML=h;
+}
+function setCap(k){
+  const cap=$('sq-cap').value;
+  if(!cap){toast('Select a captain','err');return}
+  if(!S.capEdits)S.capEdits={};
+  S.capEdits[k]=cap;
+  sv();toast(cap+' is now captain of '+T[k].s+' 👑');sqTeamChange();
+}
+function sqAdd(k){
+  const name=$('sq-new').value.trim();
+  if(!name){toast('Enter player name','err');return}
+  const sq=[...getSquad(k)];
+  if(sq.includes(name)){toast(name+' already in squad','err');return}
+  sq.push(name);
+  if(!S.squadEdits)S.squadEdits={};
+  S.squadEdits[k]=sq;
+  sv();toast(name+' added to '+T[k].s+' ✅');sqTeamChange();
+}
+function sqRemove(k,name){
+  if(!confirm('Remove '+name+' from '+T[k].s+'?'))return;
+  const sq=getSquad(k).filter(p=>p!==name);
+  if(!S.squadEdits)S.squadEdits={};
+  S.squadEdits[k]=sq;
+  // If removed player was captain, clear captain
+  if(getCap(k)===name){if(!S.capEdits)S.capEdits={};S.capEdits[k]='';}
+  sv();toast(name+' removed from '+T[k].s);sqTeamChange();
+}
+function toggleKO(){S.koOpen=!S.koOpen;sv();toast(S.koOpen?'Crystal Ballting is OPEN! 🔓':'Crystal Ballting CLOSED 🔒');rA()}
+function revealKO(){
+  const winner=$('ko-winner').value;
+  if(!winner){toast('Select the IPL winner!','err');return}
+  if(!confirm(`🔮 REVEAL ALL CRYSTAL BALL PREDICTIONS\n\nIPL 2026 Winner: ${T[winner]?.n}\n\nThis will:\n• Show everyone's secret picks\n• Add/deduct points from balances\n• Cannot be undone!\n\nProceed?`))return;
+  S.koWinner=winner;S.koRevealed=true;S.koOpen=false;
+  sv();toast('Crystal Balls revealed! 🔮🏆');rA();
+}
+function addMatch(){
+  const id=parseInt($('nm-id').value)||MM.length+1;
+  const day=parseInt($('nm-day').value);
+  const month=$('nm-month').value;
+  const year=$('nm-year').value;
+  if(!day||day<1||day>31){toast('Enter a valid day (1-31)','err');return}
+  const date=`${year}-${month}-${String(day).padStart(2,'0')}`;
+  const time=$('nm-time').value;
+  const home=$('nm-home').value;
+  const away=$('nm-away').value;
+  const venue=$('nm-venue').value.trim();
+  if(!home||!away){toast('Pick both teams','err');return}
+  if(home===away){toast('Teams must be different','err');return}
+  if(!venue){toast('Enter a venue','err');return}
+  if(MM.find(m=>m.id===id)){toast('Match #'+id+' already exists','err');return}
+  MM.push({id,d:date,t:time,h:home,a:away,v:venue});
+  if(!S.customMatches)S.customMatches=[];
+  S.customMatches.push({id,d:date,t:time,h:home,a:away,v:venue});
+  sv();
+  toast('Match #'+id+' added! ✅');
+  rA();
+}
+function setPO(id){const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv();toast('Playoff teams set! 🏟️');rA()}
+
+function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv();toast('Bet deleted');rA()}
+
+// Player actions
+let pendingLogin='';
+function promptLogin(n){
+  if(me===n)return;
+  pendingLogin=n;
+  const pdata=S.p[n];
+  // If player has no PIN (migrated from old data), let them set one
+  if(!pdata.pin){
+    const pin=prompt(n+' — no PIN set yet. Create a 4-digit PIN now:');
+    if(!pin||pin.length<4){toast('PIN must be 4+ digits','err');return}
+    hashPin(pin).then(h=>{S.p[n].pin=h;sv();toast('PIN set! Now login with it.');showLoginPrompt(n)});
+    return;
+  }
+  showLoginPrompt(n);
+}
+function showLoginPrompt(n){
+  const el=$('login-prompt');if(!el)return;
+  el.style.display='block';
+  $('login-prompt-name').textContent=n;
+  $('login-pin').value='';
+  $('login-err').textContent='';
+  setTimeout(()=>$('login-pin').focus(),100);
+}
+function confirmLogin(){
+  const pin=$('login-pin').value;
+  if(!pin||pin.length<4){$('login-err').textContent='Enter your 4-digit PIN';return}
+  const pdata=S.p[pendingLogin];
+  if(!pdata||!pdata.pin){$('login-err').textContent='Account error — contact admin';return}
+  hashPin(pin).then(h=>{
+    if(h===pdata.pin){me=pendingLogin;localStorage.setItem('dg-me',me);pendingLogin='';uh();nav('matches');toast('Welcome back, '+me+'! 🏏')}
+    else{$('login-err').textContent='Wrong PIN!'}
+  });
+}
+function showRegister(){
+  const n=($('inp-n').value||'').trim();
+  if(!n){toast('Enter your name','err');return}
+  if(S.p[n]){toast('Name taken! Tap your name above to login.','err');return}
+  pendingLogin=n;
+  $('register-prompt').style.display='block';
+  $('reg-pin').value='';$('reg-err').textContent='';
+  $('reg-pin').focus();
+}
+function addP(){
+  const pin=$('reg-pin').value;
+  if(!pin||pin.length<4){$('reg-err').textContent='PIN must be at least 4 digits';return}
+  const n=pendingLogin;
+  hashPin(pin).then(h=>{
+    S.p[n]={j:new Date().toISOString(),pin:h};
+    sv();$('inp-n').value='';
+    me=n;localStorage.setItem('dg-me',me);pendingLogin='';
+    uh();nav('matches');toast(n+' registered! 🏏');
+  });
+}
+function logout(){me=null;localStorage.removeItem('dg-me');uh();nav('home');toast('Logged out')}
+function logn(n){me=n;localStorage.setItem('dg-me',n);uh();nav('matches')}
+let adjType='add';
+function postAnnounce(){const msg=$('adm-announce').value.trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};sv();toast('Announcement posted! 📢');rA()}
+function applyAdj(){
+  const player=$('adj-player').value;if(!player){toast('Pick a player','err');return}
+  if(adjType==='waive'){
+    const pen=weeklyPenalty(player);if(pen===0){toast(player+' has no penalties to waive','err');return}
+    if(!S.adj)S.adj=[];
+    const reason=$('adj-reason').value.trim()||'Weekly penalty waived by admin';
+    S.adj.push({type:'waive',player,amount:pen,reason,ts:new Date().toISOString()});
+    sv();toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);rA();return;
+  }
+  const amt=parseInt($('adj-amt').value);if(!amt||amt<1){toast('Enter amount','err');return}
+  const reason=$('adj-reason').value.trim()||'Manual adjustment by admin';
+  if(!S.adj)S.adj=[];
+  S.adj.push({type:adjType,player,amount:amt,reason,ts:new Date().toISOString()});
+  sv();toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);rA();
+}
+function editName(old){
+  const nw=prompt('Edit name for "'+old+'":\n\nEnter new name:',old);
+  if(!nw||!nw.trim())return;
+  const newName=nw.trim();
+  if(newName===old)return;
+  if(S.p[newName]){toast('Name "'+newName+'" already taken!','err');return}
+  // Copy player data to new name
+  S.p[newName]=S.p[old];delete S.p[old];
+  // Update all bets — both values AND keys
+  Object.keys(S.b).forEach(k=>{
+    if(S.b[k].u===old){
+      S.b[k].u=newName;
+      // Fix key: old key is matchId-oldName, new key is matchId-newName
+      const newKey=S.b[k].mid+'-'+newName;
+      if(newKey!==k){S.b[newKey]=S.b[k];delete S.b[k]}
+    }
+  });
+  // Update Crystal Ball bet
+  if(S.ko&&S.ko[old]){S.ko[newName]=S.ko[old];delete S.ko[old]}
+  // Update adjustments
+  if(S.adj)(S.adj).forEach(a=>{if(a.player===old)a.player=newName});
+  // Update current login if it was this player
+  if(me===old){me=newName;localStorage.setItem('dg-me',newName)}
+  sv();toast(old+' → '+newName+' ✅');rA();
+}
+function resetPin(n){const np=prompt('Set new PIN for '+n+' (4+ digits):');if(!np||np.length<4){toast('PIN must be 4+ digits','err');return}hashPin(np).then(h=>{S.p[n].pin=h;sv();toast(n+'\'s PIN reset 🔑');rA()})}
+function remP(n){if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
+function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?'))return;S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Cleared!');nav('home')}
+
+function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
+if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
+try{const c=JSON.parse(raw);if(!c.databaseURL){err.textContent='Missing databaseURL';return}localStorage.setItem('dg-fb',raw);if(!firebase.apps.length)firebase.initializeApp(c);db=firebase.database();
+// Push local then listen
+db.ref('dugout').once('value').then(snap=>{
+  const d=snap.val();
+  if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
+  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{}}
+  db.ref('dugout').on('value',sn=>{const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  ren();uh();
+});
+$('mtag').textContent='LIVE';$('mtag').style.background='#10B98122';$('mtag').style.color='#34D399';toast('Firebase connected! 🔗');
+}catch(e){err.textContent='Invalid JSON'}}
+
+// Boot
+setInterval(()=>{
+  // Don't refresh if a bet form is open (prevents flickering)
+  const anyFormOpen=document.querySelector('.bf');
+  if(!anyFormOpen&&(vw==='matches'||vw==='home'))ren();
+},30000);
+ld();
+</script>
+</body>
+</html>
