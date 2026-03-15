@@ -214,6 +214,28 @@ function bal(n,excludePending=false){
   return Math.round(b);
 }
 
+// Raw balance without floor — for true P&L calculation
+function rawBal(n){
+  let b=ST;
+  const userBets=Object.values(S.b).filter(x=>x.u===n);
+  userBets.forEach(bt=>{
+    const rs=S.r[bt.mid];
+    if(rs){
+      const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
+      if(w){const py=bt.am/od;b+=py;if(mh)b+=(bt.am*MOMB)/od;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      else{if(!mh)b-=bt.am}
+    } else {b-=bt.am}
+  });
+  let pen=weeklyPenalty(n);
+  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+  pen=Math.max(pen-waived,0);
+  b-=pen;
+  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+    if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
+  });
+  return Math.round(b);
+}
+
 // Final balance including Crystal Ball — admin eyes only
 function finalBal(n){
   let b=bal(n);
@@ -429,7 +451,7 @@ function rH(){
 
   // ─── PROFILE (logged in) ───
   if(me){
-    const b=bal(me),diff=b-ST,myBets=Object.values(S.b).filter(x=>x.u===me),myWins=myBets.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length,myLosses=myBets.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length,rank=L.findIndex(x=>x.n===me)+1;
+    const b=bal(me),diff=rawBal(me)-ST,myBets=Object.values(S.b).filter(x=>x.u===me),myWins=myBets.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length,myLosses=myBets.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length,rank=L.findIndex(x=>x.n===me)+1;
     h+=`<div style="background:linear-gradient(135deg,#0D1B3E,#162040);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:24px;font-family:var(--ff);flex-shrink:0">${me[0].toUpperCase()}</div>
@@ -492,7 +514,7 @@ function rH(){
     const hasDiff=L.some(p=>p.b!==ST);
     h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">STANDINGS</span></div>`;
     if(!hasDiff){h+=`<div style="text-align:center;padding:12px;color:var(--t3);font-size:13px">Everyone starts equal at ₹${ST.toLocaleString()} — standings update after the first results come in!</div>`}
-    else{L.slice(0,5).forEach((p,i)=>{const c=['#FBBF24','#94A3B8','#D97706'][i]||'#475569';const df=p.b-ST;h+=`<div class="sr"><span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${c}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span><span style="flex:1;font-weight:700;font-size:14px">${p.n}</span><div style="text-align:right"><div style="font-weight:800;font-size:14px;color:${p.b>=ST?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div><div style="font-size:11px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div></div></div>`});if(L.length>5)h+=`<button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:13px;font-weight:700;margin-top:12px" onclick="nav('board')">View full leaderboard →</button>`}
+    else{L.slice(0,5).forEach((p,i)=>{const c=['#FBBF24','#94A3B8','#D97706'][i]||'#475569';const df=rawBal(p.n)-ST;h+=`<div class="sr"><span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${c}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span><span style="flex:1;font-weight:700;font-size:14px">${p.n}</span><div style="text-align:right"><div style="font-weight:800;font-size:14px;color:${p.b>=ST?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div><div style="font-size:11px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div></div></div>`});if(L.length>5)h+=`<button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:13px;font-weight:700;margin-top:12px" onclick="nav('board')">View full leaderboard →</button>`}
     h+=`</div>`;
   }
 
@@ -688,73 +710,113 @@ function tBL(id){const e=$('bl-'+id);if(e)e.style.display=e.style.display==='non
 function rB(){
   const el=$('v-board'),L=LB(),rc=Object.keys(S.r).length;
   const hasDiff=L.some(p=>p.b!==ST);
-  let h=`<div style="text-align:center;margin-bottom:24px;padding-top:8px"><div style="font-size:48px">🏆</div><div class="ct" style="font-size:26px;margin-top:10px;text-align:center">LEADERBOARD</div><div style="color:var(--t4);font-size:14px;margin-top:4px">${rc} match${rc!==1?'es':''} resolved · ${L.length} players</div></div>`;
+  const maxBal=L.length?Math.max(...L.map(p=>p.b)):ST;
+  const minBal=L.length?Math.min(...L.map(p=>p.b)):ST;
+  let h='';
 
-  if(!L.length)h+=`<div class="card" style="text-align:center;color:var(--t3);padding:40px">No players yet. Go Home and register!</div>`;
+  // Header
+  h+=`<div style="text-align:center;margin-bottom:28px;padding-top:8px">
+    <div style="font-size:48px">🏆</div>
+    <div class="ct" style="font-size:28px;margin-top:10px;text-align:center">LEADERBOARD</div>
+    <div style="color:var(--t4);font-size:14px;margin-top:6px">${rc} match${rc!==1?'es':''} played · ${L.length} players</div>
+  </div>`;
+
+  if(!L.length){
+    h+=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:40px;margin-bottom:12px">👥</div><div style="font-size:16px;color:var(--t2)">No players yet — go Home and register!</div></div>`;
+  }
   else if(!hasDiff){
-    h+=`<div class="card" style="text-align:center;padding:32px"><div style="font-size:32px;margin-bottom:12px">⏳</div><div style="font-size:16px;color:var(--t2);font-weight:600">Everyone starts at ₹${ST.toLocaleString()}</div><div style="color:var(--t4);font-size:14px;margin-top:8px">Standings will come alive once results are in!</div></div>`;
-    // Still show the list but muted
+    // Pre-tournament — clean waiting state
+    h+=`<div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid #F59E0B22;border-radius:20px;padding:32px 24px;text-align:center;margin-bottom:24px">
+      <div style="font-size:36px;margin-bottom:12px">⏳</div>
+      <div style="font-family:var(--ff);font-size:20px;font-weight:700;color:var(--acc)">WAITING FOR KICKOFF</div>
+      <div style="color:var(--t4);font-size:14px;margin-top:8px">Everyone starts at ₹${ST.toLocaleString()} — rankings update after the first match result</div>
+    </div>`;
     h+=`<div class="card">`;
     L.forEach((p,i)=>{
       const isMe=me===p.n;
-      h+=`<div style="display:flex;align-items:center;gap:14px;padding:14px 0;${i<L.length-1?'border-bottom:1px solid var(--bdr)':''}">
-      <div style="width:32px;text-align:center;font-weight:800;color:var(--t3);font-size:14px">#${i+1}</div>
-      <div style="width:36px;height:36px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:1px solid ${isMe?'transparent':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:14px">${p.n[0].toUpperCase()}</div>
-      <div style="flex:1"><span style="font-weight:${isMe?'800':'600'};font-size:15px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}</span></div>
-      <span style="font-weight:800;font-size:15px;color:var(--grn);font-family:var(--ff)">₹${p.b.toLocaleString()}</span></div>`;
+      h+=`<div style="display:flex;align-items:center;gap:14px;padding:16px 0;${i<L.length-1?'border-bottom:1px solid var(--bdr)':''}">
+        <div style="width:28px;text-align:center;font-weight:800;color:var(--t3);font-size:14px;font-family:var(--ff)">${i+1}</div>
+        <div style="width:38px;height:38px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:14px">${p.n[0].toUpperCase()}</div>
+        <div style="flex:1"><span style="font-weight:${isMe?'800':'600'};font-size:15px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}</span></div>
+        <span style="font-weight:800;font-size:15px;color:var(--t2);font-family:var(--ff)">₹${p.b.toLocaleString()}</span>
+      </div>`;
     });
     h+=`</div>`;
   }
   else{
-    // Top 3 podium
+    // === ACTIVE TOURNAMENT LEADERBOARD ===
+
+    // Top 3 podium — only when 3+ players with different balances
     if(L.length>=3){
-      h+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:10px;margin-bottom:24px;padding:0 10px">`;
-      // 2nd place
-      const s=L[1],sd=s.b-ST;
-      h+=`<div style="flex:1;max-width:160px;text-align:center">
-      <div style="width:48px;height:48px;border-radius:50%;background:var(--inp);border:2px solid #94A3B8;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-weight:900;font-size:18px;margin:0 auto">${s.n[0].toUpperCase()}</div>
-      <div style="font-weight:800;font-size:14px;margin-top:8px;color:var(--t1)">${s.n}</div>
-      <div style="font-weight:900;font-size:16px;color:${sd>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${s.b.toLocaleString()}</div>
-      <div style="background:#94A3B815;border:1px solid #94A3B830;border-radius:10px 10px 0 0;padding:24px 8px 12px;margin-top:8px"><div style="font-size:24px">🥈</div></div></div>`;
-      // 1st place
-      const f=L[0],fd2=f.b-ST;
-      h+=`<div style="flex:1;max-width:180px;text-align:center">
-      <div style="width:56px;height:56px;border-radius:50%;background:var(--grad);border:2px solid #FBBF24;display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:22px;margin:0 auto">${f.n[0].toUpperCase()}</div>
-      <div style="font-weight:800;font-size:16px;margin-top:8px;color:var(--acc)">${f.n}</div>
-      <div style="font-weight:900;font-size:20px;color:${fd2>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${f.b.toLocaleString()}</div>
-      <div style="background:#FBBF2415;border:1px solid #FBBF2430;border-radius:10px 10px 0 0;padding:36px 8px 12px;margin-top:8px"><div style="font-size:28px">👑</div></div></div>`;
-      // 3rd place
-      const t=L[2],td=t.b-ST;
-      h+=`<div style="flex:1;max-width:160px;text-align:center">
-      <div style="width:48px;height:48px;border-radius:50%;background:var(--inp);border:2px solid #D97706;display:flex;align-items:center;justify-content:center;color:#D97706;font-weight:900;font-size:18px;margin:0 auto">${t.n[0].toUpperCase()}</div>
-      <div style="font-weight:800;font-size:14px;margin-top:8px;color:var(--t1)">${t.n}</div>
-      <div style="font-weight:900;font-size:16px;color:${td>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${t.b.toLocaleString()}</div>
-      <div style="background:#D9770615;border:1px solid #D9770630;border-radius:10px 10px 0 0;padding:16px 8px 12px;margin-top:8px"><div style="font-size:24px">🥉</div></div></div>`;
+      const podium=[L[1],L[0],L[2]]; // 2nd, 1st, 3rd (visual order)
+      const heights=['80px','110px','60px'];
+      const colors=['#94A3B8','#FBBF24','#D97706'];
+      const borders=['#94A3B8','#FBBF24','#D97706'];
+      const sizes=[46,58,46];
+      const emojis=['🥈','👑','🥉'];
+      const fontSizes=[14,18,14];
+
+      h+=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;margin-bottom:28px;padding:0 8px">`;
+      podium.forEach((p,pi)=>{
+        const df=rawBal(p.n)-ST;
+        const isMe=me===p.n;
+        h+=`<div style="flex:1;max-width:${pi===1?'180px':'150px'};text-align:center">
+          <div style="width:${sizes[pi]}px;height:${sizes[pi]}px;border-radius:50%;background:${pi===1?'var(--grad)':'var(--inp)'};border:3px solid ${borders[pi]};display:flex;align-items:center;justify-content:center;color:${pi===1?'#000':colors[pi]};font-weight:900;font-size:${fontSizes[pi]}px;margin:0 auto;${isMe?'box-shadow:0 0 16px '+colors[pi]+'66':''}">${p.n[0].toUpperCase()}</div>
+          <div style="font-weight:800;font-size:${pi===1?'16':'13'}px;margin-top:8px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}</div>
+          <div style="font-weight:900;font-size:${pi===1?'22':'16'}px;color:${df>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
+          <div style="font-size:11px;color:${df>=0?'#34D39966':'#F8717166'}">${df>=0?'+':''}${df.toLocaleString()}</div>
+          <div style="background:${colors[pi]}12;border:1px solid ${colors[pi]}25;border-radius:12px 12px 0 0;height:${heights[pi]};display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;margin-top:8px">
+            <span style="font-size:${pi===1?'32':'24'}px">${emojis[pi]}</span>
+          </div>
+        </div>`;
+      });
       h+=`</div>`;
     }
-    // Full list
-    h+=`<div class="card">`;
+
+    // Full ranked list
     L.forEach((p,i)=>{
       const ub=Object.values(S.b).filter(x=>x.u===p.n);
       const w=ub.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length;
       const l=ub.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length;
+      const rub=ub.filter(x=>S.r[x.mid]);
+      const winPct=rub.length?Math.round(w/rub.length*100):0;
       const pending=ub.filter(x=>!S.r[x.mid]).length;
-      const df=p.b-ST;
+      const df=rawBal(p.n)-ST;
       const isMe=me===p.n;
-      const bg=i===0?'linear-gradient(135deg,#FBBF2408,#F59E0B10)':i===1?'linear-gradient(135deg,#94A3B808,#64748B10)':i===2?'linear-gradient(135deg,#D9770608,#92400E10)':isMe?'#F59E0B08':'transparent';
-      h+=`<div class="lb-r" style="background:${bg};border-left:4px solid ${['#FBBF24','#94A3B8','#D97706'][i]||isMe?'var(--acc)':'#1E293B'}">
-      <div style="font-size:22px;font-weight:900;width:40px;text-align:center">${i<3?['👑','🥈','🥉'][i]:'<span style="color:var(--t3)">#'+(i+1)+'</span>'}</div>
-      <div style="flex:1"><div style="font-weight:800;font-size:16px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' <span style="font-size:11px;color:var(--t3)">(you)</span>':''}</div><div style="font-size:12px;color:var(--t3);margin-top:3px">${w}W · ${l}L · ${ub.length} bets${pending?` · <span style="color:var(--yel)">${pending} pending</span>`:''}</div></div>
-      <div style="text-align:right">
-      <div class="lb-a" style="color:${df>=0?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div>
-      <div style="font-size:12px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div>
-      </div></div>
-      <button class="tb" style="margin-left:54px;margin-bottom:10px" onclick="$('bd-${i}').style.display=$('bd-${i}').style.display==='none'?'block':'none'">📊 Balance breakdown</button>
-      <div id="bd-${i}" style="display:none;margin:0 0 14px 54px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;font-size:13px">
-      ${getBalBreakdown(p.n)}
+      const barWidth=maxBal>minBal?Math.max(((p.b-minBal)/(maxBal-minBal))*100,8):100;
+      const rankColors=['#FBBF24','#94A3B8','#D97706'];
+      const rankColor=rankColors[i]||'var(--t3)';
+
+      h+=`<div style="background:var(--card);border:1px solid ${isMe?'var(--acc)33':'var(--bdr)'};border-radius:16px;padding:18px;margin-bottom:10px;${isMe?'box-shadow:0 0 20px #F59E0B11':''}">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;text-align:center">
+            ${i<3?`<span style="font-size:22px">${['👑','🥈','🥉'][i]}</span>`:`<span style="font-weight:900;font-size:16px;color:var(--t3);font-family:var(--ff)">#${i+1}</span>`}
+          </div>
+          <div style="width:40px;height:40px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${i<3?rankColor:isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:16px;flex-shrink:0">${p.n[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:16px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' <span style="font-size:11px;color:var(--t3)">(you)</span>':''}</div>
+            <div style="display:flex;gap:8px;margin-top:4px;font-size:12px;color:var(--t4);flex-wrap:wrap">
+              <span>${ub.length} bets</span>
+              <span style="color:${winPct>=50?'var(--grn)':winPct>0?'var(--red)':'var(--t3)'}">${w}W/${l}L${rub.length?' ('+winPct+'%)':''}</span>
+              ${pending?`<span style="color:var(--yel)">${pending} pending</span>`:''}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:20px;font-weight:900;color:${p.b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
+            <div style="font-size:12px;color:${df>=0?'#34D39988':'#F8717188'};font-weight:700">${df>=0?'+':''}₹${Math.abs(df).toLocaleString()}</div>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div style="margin-top:12px;height:6px;background:var(--inp);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${barWidth}%;background:${i<3?rankColor:df>=0?'var(--grn)':'var(--red)'};border-radius:3px;opacity:0.6"></div>
+        </div>
+        <!-- Expandable breakdown -->
+        <button style="background:0;border:0;color:var(--t4);font-size:12px;cursor:pointer;font-weight:700;padding:8px 0 0;display:flex;align-items:center;gap:4px" onclick="const d=$('bd-${i}');d.style.display=d.style.display==='none'?'block':'none';this.querySelector('span').textContent=d.style.display==='none'?'▸':'▾'"><span>▸</span> Balance breakdown</button>
+        <div id="bd-${i}" style="display:none;margin-top:10px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;font-size:13px">
+          ${getBalBreakdown(p.n)}
+        </div>
       </div>`;
     });
-    h+=`</div>`;
   }
   el.innerHTML=h;
 }
@@ -1153,7 +1215,7 @@ function rAn(){
     const momT=rub.filter(b=>b.mom).length;
     const favTeam=ub.length?Object.entries(ub.reduce((acc,b)=>{acc[b.tm]=(acc[b.tm]||0)+1;return acc},{})).sort((a,b)=>b[1]-a[1])[0]:null;
     const winPct=rub.length?Math.round(w/rub.length*100):0;
-    const diff=b-ST;
+    const diff=rawBal(n)-ST;
     const rank=LB().findIndex(x=>x.n===n)+1;
     const allInCount=ub.filter(x=>x.am>=bal(n)*0.95||x.am>=ST).length;
     const biggestBet=ub.length?ub.reduce((mx,x)=>x.am>mx.am?x:mx,ub[0]):null;
