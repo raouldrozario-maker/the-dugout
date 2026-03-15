@@ -1441,6 +1441,12 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Venue</div><input class="bf-i" id="nm-venue" placeholder="e.g. Wankhede, Mumbai"></div>
   <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
   </div>`;
+  // Admin Place Bet (override — bypasses lock and player login)
+  h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
+  <div style="font-size:13px;color:var(--t4);margin-bottom:14px">Place or override a bet on behalf of a player. Bypasses lock timer and login. Use for special scenarios only.</div>
+  <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="ab-player"><option value="">-- Select player --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
+  <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
+  <div id="ab-form"></div></div>`;
   // Manage Bets
   h+=`<div class="card"><div class="ch"><span style="font-size:18px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
@@ -1584,6 +1590,45 @@ function sqRemove(k,name){
   // If removed player was captain, clear captain
   if(getCap(k)===name){if(!S.capEdits)S.capEdits={};S.capEdits[k]='';}
   sv();toast(name+' removed from '+T[k].s);sqTeamChange();
+}
+function abMatchChange(){
+  const mid=parseInt($('ab-match').value),f=$('ab-form');
+  if(!mid){f.innerHTML='';return}
+  const m=gm(mid),mo=S.odds[mid]||{};
+  if(!mo[m.h]){f.innerHTML=`<div style="color:var(--red);font-size:13px;margin-top:8px">⚠️ Set odds for this match first.</div>`;return}
+  const player=$('ab-player').value;
+  const existing=player?S.b[mid+'-'+player]:null;
+  f.innerHTML=`
+  ${existing?`<div style="margin-top:8px;padding:10px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:8px;font-size:13px;color:var(--yel)">⚠️ ${player} already has a bet on this match: ₹${existing.am.toLocaleString()} on ${existing.tm}. This will override it.</div>`:''}
+  <div class="bf-s" style="margin-top:12px"><div class="bf-l">Team</div><div style="display:flex;gap:8px">
+  <button class="bf-tb" id="ab-t-${m.h}" style="border-color:${T[m.h]?.c};color:${T[m.h]?.c}" onclick="abTeam='${m.h}';$('ab-t-${m.h}').style.background='${T[m.h]?.c}';$('ab-t-${m.h}').style.color='#fff';$('ab-t-${m.a}').style.background='transparent';$('ab-t-${m.a}').style.color='${T[m.a]?.c}'">${T[m.h]?.s} (1/${mo[m.h]})</button>
+  <button class="bf-tb" id="ab-t-${m.a}" style="border-color:${T[m.a]?.c};color:${T[m.a]?.c}" onclick="abTeam='${m.a}';$('ab-t-${m.a}').style.background='${T[m.a]?.c}';$('ab-t-${m.a}').style.color='#fff';$('ab-t-${m.h}').style.background='transparent';$('ab-t-${m.h}').style.color='${T[m.h]?.c}'">${T[m.a]?.s} (1/${mo[m.a]})</button>
+  </div></div>
+  <div class="bf-s"><div class="bf-l">Amount (₹)</div><input class="bf-i" type="number" id="ab-amt" min="500" placeholder="e.g. 5000"></div>
+  <div class="bf-s"><div class="bf-l">MoM (optional)</div>${momDropdown('ab-mom',mid)}</div>
+  <div class="bf-s"><div class="bf-l">Reason</div><input class="bf-i" id="ab-reason" placeholder="e.g. Player requested via WhatsApp before lock"></div>
+  <button class="bp" style="width:100%;margin-top:8px" onclick="adminPlaceBet(${mid})">🔓 Place Bet as Admin</button>`;
+}
+let abTeam='';
+function adminPlaceBet(mid){
+  const player=$('ab-player').value;
+  if(!player){toast('Select a player','err');return}
+  if(!abTeam){toast('Pick a team','err');return}
+  const am=parseInt($('ab-amt').value);
+  if(!am||am<500){toast('Min ₹500','err');return}
+  const b=bal(player);
+  if(am>b){toast(player+' only has ₹'+b.toLocaleString(),'err');return}
+  const mo=S.odds[mid];
+  const od=parseFloat(mo[abTeam]);
+  const momSel=$('ab-mom');
+  const mom=momSel?momSel.value.trim():'';
+  let mt='';
+  if(mom){const mx=gm(mid);if(getSquad(mx.h).includes(mom))mt=mx.h;else if(getSquad(mx.a).includes(mom))mt=mx.a}
+  const reason=$('ab-reason').value.trim();
+  const m=gm(mid);
+  if(!confirm(`🔓 ADMIN BET OVERRIDE\n\nPlayer: ${player}\nMatch: ${T[m.h]?.s} vs ${T[m.a]?.s}\nTeam: ${T[abTeam]?.n}\nAmount: ₹${am.toLocaleString()} @ 1/${od}\nMoM: ${mom||'None'}\nReason: ${reason||'No reason'}\n\nThis bypasses the lock timer.\nConfirm?`))return;
+  S.b[mid+'-'+player]={mid,u:player,tm:abTeam,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString(),adminBet:true,reason:reason||null};
+  sv();toast('Bet placed for '+player+' ✅');abTeam='';rA();
 }
 function sendReminder(id,type){
   const m=gm(id),mo=S.odds[id]||{},dl=getDeadlineStr(m);
