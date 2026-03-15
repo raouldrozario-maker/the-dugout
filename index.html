@@ -636,7 +636,21 @@ function oBF(id,prefill){
   <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'}${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(1/${mo[m.h]||'?'})</span></button>
   <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(1/${mo[m.a]||'?'})</span></button>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="number" id="am-${id}" min="500" step="500" value="${prefill?prefill.am:''}" placeholder="Max: ₹${mx.toLocaleString()}"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="$('am-${id}').value=${v}">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="$('am-${id}').value=${b}">ALL IN 🔥</button></div></div>
+  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="number" id="am-${id}" min="500" step="500" value="${prefill?prefill.am:''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="$('am-${id}').value=${v};calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="$('am-${id}').value=${b};calcWin(${id})">ALL IN 🔥</button></div>
+  <div id="wc-${id}" style="margin-top:10px;padding:12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <div style="font-size:13px;color:var(--t4)">If you win:</div>
+      <div style="font-size:18px;font-weight:900;color:var(--grn);font-family:var(--ff)" id="wc-win-${id}"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-top:4px">
+      <div style="font-size:13px;color:var(--t4)">If you lose:</div>
+      <div style="font-size:18px;font-weight:900;color:var(--red);font-family:var(--ff)" id="wc-lose-${id}"></div>
+    </div>
+    <div id="wc-mom-${id}" style="margin-top:4px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+      <div style="font-size:13px;color:var(--t4)">If you win + MoM correct:</div>
+      <div style="font-size:18px;font-weight:900;color:var(--yel);font-family:var(--ff)" id="wc-momv-${id}"></div>
+    </div>
+  </div></div>
   <div class="bf-s"><div class="bf-l">Man of the Match (optional +20%)</div>${momDropdown('mo-'+id,id)}</div>
   <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'✅ Confirm Bet'}</button></div></div>`;
   // Pre-select team and MoM if editing
@@ -658,8 +672,20 @@ function cancelEdit(id,oldBet){
   }
 }
 
-function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
+function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});calcWin(id)}
 
+function calcWin(id){
+  const wc=$('wc-'+id);if(!wc)return;
+  const f=bfs[id]||{},mo=S.odds[id]||{},am=parseInt($('am-'+id)?.value);
+  if(!f.tm||!am||am<1||!mo[f.tm]){wc.style.display='none';return}
+  wc.style.display='block';
+  const od=parseFloat(mo[f.tm]);
+  const win=Math.round(am/od);
+  const momWin=Math.round((am+(am*MOMB))/od);
+  $('wc-win-'+id).textContent='+₹'+win.toLocaleString();
+  $('wc-lose-'+id).textContent='-₹'+am.toLocaleString();
+  $('wc-momv-'+id).textContent='+₹'+momWin.toLocaleString();
+}
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
   const f=bfs[id]||{};if(!f.tm){toast('Pick a team!','err');return}
