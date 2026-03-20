@@ -1039,20 +1039,41 @@ function rRu(){
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">On days with two matches, you can <strong style="color:var(--acc)">bet on both matches using your full balance</strong>. Your balance is based on resolved results only — pending (unresolved) bets don't reduce your available balance. Instead, the amount you've wagered on unresolved matches is shown as <strong style="color:var(--acc)">"At Risk"</strong>.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
       <strong style="color:var(--acc)">Example — Double header day:</strong><br>
-      Match 1: DC vs MI (3:30 PM) · Match 2: GT vs RR (7:30 PM)<br>
-      You have <strong>₹10,000</strong><br><br>
+      Match 1: DC vs MI (3:30 PM, odds: DC 1/1.8, MI 1/2.5)<br>
+      Match 2: GT vs RR (7:30 PM, odds: GT 1/2.5, RR 1/1.8)<br>
+      Your balance: <strong>₹10,000</strong><br><br>
 
-      <span style="color:var(--grn)">Step 1:</span> You bet ₹10,000 all-in on DC (Match 1)<br>
-      → Balance: ₹10,000 · At Risk: ₹10,000<br><br>
+      <span style="color:var(--grn)">Step 1:</span> You bet <strong>₹10,000 all-in on DC</strong> (Match 1)<br>
+      → Your balance still shows ₹10,000 (pending bets don't deduct)<br>
+      → At Risk: ₹10,000<br><br>
 
-      <span style="color:var(--grn)">Step 2:</span> You also bet ₹5,000 on GT (Match 2)<br>
-      → Balance: ₹10,000 · At Risk: ₹15,000<br><br>
+      <span style="color:var(--grn)">Step 2:</span> You also bet <strong>₹5,000 on GT</strong> (Match 2)<br>
+      → Balance still ₹10,000 · At Risk now ₹15,000<br><br>
 
-      <span style="color:var(--t2)">Now you wait for results...</span><br><br>
+      <span style="color:var(--t1);font-weight:700">Now results come in — here's what happens in each scenario:</span><br><br>
 
-      <span style="color:var(--grn)">If both win:</span> ₹10,000 + DC win + GT win = big payday<br>
-      <span style="color:var(--red)">If both lose:</span> ₹10,000 - ₹10,000 - ₹5,000 = -₹5,000 → safety net catches you at <strong>₹2,000</strong><br>
-      <span style="color:var(--yel)">If one wins, one loses:</span> Results settle independently — your balance adjusts based on the net outcome
+      <span style="color:var(--grn)">✅ Both win:</span><br>
+      DC win: ₹10,000 ÷ 1.8 = +₹5,556<br>
+      GT win: ₹5,000 ÷ 2.5 = +₹2,000<br>
+      Final balance = ₹10,000 + ₹5,556 + ₹2,000 = <strong style="color:var(--grn)">₹17,556</strong><br><br>
+
+      <span style="color:var(--red)">❌ Both lose:</span><br>
+      DC loss: -₹10,000<br>
+      GT loss: -₹5,000<br>
+      Calculation = ₹10,000 - ₹10,000 - ₹5,000 = -₹5,000<br>
+      Safety net kicks in → <strong style="color:var(--red)">₹2,000</strong><br><br>
+
+      <span style="color:var(--yel)">🔀 DC loses, GT wins:</span><br>
+      DC loss: -₹10,000<br>
+      GT win: ₹5,000 ÷ 2.5 = +₹2,000<br>
+      Final balance = ₹10,000 - ₹10,000 + ₹2,000 = <strong style="color:var(--yel)">₹2,000</strong><br>
+      (Safety net — GT's win wasn't enough to cover the all-in loss)<br><br>
+
+      <span style="color:var(--yel)">🔀 DC wins, GT loses:</span><br>
+      DC win: ₹10,000 ÷ 1.8 = +₹5,556<br>
+      GT loss: -₹5,000<br>
+      Final balance = ₹10,000 + ₹5,556 - ₹5,000 = <strong style="color:var(--yel)">₹10,556</strong><br>
+      (DC's win more than covers the GT loss — you come out slightly ahead)
     </div>
     <div style="margin-top:10px;padding:10px;background:#F59E0B08;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--t4)">
       💡 <strong>Why it works this way:</strong> Without this, going all-in on the first match would lock you out of the second match entirely — even though you might win the first one. This keeps the game fun and lets everyone participate in every match if they want to.
