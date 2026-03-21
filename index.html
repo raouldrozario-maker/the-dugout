@@ -91,7 +91,7 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .stat-val{font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc)}
 .stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
-select.bf-i{appearance:auto;cursor:pointer}
+select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-height:44px}
 @media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
@@ -369,12 +369,12 @@ function bdg(t,sz=48,nm=false){
 
 function momDropdown(id,matchId,both=false){
   const m=gm(matchId);if(!m)return'';
-  let options='';
+  let options='<option value="">-- Select Player (optional) --</option>';
   const hSq=typeof getSquad==='function'?getSquad(m.h):(T[m.h]?.sq||[]);
   const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
-  if(hSq.length)options+=hSq.map(p=>`<option value="${p}" data-team="${m.h}">${p} (${T[m.h].s})</option>`).join('');
-  if(aSq.length)options+=aSq.map(p=>`<option value="${p}" data-team="${m.a}">${p} (${T[m.a].s})</option>`).join('');
-  return`<input class="bf-i" id="${id}" list="${id}-dl" placeholder="Type to search player..." autocomplete="off"><datalist id="${id}-dl">${options}</datalist>`;
+  if(hSq.length)options+=`<optgroup label="${T[m.h].n}">`+hSq.map(p=>`<option value="${p}">${p}</option>`).join('')+'</optgroup>';
+  if(aSq.length)options+=`<optgroup label="${T[m.a].n}">`+aSq.map(p=>`<option value="${p}">${p}</option>`).join('')+'</optgroup>';
+  return`<select class="bf-i" id="${id}">${options}</select>`;
 }
 
 // ══════════════════════════════════════════════════════════════
