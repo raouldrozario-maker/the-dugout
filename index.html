@@ -654,7 +654,8 @@ function rM(){
     // Odds display
     if(mo&&T[m.h]){h+=`<div style="display:flex;justify-content:center;gap:20px;margin-top:10px;padding:8px;background:var(--inp);border-radius:10px;font-size:13px"><span style="color:${T[m.h].c};font-weight:800">${T[m.h].s}: <span style="color:var(--yel)">1/${mo[m.h]}</span></span><span style="color:${T[m.a].c};font-weight:800">${T[m.a].s}: <span style="color:var(--yel)">1/${mo[m.a]}</span></span></div>`}
     else if(!rs&&!l&&T[m.h]){h+=`<div style="text-align:center;margin-top:10px;padding:8px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t3)">⏳ Waiting for admin to set odds</div>`}
-    if(rs)h+=`<div class="rb"><span>🏆 <strong>${T[rs.w]?.s||rs.w}</strong> won</span>${rs.mom?`<span>🏅 MoM: <strong>${rs.mom}</strong></span>`:''}</div>`;
+    if(rs&&rs.voided)h+=`<div class="rb" style="background:#64748B20;border-color:#64748B44"><span>🌧️ <strong>Match Voided</strong> — No Result</span></div>`;
+    else if(rs)h+=`<div class="rb"><span>🏆 <strong>${T[rs.w]?.s||rs.w}</strong> won</span>${rs.mom?`<span>🏅 MoM: <strong>${rs.mom}</strong></span>`:''}</div>`;
     if(my){
       const won=rs&&my.tm===rs.w;const momH=rs&&my.mom&&my.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
       h+=`<div class="mb"><span>Your bet: <strong style="color:${T[my.tm]?.c||'var(--acc)'}">₹${my.am.toLocaleString()} on ${my.tm}</strong></span><span style="color:var(--t2)">@ 1/${my.od}</span>${my.mom?`<span style="color:var(--yel)">🎯 ${my.mom}</span>`:''}`;
@@ -952,6 +953,60 @@ function rB(){
       </div>`;
     });
   }
+
+  // ─── CRYSTAL BALL RESULTS (only after admin publishes) ───
+  if(S.koPublished&&S.koRevealed&&S.koWinner){
+    h+=`<div style="background:linear-gradient(135deg,#1a0a2e,#0D1B3E);border:2px solid #F59E0B44;border-radius:20px;padding:24px;margin-top:20px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:8px">🔮</div>
+      <div class="ct" style="font-size:22px;text-align:center;color:var(--acc)">SECRET BETS REVEALED</div>
+      <div style="color:var(--t4);font-size:13px;margin-top:4px">The Crystal Ball predictions are out! IPL 2026 Champion: <strong style="color:${T[S.koWinner]?.c||'var(--acc)'}">${T[S.koWinner]?.n||S.koWinner}</strong></div>
+    </div>`;
+
+    // Each player's Crystal Ball result
+    const koPlayers=Object.keys(S.p).sort();
+    const koBets=koPlayers.filter(n=>S.ko?.[n]);
+    const koNone=koPlayers.filter(n=>!S.ko?.[n]);
+
+    koBets.forEach(n=>{
+      const k=S.ko[n];
+      const won=k.team===S.koWinner;
+      h+=`<div style="display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px;background:${won?'#10B98110':'#EF444410'};border:1px solid ${won?'#10B98130':'#EF444430'};border-radius:12px">
+        <div style="width:38px;height:38px;border-radius:50%;background:${won?'#10B98120':'#EF444420'};display:flex;align-items:center;justify-content:center;font-size:18px">${won?'✅':'❌'}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px;color:var(--t1)">${n}</div>
+          <div style="font-size:12px;color:var(--t4)">Picked <strong style="color:${T[k.team]?.c||'var(--acc)'}">${T[k.team]?.s||k.team}</strong> · ₹${k.amount.toLocaleString()} wagered</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:900;color:${won?'var(--grn)':'var(--red)'};font-family:var(--ff)">${won?'+':'-'}₹${k.amount.toLocaleString()}</div>
+        </div>
+      </div>`;
+    });
+
+    if(koNone.length){
+      h+=`<div style="margin-top:8px;padding:10px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t3)">Didn't participate: ${koNone.join(', ')}</div>`;
+    }
+
+    // Final Standings
+    h+=`<div style="margin-top:20px;border-top:1px solid #F59E0B33;padding-top:16px">
+      <div style="text-align:center;margin-bottom:16px"><div class="ct" style="font-size:18px;color:var(--acc);text-align:center">🏆 FINAL STANDINGS</div>
+      <div style="font-size:12px;color:var(--t4)">Regular balance + Crystal Ball result</div></div>`;
+    const finalL=Object.keys(S.p).map(n=>({n,pub:bal(n),fin:finalBal(n),ko:S.ko?.[n]||null})).sort((a,b)=>b.fin-a.fin);
+    finalL.forEach((p,i)=>{
+      const isMe=me===p.n;
+      const diff=p.fin-p.pub;
+      h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:${isMe?'#F59E0B08':'var(--inp)'};border:1px solid ${isMe?'#F59E0B33':'var(--bdr)'};border-radius:12px">
+        <span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' (you)':''}</div>
+          <div style="font-size:11px;color:var(--t4)">Base: ₹${p.pub.toLocaleString()}${diff!==0?' · CB: <span style="color:'+(diff>0?'var(--grn)':'var(--red)')+'">'+( diff>0?'+':'')+diff.toLocaleString()+'</span>':''}</div>
+        </div>
+        <div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${p.fin.toLocaleString()}</div>
+      </div>`;
+    });
+    h+=`</div></div>`;
+  }
+
   el.innerHTML=h;
 }
 
@@ -975,11 +1030,12 @@ function rRu(){
       <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-2').scrollIntoView({behavior:'smooth',block:'start'})">🔒 Betting Window</button>
       <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-3').scrollIntoView({behavior:'smooth',block:'start'})">📊 Bet Amounts</button>
       <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-4').scrollIntoView({behavior:'smooth',block:'start'})">🏏🏏 Double Headers</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-5').scrollIntoView({behavior:'smooth',block:'start'})">⚠️ Weekly Penalty</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-6').scrollIntoView({behavior:'smooth',block:'start'})">🎯 Man of the Match</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-7').scrollIntoView({behavior:'smooth',block:'start'})">⭐ Super Jackpot</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-8').scrollIntoView({behavior:'smooth',block:'start'})">📈 Odds</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-9').scrollIntoView({behavior:'smooth',block:'start'})">🔮 Crystal Ball</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-5').scrollIntoView({behavior:'smooth',block:'start'})">🌧️ Washout</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-6').scrollIntoView({behavior:'smooth',block:'start'})">⚠️ Weekly Penalty</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-7').scrollIntoView({behavior:'smooth',block:'start'})">🎯 Man of the Match</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-8').scrollIntoView({behavior:'smooth',block:'start'})">⭐ Super Jackpot</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-9').scrollIntoView({behavior:'smooth',block:'start'})">📈 Odds</button>
+      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-10').scrollIntoView({behavior:'smooth',block:'start'})">🔮 Crystal Ball</button>
       <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-guide').scrollIntoView({behavior:'smooth',block:'start'})">📱 Dashboard Guide</button>
       <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="$('ru-glossary').scrollIntoView({behavior:'smooth',block:'start'})">📖 Glossary</button>
     </div>
@@ -1080,8 +1136,21 @@ function rRu(){
     </div>
   </div>
 
-  <!-- Rule 5: Weekly Mandatory -->
-  <div id="ru-5" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+  <!-- Rule 5: Washout / No Result -->
+  <div id="ru-5" style="background:var(--inp);border:1px solid #64748B33;border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🌧️</span><span class="ct" style="font-size:15px">WASHOUT / NO RESULT</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">If a match is abandoned due to rain, technical issues, or any other reason and no result is declared, the admin will <strong style="color:var(--t1)">void the match</strong>. All bets on that match are <strong style="color:var(--grn)">fully refunded</strong> — deleted as if they were never placed.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Example:</strong> You bet ₹5,000 on RCB in Match #7. The match gets rained out.<br><br>
+      Admin voids the match → your ₹5,000 bet is deleted<br>
+      Your balance is unaffected — it's as if you never placed the bet<br>
+      The match shows as "🌧️ Match Voided — No Result" on the dashboard<br><br>
+      <strong style="color:var(--t4)">Note:</strong> The voided match still counts as a match for the season, but it does NOT count towards the weekly penalty check — you won't be penalized for not betting on a voided match. If you had selected a Man of the Match, that prediction is also deleted along with the bet — no impact on your MoM accuracy stats.
+    </div>
+  </div>
+
+  <!-- Rule 6: Weekly Mandatory -->
+  <div id="ru-6" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⚠️</span><span class="ct" style="font-size:15px">WEEKLY MANDATORY BET</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (Wednesday to Tuesday). If you miss an entire week, you'll be penalized <strong style="color:var(--hot)">20% of starting balance (₹2,000)</strong>.</div>
     <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
@@ -1089,8 +1158,8 @@ function rRu(){
     </div>
   </div>
 
-  <!-- Rule 6: Man of the Match -->
-  <div id="ru-6" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+  <!-- Rule 7: Man of the Match -->
+  <div id="ru-7" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🎯</span><span class="ct" style="font-size:15px">MAN OF THE MATCH (OPTIONAL)</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Along with your team pick, you can optionally predict the <strong style="color:var(--yel)">Man of the Match</strong>. If correct, you get a flat <strong style="color:var(--yel)">20% bonus on your bet amount</strong> — regardless of odds.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1122,8 +1191,8 @@ function rRu(){
     </div>
   </div>
 
-  <!-- Rule 7: Super Jackpot -->
-  <div id="ru-7" style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
+  <!-- Rule 8: Super Jackpot -->
+  <div id="ru-8" style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">The ultimate power move. If you bet on the <strong style="color:var(--grn)">winning team</strong> AND correctly predict the MoM from the <strong style="color:var(--hot)">losing team</strong>, you get an <strong style="color:var(--yel)">extra 100% of your winnings</strong>!</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1147,8 +1216,8 @@ function rRu(){
     </div>
   </div>
 
-  <!-- Rule 8: Odds -->
-  <div id="ru-8" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+  <!-- Rule 9: Odds -->
+  <div id="ru-9" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your winnings = bet amount ÷ odds. Lower odds = favourite (safe bet, lower return). Higher odds = underdog (risky, higher return).</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
@@ -1162,8 +1231,8 @@ function rRu(){
     </div>
   </div>
 
-  <!-- Rule 9: Crystal Ball -->
-  <div id="ru-9" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+  <!-- Rule 10: Crystal Ball -->
+  <div id="ru-10" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Before the playoffs begin, the admin will open the <strong style="color:var(--acc)">Crystal Ball</strong> — your chance to secretly predict who will lift the IPL 2026 trophy. Choose a team and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1922,25 +1991,31 @@ function rA(){
   h+=`</div>`;
   // Crystal Ball Admin
   h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
-  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manage the secret crystal ballting window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
+  <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
   // Status + toggle
   const koCount=S.ko?Object.keys(S.ko).length:0;
   h+=`<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
   <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koOpen?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koOpen?'OPEN':'CLOSED'}</div><div style="font-size:10px;color:var(--t4)">Betting Window</div></div>
   <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:var(--yel);font-family:var(--ff)">${koCount}</div><div style="font-size:10px;color:var(--t4)">Secret Bets</div></div>
-  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koRevealed?'var(--grn)':'var(--t3)'}";font-family:var(--ff)">${S.koRevealed?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Revealed</div></div>
+  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koRevealed?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koRevealed?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Revealed</div></div>
+  <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koPublished?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koPublished?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Published</div></div>
   </div>`;
   // Toggle button
   if(!S.koRevealed){
     h+=`<button style="width:100%;padding:10px;background:${S.koOpen?'#EF444415':'#10B98115'};border:1px solid ${S.koOpen?'#EF444433':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
   }
-  // Show secret bets (admin only)
+  // Show secret bets with edit capability (admin only)
   if(koCount>0){
     h+=`<div style="margin-top:12px"><div class="bf-l">SECRET BETS (admin eyes only 👀)</div>`;
     Object.entries(S.ko).forEach(([name,k])=>{
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px">
       <div><span style="font-weight:700;color:var(--t1)">${name}</span></div>
-      <div><span style="color:${T[k.team]?.c||'var(--acc)'};font-weight:800">${T[k.team]?.s||k.team}</span><span style="color:var(--t4);margin-left:8px">₹${k.amount.toLocaleString()} (${k.pct}%)</span></div></div>`;
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:${T[k.team]?.c||'var(--acc)'};font-weight:800">${T[k.team]?.s||k.team}</span>
+        <span style="color:var(--t4)">₹${k.amount.toLocaleString()} (${k.pct}%)</span>
+        <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:6px;padding:3px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="editKO('${name.replace(/'/g,"\\'")}')">✏️ Edit</button>
+        <button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="deleteKO('${name.replace(/'/g,"\\'")}')">✕</button>
+      </div></div>`;
     });
     h+=`</div>`;
   }
@@ -1948,12 +2023,35 @@ function rA(){
   if(koCount>0&&!S.koRevealed){
     h+=`<div style="margin-top:16px;padding:14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px">
     <div class="bf-l">REVEAL & SETTLE</div>
-    <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team and reveal all bets. Balances will be adjusted automatically.</div>
+    <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team. This settles all Crystal Ball bets internally. Players will only see "settled — announced at event" until you publish.</div>
     <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
-    <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal Predictions & Settle Balances</button></div>`;
+    <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal & Settle (Admin Only)</button></div>`;
   }
-  if(S.koRevealed){
-    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">✅ Bets revealed! Winner: <strong>${T[S.koWinner]?.n||S.koWinner}</strong> — balances updated.</div>`;
+  if(S.koRevealed&&!S.koPublished){
+    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">✅ Settled internally! Winner: <strong>${T[S.koWinner]?.n||S.koWinner}</strong></div>`;
+    h+=`<div style="margin-top:8px;padding:14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px">
+    <div class="bf-l">📢 PUBLISH TO PLAYERS</div>
+    <div style="font-size:12px;color:var(--t4);margin-bottom:10px">When you're ready (e.g. at the final event), publish the Crystal Ball results. This will show a "🔮 Secret Bets Revealed" section on the Board tab for everyone to see.</div>
+    <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="publishKO()">📢 Publish Crystal Ball Results to Everyone</button></div>`;
+  }
+  if(S.koPublished){
+    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">📢 Published! Crystal Ball results are now visible on the Board tab for all players.</div>`;
+  }
+  // Final Standings (admin only — always visible after reveal)
+  if(S.koRevealed&&S.koWinner){
+    h+=`<div style="margin-top:16px"><div class="bf-l">🏆 FINAL STANDINGS (with Crystal Ball)</div>`;
+    const finalL=Object.keys(S.p).map(n=>({n,pub:bal(n),fin:finalBal(n),ko:S.ko[n]||null})).sort((a,b)=>b.fin-a.fin);
+    finalL.forEach((p,i)=>{
+      const koRes=p.ko?(p.ko.team===S.koWinner?`<span style="color:var(--grn)">✅ +₹${p.ko.amount.toLocaleString()}</span>`:`<span style="color:var(--red)">❌ -₹${p.ko.amount.toLocaleString()}</span>`):'<span style="color:var(--t3)">No bet</span>';
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:4px">
+      <div><span style="font-weight:900;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'};margin-right:8px">#${i+1}</span><span style="font-weight:700;color:var(--t1)">${p.n}</span></div>
+      <div style="display:flex;gap:12px;align-items:center;font-size:13px">
+        <span style="color:var(--t4)">Base: ₹${p.pub.toLocaleString()}</span>
+        ${p.ko?`<span>${koRes}</span>`:''}
+        <span style="font-weight:900;color:var(--acc);font-family:var(--ff)">₹${p.fin.toLocaleString()}</span>
+      </div></div>`;
+    });
+    h+=`</div>`;
   }
   h+=`</div>`;
   // Squad Management
@@ -2071,9 +2169,10 @@ let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><
 <button class="bf-tb" id="aw-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}" onclick="apw(${id},'${m.a}')">${T[m.a]?.s||m.a}</button>
 </div></div>
 <div class="bf-s"><div class="bf-l">Man of the Match</div>${momDropdown('amm-'+id,id)}</div>
-<button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>`;
+<button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>
+<button style="width:100%;margin-top:8px;background:#EF444415;border:1px solid #EF444433;border-radius:12px;padding:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="voidMatch(${id})">🌧️ Void Match (Washout / No Result)</button>`;
 // Show clear result if already recorded
-if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--grn)">✅ Result: ${T[S.r[id].w]?.s||S.r[id].w} won${S.r[id].mom?' · MoM: '+S.r[id].mom:''}</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
+if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#10B98115'};border:1px solid ${S.r[id].voided?'#64748B30':'#10B98130'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
 const ab=Object.values(S.b).filter(x=>x.mid===id);
 if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
 f.innerHTML=h}
@@ -2081,6 +2180,23 @@ f.innerHTML=h}
 function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
 
 function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv();toast('Result saved! 📝');delete admW[id];rA()}
+
+function voidMatch(id){
+  const m=gm(id);
+  const bets=Object.values(S.b).filter(x=>x.mid===id);
+  const msg=`🌧️ VOID MATCH — ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n\n` +
+    `This will:\n` +
+    `• Delete all ${bets.length} bet(s) on this match\n` +
+    `• Refund all players (bets removed = money back)\n` +
+    `• Mark the match as "No Result"\n\n` +
+    `This cannot be undone. Continue?`;
+  if(!confirm(msg))return;
+  // Delete all bets for this match
+  Object.keys(S.b).forEach(k=>{if(S.b[k].mid===id)delete S.b[k]});
+  // Record as voided (so it doesn't show as pending)
+  S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};
+  sv();toast('Match voided — all bets refunded 🌧️');rA();
+}
 
 function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k].sq}
 function getCap(k){return(S.capEdits&&S.capEdits[k])||T[k].cap||''}
@@ -2190,7 +2306,35 @@ function sendReminder(id,type){
   }
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
-function toggleKO(){S.koOpen=!S.koOpen;sv();toast(S.koOpen?'Crystal Ballting is OPEN! 🔓':'Crystal Ballting CLOSED 🔒');rA()}
+function toggleKO(){S.koOpen=!S.koOpen;sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
+
+function editKO(name){
+  const k=S.ko[name];if(!k)return;
+  const newTeam=prompt('Current team: '+( T[k.team]?.n||k.team)+'\n\nEnter new team code (e.g. RCB, MI, CSK) or leave blank to keep:');
+  const teamCode=newTeam?newTeam.trim().toUpperCase():'';
+  if(teamCode&&!T[teamCode]){toast('Invalid team code: '+teamCode,'err');return}
+  const newAmt=prompt('Current amount: ₹'+k.amount.toLocaleString()+' ('+k.pct+'%)\n\nEnter new amount or leave blank to keep:');
+  const amt=newAmt?parseInt(newAmt.replace(/,/g,'')):0;
+  if(newAmt&&(!amt||amt<1)){toast('Invalid amount','err');return}
+  const updatedTeam=teamCode||k.team;
+  const updatedAmt=amt||k.amount;
+  const updatedPct=amt?Math.round(amt/bal(name)*100):k.pct;
+  if(!confirm(`Update ${name}'s Crystal Ball:\n\nTeam: ${T[updatedTeam]?.n||updatedTeam}\nAmount: ₹${updatedAmt.toLocaleString()}\n\nConfirm?`))return;
+  S.ko[name]={team:updatedTeam,pct:updatedPct,amount:updatedAmt,ts:k.ts,editedByAdmin:true};
+  sv();toast(name+'\'s Crystal Ball updated ✏️');rA();
+}
+
+function deleteKO(name){
+  if(!confirm('Delete '+name+'\'s Crystal Ball prediction?\n\nThey will be able to place a new one if the window is still open.'))return;
+  delete S.ko[name];sv();toast(name+'\'s Crystal Ball deleted');rA();
+}
+
+function publishKO(){
+  if(!S.koRevealed){toast('Reveal & settle first before publishing','err');return}
+  if(!confirm('📢 PUBLISH CRYSTAL BALL RESULTS\n\nThis will show the Crystal Ball results on the Board tab for ALL players to see.\n\nEveryone will see:\n• Each player\'s secret team pick\n• How much they wagered\n• Whether they won or lost\n• Final standings with Crystal Ball impact\n\nThis cannot be undone. Publish now?'))return;
+  S.koPublished=true;
+  sv();toast('Crystal Ball results published! 📢 Visible on Board tab.');rA();
+}
 function revealKO(){
   const winner=$('ko-winner').value;
   if(!winner){toast('Select the IPL winner!','err');return}
@@ -2323,7 +2467,7 @@ function editName(old){
 }
 function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
 function remP(n){if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
-function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?'))return;S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Cleared!');nav('home')}
+function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?'))return;S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Cleared!');nav('home')}
 
 function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
 if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
