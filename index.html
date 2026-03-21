@@ -971,14 +971,18 @@ function rB(){
     koBets.forEach(n=>{
       const k=S.ko[n];
       const won=k.team===S.koWinner;
-      h+=`<div style="display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:8px;background:${won?'#10B98110':'#EF444410'};border:1px solid ${won?'#10B98130':'#EF444430'};border-radius:12px">
+      const baseB=bal(n);
+      h+=`<div style="display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:${won?'#10B98110':'#EF444410'};border:1px solid ${won?'#10B98130':'#EF444430'};border-radius:12px">
         <div style="width:38px;height:38px;border-radius:50%;background:${won?'#10B98120':'#EF444420'};display:flex;align-items:center;justify-content:center;font-size:18px">${won?'✅':'❌'}</div>
         <div style="flex:1">
           <div style="font-weight:700;font-size:14px;color:var(--t1)">${n}</div>
-          <div style="font-size:12px;color:var(--t4)">Picked <strong style="color:${T[k.team]?.c||'var(--acc)'}">${T[k.team]?.s||k.team}</strong> · ₹${k.amount.toLocaleString()} wagered</div>
+          <div style="font-size:12px;color:var(--t4);margin-top:2px">Picked <strong style="color:${T[k.team]?.c||'var(--acc)'}">${T[k.team]?.s||k.team}</strong></div>
+          <div style="font-size:12px;color:var(--t4);margin-top:2px">Wagered <strong>${k.pct}%</strong> of balance = <strong>₹${k.amount.toLocaleString()}</strong></div>
+          <div style="font-size:11px;color:var(--t3);margin-top:2px">Base balance: ₹${baseB.toLocaleString()} ${won?'+ ₹'+k.amount.toLocaleString()+' = <strong style="color:var(--grn)">₹'+(baseB+k.amount).toLocaleString()+'</strong>':'- ₹'+k.amount.toLocaleString()+' = <strong style="color:var(--red)">₹'+Math.max(baseB-k.amount,2000).toLocaleString()+'</strong>'}</div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:18px;font-weight:900;color:${won?'var(--grn)':'var(--red)'};font-family:var(--ff)">${won?'+':'-'}₹${k.amount.toLocaleString()}</div>
+          <div style="font-size:20px;font-weight:900;color:${won?'var(--grn)':'var(--red)'};font-family:var(--ff)">${won?'+':'-'}₹${k.amount.toLocaleString()}</div>
+          <div style="font-size:11px;color:var(--t4)">${won?'Won':'Lost'}</div>
         </div>
       </div>`;
     });
@@ -1932,7 +1936,25 @@ function rA(){
   const activePlayers=new Set(Object.values(S.b).map(b=>b.u)).size;
   const dormant=totalPlayers-activePlayers;
   h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button style="background:#EF444415;border:1px solid #EF444433;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;toast('Logged out as Admin');ren()">🔓 Logout Admin</button></div>`;
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📋</span><span class="ct">ADMIN DASHBOARD</span></div>
+  // Admin jump navigation
+  h+=`<div style="background:var(--inp);border:1px solid var(--bdr2);border-radius:14px;padding:14px;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚡ JUMP TO SECTION</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px">
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-dash').scrollIntoView({behavior:'smooth'})">📋 Dashboard</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-wa').scrollIntoView({behavior:'smooth'})">📲 WhatsApp</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-odds').scrollIntoView({behavior:'smooth'})">📊 Odds</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-result').scrollIntoView({behavior:'smooth'})">📝 Results</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-playoff').scrollIntoView({behavior:'smooth'})">🏟️ Playoffs</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-crystal').scrollIntoView({behavior:'smooth'})">🔮 Crystal Ball</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-squads').scrollIntoView({behavior:'smooth'})">🏏 Squads</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-placebet').scrollIntoView({behavior:'smooth'})">🔓 Place Bet</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-bets').scrollIntoView({behavior:'smooth'})">🎰 Bets</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-broadcast').scrollIntoView({behavior:'smooth'})">📢 Broadcast</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-balance').scrollIntoView({behavior:'smooth'})">💰 Balance</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-players').scrollIntoView({behavior:'smooth'})">👥 Players</button>
+    <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="$('adm-danger').scrollIntoView({behavior:'smooth'})">🗑️ Danger</button>
+  </div></div>`;
+  h+=`<div id="adm-dash" class="card"><div class="ch"><span style="font-size:18px">📋</span><span class="ct">ADMIN DASHBOARD</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">${resolved}/${totalM}</div><div style="font-size:11px;color:var(--t4)">Matches Done</div></div>
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">${oddsSet}</div><div style="font-size:11px;color:var(--t4)">Odds Set</div></div>
@@ -1948,7 +1970,7 @@ function rA(){
   h+=`</div>`;
   // WhatsApp Reminders
   const remMatches=allM.filter(m=>!S.r[m.id]&&!lk(m)&&m.h!=='TBD'&&S.odds[m.id]);
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📲</span><span class="ct">WHATSAPP REMINDERS</span></div>
+  h+=`<div id="adm-wa" class="card"><div class="ch"><span style="font-size:18px">📲</span><span class="ct">WHATSAPP REMINDERS</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:14px">One-tap reminders for your WhatsApp group. Only shows matches with odds set.</div>`;
   if(!remMatches.length){h+=`<div style="color:var(--t3);font-size:13px">No matches ready for reminders. Set odds first, then come back here.</div>`}
   else{remMatches.forEach(m=>{
@@ -1970,15 +1992,15 @@ function rA(){
   })}
   h+=`</div>`;
   // Set Odds
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="odds-m" onchange="oddsMC()"><option value="">-- Pick --</option>`;
+  h+=`<div id="adm-odds" class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="odds-m" onchange="oddsMC()"><option value="">-- Pick --</option>`;
   gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.odds[m.id]?'✅':''}</option>`});
   h+=`</select></div><div id="odds-f"></div></div>`;
   // Record Result
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📝</span><span class="ct">RECORD RESULT</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
+  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:18px">📝</span><span class="ct">RECORD RESULT</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
   gms().filter(m=>m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.r[m.id]?'✅':''}</option>`});
   h+=`</select></div><div id="adm-f"></div></div>`;
   // Set Playoff Teams
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><div style="font-size:13px;color:var(--t4);margin-bottom:12px">Once top 4 are decided, assign teams to playoff matches.</div>`;
+  h+=`<div id="adm-playoff" class="card"><div class="ch"><span style="font-size:18px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><div style="font-size:13px;color:var(--t4);margin-bottom:12px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
     const curH=po.h,curA=po.a;
@@ -1990,7 +2012,7 @@ function rA(){
   });
   h+=`</div>`;
   // Crystal Ball Admin
-  h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
+  h+=`<div id="adm-crystal" class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
   // Status + toggle
   const koCount=S.ko?Object.keys(S.ko).length:0;
@@ -2055,7 +2077,7 @@ function rA(){
   }
   h+=`</div>`;
   // Squad Management
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏏</span><span class="ct">MANAGE SQUADS</span></div>
+  h+=`<div id="adm-squads" class="card"><div class="ch"><span style="font-size:18px">🏏</span><span class="ct">MANAGE SQUADS</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Update captains, add or remove players from team squads.</div>
   <div class="bf-s"><div class="bf-l">Team</div><select class="bf-i" id="sq-team" onchange="sqTeamChange()"><option value="">-- Select --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n} (${T[k].s})</option>`).join('')}</select></div>
   <div id="sq-panel"></div></div>`;
@@ -2077,25 +2099,25 @@ function rA(){
   <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
   </div>`;
   // Admin Place Bet (override — bypasses lock and player login)
-  h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
+  h+=`<div id="adm-placebet" class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:14px">Place or override a bet on behalf of a player. Bypasses lock timer and login. Use for special scenarios only.</div>
   <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="ab-player"><option value="">-- Select player --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
   <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
   <div id="ab-form"></div></div>`;
   // Manage Bets
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
+  h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:18px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
   else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">1/${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
   h+=`</div>`;
   // Broadcast Announcement
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📢</span><span class="ct">BROADCAST</span></div>
+  h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:18px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Post an announcement visible to all players on the Home screen.</div>`;
   if(S.announce){h+=`<div style="padding:10px 14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv();toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // Manual Balance Adjustment
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
+  h+=`<div id="adm-balance" class="card"><div class="ch"><span style="font-size:18px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
   <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Manually add/deduct points or waive weekly penalties for a player.</div>
   <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="adj-player"><option value="">-- Select --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
   <div class="bf-s"><div class="bf-l">Type</div><div style="display:flex;gap:8px">
@@ -2110,7 +2132,7 @@ function rA(){
   if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN')}</span></div></div>`});h+=`</div>`}
   h+=`</div>`;
   // Participants
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">👥</span><span class="ct">PARTICIPANTS</span></div>`;
+  h+=`<div id="adm-players" class="card"><div class="ch"><span style="font-size:18px">👥</span><span class="ct">PARTICIPANTS</span></div>`;
   Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#254AA515;border:1px solid #254AA544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#F59E0B15;border:1px solid #F59E0B44;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#EF444420;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
   h+=`</div>`;
   // Final Standings (admin only — includes Crystal Ball)
@@ -2142,9 +2164,9 @@ function rA(){
     h+=`</table></div></div>`;
   }
   // Danger
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🗑️</span><span class="ct">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:8px">
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets?')){S.b={};sv();toast('Bets cleared');rA()}">🎰 Clear All Bets</button>
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results?')){S.r={};sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
+  h+=`<div id="adm-danger" class="card"><div class="ch"><span style="font-size:18px">🗑️</span><span class="ct">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:8px">
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets and Crystal Ball predictions?')){S.b={};S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Bets & Crystal Ball cleared');rA()}">🎰 Clear All Bets & Crystal Ball</button>
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results? Balances will recalculate.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
   <button style="width:100%;padding:12px;background:#EF444420;border:1px solid #EF444444;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
   el.innerHTML=h;
 }
@@ -2467,7 +2489,7 @@ function editName(old){
 }
 function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
 function remP(n){if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
-function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?'))return;S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Cleared!');nav('home')}
+function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
 
 function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
 if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
