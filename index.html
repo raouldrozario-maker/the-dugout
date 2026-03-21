@@ -684,6 +684,26 @@ function rH(){
       </div>`}).join('')}
     </div>`:''}
 
+    <!-- No bet this week warning -->
+    ${(()=>{
+      const weekStart=new Date('2026-03-26T00:00:00+05:30');
+      const now=new Date();
+      if(now<weekStart||Object.keys(S.r).length===0)return '';
+      let ws=new Date(weekStart);
+      while(ws<now){const we=new Date(ws);we.setDate(we.getDate()+7);if(we>now)break;ws=new Date(we)}
+      const currentWeekMatches=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=ws&&md<new Date(ws.getTime()+7*86400000)});
+      const betThisWeek=Object.values(S.b).filter(x=>x.u===me).some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=ws&&d<new Date(ws.getTime()+7*86400000)});
+      if(betThisWeek||currentWeekMatches.length===0)return '';
+      const openMatches=currentWeekMatches.filter(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]);
+      return `<div style="background:#EF444415;border:1px solid #EF444433;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--red)">You haven't bet this week!</div>
+          <div style="font-size:12px;color:var(--t4)">Miss the week = 20% penalty (₹${Math.round(ST*0.2).toLocaleString()})${openMatches.length?' · '+openMatches.length+' match'+(openMatches.length>1?'es':'')+' still open':''}</div>
+        </div>
+      </div>`;
+    })()}
+
     <!-- Action buttons -->
     <div style="display:flex;gap:8px">
       <button style="flex:1;background:var(--grad);border:0;border-radius:10px;padding:12px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="nav('matches')">💰 Bet Now</button>
