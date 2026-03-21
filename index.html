@@ -91,7 +91,22 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .stat-val{font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc)}
 .stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
-select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-height:44px}
+select.bf-i{appearance:auto;cursor:pointer}
+.sd-wrap{position:relative}
+.sd-input{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:10px 36px 10px 14px;color:var(--t1);font-size:15px;outline:0;font-family:var(--fb);cursor:text}
+.sd-input:focus{border-color:var(--bdr2)}
+.sd-input::placeholder{color:var(--t4)}
+.sd-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t4);font-size:11px}
+.sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:240px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
+.sd-dd.open{display:block}
+.sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
+.sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
+.sd-opt:last-child{border-bottom:0}
+.sd-opt:active,.sd-opt.hi{background:var(--inp)}
+.sd-opt .sd-tm{font-size:11px;color:var(--t3);margin-left:6px}
+.sd-empty{padding:14px;font-size:13px;color:var(--t4);text-align:center}
+.sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
+.sd-wrap.has-val .sd-clear{display:block}
 @media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
@@ -369,12 +384,70 @@ function bdg(t,sz=48,nm=false){
 
 function momDropdown(id,matchId,both=false){
   const m=gm(matchId);if(!m)return'';
-  let options='<option value="">-- Select Player (optional) --</option>';
   const hSq=typeof getSquad==='function'?getSquad(m.h):(T[m.h]?.sq||[]);
   const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
-  if(hSq.length)options+=`<optgroup label="${T[m.h].n}">`+hSq.map(p=>`<option value="${p}">${p}</option>`).join('')+'</optgroup>';
-  if(aSq.length)options+=`<optgroup label="${T[m.a].n}">`+aSq.map(p=>`<option value="${p}">${p}</option>`).join('')+'</optgroup>';
-  return`<select class="bf-i" id="${id}">${options}</select>`;
+  const hName=T[m.h]?.n||m.h, aName=T[m.a]?.n||m.a;
+  const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
+  // Build data attr with JSON for JS to use
+  const data=JSON.stringify([{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}]);
+  return`<div class="sd-wrap" id="${id}-wrap">
+    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
+    <button class="sd-clear" onclick="sdClear('${id}')">&times;</button>
+    <span class="sd-arrow">▼</span>
+    <div class="sd-dd" id="${id}-dd"></div>
+  </div>`;
+}
+
+function sdOpen(id){
+  const inp=$(id);if(!inp)return;
+  const dd=$(id+'-dd');if(!dd)return;
+  sdFilter(id);
+  dd.classList.add('open');
+  // Close on outside click
+  setTimeout(()=>{
+    const closer=function(e){if(!$(id+'-wrap')?.contains(e.target)){dd.classList.remove('open');document.removeEventListener('click',closer)}};
+    document.addEventListener('click',closer);
+  },10);
+}
+
+function sdFilter(id){
+  const inp=$(id);if(!inp)return;
+  const dd=$(id+'-dd');if(!dd)return;
+  let groups;
+  try{groups=JSON.parse(inp.dataset.sd)}catch(e){return}
+  const q=inp.value.toLowerCase().trim();
+  let html='';
+  let hasResults=false;
+  groups.forEach(g=>{
+    const filtered=g.players.filter(p=>!q||p.toLowerCase().includes(q));
+    if(filtered.length){
+      hasResults=true;
+      html+=`<div class="sd-grp">${g.name}</div>`;
+      filtered.forEach(p=>{
+        html+=`<div class="sd-opt" onmousedown="sdPick('${id}','${p.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();sdPick('${id}','${p.replace(/'/g,"\\'")}')">${p}<span class="sd-tm">${g.short}</span></div>`;
+      });
+    }
+  });
+  if(!hasResults)html='<div class="sd-empty">No players found</div>';
+  dd.innerHTML=html;
+  dd.classList.add('open');
+}
+
+function sdPick(id,val){
+  const inp=$(id);if(!inp)return;
+  inp.value=val;
+  const wrap=$(id+'-wrap');
+  if(wrap)wrap.classList.toggle('has-val',!!val);
+  const dd=$(id+'-dd');
+  if(dd)dd.classList.remove('open');
+}
+
+function sdClear(id){
+  const inp=$(id);if(!inp)return;
+  inp.value='';
+  const wrap=$(id+'-wrap');
+  if(wrap)wrap.classList.remove('has-val');
+  inp.focus();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -960,7 +1033,7 @@ function oBF(id,prefill){
   // Pre-select team and MoM if editing
   if(prefill){
     if(prefill.tm)pk(id,prefill.tm);
-    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom}}
+    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom;const w=$('mo-'+id+'-wrap');if(w)w.classList.add('has-val')}}
   }
 }
 
