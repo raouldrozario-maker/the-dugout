@@ -91,7 +91,22 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .stat-val{font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc)}
 .stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
-select.bf-i{appearance:auto;cursor:pointer}
+select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-height:44px}
+.sd-wrap{position:relative}
+.sd-input{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:10px 36px 10px 14px;color:var(--t1);font-size:15px;outline:0;font-family:var(--fb);cursor:text}
+.sd-input:focus{border-color:var(--bdr2)}
+.sd-input::placeholder{color:var(--t4)}
+.sd-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t4);font-size:11px}
+.sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:240px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
+.sd-dd.open{display:block}
+.sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
+.sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
+.sd-opt:last-child{border-bottom:0}
+.sd-opt:active,.sd-opt.hi{background:var(--inp)}
+.sd-opt .sd-tm{font-size:11px;color:var(--t3);margin-left:6px}
+.sd-empty{padding:14px;font-size:13px;color:var(--t4);text-align:center}
+.sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
+.sd-wrap.has-val .sd-clear{display:block}
 @media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
@@ -182,6 +197,7 @@ function fd(s){return new Date(s+'T00:00:00+05:30').toLocaleDateString('en-IN',{
 function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m} ${hr>=12?'PM':'AM'}`}
 function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.floor(df/864e5),h=Math.floor((df%864e5)/36e5),mn=Math.floor((df%36e5)/6e4);return d>0?d+'d '+h+'h':h>0?h+'h '+mn+'m':mn+'m'}
 function $(id){return document.getElementById(id)}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
@@ -194,14 +210,12 @@ function bal(n){
   const userBets=Object.values(S.b).filter(x=>x.u===n);
   userBets.forEach(bt=>{
     const rs=S.r[bt.mid];
-    if(rs){
+    if(rs&&!rs.voided){
       const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
       if(w){const py=bt.am/od;b+=py;if(mh)b+=bt.am*MOMB;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
       else{if(!mh)b-=bt.am}
     }
-    // Pending bets do NOT deduct from available balance
   });
-  // Crystal Ball — excluded from balance
   // Weekly penalty
   let pen=weeklyPenalty(n);
   const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
@@ -216,6 +230,30 @@ function bal(n){
   return Math.round(b);
 }
 
+// Bettable balance — no MINB floor, no negative protection
+// Used for bet validation to prevent infinite money exploit
+function betBal(n){
+  let b=ST;
+  const userBets=Object.values(S.b).filter(x=>x.u===n);
+  userBets.forEach(bt=>{
+    const rs=S.r[bt.mid];
+    if(rs&&!rs.voided){
+      const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
+      if(w){const py=bt.am/od;b+=py;if(mh)b+=bt.am*MOMB;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      else{if(!mh)b-=bt.am}
+    }
+    if(!rs||rs.voided)b-=bt.am;
+  });
+  let pen=weeklyPenalty(n);
+  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+  pen=Math.max(pen-waived,0);
+  b-=pen;
+  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+    if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
+  });
+  return Math.max(Math.round(b),0);
+}
+
 // Amount at risk in pending (unresolved) bets
 function atRisk(n){
   return Object.values(S.b).filter(x=>x.u===n&&!S.r[x.mid]).reduce((s,x)=>s+x.am,0);
@@ -227,12 +265,11 @@ function rawBal(n){
   const userBets=Object.values(S.b).filter(x=>x.u===n);
   userBets.forEach(bt=>{
     const rs=S.r[bt.mid];
-    if(rs){
+    if(rs&&!rs.voided){
       const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(bt.od)||2;
       if(w){const py=bt.am/od;b+=py;if(mh)b+=bt.am*MOMB;if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
       else{if(!mh)b-=bt.am}
     }
-    // Pending bets do NOT affect P&L — only resolved results count
   });
   let pen=weeklyPenalty(n);
   const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
@@ -273,10 +310,10 @@ function weeklyPenalty(n){
     const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
     if(weekEnd>now)break;
     const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
-    // Only penalize if matches happened AND at least one result was recorded that week
-    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]);
+    // Only penalize if matches happened AND at least one non-voided result was recorded that week
+    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(matchesThisWeek.length>0&&resultsThisWeek.length>0){
-      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
       if(!betThisWeek)penalty+=Math.round(ST*0.2);
     }
     weekStart=new Date(weekEnd);
@@ -298,7 +335,7 @@ function getPenaltyBreakdown(){
     const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
     if(weekEnd>now)break;
     const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
-    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]);
+    const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(matchesThisWeek.length>0&&resultsThisWeek.length>0){
       weekNum++;
       const wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
@@ -306,7 +343,7 @@ function getPenaltyBreakdown(){
       const defaulters=[];
       players.forEach(n=>{
         const userBets=Object.values(S.b).filter(x=>x.u===n);
-        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
         if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+Math.round(ST*0.2)}
       });
       weeks.push({label:`Week ${weekNum} (${wsLabel} – ${weLabel})`,defaulters,matchCount:matchesThisWeek.length});
@@ -369,18 +406,106 @@ function bdg(t,sz=48,nm=false){
 
 function momDropdown(id,matchId,both=false){
   const m=gm(matchId);if(!m)return'';
-  let options='';
   const hSq=typeof getSquad==='function'?getSquad(m.h):(T[m.h]?.sq||[]);
   const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
-  if(hSq.length)options+=hSq.map(p=>`<option value="${p}" data-team="${m.h}">${p} (${T[m.h].s})</option>`).join('');
-  if(aSq.length)options+=aSq.map(p=>`<option value="${p}" data-team="${m.a}">${p} (${T[m.a].s})</option>`).join('');
-  return`<input class="bf-i" id="${id}" list="${id}-dl" placeholder="Type to search player..." autocomplete="off"><datalist id="${id}-dl">${options}</datalist>`;
+  const hName=T[m.h]?.n||m.h, aName=T[m.a]?.n||m.a;
+  const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
+  const data=JSON.stringify([{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}]);
+  return`<div class="sd-wrap" id="${id}-wrap">
+    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
+    <button class="sd-clear" onclick="sdClear('${id}')">&times;</button>
+    <span class="sd-arrow">▼</span>
+    <div class="sd-dd" id="${id}-dd"></div>
+  </div>`;
+}
+
+function sdOpen(id){
+  const inp=$(id);if(!inp)return;
+  const dd=$(id+'-dd');if(!dd)return;
+  sdFilter(id);
+  dd.classList.add('open');
+  setTimeout(()=>{
+    const closer=function(e){if(!$(id+'-wrap')?.contains(e.target)){dd.classList.remove('open');document.removeEventListener('click',closer)}};
+    document.addEventListener('click',closer);
+  },10);
+}
+
+function sdFilter(id){
+  const inp=$(id);if(!inp)return;
+  const dd=$(id+'-dd');if(!dd)return;
+  let groups;
+  try{groups=JSON.parse(inp.dataset.sd)}catch(e){return}
+  const q=inp.value.toLowerCase().trim();
+  let html='';
+  let hasResults=false;
+  groups.forEach(g=>{
+    const filtered=g.players.filter(p=>!q||p.toLowerCase().includes(q));
+    if(filtered.length){
+      hasResults=true;
+      html+=`<div class="sd-grp">${g.name}</div>`;
+      filtered.forEach(p=>{
+        html+=`<div class="sd-opt" onmousedown="sdPick('${id}','${p.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();sdPick('${id}','${p.replace(/'/g,"\\'")}')">${p}<span class="sd-tm">${g.short}</span></div>`;
+      });
+    }
+  });
+  if(!hasResults)html='<div class="sd-empty">No players found</div>';
+  dd.innerHTML=html;
+  dd.classList.add('open');
+}
+
+function sdPick(id,val){
+  const inp=$(id);if(!inp)return;
+  inp.value=val;
+  const wrap=$(id+'-wrap');
+  if(wrap)wrap.classList.toggle('has-val',!!val);
+  const dd=$(id+'-dd');
+  if(dd)dd.classList.remove('open');
+}
+
+function sdClear(id){
+  const inp=$(id);if(!inp)return;
+  inp.value='';
+  const wrap=$(id+'-wrap');
+  if(wrap)wrap.classList.remove('has-val');
+  inp.focus();
 }
 
 // ══════════════════════════════════════════════════════════════
-// STORAGE — Firebase sync fix: never overwrite remote with empty local
+// STORAGE — Granular Firebase sync to prevent multi-user overwrites
 // ══════════════════════════════════════════════════════════════
-function sv(){localStorage.setItem('dg-s',JSON.stringify(S));if(db)db.ref('dugout').set(S);ren();uh()}
+function sv(keys){
+  localStorage.setItem('dg-s',JSON.stringify(S));
+  if(db){
+    if(keys&&keys.length){
+      // Granular update — only push changed keys
+      const upd={};
+      keys.forEach(k=>{upd[k]=S[k]!==undefined?S[k]:null});
+      db.ref('dugout').update(upd).catch(e=>console.error('Firebase update err:',e));
+    }else{
+      // Full sync fallback (admin ops, initial setup)
+      db.ref('dugout').set(S).catch(e=>console.error('Firebase set err:',e));
+    }
+  }
+  ren();uh();
+}
+
+// Offline detection — warn user so they don't lose bets
+let _wasOffline=false;
+window.addEventListener('offline',()=>{_wasOffline=true;toast('⚠️ You\'re offline — bets may not sync','err')});
+window.addEventListener('online',()=>{
+  if(_wasOffline&&db){
+    _wasOffline=false;
+    toast('Back online — syncing...');
+    // Re-push local state for safety (merge with remote)
+    db.ref('dugout/b').once('value').then(snap=>{
+      const remoteB=snap.val()||{};
+      // Merge: keep remote bets + add any local-only bets
+      Object.keys(S.b).forEach(k=>{if(!remoteB[k])remoteB[k]=S.b[k]});
+      S.b=remoteB;
+      sv(['b']);
+    });
+  }
+});
 
 function ld(){
   // Load local state
@@ -583,7 +708,7 @@ function rH(){
     const pStats={};
     Object.keys(S.p).forEach(n=>{
       const ub=Object.values(S.b).filter(x=>x.u===n);
-      const rb=ub.filter(x=>S.r[x.mid]).sort((a,b)=>b.mid-a.mid);
+      const rb=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided).sort((a,b)=>b.mid-a.mid);
       let streak=0,sType='';
       for(const bt of rb){
         const w=bt.tm===S.r[bt.mid].w;
@@ -637,22 +762,18 @@ function rH(){
 
     // ── EVENT SCORING ENGINE ──
     function getEventScore(e){
-      let score=e.pri*100; // base from priority
-      // Tiered amount scoring
+      let score=e.pri*100;
       if(e.amount>=5000)score+=30;
       else if(e.amount>=3000)score+=20;
       else if(e.amount>=2000)score+=10;
-      // Type boosts
       if(e.type==='jackpot')score+=50;
       else if(e.type==='win')score+=25;
       else if(e.type==='loss')score+=15;
       else if(e.type==='save')score+=20;
-      // Streak multiplier
       if(e.streak&&e.streak>=2)score+=e.streak*10;
       return score;
     }
 
-    // Sort: score engine first, then newest as tiebreaker
     feed.sort((a,b)=>{
       const scoreDiff=getEventScore(b)-getEventScore(a);
       if(scoreDiff!==0)return scoreDiff;
@@ -670,7 +791,6 @@ function rH(){
 
       recentFeed.forEach((f,i)=>{
         if(i===0&&f.type!=='join'&&f.type!=='talk'){
-          // ── HERO CARD for #1 event ──
           h+=`<div style="position:relative;padding:16px 18px;background:linear-gradient(135deg,#1A2E5A,#0D1B3E);border:1px solid var(--acc);border-radius:14px;box-shadow:0 0 20px #F59E0B18;margin-bottom:4px;overflow:hidden">
             <div style="position:absolute;top:0;right:0;padding:4px 12px;background:var(--acc);border-radius:0 14px 0 10px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;font-family:var(--ff)">🔥 MOMENT</div>
             <div style="display:flex;align-items:flex-start;gap:12px;margin-top:4px">
@@ -682,7 +802,6 @@ function rH(){
             </div>
           </div>`;
         }else{
-          // ── Standard feed items ──
           h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:${f.bg||'var(--inp)'};border:1px solid ${f.border||'transparent'};border-radius:10px">
             <span style="font-size:18px;flex-shrink:0;margin-top:1px">${f.icon}</span>
             <div style="flex:1;min-width:0">
@@ -935,11 +1054,11 @@ function placeKO(){
   const team=$('ko-team').value,pct=parseInt($('ko-pct').value);
   if(!team){toast('Pick a team!','err');return}
   if(!pct||pct<1||pct>100){toast('Enter 1-100%','err');return}
-  const b=bal(me),amount=Math.round(b*pct/100);
+  const b=betBal(me),amount=Math.round(b*pct/100);
   if(!confirm(`🔒 SECRET BET\n\n${T[team]?.n} to win IPL 2026\n₹${amount.toLocaleString()} (${pct}% of your balance)\n\nThis is permanent — you cannot change it.\nOnly you and the admin will see this until the reveal.\n\nConfirm?`))return;
   if(!S.ko)S.ko={};
   S.ko[me]={team,pct,amount,ts:new Date().toISOString()};
-  sv();toast('Crystal Ball prediction locked! 🔮');rM();
+  sv(['ko']);toast('Crystal Ball prediction locked! 🔮');rM();
 }
 
 function editBet(id){
@@ -961,7 +1080,7 @@ function oBF(id,prefill){
   if(btn)btn.style.display='none';
   if(!f)return;
   f.style.display='block';
-  const m=gm(id),b=bal(me),mx=b,mo=S.odds[id]||{};
+  const m=gm(id),b=betBal(me),mx=b,mo=S.odds[id]||{};
   bfs[id]=bfs[id]||{};
   const isEdit=!!prefill;
   const cdStr=cd(m);
@@ -994,7 +1113,7 @@ function oBF(id,prefill){
   // Pre-select team and MoM if editing
   if(prefill){
     if(prefill.tm)pk(id,prefill.tm);
-    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom}}
+    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom;const w=$('mo-'+id+'-wrap');if(w)w.classList.add('has-val')}}
   }
 }
 
@@ -1034,8 +1153,9 @@ function sub(id){
   const mo=S.odds[id];if(!mo||!mo[f.tm]){toast('Odds not set!','err');return}
   const od=parseFloat(mo[f.tm]),am=parseAmt(id);
   if(!am||am<500){toast('Min ₹500','err');return}
-  const b=bal(me),ai=am===b;
+  const b=betBal(me),ai=am===b;
   if(am>b){toast('Not enough balance! Max: ₹'+b.toLocaleString(),'err');return}
+  if(b<=0){toast('No balance left to bet!','err');return}
   if(!ai&&am%500!==0){toast('Multiples of ₹500','err');return}
   const momSel=$('mo-'+id);
   const mom=momSel?momSel.value.trim():'';
@@ -1055,7 +1175,7 @@ function sub(id){
     `\nPlace this bet?`;
   if(!confirm(confirmMsg))return;
   S.b[id+'-'+me]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
-  sv();toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
+  sv(['b']);toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
 }
 
 function shareWA(id){
@@ -1147,9 +1267,9 @@ function rB(){
     // Full ranked list
     L.forEach((p,i)=>{
       const ub=Object.values(S.b).filter(x=>x.u===p.n);
-      const w=ub.filter(x=>S.r[x.mid]&&x.tm===S.r[x.mid].w).length;
-      const l=ub.filter(x=>S.r[x.mid]&&x.tm!==S.r[x.mid].w).length;
-      const rub=ub.filter(x=>S.r[x.mid]);
+      const w=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided&&x.tm===S.r[x.mid].w).length;
+      const l=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided&&x.tm!==S.r[x.mid].w).length;
+      const rub=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided);
       const winPct=rub.length?Math.round(w/rub.length*100):0;
       const pending=ub.filter(x=>!S.r[x.mid]).length;
       const df=rawBal(p.n)-ST;
@@ -1667,7 +1787,7 @@ function rAn(){
   const el=$('v-analytics');
   const allBets=Object.values(S.b),resolved=Object.keys(S.r),players=Object.keys(S.p);
   const totalBet=allBets.reduce((s,b)=>s+b.am,0);
-  const resolvedBets=allBets.filter(b=>S.r[b.mid]);
+  const resolvedBets=allBets.filter(b=>S.r[b.mid]&&!S.r[b.mid].voided);
   const wins=resolvedBets.filter(b=>b.tm===S.r[b.mid].w);
   const losses=resolvedBets.filter(b=>b.tm!==S.r[b.mid].w);
   const totalWon=wins.reduce((s,b)=>s+Math.round(b.am/b.od),0);
@@ -1833,7 +1953,7 @@ function rMG(){
   const L=LB();
   const b=bal(n),risk=atRisk(n),diff=rawBal(n)-ST,rank=L.findIndex(x=>x.n===n)+1;
   const ub=Object.values(S.b).filter(x=>x.u===n);
-  const resolved=ub.filter(x=>S.r[x.mid]);
+  const resolved=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided);
   const pending=ub.filter(x=>!S.r[x.mid]);
   const wins=resolved.filter(x=>x.tm===S.r[x.mid].w);
   const losses=resolved.filter(x=>x.tm!==S.r[x.mid].w);
@@ -2501,8 +2621,8 @@ f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><
 function sOdds(id){const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
   if(existingBets.length>0&&S.odds[id]){if(!confirm(`⚠️ ${existingBets.length} bet(s) already placed on this match! Changing odds will affect existing bets. Existing bets keep their OLD odds. Continue?`))return}
-  S.odds[id]={};S.odds[id][m.h]=hv;S.odds[id][m.a]=av;sv();toast('Odds published! 📊');oddsMC()}
-function clearOdds(id){const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];sv();toast('Odds cleared');oddsMC();rA()}
+  S.odds[id]={};S.odds[id][m.h]=hv;S.odds[id][m.a]=av;sv(['odds']);toast('Odds published! 📊');oddsMC()}
+function clearOdds(id){const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];sv(['odds']);toast('Odds cleared');oddsMC();rA()}
 
 function admMC(){const id=parseInt($('adm-m').value),f=$('adm-f');if(!id){f.innerHTML='';return}const m=gm(id);admW={};
 let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><div class="bf-tr">
@@ -2520,7 +2640,7 @@ f.innerHTML=h}
 
 function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
 
-function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv();toast('Result saved! 📝');delete admW[id];rA()}
+function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);toast('Result saved! 📝');delete admW[id];rA()}
 
 function voidMatch(id){
   const m=gm(id);
@@ -2536,7 +2656,7 @@ function voidMatch(id){
   Object.keys(S.b).forEach(k=>{if(S.b[k].mid===id)delete S.b[k]});
   // Record as voided (so it doesn't show as pending)
   S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};
-  sv();toast('Match voided — all bets refunded 🌧️');rA();
+  sv(['r','b']);toast('Match voided — all bets refunded 🌧️');rA();
 }
 
 function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k].sq}
@@ -2611,7 +2731,7 @@ function adminPlaceBet(mid){
   if(!abTeam){toast('Pick a team','err');return}
   const am=parseInt($('ab-amt').value);
   if(!am||am<500){toast('Min ₹500','err');return}
-  const b=bal(player);
+  const b=betBal(player);
   if(am>b){toast(player+' only has ₹'+b.toLocaleString(),'err');return}
   const mo=S.odds[mid];
   const od=parseFloat(mo[abTeam]);
@@ -2623,7 +2743,7 @@ function adminPlaceBet(mid){
   const m=gm(mid);
   if(!confirm(`🔓 ADMIN BET OVERRIDE\n\nPlayer: ${player}\nMatch: ${T[m.h]?.s} vs ${T[m.a]?.s}\nTeam: ${T[abTeam]?.n}\nAmount: ₹${am.toLocaleString()} @ 1/${od}\nMoM: ${mom||'None'}\nReason: ${reason||'No reason'}\n\nThis bypasses the lock timer.\nConfirm?`))return;
   S.b[mid+'-'+player]={mid,u:player,tm:abTeam,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString(),adminBet:true,reason:reason||null};
-  sv();toast('Bet placed for '+player+' ✅');abTeam='';rA();
+  sv(['b']);toast('Bet placed for '+player+' ✅');abTeam='';rA();
 }
 function sendReminder(id,type){
   const m=gm(id),mo=S.odds[id]||{},dl=getDeadlineStr(m);
@@ -2707,7 +2827,7 @@ function addMatch(){
 }
 function setPO(id){const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv();toast('Playoff teams set! 🏟️');rA()}
 
-function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv();toast('Bet deleted');rA()}
+function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv(['b']);toast('Bet deleted');rA()}
 
 // Player actions
 let pendingLogin='';
@@ -2743,8 +2863,10 @@ function confirmLogin(){
   });
 }
 function showRegister(){
-  const n=($('inp-n').value||'').trim();
+  let n=($('inp-n').value||'').trim();
+  n=n.replace(/<[^>]*>/g,'').trim(); // Strip HTML tags
   if(!n){toast('Enter your name','err');return}
+  if(n.length>30){toast('Max 30 characters','err');return}
   if(S.p[n]){toast('Name taken! Tap your name above to login.','err');return}
   pendingLogin=n;
   $('register-prompt').style.display='block';
@@ -2757,7 +2879,7 @@ function addP(){
   const n=pendingLogin;
   hashPin(pin).then(h=>{
     S.p[n]={j:new Date().toISOString(),pin:h};
-    sv();$('inp-n').value='';
+    sv(['p']);$('inp-n').value='';
     me=n;localStorage.setItem('dg-me',me);pendingLogin='';
     uh();nav('matches');toast(n+' registered! 🏏');
   });
@@ -2765,7 +2887,7 @@ function addP(){
 function logout(){me=null;localStorage.removeItem('dg-me');uh();nav('home');toast('Logged out')}
 function logn(n){me=n;localStorage.setItem('dg-me',n);uh();nav('matches')}
 let adjType='add';
-function postAnnounce(){const msg=$('adm-announce').value.trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};sv();toast('Announcement posted! 📢');rA()}
+function postAnnounce(){let msg=$('adm-announce').value.trim();msg=msg.replace(/<[^>]*>/g,'').trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};sv(['announce']);toast('Announcement posted! 📢');rA()}
 
 function timeAgo(ts){
   const s=Math.floor((Date.now()-new Date(ts).getTime())/1000);
@@ -2807,14 +2929,15 @@ function hasMention(msg,player){
 
 function postTrash(){
   if(!me){toast('Login first','err');return}
-  const inp=$('tt-msg');const msg=inp.value.trim();
+  const inp=$('tt-msg');let msg=inp.value.trim();
+  msg=msg.replace(/<[^>]*>/g,'').trim(); // Strip HTML tags
   if(!msg){toast('Type something!','err');return}
   if(msg.length>150){toast('Max 150 characters','err');return}
   if(!S.trash)S.trash=[];
   S.trash.push({u:me,msg,ts:new Date().toISOString()});
   // Keep last 50 messages
   if(S.trash.length>50)S.trash=S.trash.slice(-50);
-  sv();inp.value='';rH();
+  sv(['trash']);inp.value='';rH();
 }
 
 function delTrash(idx){
@@ -2870,13 +2993,13 @@ function applyAdj(){
     if(!S.adj)S.adj=[];
     const reason=$('adj-reason').value.trim()||'Weekly penalty waived by admin';
     S.adj.push({type:'waive',player,amount:pen,reason,ts:new Date().toISOString()});
-    sv();toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);rA();return;
+    sv(['adj']);toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);rA();return;
   }
   const amt=parseInt($('adj-amt').value);if(!amt||amt<1){toast('Enter amount','err');return}
   const reason=$('adj-reason').value.trim()||'Manual adjustment by admin';
   if(!S.adj)S.adj=[];
   S.adj.push({type:adjType,player,amount:amt,reason,ts:new Date().toISOString()});
-  sv();toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);rA();
+  sv(['adj']);toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);rA();
 }
 function editName(old){
   const nw=prompt('Edit name for "'+old+'":\n\nEnter new name:',old);
