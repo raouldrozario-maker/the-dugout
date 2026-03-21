@@ -340,7 +340,7 @@ function getBalBreakdown(n){
   // Pending bets (at risk)
   const pendingBets=ub.filter(bt=>!S.r[bt.mid]);
   if(pendingBets.length){
-    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⏳ Pending bets (at risk)</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
+    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ ON THE LINE (pending bets)</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
     pendingBets.forEach(bt=>{
       const m=gm(bt.mid);
       h+=`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--t3);gap:8px"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -394,7 +394,7 @@ function ld(){
       const d=snap.val();
       if(d&&Object.keys(d.p||{}).length>0){
         // Remote has data — use it (don't overwrite with empty local)
-        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
@@ -402,7 +402,20 @@ function ld(){
       }
       // Now start real-time listener
       db.ref('dugout').on('value',sn=>{
-        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        const oldR={...S.r};
+        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        // Detect new results for logged-in player
+        if(me){Object.keys(S.r).forEach(mid=>{
+          if(!oldR[mid]&&!S.r[mid].voided){
+            const myBet=S.b[mid+'-'+me];
+            if(myBet){
+              const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;
+              if(won){let py=Math.round(myBet.am/od);if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}
+              else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}
+              else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}
+            }
+          }
+        })}
         localStorage.setItem('dg-s',JSON.stringify(S));ren();uh();
       });
       ren();uh();
@@ -445,6 +458,7 @@ function rH(){
       ${bdg(nx.a,60,true)}
     </div>
     <div style="margin-top:14px;font-size:12px;color:var(--t3)">📍 ${nx.v}</div>
+    ${(()=>{const nxBets=Object.values(S.b).filter(x=>x.mid===nx.id);const nxWagered=nxBets.reduce((s,x)=>s+x.am,0);return nxBets.length?`<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:13px;font-weight:700"><span style="color:var(--hot)">🔥 ₹${nxWagered.toLocaleString()} in play</span><span style="color:var(--t2)">⚔️ ${nxBets.length} bet${nxBets.length!==1?'s':''}</span></div>`:''})()}
     ${me&&!l&&S.odds[nx.id]&&!S.b[nx.id+'-'+me]?`<button style="margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px 28px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="nav('matches')">💰 Place Your Bet</button>`:''}
     </div>`;
   } else if(!ns.length){
@@ -493,7 +507,7 @@ function rH(){
         <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Balance</div>
         <div style="font-size:32px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff);margin-top:4px">₹${b.toLocaleString()}</div>
         <div style="font-size:14px;color:${diff>=0?'#34D399':'#F87171'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
-        ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#F59E0B10;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} at risk</div>`:''}
+        ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#F59E0B10;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}
       </div>
       <!-- Win/Loss Ring Chart -->
       <div style="flex-shrink:0;text-align:center;position:relative;width:100px;height:100px">
@@ -527,7 +541,7 @@ function rH(){
 
     <!-- At Risk breakdown (if any pending bets) -->
     ${myPending.length?`<div style="background:var(--inp);border:1px solid #F59E0B22;border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚡ BETS IN PLAY</div>
+      <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ ON THE LINE</div>
       ${myPending.map(bt=>{const m=gm(bt.mid);const mo=S.odds[bt.mid]||{};const od=parseFloat(bt.od)||2;const potWin=Math.round(bt.am/od);return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${myPending.indexOf(bt)<myPending.length-1?'border-bottom:1px solid var(--bdr)':''}">
         <div style="display:flex;align-items:center;gap:8px">
           ${bdg(bt.tm,28)}
@@ -558,6 +572,67 @@ function rH(){
     h+=`<div style="border-top:1px solid var(--bdr);padding-top:12px;margin-top:12px"><div style="font-size:12px;color:var(--t4);margin-bottom:8px">New player? Register below:</div><div class="ar"><input class="inp" id="inp-n" placeholder="Your name..." onkeydown="if(event.key==='Enter')showRegister()"><button class="bp" onclick="showRegister()">Join</button></div></div>`;
     h+=`<div id="register-prompt" style="display:none;margin-top:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Set your PIN</div><div style="font-size:12px;color:var(--t4);margin-bottom:8px">You'll need this every time you log in. Don't forget it!</div><div class="ar"><input class="inp" type="password" id="reg-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')addP()"><button class="bp" onclick="addP()">Register</button></div><div id="reg-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`</div>`;
+  }
+
+  // ─── LIVE ACTIVITY FEED ───
+  if(ns.length>1){
+    const feed=[];
+    // Recent bets (privacy-aware)
+    Object.values(S.b).forEach(bt=>{
+      const m=gm(bt.mid);if(!m)return;
+      const l=lk(m),rs=S.r[bt.mid];
+      if(rs){
+        // Resolved — show result
+        const won=bt.tm===rs.w;
+        const mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
+        const od=parseFloat(bt.od)||2;
+        if(won){
+          let py=Math.round(bt.am/od);
+          if(mh)py+=Math.round(bt.am*MOMB);
+          feed.push({ts:rs.ts||bt.ts,icon:'🏆',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+        }else if(mh){
+          feed.push({ts:rs.ts||bt.ts,icon:'🛡️',text:`<strong>${bt.u}</strong> saved by MoM pick on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+        }else{
+          feed.push({ts:rs.ts||bt.ts,icon:'💀',text:`<strong>${bt.u}</strong> lost <strong style="color:var(--red)">₹${bt.am.toLocaleString()}</strong> on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+        }
+      }else if(l){
+        // Locked — bets visible, show details
+        feed.push({ts:bt.ts,icon:'💰',text:`<strong>${bt.u}</strong> bet <strong style="color:var(--acc)">₹${bt.am.toLocaleString()}</strong> on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
+      }else{
+        // Open — hide details for privacy
+        feed.push({ts:bt.ts,icon:'🔥',text:`<strong>${bt.u}</strong> placed a bet on M#${bt.mid} ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+      }
+    });
+    // Recent joins
+    Object.entries(S.p).forEach(([n,p])=>{
+      feed.push({ts:p.j,icon:'👤',text:`<strong>${n}</strong> joined the league`});
+    });
+    // Recent trash talk
+    (S.trash||[]).slice(-5).forEach(t=>{
+      feed.push({ts:t.ts,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>40?t.msg.slice(0,40)+'...':t.msg}"`});
+    });
+    // Sort by time, take latest 8
+    feed.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    const recentFeed=feed.slice(0,8);
+
+    if(recentFeed.length){
+      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:18px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="font-size:16px">🔥</span>
+        <span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:2px">LIVE FROM THE DUGOUT</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">`;
+      recentFeed.forEach(f=>{
+        h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--inp);border-radius:10px">
+          <span style="font-size:16px;flex-shrink:0;margin-top:1px">${f.icon}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;color:var(--t2);line-height:1.5">${f.text}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:2px">${timeAgo(f.ts)}</div>
+          </div>
+        </div>`;
+      });
+      h+=`</div></div>`;
+    }
   }
 
   // ─── LEAGUE OVERVIEW (always visible) ───
@@ -600,9 +675,11 @@ function rH(){
         <span style="font-size:12px;color:var(--t4)">💎 Biggest Bet</span>
         <span style="font-size:13px;font-weight:800;color:var(--acc)">₹${bigB.am.toLocaleString()} by ${bigB.u}</span>
       </div>`:''}
-      ${activeBettors<ns.length?`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--inp);border-radius:10px">
-        <span style="font-size:12px;color:var(--t4)">😴 Haven't bet yet</span>
-        <span style="font-size:13px;font-weight:700;color:var(--red)">${ns.length-activeBettors} player${ns.length-activeBettors!==1?'s':''}</span>
+      ${activeBettors<ns.length?`<div style="padding:10px 12px;background:#EF444408;border:1px solid #EF444420;border-radius:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${noBets.length?'6px':'0'}">
+          <span style="font-size:12px;color:var(--red)">😴 ${noBets.length} player${noBets.length!==1?'s':''} still sleeping</span>
+        </div>
+        ${noBets.length?`<div style="font-size:12px;color:var(--red);font-weight:700">👉 ${noBets.join(', ')}</div>`:''}
       </div>`:''}
     </div>`:''}
     </div>`;
@@ -679,7 +756,7 @@ function rM(){
   const allM=gms().filter(m=>!m.playoff||m.h!=='TBD'); // only show playoffs with assigned teams
   let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+me]):allM;
   const risk=atRisk(me);
-  let h=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${risk>0?`<div style="font-size:11px;color:var(--acc)">₹${risk.toLocaleString()} at risk</div>`:''}</div></div>
+  let h=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}</div></div>
   <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
@@ -1191,7 +1268,7 @@ function rRu(){
   <!-- Rule 4: Double Headers & At Risk -->
   <div id="ru-4" style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🏏🏏</span><span class="ct" style="font-size:15px">DOUBLE HEADERS & "AT RISK"</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">On days with two matches, you can <strong style="color:var(--acc)">bet on both matches using your full balance</strong>. Your balance is based on resolved results only — pending (unresolved) bets don't reduce your available balance. Instead, the amount you've wagered on unresolved matches is shown as <strong style="color:var(--acc)">"At Risk"</strong>.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">On days with two matches, you can <strong style="color:var(--acc)">bet on both matches using your full balance</strong>. Your balance is based on resolved results only — pending (unresolved) bets don't reduce your available balance. Instead, the amount you've wagered on unresolved matches is shown as <strong style="color:var(--acc)">"ON THE LINE"</strong>.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
       <strong style="color:var(--acc)">Example — Double header day:</strong><br>
       Match 1: DC vs MI (3:30 PM, odds: DC 1/1.8, MI 1/2.5)<br>
@@ -1200,10 +1277,10 @@ function rRu(){
 
       <span style="color:var(--grn)">Step 1:</span> You bet <strong>₹10,000 all-in on DC</strong> (Match 1)<br>
       → Your balance still shows ₹10,000 (pending bets don't deduct)<br>
-      → At Risk: ₹10,000<br><br>
+      → On the line: ₹10,000<br><br>
 
       <span style="color:var(--grn)">Step 2:</span> You also bet <strong>₹5,000 on GT</strong> (Match 2)<br>
-      → Balance still ₹10,000 · At Risk now ₹15,000<br><br>
+      → Balance still ₹10,000 · On the line now ₹15,000<br><br>
 
       <span style="color:var(--t1);font-weight:700">Now results come in — here's what happens in each scenario:</span><br><br>
 
@@ -1381,7 +1458,7 @@ function rRu(){
       <div style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:12px">Your personal hub — everything about <strong>your</strong> game in one place. Only you can see your data (admin can view any player's tab).</div>
       <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
         <strong style="color:var(--acc)">What you'll find here:</strong><br>
-        💰 <strong>Profile & Balance</strong> — your rank, balance, P&L, and amount at risk<br>
+        💰 <strong>Profile & Balance</strong> — your rank, balance, P&L, and amount on the line<br>
         📈 <strong>Wallet Journey</strong> — step-by-step timeline of how your balance changed after each match, including penalties and adjustments. Running total after every event.<br>
         📊 <strong>Stats</strong> — total bets, win rate, total wagered/won/lost, MoM accuracy, favourite team, current streak, biggest win and loss<br>
         📜 <strong>Bet History</strong> — every bet you've placed with result (Won, Lost, Pending, MoM Save, Super Jackpot)<br>
@@ -1446,7 +1523,7 @@ function rRu(){
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
-      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">At Risk</div>
+      <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">ON THE LINE</div>
       <div style="font-size:13px;color:var(--t2);line-height:1.6">The total amount you've wagered on matches that haven't been played yet. This money isn't deducted from your balance — it shows what you could lose if all pending bets go wrong.</div>
     </div>
 
@@ -1759,7 +1836,7 @@ function rMG(){
     </div>
     ${risk>0?`<div style="flex:1;min-width:75px;background:var(--inp);border:1px solid #F59E0B33;border-radius:12px;padding:12px;text-align:center">
       <div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${risk.toLocaleString()}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px">At Risk</div>
+      <div style="font-size:10px;color:var(--t4);margin-top:2px">ON THE LINE</div>
     </div>`:''}
   </div>
   <div style="height:6px;background:var(--inp);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.max(Math.min(b/ST*50,100),5)}%;background:${diff>=0?'var(--grn)':'var(--red)'};border-radius:3px;opacity:.6"></div></div>
@@ -1805,7 +1882,7 @@ function rMG(){
       h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Adjustment'}</span><span style="font-weight:700"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">${a.type==='add'?'+':'-'}₹${a.amount.toLocaleString()}</span> <span style="color:var(--t3)">→ ₹${Math.max(runBal,MINB).toLocaleString()}</span></span></div>`});
     // Pending
     if(pending.length){
-      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⏳ At Risk (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
+      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ ON THE LINE (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
       pending.forEach(bt=>{
         const m=gm(bt.mid);
         h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:var(--t3)"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -1842,7 +1919,7 @@ function rMG(){
     sorted.forEach(bt=>{
       const m=gm(bt.mid),rs=S.r[bt.mid],od=parseFloat(bt.od)||2;
       let status='',statusClr='',amount='';
-      if(!rs){status='⏳ Pending';statusClr='var(--acc)';amount=`₹${bt.am.toLocaleString()} at risk`}
+      if(!rs){status='⏳ Pending';statusClr='var(--acc)';amount=`₹${bt.am.toLocaleString()} on the line`}
       else{
         const w=bt.tm===rs.w,mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
         if(w){
@@ -2324,8 +2401,10 @@ function rA(){
   }
   // Danger
   h+=`<div id="adm-danger" class="card"><div class="ch"><span style="font-size:18px">🗑️</span><span class="ct">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:8px">
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets and Crystal Ball predictions?')){S.b={};S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Bets & Crystal Ball cleared');rA()}">🎰 Clear All Bets & Crystal Ball</button>
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets? Crystal Ball predictions will remain.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button>
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button>
   <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results? Balances will recalculate.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
+  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button>
   <button style="width:100%;padding:12px;background:#EF444420;border:1px solid #EF444444;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
   el.innerHTML=h;
 }
@@ -2713,8 +2792,8 @@ try{const c=JSON.parse(raw);if(!c.databaseURL){err.textContent='Missing database
 db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
-  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am/od);if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#10B98122';$('mtag').style.color='#34D399';toast('Firebase connected! 🔗');
