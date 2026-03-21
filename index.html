@@ -614,6 +614,37 @@ function rH(){
     h+=`</div>`;
   }
 
+  // ─── TRASH TALK WALL ───
+  if(ns.length>1){
+    const msgs=(S.trash||[]).slice().reverse().slice(0,20);
+    h+=`<div class="card"><div class="ch"><span style="font-size:18px">🗣️</span><span class="ct">TRASH TALK</span></div>`;
+    if(me){
+      h+=`<div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="inp" id="tt-msg" placeholder="Talk your smack..." style="flex:1" maxlength="150" onkeydown="if(event.key==='Enter')postTrash()">
+        <button style="background:var(--grad);border:0;border-radius:10px;padding:8px 16px;color:#000;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0" onclick="postTrash()">Send</button>
+      </div>`;
+    }
+    if(!msgs.length){h+=`<div style="color:var(--t3);font-size:13px;text-align:center;padding:12px">No trash talk yet — be the first to start! 🎤</div>`}
+    else{
+      msgs.forEach((m,i)=>{
+        const isMe=me===m.u;
+        const ago=timeAgo(m.ts);
+        h+=`<div style="display:flex;gap:10px;padding:8px 0;${i<msgs.length-1?'border-bottom:1px solid var(--bdr)':''}">
+          <div style="width:30px;height:30px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:1px solid ${isMe?'transparent':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:12px;flex-shrink:0">${m.u[0].toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:700;font-size:13px;color:${isMe?'var(--acc)':'var(--t1)'}">${m.u}</span>
+              <span style="font-size:10px;color:var(--t3)">${ago}</span>
+            </div>
+            <div style="font-size:13px;color:var(--t2);margin-top:2px;word-wrap:break-word">${m.msg}</div>
+          </div>
+          ${adm?`<button style="background:0;border:0;color:var(--red);font-size:10px;cursor:pointer;padding:0 4px;flex-shrink:0" onclick="delTrash(${msgs.length-1-i})">✕</button>`:''}
+        </div>`;
+      });
+    }
+    h+=`</div>`;
+  }
+
   // ─── PLAYERS ───
   if(ns.length){
     h+=`<div class="card"><div class="ch"><span style="font-size:18px">👥</span><span class="ct">PLAYERS (${ns.length})</span></div>
@@ -1792,6 +1823,70 @@ function rMG(){
   }
   h+=`</div>`;
 
+  // ─── ACHIEVEMENT BADGES ───
+  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏅</span><span class="ct">ACHIEVEMENTS</span></div>`;
+  const badges=[];
+  // Calculate badges for this player
+  const resolvedBets=ub.filter(x=>S.r[x.mid]);
+  const winBets=resolvedBets.filter(x=>x.tm===S.r[x.mid].w);
+  const lossBets=resolvedBets.filter(x=>x.tm!==S.r[x.mid].w);
+  const momHitBets=resolvedBets.filter(x=>x.mom&&x.mom.trim().toLowerCase()===(S.r[x.mid].mom||'').trim().toLowerCase());
+  const momSaves=resolvedBets.filter(x=>x.tm!==S.r[x.mid].w&&x.mom&&x.mom.trim().toLowerCase()===(S.r[x.mid].mom||'').trim().toLowerCase());
+  const jackpots=resolvedBets.filter(x=>x.tm===S.r[x.mid].w&&x.mom&&x.mom.trim().toLowerCase()===(S.r[x.mid].mom||'').trim().toLowerCase()&&x.mt&&x.mt!==x.tm);
+  // Streaks
+  let curStreak=0,maxStreak=0,curLStreak=0,maxLStreak=0;
+  [...resolvedBets].sort((a,b)=>a.mid-b.mid).forEach(bt=>{
+    if(bt.tm===S.r[bt.mid].w){curStreak++;curLStreak=0;if(curStreak>maxStreak)maxStreak=curStreak}
+    else{curLStreak++;curStreak=0;if(curLStreak>maxLStreak)maxLStreak=curLStreak}
+  });
+  const aiCount=ub.filter(x=>x.am>=ST*.9);
+  const totalWag=ub.reduce((s,x)=>s+x.am,0);
+
+  // Define badges: {icon, name, desc, unlocked}
+  badges.push({icon:'🎯',name:'First Blood',desc:'Place your first bet',unlocked:ub.length>=1});
+  badges.push({icon:'✅',name:'First Win',desc:'Win your first bet',unlocked:winBets.length>=1});
+  badges.push({icon:'🔥',name:'On Fire',desc:'Win 3 bets in a row',unlocked:maxStreak>=3});
+  badges.push({icon:'💀',name:'Inferno',desc:'Win 5 bets in a row',unlocked:maxStreak>=5});
+  badges.push({icon:'🎰',name:'High Roller',desc:'Wager ₹50,000+ total',unlocked:totalWag>=50000});
+  badges.push({icon:'💎',name:'Diamond Hands',desc:'Wager ₹1,00,000+ total',unlocked:totalWag>=100000});
+  badges.push({icon:'🔮',name:'MoM Oracle',desc:'Get 3 MoM predictions right',unlocked:momHitBets.length>=3});
+  badges.push({icon:'🛡️',name:'Plot Armor',desc:'Get saved by a MoM pick',unlocked:momSaves.length>=1});
+  badges.push({icon:'⭐',name:'Jackpot!',desc:'Hit the Super Jackpot',unlocked:jackpots.length>=1});
+  badges.push({icon:'🫡',name:'All-In Warrior',desc:'Go all-in 3 times',unlocked:aiCount.length>=3});
+  badges.push({icon:'📅',name:'Iron Man',desc:'Bet on 10+ matches',unlocked:ub.length>=10});
+  badges.push({icon:'🏆',name:'Season Veteran',desc:'Bet on 30+ matches',unlocked:ub.length>=30});
+  badges.push({icon:'😤',name:'Bounced Back',desc:'Win a bet after 3+ losses in a row',unlocked:maxLStreak>=3&&winBets.length>0&&curStreak>=1});
+  badges.push({icon:'🧠',name:'Strategist',desc:'Win 60%+ of resolved bets (min 5)',unlocked:resolvedBets.length>=5&&Math.round(winBets.length/resolvedBets.length*100)>=60});
+
+  const unlocked=badges.filter(b=>b.unlocked);
+  const locked=badges.filter(b=>!b.unlocked);
+
+  if(unlocked.length){
+    h+=`<div style="font-size:12px;color:var(--grn);font-weight:700;margin-bottom:8px">UNLOCKED (${unlocked.length}/${badges.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:14px">`;
+    unlocked.forEach(b=>{
+      h+=`<div style="background:#10B98110;border:1px solid #10B98130;border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:28px;margin-bottom:4px">${b.icon}</div>
+        <div style="font-weight:800;font-size:12px;color:var(--grn)">${b.name}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">${b.desc}</div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  if(locked.length){
+    h+=`<div style="font-size:12px;color:var(--t3);font-weight:700;margin-bottom:8px">LOCKED (${locked.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">`;
+    locked.forEach(b=>{
+      h+=`<div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:12px;text-align:center;opacity:0.5">
+        <div style="font-size:28px;margin-bottom:4px;filter:grayscale(1)">🔒</div>
+        <div style="font-weight:800;font-size:12px;color:var(--t3)">${b.name}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">${b.desc}</div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+
   // ─── TEAM PERFORMANCE TRACKER ───
   h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏏</span><span class="ct">TEAM PERFORMANCE</span></div>`;
   const teamStats={};
@@ -2447,6 +2542,32 @@ function logout(){me=null;localStorage.removeItem('dg-me');uh();nav('home');toas
 function logn(n){me=n;localStorage.setItem('dg-me',n);uh();nav('matches')}
 let adjType='add';
 function postAnnounce(){const msg=$('adm-announce').value.trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};sv();toast('Announcement posted! 📢');rA()}
+
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-new Date(ts).getTime())/1000);
+  if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  if(s<604800)return Math.floor(s/86400)+'d ago';
+  return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+
+function postTrash(){
+  if(!me){toast('Login first','err');return}
+  const inp=$('tt-msg');const msg=inp.value.trim();
+  if(!msg){toast('Type something!','err');return}
+  if(msg.length>150){toast('Max 150 characters','err');return}
+  if(!S.trash)S.trash=[];
+  S.trash.push({u:me,msg,ts:new Date().toISOString()});
+  // Keep last 50 messages
+  if(S.trash.length>50)S.trash=S.trash.slice(-50);
+  sv();inp.value='';rH();
+}
+
+function delTrash(idx){
+  if(!S.trash||!S.trash[idx])return;
+  if(!confirm('Delete this message from '+S.trash[idx].u+'?'))return;
+  S.trash.splice(idx,1);sv();toast('Message deleted');rH();
+}
 function applyAdj(){
   const player=$('adj-player').value;if(!player){toast('Pick a player','err');return}
   if(adjType==='waive'){
@@ -2489,7 +2610,7 @@ function editName(old){
 }
 function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
 function remP(n){if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
-function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{}};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
+function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
 
 function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
 if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
