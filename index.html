@@ -92,21 +92,6 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .stat-lbl{font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px}
 select.bf-i{appearance:auto;cursor:pointer}
-.sd-wrap{position:relative}
-.sd-input{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:10px 36px 10px 14px;color:var(--t1);font-size:15px;outline:0;font-family:var(--fb);cursor:text}
-.sd-input:focus{border-color:var(--bdr2)}
-.sd-input::placeholder{color:var(--t4)}
-.sd-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t4);font-size:11px}
-.sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:240px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
-.sd-dd.open{display:block}
-.sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
-.sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
-.sd-opt:last-child{border-bottom:0}
-.sd-opt:active,.sd-opt.hi{background:var(--inp)}
-.sd-opt .sd-tm{font-size:11px;color:var(--t3);margin-left:6px}
-.sd-empty{padding:14px;font-size:13px;color:var(--t4);text-align:center}
-.sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
-.sd-wrap.has-val .sd-clear{display:block}
 @media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
@@ -384,70 +369,12 @@ function bdg(t,sz=48,nm=false){
 
 function momDropdown(id,matchId,both=false){
   const m=gm(matchId);if(!m)return'';
+  let options='';
   const hSq=typeof getSquad==='function'?getSquad(m.h):(T[m.h]?.sq||[]);
   const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
-  const hName=T[m.h]?.n||m.h, aName=T[m.a]?.n||m.a;
-  const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
-  // Build data attr with JSON for JS to use
-  const data=JSON.stringify([{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}]);
-  return`<div class="sd-wrap" id="${id}-wrap">
-    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
-    <button class="sd-clear" onclick="sdClear('${id}')">&times;</button>
-    <span class="sd-arrow">▼</span>
-    <div class="sd-dd" id="${id}-dd"></div>
-  </div>`;
-}
-
-function sdOpen(id){
-  const inp=$(id);if(!inp)return;
-  const dd=$(id+'-dd');if(!dd)return;
-  sdFilter(id);
-  dd.classList.add('open');
-  // Close on outside click
-  setTimeout(()=>{
-    const closer=function(e){if(!$(id+'-wrap')?.contains(e.target)){dd.classList.remove('open');document.removeEventListener('click',closer)}};
-    document.addEventListener('click',closer);
-  },10);
-}
-
-function sdFilter(id){
-  const inp=$(id);if(!inp)return;
-  const dd=$(id+'-dd');if(!dd)return;
-  let groups;
-  try{groups=JSON.parse(inp.dataset.sd)}catch(e){return}
-  const q=inp.value.toLowerCase().trim();
-  let html='';
-  let hasResults=false;
-  groups.forEach(g=>{
-    const filtered=g.players.filter(p=>!q||p.toLowerCase().includes(q));
-    if(filtered.length){
-      hasResults=true;
-      html+=`<div class="sd-grp">${g.name}</div>`;
-      filtered.forEach(p=>{
-        html+=`<div class="sd-opt" onmousedown="sdPick('${id}','${p.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();sdPick('${id}','${p.replace(/'/g,"\\'")}')">${p}<span class="sd-tm">${g.short}</span></div>`;
-      });
-    }
-  });
-  if(!hasResults)html='<div class="sd-empty">No players found</div>';
-  dd.innerHTML=html;
-  dd.classList.add('open');
-}
-
-function sdPick(id,val){
-  const inp=$(id);if(!inp)return;
-  inp.value=val;
-  const wrap=$(id+'-wrap');
-  if(wrap)wrap.classList.toggle('has-val',!!val);
-  const dd=$(id+'-dd');
-  if(dd)dd.classList.remove('open');
-}
-
-function sdClear(id){
-  const inp=$(id);if(!inp)return;
-  inp.value='';
-  const wrap=$(id+'-wrap');
-  if(wrap)wrap.classList.remove('has-val');
-  inp.focus();
+  if(hSq.length)options+=hSq.map(p=>`<option value="${p}" data-team="${m.h}">${p} (${T[m.h].s})</option>`).join('');
+  if(aSq.length)options+=aSq.map(p=>`<option value="${p}" data-team="${m.a}">${p} (${T[m.a].s})</option>`).join('');
+  return`<input class="bf-i" id="${id}" list="${id}-dl" placeholder="Type to search player..." autocomplete="off"><datalist id="${id}-dl">${options}</datalist>`;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -666,7 +593,7 @@ function rH(){
       pStats[n]={bets:ub.length,streak,sType,totalWagered:ub.reduce((s,x)=>s+x.am,0)};
     });
 
-    // Build feed with priority scores
+    // Build feed with metadata for scoring engine
     Object.values(S.b).forEach(bt=>{
       const m=gm(bt.mid);if(!m)return;
       const l=lk(m),rs=S.r[bt.mid],ps=pStats[bt.u]||{};
@@ -677,40 +604,58 @@ function rH(){
         const isJackpot=won&&mh&&bt.mt&&bt.mt!==bt.tm;
         if(isJackpot){
           const py=Math.round(bt.am/od)*2+Math.round(bt.am*MOMB);
-          feed.push({ts:rs.ts||bt.ts,pri:10,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#F59E0B08',border:'#F59E0B25'});
+          feed.push({ts:rs.ts||bt.ts,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#F59E0B08',border:'#F59E0B25'});
         }else if(won&&mh){
           let py=Math.round(bt.am/od)+Math.round(bt.am*MOMB);
-          feed.push({ts:rs.ts||bt.ts,pri:8,icon:'🎯',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + nailed the MoM! ${ps.streak>=3&&ps.sType==='W'?'<strong style="color:var(--acc)">'+ps.streak+' wins in a row! 🔥</strong>':''}`});
+          feed.push({ts:rs.ts||bt.ts,pri:8,type:'win',amount:py,streak:ps.streak,icon:'🎯',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + nailed the MoM! ${ps.streak>=3&&ps.sType==='W'?'<strong style="color:var(--acc)">'+ps.streak+' wins in a row! 🔥</strong>':''}`});
         }else if(won){
           let py=Math.round(bt.am/od);
           const bigWin=py>=5000;
-          feed.push({ts:rs.ts||bt.ts,pri:bigWin?7:5,icon:bigWin?'💰':'🏆',text:`<strong>${bt.u}</strong> ${bigWin?'cashed <strong style="color:var(--grn)">₹'+py.toLocaleString()+'</strong>':'won ₹'+py.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=3&&ps.sType==='W'?' — <strong style="color:var(--acc)">'+ps.streak+' in a row!</strong>':ps.streak>=2&&ps.sType==='W'?' — on a roll!':''}`});
+          feed.push({ts:rs.ts||bt.ts,pri:bigWin?7:5,type:'win',amount:py,streak:ps.streak,icon:bigWin?'💰':'🏆',text:`<strong>${bt.u}</strong> ${bigWin?'cashed <strong style="color:var(--grn)">₹'+py.toLocaleString()+'</strong>':'won ₹'+py.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=3&&ps.sType==='W'?' — <strong style="color:var(--acc)">'+ps.streak+' in a row!</strong>':ps.streak>=2&&ps.sType==='W'?' — on a roll!':''}`});
         }else if(mh){
-          feed.push({ts:rs.ts||bt.ts,pri:6,icon:'🛡️',text:`<strong>${bt.u}</strong> lost the bet but <strong style="color:var(--yel)">MoM pick saved them</strong>! Lucky escape`});
+          feed.push({ts:rs.ts||bt.ts,pri:6,type:'save',amount:bt.am,streak:ps.streak,icon:'🛡️',text:`<strong>${bt.u}</strong> lost the bet but <strong style="color:var(--yel)">MoM pick saved them</strong>! Lucky escape`});
         }else{
           const bigLoss=bt.am>=5000;
           const loseStreak=ps.streak>=2&&ps.sType==='L';
-          feed.push({ts:rs.ts||bt.ts,pri:bigLoss?6:loseStreak?5:3,icon:loseStreak?'😵':'💀',text:`<strong>${bt.u}</strong> ${bigLoss?'dropped <strong style="color:var(--red)">₹'+bt.am.toLocaleString()+'</strong>':'lost ₹'+bt.am.toLocaleString()} on ${T[bt.tm]?.s}${loseStreak?' — <strong style="color:var(--red)">'+ps.streak+' losses in a row 💀</strong>':''}`});
+          feed.push({ts:rs.ts||bt.ts,pri:bigLoss?6:loseStreak?5:3,type:'loss',amount:bt.am,streak:ps.streak,icon:loseStreak?'😵':'💀',text:`<strong>${bt.u}</strong> ${bigLoss?'dropped <strong style="color:var(--red)">₹'+bt.am.toLocaleString()+'</strong>':'lost ₹'+bt.am.toLocaleString()} on ${T[bt.tm]?.s}${loseStreak?' — <strong style="color:var(--red)">'+ps.streak+' losses in a row 💀</strong>':''}`});
         }
       }else if(!rs&&l){
         const bigBet=bt.am>=5000;
-        feed.push({ts:bt.ts,pri:bigBet?4:2,icon:bigBet?'🔥':'💰',text:`<strong>${bt.u}</strong> ${bt.am>=bal(bt.u)?'went <strong style="color:var(--hot)">ALL IN</strong> with ₹'+bt.am.toLocaleString():bigBet?'dropped a big one — <strong style="color:var(--acc)">₹'+bt.am.toLocaleString()+'</strong>':'bet ₹'+bt.am.toLocaleString()} on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
+        feed.push({ts:bt.ts,pri:bigBet?4:2,type:'bet',amount:bt.am,streak:0,icon:bigBet?'🔥':'💰',text:`<strong>${bt.u}</strong> ${bt.am>=bal(bt.u)?'went <strong style="color:var(--hot)">ALL IN</strong> with ₹'+bt.am.toLocaleString():bigBet?'dropped a big one — <strong style="color:var(--acc)">₹'+bt.am.toLocaleString()+'</strong>':'bet ₹'+bt.am.toLocaleString()} on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
       }else if(!rs&&!l){
-        feed.push({ts:bt.ts,pri:1,icon:'👀',text:`<strong>${bt.u}</strong> just made a move on ${T[m.h]?.s} vs ${T[m.a]?.s}... 👀`});
+        feed.push({ts:bt.ts,pri:1,type:'bet',amount:bt.am,streak:0,icon:'👀',text:`<strong>${bt.u}</strong> just made a move on ${T[m.h]?.s} vs ${T[m.a]?.s}... 👀`});
       }
     });
     // Joins (low priority)
     Object.entries(S.p).forEach(([n,p])=>{
-      feed.push({ts:p.j,pri:0,icon:'👤',text:`<strong>${n}</strong> entered The Dugout`});
+      feed.push({ts:p.j,pri:0,type:'join',amount:0,streak:0,icon:'👤',text:`<strong>${n}</strong> entered The Dugout`});
     });
     // Trash talk (medium priority)
     (S.trash||[]).slice(-3).forEach(t=>{
-      feed.push({ts:t.ts,pri:2,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>35?t.msg.slice(0,35)+'…':t.msg}"`});
+      feed.push({ts:t.ts,pri:2,type:'talk',amount:0,streak:0,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>35?t.msg.slice(0,35)+'…':t.msg}"`});
     });
 
-    // Sort: priority first (highest = most dramatic), then newest
+    // ── EVENT SCORING ENGINE ──
+    function getEventScore(e){
+      let score=e.pri*100; // base from priority
+      // Tiered amount scoring
+      if(e.amount>=5000)score+=30;
+      else if(e.amount>=3000)score+=20;
+      else if(e.amount>=2000)score+=10;
+      // Type boosts
+      if(e.type==='jackpot')score+=50;
+      else if(e.type==='win')score+=25;
+      else if(e.type==='loss')score+=15;
+      else if(e.type==='save')score+=20;
+      // Streak multiplier
+      if(e.streak&&e.streak>=2)score+=e.streak*10;
+      return score;
+    }
+
+    // Sort: score engine first, then newest as tiebreaker
     feed.sort((a,b)=>{
-      if(b.pri!==a.pri)return b.pri-a.pri;
+      const scoreDiff=getEventScore(b)-getEventScore(a);
+      if(scoreDiff!==0)return scoreDiff;
       return new Date(b.ts)-new Date(a.ts);
     });
     const recentFeed=feed.slice(0,8);
@@ -722,14 +667,30 @@ function rH(){
         <span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:2px">LIVE FROM THE DUGOUT</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">`;
-      recentFeed.forEach(f=>{
-        h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:${f.bg||'var(--inp)'};border:1px solid ${f.border||'transparent'};border-radius:10px">
-          <span style="font-size:18px;flex-shrink:0;margin-top:1px">${f.icon}</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;color:var(--t1);line-height:1.5">${f.text}</div>
-            <div style="font-size:10px;color:var(--t3);margin-top:3px">${timeAgo(f.ts)}</div>
-          </div>
-        </div>`;
+
+      recentFeed.forEach((f,i)=>{
+        if(i===0&&f.type!=='join'&&f.type!=='talk'){
+          // ── HERO CARD for #1 event ──
+          h+=`<div style="position:relative;padding:16px 18px;background:linear-gradient(135deg,#1A2E5A,#0D1B3E);border:1px solid var(--acc);border-radius:14px;box-shadow:0 0 20px #F59E0B18;margin-bottom:4px;overflow:hidden">
+            <div style="position:absolute;top:0;right:0;padding:4px 12px;background:var(--acc);border-radius:0 14px 0 10px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;font-family:var(--ff)">🔥 MOMENT</div>
+            <div style="display:flex;align-items:flex-start;gap:12px;margin-top:4px">
+              <span style="font-size:28px;flex-shrink:0">${f.icon}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:16px;color:var(--t1);line-height:1.5;font-weight:600">${f.text}</div>
+                <div style="font-size:11px;color:var(--t3);margin-top:5px">${timeAgo(f.ts)}</div>
+              </div>
+            </div>
+          </div>`;
+        }else{
+          // ── Standard feed items ──
+          h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:${f.bg||'var(--inp)'};border:1px solid ${f.border||'transparent'};border-radius:10px">
+            <span style="font-size:18px;flex-shrink:0;margin-top:1px">${f.icon}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;color:var(--t1);line-height:1.5">${f.text}</div>
+              <div style="font-size:10px;color:var(--t3);margin-top:3px">${timeAgo(f.ts)}</div>
+            </div>
+          </div>`;
+        }
       });
       h+=`</div></div>`;
     }
@@ -1033,7 +994,7 @@ function oBF(id,prefill){
   // Pre-select team and MoM if editing
   if(prefill){
     if(prefill.tm)pk(id,prefill.tm);
-    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom;const w=$('mo-'+id+'-wrap');if(w)w.classList.add('has-val')}}
+    if(prefill.mom){const sel=$('mo-'+id);if(sel){sel.value=prefill.mom}}
   }
 }
 
