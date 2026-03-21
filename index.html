@@ -959,7 +959,29 @@ function rM(){
   const allM=gms().filter(m=>!m.playoff||m.h!=='TBD'); // only show playoffs with assigned teams
   let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+me]):allM;
   const risk=atRisk(me);
-  let h=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}</div></div>
+  const myBetCount=Object.values(S.b).filter(x=>x.u===me).length;
+  const onboardDismissed=localStorage.getItem('dg-onboard-done');
+  let h='';
+
+  // ─── FIRST-TIME ONBOARDING ───
+  if(myBetCount===0&&!onboardDismissed){
+    h+=`<div style="background:linear-gradient(135deg,#1A2E5A,#0D1B3E);border:1px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;position:relative">
+      <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="position:absolute;top:10px;right:14px;background:0;border:0;color:var(--t4);font-size:18px;cursor:pointer">&times;</button>
+      <div style="font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:14px">👋 WELCOME TO THE DUGOUT!</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--t2);line-height:1.5">
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">1️⃣</span><span><strong style="color:var(--t1)">Pick a team</strong> — tap the team badge you think will win</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">2️⃣</span><span><strong style="color:var(--t1)">Set your amount</strong> — min ₹500, multiples of 500, or go ALL IN</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">3️⃣</span><span><strong style="color:var(--t1)">Pick Man of the Match</strong> (optional) — correct pick = +20% bonus, saves you from a loss if your team loses</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">4️⃣</span><span><strong style="color:var(--t1)">Confirm before lock</strong> — bets close 40 min before the match. No exceptions!</span></div>
+      </div>
+      <div style="margin-top:14px;padding:10px 14px;background:#F59E0B10;border:1px solid #F59E0B22;border-radius:10px;font-size:12px;color:var(--acc)">
+        💡 <strong>Tip:</strong> Bet at least once per week or you'll get a 20% penalty. Check the Rules tab for the full playbook.
+      </div>
+      <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="width:100%;margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px">Got it — let's go! 🏏</button>
+    </div>`;
+  }
+
+  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}</div></div>
   <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
@@ -1037,6 +1059,7 @@ function rM(){
 
     // Place bet button
     if(!l&&!my&&mo&&!rs)h+=`<button class="ob" id="ob-${m.id}" onclick="oBF(${m.id})">💰 Place Bet</button><div id="bf-${m.id}" style="display:none"></div>`;
+    else if(!l&&!my&&!mo&&!rs)h+=`<div style="margin-top:8px;padding:8px 12px;background:var(--inp);border-radius:8px;font-size:12px;color:var(--t4);text-align:center">⏳ Waiting for admin to set odds</div>`;
     if(!l&&my&&!rs)h+=`<div id="bf-${m.id}" style="display:none"></div>`;
 
     // All bets (after lock)
@@ -1088,7 +1111,7 @@ function editBet(id){
   // Store old values for pre-fill
   if(old)bfs[id]={tm:old.tm,oldAm:old.am,oldMom:old.mom,editing:true};
   delete S.b[bk];
-  sv();
+  sv(["b"]);
   // Small delay to let render happen then open form
   setTimeout(()=>oBF(id,old),100);
 }
@@ -1145,7 +1168,7 @@ function cancelEdit(id,oldBet){
   if(oldBet){
     const bk=id+'-'+me;
     S.b[bk]=oldBet;
-    sv();
+    sv(["b"]);
   }
 }
 
@@ -1169,6 +1192,13 @@ function calcWin(id){
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
   if(S.r[id]){toast('Match already has a result!','err');return}
+  const bk=id+'-'+me;
+  const existing=S.b[bk];
+  const isEditing=bfs[id]?.editing;
+  // Block silent overwrites — existing bet can only be changed via Edit button
+  if(existing&&!isEditing){
+    toast('Bet already placed! Use ✏️ Edit to change it.','err');return;
+  }
   const f=bfs[id]||{};if(!f.tm){toast('Pick a team!','err');return}
   const mo=S.odds[id];if(!mo||!mo[f.tm]){toast('Odds not set!','err');return}
   const od=parseFloat(mo[f.tm]),am=parseAmt(id);
@@ -1184,17 +1214,17 @@ function sub(id){
   if(mom){const mx2=gm(id);if(getSquad(mx2.h).includes(mom))mt=mx2.h;else if(getSquad(mx2.a).includes(mom))mt=mx2.a}
   const potWin=Math.round(am/od);
   const momBonus=mom?Math.round(am*MOMB):0;
-  const confirmMsg=`🏏 Confirm your bet:\n\n` +
-    `Match: ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n` +
+  let confirmMsg=isEditing?`✏️ Update your bet:\n\n`:`🏏 Confirm your bet:\n\n`;
+  confirmMsg+=`Match: ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n` +
     `Team: ${T[f.tm]?.n||f.tm}\n` +
     `Amount: ₹${am.toLocaleString()} @ 1/${od}\n` +
     `Potential win: ₹${potWin.toLocaleString()}` +
     (mom?` (+₹${momBonus.toLocaleString()} MoM bonus)`:'') + `\n` +
     (mom?`MoM pick: ${mom}\n`:'No MoM selected\n') +
     (ai?`\n🔥 ALL IN!\n`:'') +
-    `\nPlace this bet?`;
+    `\n${isEditing?'Update':'Place'} this bet?`;
   if(!confirm(confirmMsg))return;
-  S.b[id+'-'+me]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
+  S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
   sv(['b']);toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
 }
 
