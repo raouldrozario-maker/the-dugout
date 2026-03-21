@@ -22,8 +22,10 @@ header{background:linear-gradient(180deg,#0B1426,var(--bg));border-bottom:1px so
 .upill{display:flex;align-items:center;gap:8px;background:var(--inp);border:1px solid var(--bdr);border-radius:24px;padding:4px 14px 4px 4px}
 .udot{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px}
 nav{display:flex;justify-content:center;gap:2px;padding:0 12px 8px;max-width:900px;margin:0 auto;overflow-x:auto}
-.nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;background:0;border:0;color:var(--t3);cursor:pointer;padding:8px 4px;border-radius:8px;font-size:18px;transition:.2s;white-space:nowrap}
+.nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;background:0;border:0;color:var(--t3);cursor:pointer;padding:10px 4px;border-radius:10px;font-size:18px;transition:.2s;white-space:nowrap}
 .nb.on{color:var(--acc);background:#F59E0B12}
+.nb svg{opacity:.6;transition:.2s}
+.nb.on svg{opacity:1;stroke:var(--acc)}
 .nb span:last-child{font-size:11px;font-weight:700;letter-spacing:.5px}
 main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:24px;margin-bottom:20px;animation:fadeUp .4s}
@@ -101,14 +103,14 @@ select.bf-i{appearance:auto;cursor:pointer}
 <div id="app">
 <header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#F59E0B22;color:#F59E0B">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
 <nav>
-<button class="nb on" data-v="home" onclick="nav('home')"><span>🏠</span><span>Home</span></button>
-<button class="nb" data-v="matches" onclick="nav('matches')"><span>📅</span><span>Matches</span></button>
-<button class="nb" data-v="board" onclick="nav('board')"><span>🏆</span><span>Board</span></button>
-<button class="nb" data-v="rules" onclick="nav('rules')"><span>📋</span><span>Rules</span></button>
-<button class="nb" data-v="teams" onclick="nav('teams')"><span>🏏</span><span>Teams</span></button>
-<button class="nb" data-v="analytics" onclick="nav('analytics')"><span>📊</span><span>Stats</span></button>
-<button class="nb" data-v="mygame" onclick="nav('mygame')"><span>👤</span><span>My Game</span></button>
-<button class="nb" data-v="admin" onclick="nav('admin')"><span>⚙️</span><span>Admin</span></button>
+<button class="nb on" data-v="home" onclick="nav('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+<button class="nb" data-v="matches" onclick="nav('matches')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
+<button class="nb" data-v="board" onclick="nav('board')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V10"/><path d="M14 22V10"/><path d="M8 6h8l1 3H7z"/></svg><span>Board</span></button>
+<button class="nb" data-v="rules" onclick="nav('rules')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Rules</span></button>
+<button class="nb" data-v="teams" onclick="nav('teams')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Teams</span></button>
+<button class="nb" data-v="analytics" onclick="nav('analytics')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Stats</span></button>
+<button class="nb" data-v="mygame" onclick="nav('mygame')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My Game</span></button>
+<button class="nb" data-v="admin" onclick="nav('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Admin</span></button>
 </nav></header>
 <main>
 <div id="v-home" class="ctr"></div>
@@ -577,42 +579,67 @@ function rH(){
   // ─── LIVE ACTIVITY FEED ───
   if(ns.length>1){
     const feed=[];
-    // Recent bets (privacy-aware)
+    // Pre-compute streaks and stats per player for emotional phrasing
+    const pStats={};
+    Object.keys(S.p).forEach(n=>{
+      const ub=Object.values(S.b).filter(x=>x.u===n);
+      const rb=ub.filter(x=>S.r[x.mid]).sort((a,b)=>b.mid-a.mid);
+      let streak=0,sType='';
+      for(const bt of rb){
+        const w=bt.tm===S.r[bt.mid].w;
+        if(!sType)sType=w?'W':'L';
+        if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break;
+      }
+      pStats[n]={bets:ub.length,streak,sType,totalWagered:ub.reduce((s,x)=>s+x.am,0)};
+    });
+
+    // Build feed with priority scores
     Object.values(S.b).forEach(bt=>{
       const m=gm(bt.mid);if(!m)return;
-      const l=lk(m),rs=S.r[bt.mid];
-      if(rs){
-        // Resolved — show result
+      const l=lk(m),rs=S.r[bt.mid],ps=pStats[bt.u]||{};
+      if(rs&&!rs.voided){
         const won=bt.tm===rs.w;
         const mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
         const od=parseFloat(bt.od)||2;
-        if(won){
+        const isJackpot=won&&mh&&bt.mt&&bt.mt!==bt.tm;
+        if(isJackpot){
+          const py=Math.round(bt.am/od)*2+Math.round(bt.am*MOMB);
+          feed.push({ts:rs.ts||bt.ts,pri:10,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#F59E0B08',border:'#F59E0B25'});
+        }else if(won&&mh){
+          let py=Math.round(bt.am/od)+Math.round(bt.am*MOMB);
+          feed.push({ts:rs.ts||bt.ts,pri:8,icon:'🎯',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + nailed the MoM! ${ps.streak>=3&&ps.sType==='W'?'<strong style="color:var(--acc)">'+ps.streak+' wins in a row! 🔥</strong>':''}`});
+        }else if(won){
           let py=Math.round(bt.am/od);
-          if(mh)py+=Math.round(bt.am*MOMB);
-          feed.push({ts:rs.ts||bt.ts,icon:'🏆',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+          const bigWin=py>=5000;
+          feed.push({ts:rs.ts||bt.ts,pri:bigWin?7:5,icon:bigWin?'💰':'🏆',text:`<strong>${bt.u}</strong> ${bigWin?'cashed <strong style="color:var(--grn)">₹'+py.toLocaleString()+'</strong>':'won ₹'+py.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=3&&ps.sType==='W'?' — <strong style="color:var(--acc)">'+ps.streak+' in a row!</strong>':ps.streak>=2&&ps.sType==='W'?' — on a roll!':''}`});
         }else if(mh){
-          feed.push({ts:rs.ts||bt.ts,icon:'🛡️',text:`<strong>${bt.u}</strong> saved by MoM pick on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+          feed.push({ts:rs.ts||bt.ts,pri:6,icon:'🛡️',text:`<strong>${bt.u}</strong> lost the bet but <strong style="color:var(--yel)">MoM pick saved them</strong>! Lucky escape`});
         }else{
-          feed.push({ts:rs.ts||bt.ts,icon:'💀',text:`<strong>${bt.u}</strong> lost <strong style="color:var(--red)">₹${bt.am.toLocaleString()}</strong> on ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+          const bigLoss=bt.am>=5000;
+          const loseStreak=ps.streak>=2&&ps.sType==='L';
+          feed.push({ts:rs.ts||bt.ts,pri:bigLoss?6:loseStreak?5:3,icon:loseStreak?'😵':'💀',text:`<strong>${bt.u}</strong> ${bigLoss?'dropped <strong style="color:var(--red)">₹'+bt.am.toLocaleString()+'</strong>':'lost ₹'+bt.am.toLocaleString()} on ${T[bt.tm]?.s}${loseStreak?' — <strong style="color:var(--red)">'+ps.streak+' losses in a row 💀</strong>':''}`});
         }
-      }else if(l){
-        // Locked — bets visible, show details
-        feed.push({ts:bt.ts,icon:'💰',text:`<strong>${bt.u}</strong> bet <strong style="color:var(--acc)">₹${bt.am.toLocaleString()}</strong> on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
-      }else{
-        // Open — hide details for privacy
-        feed.push({ts:bt.ts,icon:'🔥',text:`<strong>${bt.u}</strong> placed a bet on M#${bt.mid} ${T[m.h]?.s} vs ${T[m.a]?.s}`});
+      }else if(!rs&&l){
+        const bigBet=bt.am>=5000;
+        feed.push({ts:bt.ts,pri:bigBet?4:2,icon:bigBet?'🔥':'💰',text:`<strong>${bt.u}</strong> ${bt.am>=bal(bt.u)?'went <strong style="color:var(--hot)">ALL IN</strong> with ₹'+bt.am.toLocaleString():bigBet?'dropped a big one — <strong style="color:var(--acc)">₹'+bt.am.toLocaleString()+'</strong>':'bet ₹'+bt.am.toLocaleString()} on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
+      }else if(!rs&&!l){
+        feed.push({ts:bt.ts,pri:1,icon:'👀',text:`<strong>${bt.u}</strong> just made a move on ${T[m.h]?.s} vs ${T[m.a]?.s}... 👀`});
       }
     });
-    // Recent joins
+    // Joins (low priority)
     Object.entries(S.p).forEach(([n,p])=>{
-      feed.push({ts:p.j,icon:'👤',text:`<strong>${n}</strong> joined the league`});
+      feed.push({ts:p.j,pri:0,icon:'👤',text:`<strong>${n}</strong> entered The Dugout`});
     });
-    // Recent trash talk
-    (S.trash||[]).slice(-5).forEach(t=>{
-      feed.push({ts:t.ts,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>40?t.msg.slice(0,40)+'...':t.msg}"`});
+    // Trash talk (medium priority)
+    (S.trash||[]).slice(-3).forEach(t=>{
+      feed.push({ts:t.ts,pri:2,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>35?t.msg.slice(0,35)+'…':t.msg}"`});
     });
-    // Sort by time, take latest 8
-    feed.sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+
+    // Sort: priority first (highest = most dramatic), then newest
+    feed.sort((a,b)=>{
+      if(b.pri!==a.pri)return b.pri-a.pri;
+      return new Date(b.ts)-new Date(a.ts);
+    });
     const recentFeed=feed.slice(0,8);
 
     if(recentFeed.length){
@@ -621,13 +648,13 @@ function rH(){
         <span style="font-size:16px">🔥</span>
         <span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:2px">LIVE FROM THE DUGOUT</span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px">`;
+      <div style="display:flex;flex-direction:column;gap:6px">`;
       recentFeed.forEach(f=>{
-        h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:var(--inp);border-radius:10px">
-          <span style="font-size:16px;flex-shrink:0;margin-top:1px">${f.icon}</span>
+        h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:${f.bg||'var(--inp)'};border:1px solid ${f.border||'transparent'};border-radius:10px">
+          <span style="font-size:18px;flex-shrink:0;margin-top:1px">${f.icon}</span>
           <div style="flex:1;min-width:0">
-            <div style="font-size:13px;color:var(--t2);line-height:1.5">${f.text}</div>
-            <div style="font-size:10px;color:var(--t3);margin-top:2px">${timeAgo(f.ts)}</div>
+            <div style="font-size:14px;color:var(--t1);line-height:1.5">${f.text}</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:3px">${timeAgo(f.ts)}</div>
           </div>
         </div>`;
       });
