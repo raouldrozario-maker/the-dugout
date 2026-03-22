@@ -64,7 +64,7 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .fb{flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;font-size:14px;cursor:pointer;transition:.2s;min-width:60px}
 .fb.on{background:#D4A24E12;border-color:#D4A24E30;color:var(--acc)}
 .mc{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;animation:fadeUp .3s}
-.mc.lk{border-left-color:var(--t3);filter:grayscale(0.2)}.mc.lk .bf-tb,.mc.lk .ob{opacity:0.5;pointer-events:none}.mc.dn{border-left-color:var(--grn)}
+.mc.lk{border-left-color:var(--t3);filter:grayscale(0.2);cursor:not-allowed}.mc.lk .bf-tb,.mc.lk .ob{opacity:0.5;pointer-events:none}.mc.dn{border-left-color:var(--grn)}
 .mc.urgent-mid{border-left-color:var(--acc);box-shadow:0 0 25px rgba(212,162,78,0.12)}
 .mc.urgent-high{border-left-color:var(--red);animation:pulse-red 1.2s infinite;transform:translateY(-1px);will-change:transform,box-shadow;backface-visibility:hidden}
 .mc.urgent-high .mn{color:var(--red);font-weight:900}
@@ -229,7 +229,7 @@ document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
-function toast(m,t='ok'){const e=$('toast');if(window._tv){clearTimeout(window._tq);window._tq=setTimeout(()=>toast(m,t),250);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false},3000)}
+function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length<3)window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},2500)}
 
 // Balance: based on RESOLVED results only — pending bets don't deduct
 // Floor of 2K only applies when balance is genuinely negative/zero after all resolutions
@@ -1283,7 +1283,8 @@ function calcWin(id){
     `<div>If lose = ₹${curBal.toLocaleString()} − ₹${am.toLocaleString()} = <span style="color:var(--red)">₹${Math.max(curBal-am,MINB).toLocaleString()}</span></div>`;
 }
 function sub(id){
-  const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
+  const m=gm(id);if(!m||lk(m)){toast('Predictions closed for this match','err');return}
+  if(!navigator.onLine){toast('You\'re offline — try again once connected','err');return}
   if(S.r[id]){toast('Match already has a result!','err');return}
   const bk=id+'-'+me;
   const existing=S.b[bk];
