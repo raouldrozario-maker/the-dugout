@@ -112,6 +112,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-dd.open{display:block}
 .sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
 .sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
+.adm-dd-opt:hover{background:var(--inp)}
 .sd-opt:last-child{border-bottom:0}
 .sd-opt:active,.sd-opt.hi{background:var(--inp)}
 .sd-opt .sd-tm{font-size:11px;color:var(--t3);margin-left:6px}
@@ -2818,7 +2819,7 @@ function rA(){
 
   // ─── SYSTEM STATUS (top strip) ───
   h+=`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:100px;background:${db?'#3FB08C10':'#C4453A10'};border:1px solid ${db?'#3FB08C25':'#C4453A25'};border-radius:12px;padding:10px 14px;text-align:center">
+    <div style="flex:1;min-width:100px;background:${db?'#3FB08C10':'#C4453A10'};border:1px solid ${db?'#3FB08C25':'#C4453A25'};border-radius:12px;padding:10px 14px;text-align:center;display:flex;align-items:center;justify-content:center">
       <div style="font-size:13px;font-weight:800;color:${db?'var(--grn)':'var(--red)'}">${db?'🟢 LIVE':'🔴 OFFLINE'}</div>
     </div>
     <div style="flex:2;min-width:180px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px">
@@ -2843,6 +2844,7 @@ function rA(){
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-odds')">📊 Odds</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-result')">🎮 Match Control</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-playoff')">🏟️ Playoffs</button>
+    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-addmatch')">➕ Add Match</button>
   </div>
   <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">PLAYER & BETS</div>
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
@@ -2902,13 +2904,29 @@ function rA(){
   // Set Odds
   // ── MATCH OPERATIONS ──
   h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--t3);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">🏏 MATCH OPERATIONS</div>`;
-  h+=`<div id="adm-odds" class="card"><div class="ch"><span style="font-size:20px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="odds-m" onchange="oddsMC()"><option value="">-- Pick --</option>`;
-  gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.odds[m.id]?'✅':''}</option>`});
-  h+=`</select></div><div id="odds-f"></div></div>`;
-  // Record Result
-  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">MATCH CONTROL</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
-  gms().filter(m=>m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.r[m.id]?'✅':''}</option>`});
-  h+=`</select></div><div id="adm-f"></div></div>`;
+  // Build match lists for custom dropdowns
+  const oddsMatches=gms().filter(m=>!S.r[m.id]&&m.h!=='TBD');
+  const ctrlMatches=gms().filter(m=>m.h!=='TBD');
+
+  h+=`<div id="adm-odds" class="card"><div class="ch"><span style="font-size:20px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div>
+  <div style="position:relative">
+    <div class="bf-i" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center" id="odds-m-display" onclick="admDDToggle('odds-m-dd')"><span id="odds-m-text" style="color:var(--t3)">-- Select match --</span><span style="color:var(--t4)">▼</span></div>
+    <input type="hidden" id="odds-m">
+    <div id="odds-m-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-top:4px;max-height:280px;overflow-y:auto;z-index:100;box-shadow:0 4px 20px #00000066">
+      <input class="bf-i" style="border:0;border-bottom:1px solid var(--bdr);border-radius:10px 10px 0 0;font-size:13px;padding:10px 14px" placeholder="Search match..." oninput="admDDFilter('odds-m-dd',this.value)">
+      <div class="adm-dd-list">${oddsMatches.map(m=>`<div class="adm-dd-opt" data-val="${m.id}" data-text="${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${S.odds[m.id]?' ✅':''}" onclick="admDDPick('odds-m','${m.id}',this.dataset.text);oddsMC()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center"><span>${m.playoff?m.v:'#'+m.id} <strong style="color:${T[m.h]?.c}">${T[m.h]?.s}</strong> v <strong style="color:${T[m.a]?.c}">${T[m.a]?.s}</strong></span><span style="font-size:11px;color:var(--t4)">${fd(m.d)}${S.odds[m.id]?' ✅':''}</span></div>`).join('')}</div>
+    </div>
+  </div></div><div id="odds-f"></div></div>`;
+  // Match Control
+  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">MATCH CONTROL</span></div><div class="bf-s"><div class="bf-l">Match</div>
+  <div style="position:relative">
+    <div class="bf-i" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center" id="adm-m-display" onclick="admDDToggle('adm-m-dd')"><span id="adm-m-text" style="color:var(--t3)">-- Select match --</span><span style="color:var(--t4)">▼</span></div>
+    <input type="hidden" id="adm-m">
+    <div id="adm-m-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-top:4px;max-height:280px;overflow-y:auto;z-index:100;box-shadow:0 4px 20px #00000066">
+      <input class="bf-i" style="border:0;border-bottom:1px solid var(--bdr);border-radius:10px 10px 0 0;font-size:13px;padding:10px 14px" placeholder="Search match..." oninput="admDDFilter('adm-m-dd',this.value)">
+      <div class="adm-dd-list">${ctrlMatches.map(m=>`<div class="adm-dd-opt" data-val="${m.id}" data-text="${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${S.r[m.id]?' ✅':''}" onclick="admDDPick('adm-m','${m.id}',this.dataset.text);admMC()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center"><span>${m.playoff?m.v:'#'+m.id} <strong style="color:${T[m.h]?.c}">${T[m.h]?.s}</strong> v <strong style="color:${T[m.a]?.c}">${T[m.a]?.s}</strong></span><span style="font-size:11px;color:var(--t4)">${fd(m.d)}${S.r[m.id]?' ✅':''}</span></div>`).join('')}</div>
+    </div>
+  </div></div><div id="adm-f"></div></div>`;
   // Set Playoff Teams
   h+=`<div id="adm-playoff" class="card"><div class="ch"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
@@ -2992,20 +3010,25 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Team</div><select class="bf-i" id="sq-team" onchange="sqTeamChange()"><option value="">-- Select --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n} (${T[k].s})</option>`).join('')}</select></div>
   <div id="sq-panel"></div></div>`;
   // Add Match (Phase 2)
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div>
+  h+=`<div id="adm-addmatch" class="card"><div class="ch"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Add Phase 2 matches as BCCI announces them. Currently ${MM.length} matches loaded.</div>
   <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-  <div style="flex:1;min-width:70px"><div class="bf-l">Match #</div><input class="bf-i" type="number" id="nm-id" placeholder="${MM.length+1}"></div>
-  <div style="flex:1;min-width:70px"><div class="bf-l">Day</div><input class="bf-i" type="number" id="nm-day" min="1" max="31" placeholder="28"></div>
+  <div style="flex:1;min-width:70px"><div class="bf-l">Match #</div><input class="bf-i" type="number" id="nm-id" min="1" placeholder="${MM.length+1}" oninput="if(this.value<1)this.value=1"></div>
+  <div style="flex:1;min-width:70px"><div class="bf-l">Day</div><input class="bf-i" type="number" id="nm-day" min="1" max="31" placeholder="28" oninput="if(this.value>31)this.value=31;if(this.value<1&&this.value!=='')this.value=1"></div>
   <div style="flex:1;min-width:70px"><div class="bf-l">Month</div><select class="bf-i" id="nm-month"><option value="03">Mar</option><option value="04" selected>Apr</option><option value="05">May</option></select></div>
   <div style="flex:1;min-width:80px"><div class="bf-l">Year</div><input class="bf-i" type="number" id="nm-year" value="2026" readonly></div>
   <div style="flex:1;min-width:100px"><div class="bf-l">Time (IST)</div><select class="bf-i" id="nm-time"><option value="15:30">3:30 PM</option><option value="19:30" selected>7:30 PM</option></select></div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:8px">
-  <div style="flex:1"><div class="bf-l">Home Team</div><select class="bf-i" id="nm-home"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
+  <div style="flex:1"><div class="bf-l">Home Team</div><select class="bf-i" id="nm-home" onchange="nmTeamSync()"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
   <div style="flex:1"><div class="bf-l">Away Team</div><select class="bf-i" id="nm-away"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
   </div>
-  <div class="bf-s"><div class="bf-l">Venue</div><input class="bf-i" id="nm-venue" placeholder="e.g. Wankhede, Mumbai"></div>
+  <div class="bf-s"><div class="bf-l">Venue</div>
+    <div style="position:relative">
+      <input class="bf-i" id="nm-venue" placeholder="Search venue..." autocomplete="off" onfocus="nmVenueOpen()" oninput="nmVenueFilter()">
+      <div id="nm-venue-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-top:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 20px #00000066"></div>
+    </div>
+  </div>
   <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
   </div>`;
   // Admin Place Bet (override — bypasses lock and player login)
@@ -3093,6 +3116,9 @@ function rA(){
 async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
 function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
 
+function admDDToggle(ddId){const dd=$(ddId);if(!dd)return;const show=dd.style.display==='none';dd.style.display=show?'block':'none';if(show){const inp=dd.querySelector('input');if(inp){inp.value='';inp.focus()}admDDFilter(ddId,'');setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&!dd.previousElementSibling?.previousElementSibling?.contains(e.target)){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}}
+function admDDFilter(ddId,q){const dd=$(ddId);if(!dd)return;const opts=dd.querySelectorAll('.adm-dd-opt');const lq=q.toLowerCase();opts.forEach(o=>{o.style.display=o.dataset.text.toLowerCase().includes(lq)?'flex':'none'})}
+function admDDPick(inputId,val,text){$(inputId).value=val;const txt=$(inputId+'-text');if(txt){txt.textContent=text;txt.style.color='var(--t1)'}const dd=$(inputId+'-dd');if(dd)dd.style.display='none'}
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
 f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
@@ -3291,6 +3317,10 @@ function revealKO(){
   S.koWinner=winner;S.koRevealed=true;S.koOpen=false;
   sv();toast('Crystal Balls revealed! 🔮🏆');rA();
 }
+const IPL_VENUES=['M. Chinnaswamy Stadium, Bengaluru','Wankhede Stadium, Mumbai','MA Chidambaram Stadium, Chennai','Eden Gardens, Kolkata','Arun Jaitley Stadium, Delhi','Rajiv Gandhi Intl Stadium, Hyderabad','Narendra Modi Stadium, Ahmedabad','IS Bindra Stadium, Mohali','Sawai Mansingh Stadium, Jaipur','Bharat Ratna Shri Atal Bihari Vajpayee Ekana Stadium, Lucknow','Himachal Pradesh Cricket Association Stadium, Dharamsala','Dr. DY Patil Sports Academy, Navi Mumbai','Maharashtra Cricket Association Stadium, Pune','Barsapara Cricket Stadium, Guwahati','Holkar Cricket Stadium, Indore','JSCA International Stadium Complex, Ranchi','Greenfield International Stadium, Thiruvananthapuram','ACA-VDCA Cricket Stadium, Visakhapatnam'];
+function nmTeamSync(){const h=$('nm-home').value,aSel=$('nm-away');const cur=aSel.value;aSel.innerHTML='<option value="">--</option>';Object.keys(T).forEach(k=>{if(k!==h)aSel.innerHTML+=`<option value="${k}" ${k===cur?'selected':''}>${T[k].s}</option>`})}
+function nmVenueOpen(){const dd=$('nm-venue-dd');dd.style.display='block';nmVenueFilter();setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&e.target.id!=='nm-venue'){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}
+function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background=''" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">${v}</div>`).join(''):'<div style="padding:10px 14px;color:var(--t4);font-size:12px">No venues found</div>'}
 function addMatch(){
   const id=parseInt($('nm-id').value)||MM.length+1;
   const day=parseInt($('nm-day').value);
@@ -3572,6 +3602,7 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Match Control</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-addmatch');$('adm-sheet').style.display='none'">➕ Add Match</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-wa');$('adm-sheet').style.display='none'">📲 WhatsApp</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-crystal');$('adm-sheet').style.display='none'">🔮 Crystal Ball</button>
