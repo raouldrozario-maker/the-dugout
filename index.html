@@ -576,7 +576,7 @@ function ld(){
       });
       ren();uh();
     });
-    $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#34D399';
+    $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';
   }catch(e){console.log('FB fail:',e)}}
   if(me&&!S.p[me])me=null;
   uh();nav('home');
@@ -663,7 +663,7 @@ function rH(){
       <div style="flex:1;min-width:140px">
         <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Balance</div>
         <div style="font-size:32px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff);margin-top:4px">₹${b.toLocaleString()}</div>
-        <div style="font-size:14px;color:${diff>=0?'#34D399':'#F87171'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
+        <div style="font-size:14px;color:${diff>=0?'#3FB08C':'#D45B5B'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
         ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}
       </div>
       <!-- Win/Loss Ring Chart -->
@@ -920,7 +920,7 @@ function rH(){
     const hasDiff=L.some(p=>p.b!==ST);
     h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">STANDINGS</span></div>`;
     if(!hasDiff){h+=`<div style="text-align:center;padding:12px;color:var(--t3);font-size:13px">Everyone starts equal at ₹${ST.toLocaleString()} — standings update after the first results come in!</div>`}
-    else{L.slice(0,5).forEach((p,i)=>{const c=['#FBBF24','#94A3B8','#D97706'][i]||'#475569';const df=rawBal(p.n)-ST;h+=`<div class="sr"><span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${c}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span><span style="flex:1;font-weight:700;font-size:14px">${p.n}</span><div style="text-align:right"><div style="font-weight:800;font-size:14px;color:${p.b>=ST?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div><div style="font-size:11px;color:${df>=0?'#34D39988':'#F8717188'}">${df>=0?'+':''}${df.toLocaleString()}</div></div></div>`});if(L.length>5)h+=`<button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:13px;font-weight:700;margin-top:12px" onclick="nav('board')">View full leaderboard →</button>`}
+    else{L.slice(0,5).forEach((p,i)=>{const c=['#D4A24E','#94A3B8','#D97706'][i]||'#475569';const df=rawBal(p.n)-ST;h+=`<div class="sr"><span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${c}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span><span style="flex:1;font-weight:700;font-size:14px">${p.n}</span><div style="text-align:right"><div style="font-weight:800;font-size:14px;color:${p.b>=ST?'var(--grn)':'var(--red)'}">₹${p.b.toLocaleString()}</div><div style="font-size:11px;color:${df>=0?'#3FB08C77':'#D45B5B77'}">${df>=0?'+':''}${df.toLocaleString()}</div></div></div>`});if(L.length>5)h+=`<button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:13px;font-weight:700;margin-top:12px" onclick="nav('board')">View full leaderboard →</button>`}
     h+=`</div>`;
   }
 
@@ -1355,7 +1355,7 @@ function rB(){
           <div style="width:${sizes[pi]}px;height:${sizes[pi]}px;border-radius:50%;background:${pi===1?'var(--grad)':'var(--inp)'};border:3px solid ${borders[pi]};display:flex;align-items:center;justify-content:center;color:${pi===1?'#000':colors[pi]};font-weight:900;font-size:${fontSizes[pi]}px;margin:0 auto;${isMe?'box-shadow:0 0 8px '+colors[pi]+'66':''}">${p.n[0].toUpperCase()}</div>
           <div style="font-weight:800;font-size:${pi===1?'16':'13'}px;margin-top:8px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}</div>
           <div style="font-weight:900;font-size:${pi===1?'22':'16'}px;color:${df>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
-          <div style="font-size:11px;color:${df>=0?'#34D39966':'#F8717166'}">${df>=0?'+':''}${df.toLocaleString()}</div>
+          <div style="font-size:11px;color:${df>=0?'#3FB08C55':'#D45B5B55'}">${df>=0?'+':''}${df.toLocaleString()}</div>
           <div style="background:${colors[pi]}12;border:1px solid ${colors[pi]}25;border-radius:12px 12px 0 0;height:${heights[pi]};display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;margin-top:8px">
             <span style="font-size:${pi===1?'32':'24'}px">${emojis[pi]}</span>
           </div>
@@ -1460,7 +1460,7 @@ function rB(){
       const isMe=me===p.n;
       const diff=p.fin-p.pub;
       h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:${isMe?'#D4A24E08':'var(--inp)'};border:1px solid ${isMe?'#D4A24E25':'var(--bdr)'};border-radius:12px">
-        <span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span>
+        <span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${i<3?['#D4A24E','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span>
         <div style="flex:1">
           <div style="font-weight:700;font-size:14px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' (you)':''}</div>
           <div style="font-size:11px;color:var(--t4)">Base: ₹${p.pub.toLocaleString()}${diff!==0?' · CB: <span style="color:'+(diff>0?'var(--grn)':'var(--red)')+'">'+( diff>0?'+':'')+diff.toLocaleString()+'</span>':''}</div>
@@ -2605,7 +2605,7 @@ function rA(){
     finalL.forEach((p,i)=>{
       const koRes=p.ko?(p.ko.team===S.koWinner?`<span style="color:var(--grn)">✅ +₹${p.ko.amount.toLocaleString()}</span>`:`<span style="color:var(--red)">❌ -₹${p.ko.amount.toLocaleString()}</span>`):'<span style="color:var(--t3)">No bet</span>';
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:4px">
-      <div><span style="font-weight:900;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'};margin-right:8px">#${i+1}</span><span style="font-weight:700;color:var(--t1)">${p.n}</span></div>
+      <div><span style="font-weight:900;color:${i<3?['#D4A24E','#94A3B8','#D97706'][i]:'var(--t3)'};margin-right:8px">#${i+1}</span><span style="font-weight:700;color:var(--t1)">${p.n}</span></div>
       <div style="display:flex;gap:12px;align-items:center;font-size:13px">
         <span style="color:var(--t4)">Base: ₹${p.pub.toLocaleString()}</span>
         ${p.ko?`<span>${koRes}</span>`:''}
@@ -2694,7 +2694,7 @@ function rA(){
       const koDiff=p.fin-p.pub;
       const won=p.ko&&p.ko.team===S.koWinner;
       h+=`<tr style="border-bottom:1px solid var(--bdr)">
-        <td style="padding:10px 6px;font-weight:800;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</td>
+        <td style="padding:10px 6px;font-weight:800;color:${i<3?['#D4A24E','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</td>
         <td style="padding:10px 6px;font-weight:700;color:var(--t1)">${p.n}</td>
         <td style="padding:10px 6px;text-align:right;color:var(--t2)">₹${p.pub.toLocaleString()}</td>
         <td style="padding:10px 6px;text-align:center;color:${p.ko?T[p.ko.team]?.c||'var(--acc)':'var(--t3)'};font-weight:700">${p.ko?T[p.ko.team]?.s||p.ko.team:'—'}</td>
@@ -3147,7 +3147,7 @@ db.ref('dugout').once('value').then(snap=>{
   db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
-$('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#34D399';toast('Firebase connected! 🔗');
+$('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
 }catch(e){err.textContent='Invalid JSON'}}
 
 // Boot
