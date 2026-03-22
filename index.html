@@ -212,7 +212,7 @@ let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getI
 // HELPERS
 // ══════════════════════════════════════════════════════════════
 function dl(m){const[h,mn]=m.t.split(':').map(Number);const d=new Date(m.d+'T00:00:00+05:30');d.setHours(h,mn,0,0);d.setMinutes(d.getMinutes()-40);return d}
-function lk(m){return new Date()>=dl(m)}
+function lk(m){if(S.lockOverride&&S.lockOverride[m.id]!==undefined)return S.lockOverride[m.id];return new Date()>=dl(m)}
 function fd(s){return new Date(s+'T00:00:00+05:30').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m} ${hr>=12?'PM':'AM'}`}
 function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.floor(df/864e5),h=Math.floor((df%864e5)/36e5),mn=Math.floor((df%36e5)/6e4);return d>0?d+'d '+h+'h':h>0?h+'h '+mn+'m':mn+'m'}
@@ -2799,9 +2799,32 @@ function rA(){
   const totalPlayers=Object.keys(S.p).length,totalBets=Object.keys(S.b).length;
   const activePlayers=new Set(Object.values(S.b).map(b=>b.u)).size;
   const dormant=totalPlayers-activePlayers;
+  const totalWagered=Object.values(S.b).reduce((s,b)=>s+b.am,0);
+  const nextOpen=allM.find(m=>!S.r[m.id]&&!lk(m)&&m.h!=='TBD');
+  const nextLive=allM.find(m=>!S.r[m.id]&&lk(m)&&m.h!=='TBD');
   h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div><div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc);letter-spacing:2px">ADMIN PANEL</div><div style="font-size:13px;color:var(--t4);margin-top:2px">Manage the league</div></div>
+    <div><div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc);letter-spacing:2px">COMMAND CENTER</div><div style="font-size:13px;color:var(--t4);margin-top:2px">League control panel</div></div>
     <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;toast('Logged out as Admin');ren()">🔓 Logout</button>
+  </div>`;
+
+  // ─── SYSTEM STATUS (top strip) ───
+  h+=`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:100px;background:${db?'#3FB08C10':'#C4453A10'};border:1px solid ${db?'#3FB08C25':'#C4453A25'};border-radius:12px;padding:10px 14px;text-align:center">
+      <div style="font-size:13px;font-weight:800;color:${db?'var(--grn)':'var(--red)'}">${db?'🟢 LIVE':'🔴 OFFLINE'}</div>
+    </div>
+    <div style="flex:2;min-width:180px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px">
+      ${nextLive?`<div style="font-size:12px;color:var(--t4)">Awaiting result</div><div style="font-size:13px;font-weight:700;color:var(--acc)">${T[nextLive.h]?.s} vs ${T[nextLive.a]?.s} · ${fd(nextLive.d)}</div>`
+       :nextOpen?`<div style="font-size:12px;color:var(--t4)">Betting open</div><div style="font-size:13px;font-weight:700;color:var(--grn)">${T[nextOpen.h]?.s} vs ${T[nextOpen.a]?.s} · ${S.odds[nextOpen.id]?'Odds set ✅':'⚠️ Needs odds'}</div>`
+       :`<div style="font-size:13px;color:var(--t3)">No active match</div>`}
+    </div>
+    <div style="flex:1;min-width:100px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px;text-align:center">
+      <div style="font-size:16px;font-weight:900;color:var(--acc);font-family:var(--ff)">${totalPlayers}</div>
+      <div style="font-size:10px;color:var(--t4)">Players</div>
+    </div>
+    <div style="flex:1;min-width:100px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:10px 14px;text-align:center">
+      <div style="font-size:16px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${totalWagered.toLocaleString()}</div>
+      <div style="font-size:10px;color:var(--t4)">In Play</div>
+    </div>
   </div>`;
   // Admin jump navigation — grouped
   h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;margin-bottom:20px">
@@ -2827,13 +2850,14 @@ function rA(){
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-squads')">🏏 Squads</button>
     <button style="background:#C4453A0C;border:1px solid #C4453A22;border-radius:8px;padding:6px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-danger')">🗑️ Danger</button>
   </div></div>`;
-  h+=`<div id="adm-dash" class="card"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">ADMIN DASHBOARD</span></div>
+  h+=`<div id="adm-dash" class="card"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">LEAGUE SNAPSHOT</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">${resolved}/${totalM}</div><div style="font-size:11px;color:var(--t4)">Matches Done</div></div>
-  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">${oddsSet}</div><div style="font-size:11px;color:var(--t4)">Odds Set</div></div>
-  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--grn);font-family:var(--ff)">${totalPlayers}</div><div style="font-size:11px;color:var(--t4)">Players</div></div>
-  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--t2);font-family:var(--ff)">${totalBets}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
-  </div>`;
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">${totalBets}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${totalWagered.toLocaleString()}</div><div style="font-size:11px;color:var(--t4)">Total Wagered</div></div>
+  <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--t2);font-family:var(--ff)">${totalBets?'₹'+Math.round(totalWagered/totalBets).toLocaleString():'—'}</div><div style="font-size:11px;color:var(--t4)">Avg Bet Size</div></div>
+  </div>
+  ${(()=>{const tp={};Object.values(S.b).forEach(b=>{tp[b.tm]=(tp[b.tm]||0)+1});const top=Object.entries(tp).sort((a,b)=>b[1]-a[1])[0];return top?`<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"><div style="flex:1;background:var(--inp);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t4)">🔥 Most picked</span><span style="font-weight:800;color:${T[top[0]]?.c||'var(--acc)'};font-size:13px">${T[top[0]]?.s||top[0]} (${top[1]})</span></div><div style="flex:1;background:var(--inp);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:var(--t4)">👥 Active / Total</span><span style="font-weight:800;color:var(--t1);font-size:13px">${activePlayers}/${totalPlayers}${dormant?' <span style="color:var(--red);font-size:11px">(${dormant} idle)</span>':''}</span></div></div>`:''})()}`;
   // Action items
   let actions=[];
   if(nextUnresolved)actions.push(`📝 <strong>Record result</strong> for M#${nextUnresolved.id} ${T[nextUnresolved.h]?.s} v ${T[nextUnresolved.a]?.s}`);
@@ -3046,11 +3070,12 @@ function rA(){
   // ── DANGER ZONE ──
   h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">⚠️ DANGER ZONE</div>`;
   h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25"><div class="ch"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:10px">
-  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets? Crystal Ball predictions will remain.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button>
-  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button>
-  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results? Balances will recalculate.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
-  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button>
-  <button style="width:100%;padding:12px;background:#C4453A18;border:1px solid #C4453A33;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets across ALL matches for ALL players?\\n\\nCrystal Ball predictions will remain.\\nBalances will reset to ₹10,000.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?\\n\\nAll secret IPL winner bets will be deleted.')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL match results?\\n\\nAll balances will recalculate to reflect no results.\\nBets remain — only results are removed.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all match results. Bets stay — balances recalculate without wins/losses.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
+  <div style="margin-top:12px;padding-top:12px;border-top:2px solid #C4453A25"><button style="width:100%;padding:14px;background:#C4453A25;border:2px solid #C4453A44;border-radius:10px;color:var(--red);font-weight:900;cursor:pointer;font-size:14px;letter-spacing:1px" onclick="rstAll()">💀 RESET EVERYTHING</button><div style="font-size:10px;color:var(--red);padding:4px 4px 0;font-weight:600">Wipes ALL data — players, bets, results, odds, Crystal Ball, squads, admin PIN. Requires PIN confirmation. Cannot be undone.</div></div>
+  </div></div>`;
   el.innerHTML=h;
 }
 
@@ -3079,7 +3104,17 @@ let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><
 // Show clear result if already recorded
 if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv(['r']);toast('Result cleared');rA()}">↩️ Undo</button></div>`}
 const ab=Object.values(S.b).filter(x=>x.mid===id);
-if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
+// Lock override + match-level controls
+const isLocked=lk(m);
+h+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">`;
+if(!S.r[id]){
+  h+=`<button style="flex:1;padding:8px;background:${isLocked?'#3FB08C10':'#D4A24E10'};border:1px solid ${isLocked?'#3FB08C25':'#D4A24E25'};border-radius:8px;color:${isLocked?'var(--grn)':'var(--acc)'};font-weight:700;cursor:pointer;font-size:12px" onclick="if(!S.lockOverride)S.lockOverride={};S.lockOverride[${id}]=${isLocked?'false':'true'};sv();toast('${isLocked?'Match unlocked — bets allowed':'Match force-locked'}');rA()">${isLocked?'🔓 Force Unlock':'🔒 Force Lock'}</button>`;
+}
+if(ab.length){
+  h+=`<button style="flex:1;padding:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:8px;color:var(--red);font-weight:700;cursor:pointer;font-size:12px" onclick="if(confirm('Clear all ${ab.length} bet(s) for this match only?\\n\\nPlayers: ${ab.map(x=>x.u).join(', ')}')){Object.keys(S.b).forEach(k=>{if(S.b[k].mid===${id})delete S.b[k]});sv(['b']);toast('${ab.length} bets cleared for this match');rA()}">🗑️ Clear Match Bets (${ab.length})</button>`;
+}
+h+=`</div>`;
+if(ab.length){h+=`<div style="margin-top:12px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
 f.innerHTML=h}
 
 function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});sdFilter('amm-'+id)}
