@@ -604,7 +604,7 @@ window.addEventListener('online',()=>{
 
 function ld(){
   // Load local state
-  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
+  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.lockOverride=S.lockOverride||{};S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
   // Try Firebase
   const cfg=localStorage.getItem('dg-fb');
   if(cfg&&typeof firebase!=='undefined'){try{
@@ -616,7 +616,7 @@ function ld(){
       const d=snap.val();
       if(d&&Object.keys(d.p||{}).length>0){
         // Remote has data — use it (don't overwrite with empty local)
-        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
@@ -625,7 +625,7 @@ function ld(){
       // Now start real-time listener
       db.ref('dugout').on('value',sn=>{
         const oldR={...S.r};
-        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         // Detect new results for logged-in player
         if(me){Object.keys(S.r).forEach(mid=>{
           if(!oldR[mid]&&!S.r[mid].voided){
@@ -2832,7 +2832,7 @@ function rA(){
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-dash')">📋 Dashboard</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-odds')">📊 Odds</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-result')">📝 Results</button>
+    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-result')">🎮 Match Control</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-playoff')">🏟️ Playoffs</button>
   </div>
   <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">PLAYER & BETS</div>
@@ -2897,7 +2897,7 @@ function rA(){
   gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.odds[m.id]?'✅':''}</option>`});
   h+=`</select></div><div id="odds-f"></div></div>`;
   // Record Result
-  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:20px">📝</span><span class="ct">RECORD RESULT</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
+  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">MATCH CONTROL</span></div><div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="adm-m" onchange="admMC()"><option value="">-- Pick --</option>`;
   gms().filter(m=>m.h!=='TBD').forEach(m=>{h+=`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)}) ${S.r[m.id]?'✅':''}</option>`});
   h+=`</select></div><div id="adm-f"></div></div>`;
   // Set Playoff Teams
@@ -3085,7 +3085,7 @@ async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=aw
 function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
 
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
-f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">📊 Publish</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
+f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
 function sOdds(id){const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
@@ -3108,7 +3108,7 @@ const ab=Object.values(S.b).filter(x=>x.mid===id);
 const isLocked=lk(m);
 h+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">`;
 if(!S.r[id]){
-  h+=`<button style="flex:1;padding:8px;background:${isLocked?'#3FB08C10':'#D4A24E10'};border:1px solid ${isLocked?'#3FB08C25':'#D4A24E25'};border-radius:8px;color:${isLocked?'var(--grn)':'var(--acc)'};font-weight:700;cursor:pointer;font-size:12px" onclick="if(!S.lockOverride)S.lockOverride={};S.lockOverride[${id}]=${isLocked?'false':'true'};sv();toast('${isLocked?'Match unlocked — bets allowed':'Match force-locked'}');rA()">${isLocked?'🔓 Force Unlock':'🔒 Force Lock'}</button>`;
+  h+=`<div style="flex:1"><button style="width:100%;padding:8px;background:${isLocked?'#3FB08C10':'#D4A24E10'};border:1px solid ${isLocked?'#3FB08C25':'#D4A24E25'};border-radius:8px;color:${isLocked?'var(--grn)':'var(--acc)'};font-weight:700;cursor:pointer;font-size:12px" onclick="if(!S.lockOverride)S.lockOverride={};S.lockOverride[${id}]=${isLocked?'false':'true'};sv();toast('${isLocked?'Match unlocked — bets allowed':'Match force-locked — no new bets'}');rA()">${isLocked?'🔓 Force Unlock':'🔒 Force Lock'}</button><div style="font-size:9px;color:var(--t4);padding:3px 2px 0">${isLocked?'Reopen betting (e.g. match delayed)':'Close betting early before auto-lock'}</div></div>`;
 }
 if(ab.length){
   h+=`<button style="flex:1;padding:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:8px;color:var(--red);font-weight:700;cursor:pointer;font-size:12px" onclick="if(confirm('Clear all ${ab.length} bet(s) for this match only?\\n\\nPlayers: ${ab.map(x=>x.u).join(', ')}')){Object.keys(S.b).forEach(k=>{if(S.b[k].mid===${id})delete S.b[k]});sv(['b']);toast('${ab.length} bets cleared for this match');rA()}">🗑️ Clear Match Bets (${ab.length})</button>`;
@@ -3516,8 +3516,8 @@ try{const c=JSON.parse(raw);if(!c.databaseURL){err.textContent='Missing database
 db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
-  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
@@ -3561,7 +3561,7 @@ window.addEventListener('resize',moveSlider);
   <div style="display:flex;flex-direction:column;gap:4px">
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 Dashboard</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">📝 Record Result</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Match Control</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-wa');$('adm-sheet').style.display='none'">📲 WhatsApp</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
