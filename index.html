@@ -76,8 +76,8 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .bf-t{font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:16px}
 .bf-s{margin-bottom:12px}
 .bf-l{font-size:13px;color:var(--t4);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.bf-tr{display:flex;gap:8px}
-.bf-tb{padding:10px 20px;border-radius:10px;border:2px solid;font-weight:800;font-size:15px;cursor:pointer;transition:.15s;font-family:var(--ff);background:0}
+.bf-tr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bf-tb{padding:14px 16px;border-radius:12px;border:2px solid;font-weight:800;font-size:15px;cursor:pointer;transition:.15s;font-family:var(--ff);background:0;display:flex;align-items:center;justify-content:center;width:100%}
 .bf-i{width:100%;background:var(--bg);border:1px solid var(--bdr);border-radius:10px;padding:10px 14px;color:var(--t1);font-size:15px;outline:0}
 .bf-i:focus{border-color:var(--bdr2)}
 .bf-h{font-size:12px;color:var(--t3);margin-top:6px}
@@ -202,7 +202,7 @@ const MM=[
 ];
 
 const ST=10000,MINB=2000,MOMB=.2;
-let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={};
+let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={};
 
 // ══════════════════════════════════════════════════════════════
 // HELPERS
@@ -1027,15 +1027,15 @@ function rM(){
     <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 0">
       <div style="text-align:center;flex:1">
         ${bdg(m.h,56)}
-        ${mo?`<div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff);margin-top:6px">×${mo[m.h]}</div>`:''}
+        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff);margin-top:6px">×${mo[m.h]}</div><div style="font-size:10px;color:var(--t4)">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.h]*100)}%</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc)">VS</div>
+        <div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--t2)">VS</div>
         <div style="font-size:11px;color:var(--t4)">${m.v}</div>
       </div>
       <div style="text-align:center;flex:1">
         ${bdg(m.a,56)}
-        ${mo?`<div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff);margin-top:6px">×${mo[m.a]}</div>`:''}
+        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff);margin-top:6px">×${mo[m.a]}</div><div style="font-size:10px;color:var(--t4)">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.a]*100)}%</div>`:''}
       </div>
     </div>`;
 
@@ -1159,41 +1159,27 @@ function oBF(id,prefill){
   const cdStr=cd(m);
   f.innerHTML=`<div class="bf"><div class="bf-t">${isEdit?'✏️ EDIT YOUR BET':'PLACE YOUR BET'} <span style="float:right;font-size:12px;color:var(--yel);font-weight:600">⏱️ Locks in ${cdStr}</span></div>
   <div class="bf-s"><div class="bf-l">Pick Team</div><div class="bf-tr">
-  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(×${mo[m.h]||'?'})</span></button>
-  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(×${mo[m.a]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')"><span style="font-size:13px;font-weight:800">${T[m.h]?.s||m.h}</span>${mo[m.h]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.h]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.h]*100)}%</span>`:''}</button>
+  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')"><span style="font-size:13px;font-weight:800">${T[m.a]?.s||m.a}</span>${mo[m.a]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.a]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.a]*100)}%</span>`:''}</button>
   </div></div>
   <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--acc)';$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="this.classList.remove('allin-pop');void this.offsetWidth;this.classList.add('allin-pop');this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--hot)';$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN ₹${b.toLocaleString()} 🔥</button></div>
-  <div id="wc-${id}" style="margin-top:16px;padding:0;display:none">
-    <div style="text-align:center;padding:14px 0">
-      <div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Potential profit</div>
-      <div style="font-weight:900;font-family:var(--ff);font-size:32px;color:var(--grn);line-height:1" id="wc-win-${id}"></div>
-      <div id="wc-detail-${id}" style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:10px;color:var(--t3);margin-top:4px"></div>
-    </div>
-    <div style="border-top:1px solid rgba(255,255,255,0.08);padding:10px 0 0">
-      <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-        <span style="color:var(--t2);font-size:12px">With MoM bonus</span>
-        <div style="text-align:right">
-          <span style="font-weight:800;color:var(--grn);font-family:var(--ff);font-size:15px" id="wc-momv-${id}"></span>
-          <div id="wc-momd-${id}" style="font-size:10px;color:var(--t2);margin-top:2px"></div>
-        </div>
+  <div id="wc-${id}" style="margin-top:20px;padding:0;display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="padding:20px;border-radius:14px;border:1px solid rgba(63,176,140,0.25);background:linear-gradient(180deg,rgba(63,176,140,0.08),var(--card));transform:scale(1.01);box-shadow:0 6px 24px rgba(63,176,140,0.12)">
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:8px" id="wc-winlabel-${id}">If your bet wins</div>
+        <div style="font-weight:900;font-family:var(--ff);font-size:26px;color:var(--grn);line-height:1;letter-spacing:.5px" id="wc-bal-${id}"></div>
+        <div style="font-size:11px;color:var(--t4);margin-top:8px;line-height:1.5" id="wc-windetail-${id}"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-        <span style="color:var(--t2);font-size:12px">Lose</span>
-        <span style="font-weight:800;color:var(--red);font-family:var(--ff);font-size:15px" id="wc-lose-${id}"></span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
-        <span style="color:var(--t3);font-size:12px">MoM save</span>
-        <span style="color:var(--t3);font-family:var(--ff);font-size:15px">₹0</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline;padding:12px 0">
-        <span style="color:var(--t2);font-size:12px;font-weight:600">At risk</span>
-        <span style="color:var(--t1);font-weight:800;font-family:var(--ff);font-size:15px" id="wc-risk-${id}"></span>
+      <div style="padding:20px;border-radius:14px;border:1px solid rgba(212,91,91,0.18);background:linear-gradient(180deg,rgba(212,91,91,0.05),var(--card))">
+        <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:8px" id="wc-loselabel-${id}">If your bet loses</div>
+        <div style="font-weight:900;font-family:var(--ff);font-size:26px;color:var(--red);line-height:1;letter-spacing:.5px" id="wc-lose-${id}"></div>
+        <div style="font-size:11px;color:var(--t4);margin-top:8px;line-height:1.5">MoM saves your stake</div>
       </div>
     </div>
-    <div id="wc-final-${id}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding:14px 0 0;margin-top:2px">
-      <div style="display:grid;grid-template-columns:1fr auto;align-items:baseline">
-        <span style="color:var(--t2);font-size:12px">Balance after win</span>
-        <span style="color:var(--t1);font-weight:800;font-family:var(--ff);font-size:17px" id="wc-bal-${id}"></span>
+    <div style="text-align:center;margin-top:10px">
+      <button style="background:0;border:0;color:var(--t4);font-size:11px;cursor:pointer;font-weight:600;padding:4px 8px" onclick="const d=$('wc-calc-${id}');d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'View calculation ▸':'Hide calculation ▾'">View calculation ▸</button>
+      <div id="wc-calc-${id}" style="display:none;margin-top:8px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:var(--t2);line-height:2">
+        <div id="wc-calcbody-${id}"></div>
       </div>
     </div>
   </div></div>
@@ -1231,19 +1217,27 @@ function calcWin(id){
   const od=parseFloat(mo[f.tm]);
   const win=Math.round(am*(od-1));
   const momBonus=Math.round(am*MOMB);
-  $('wc-win-'+id).textContent='+₹'+win.toLocaleString();
+  const curBal=bal(me);
+  const bv=$('wc-bal-'+id);
+  if(bv)bv.textContent='₹'+(curBal+win).toLocaleString();
+  const wd=$('wc-windetail-'+id);
+  if(wd)wd.innerHTML='+₹'+win.toLocaleString()+' profit<br><span style="color:var(--t3)">MoM bonus adds ₹'+momBonus.toLocaleString()+'</span>';
+  const wl=$('wc-winlabel-'+id);
+  if(wl)wl.textContent='If your bet wins';
   $('wc-lose-'+id).textContent='-₹'+am.toLocaleString();
-  $('wc-momv-'+id).textContent='+₹'+(win+momBonus).toLocaleString();
-  const momd=$('wc-momd-'+id);
-  if(momd)momd.textContent='includes ₹'+momBonus.toLocaleString()+' MoM bonus';
-  const det=$('wc-detail-'+id);
-  if(det)det.textContent='₹'+am.toLocaleString()+' × ('+od+' - 1) = ₹'+win.toLocaleString();
-  const risk=$('wc-risk-'+id);
-  if(risk)risk.textContent='₹'+am.toLocaleString();
-  const bf=$('wc-final-'+id),bv=$('wc-bal-'+id);
-  if(bf&&bv){const curBal=bal(me);bv.textContent='₹'+(curBal+win).toLocaleString();bf.style.display=''}
+  const ll=$('wc-loselabel-'+id);
+  if(ll)ll.textContent='If your bet loses';
   const cta=$('cta-'+id);
   if(cta)cta.textContent='Bet ₹'+am.toLocaleString()+' on '+f.tm;
+  // Populate calculation detail
+  const cb=$('wc-calcbody-'+id);
+  if(cb)cb.innerHTML=
+    `<div style="color:var(--t4);margin-bottom:6px">Bet: ₹${am.toLocaleString()} on ${f.tm} at ×${od}</div>`+
+    `<div>Profit = ₹${am.toLocaleString()} × (${od} − 1) = <span style="color:var(--grn)">₹${win.toLocaleString()}</span></div>`+
+    `<div>MoM bonus = ₹${am.toLocaleString()} × 20% = <span style="color:var(--acc)">₹${momBonus.toLocaleString()}</span></div>`+
+    `<div>Win + MoM = ₹${win.toLocaleString()} + ₹${momBonus.toLocaleString()} = <span style="color:var(--grn)">₹${(win+momBonus).toLocaleString()}</span></div>`+
+    `<div style="border-top:1px solid var(--bdr);margin-top:8px;padding-top:8px">New balance if win = ₹${curBal.toLocaleString()} + ₹${win.toLocaleString()} = <span style="color:var(--t1);font-weight:700">₹${(curBal+win).toLocaleString()}</span></div>`+
+    `<div>If lose = ₹${curBal.toLocaleString()} − ₹${am.toLocaleString()} = <span style="color:var(--red)">₹${Math.max(curBal-am,MINB).toLocaleString()}</span></div>`;
 }
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
@@ -1347,8 +1341,8 @@ function rB(){
     if(L.length>=3){
       const podium=[L[1],L[0],L[2]]; // 2nd, 1st, 3rd (visual order)
       const heights=['80px','110px','60px'];
-      const colors=['#94A3B8','#FBBF24','#D97706'];
-      const borders=['#94A3B8','#FBBF24','#D97706'];
+      const colors=['#94A3B8','#D4A24E','#D97706'];
+      const borders=['#94A3B8','#D4A24E','#D97706'];
       const sizes=[46,58,46];
       const emojis=['🥈','👑','🥉'];
       const fontSizes=[14,18,14];
@@ -1370,50 +1364,54 @@ function rB(){
       h+=`</div>`;
     }
 
-    // Full ranked list
-    L.forEach((p,i)=>{
-      const ub=Object.values(S.b).filter(x=>x.u===p.n);
-      const w=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided&&x.tm===S.r[x.mid].w).length;
-      const l=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided&&x.tm!==S.r[x.mid].w).length;
-      const rub=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided);
-      const winPct=rub.length?Math.round(w/rub.length*100):0;
-      const pending=ub.filter(x=>!S.r[x.mid]).length;
-      const df=rawBal(p.n)-ST;
-      const isMe=me===p.n;
-      const barWidth=maxBal>minBal?Math.max(((p.b-minBal)/(maxBal-minBal))*100,8):100;
-      const rankColors=['#FBBF24','#94A3B8','#D97706'];
-      const rankColor=rankColors[i]||'var(--t3)';
+    // You vs Leader strip
+    const meData=L.find(p=>p.n===me);
+    const leader=L[0];
+    if(me&&meData&&leader){
+      if(meData.n===leader.n){
+        h+=`<div style="display:flex;align-items:center;justify-content:center;padding:12px 16px;margin-bottom:16px;border-radius:12px;background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.15);font-size:13px;font-weight:700;color:var(--acc)">👑 You're leading</div>`;
+      } else {
+        const myGap=leader.b-meData.b;
+        const myRank=L.indexOf(meData)+1;
+        h+=`<div style="display:grid;grid-template-columns:1fr 1fr auto;align-items:center;padding:12px 16px;margin-bottom:16px;border-radius:12px;background:rgba(212,162,78,0.04);border:1px solid rgba(212,162,78,0.1);font-size:13px">
+          <div><span style="color:var(--t4)">You (#${myRank})</span> <span style="font-weight:800;color:var(--t1)">₹${meData.b.toLocaleString()}</span></div>
+          <div><span style="color:var(--t4)">Leader</span> <span style="font-weight:800;color:var(--acc)">₹${leader.b.toLocaleString()}</span></div>
+          <div style="font-weight:900;color:var(--red);font-family:var(--ff)">-₹${myGap.toLocaleString()}</div>
+        </div>`;
+      }
+    }
 
-      h+=`<div style="background:var(--card);border:1px solid ${isMe?'var(--acc)33':'var(--bdr)'};border-radius:16px;padding:18px;margin-bottom:10px;${isMe?'box-shadow:0 0 20px #D4A24E0A':''}">
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="width:36px;text-align:center">
-            ${i<3?`<span style="font-size:22px">${['👑','🥈','🥉'][i]}</span>`:`<span style="font-weight:900;font-size:16px;color:var(--t3);font-family:var(--ff)">#${i+1}</span>`}
-          </div>
-          <div style="width:40px;height:40px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${i<3?rankColor:isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:16px;flex-shrink:0">${p.n[0].toUpperCase()}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:800;font-size:16px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' <span style="font-size:11px;color:var(--t3)">(you)</span>':''}</div>
-            <div style="display:flex;gap:8px;margin-top:4px;font-size:12px;color:var(--t4);flex-wrap:wrap">
-              <span>${ub.length} bets</span>
-              <span style="color:${winPct>=50?'var(--grn)':winPct>0?'var(--red)':'var(--t3)'}">${w}W/${l}L${rub.length?' ('+winPct+'%)':''}</span>
-              ${pending?`<span style="color:var(--yel)">${pending} pending</span>`:''}
-            </div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:20px;font-weight:900;color:${p.b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
-            <div style="font-size:12px;color:${df>=0?'#34D39988':'#F8717188'};font-weight:700">${df>=0?'+':''}₹${Math.abs(df).toLocaleString()}</div>
-          </div>
+    // Compute rank deltas
+    const currentRanks={};
+    L.forEach((p,i)=>{currentRanks[p.n]=i+1});
+
+    // Full ranked list — rank, name, money, gap, delta.
+    const leaderBal=L[0]?.b||ST;
+    h+=`<div class="card" style="padding:0;overflow:hidden">`;
+    L.forEach((p,i)=>{
+      const isMe=me===p.n;
+      const gap=i>0?leaderBal-p.b:0;
+      const t3bg=i===0?'linear-gradient(135deg,rgba(212,162,78,0.06),transparent)':i===1?'linear-gradient(135deg,rgba(148,163,184,0.03),transparent)':i===2?'linear-gradient(135deg,rgba(217,119,6,0.03),transparent)':'transparent';
+      const rankColor=i===0?'var(--acc)':i===1?'#94A3B8':i===2?'#D97706':'var(--t3)';
+      const prev=prevRanks[p.n];const curr=i+1;const delta=prev?(prev-curr):0;
+      const deltaHtml=delta>0?`<span style="font-size:10px;color:var(--grn);font-weight:800;margin-left:6px">▲${delta}</span>`:delta<0?`<span style="font-size:10px;color:var(--red);font-weight:800;margin-left:6px">▼${Math.abs(delta)}</span>`:'';
+
+      h+=`<div class="lb-r" style="display:grid;grid-template-columns:36px 42px 1fr auto;align-items:center;gap:14px;padding:16px 20px;background:${t3bg};${i<L.length-1?'border-bottom:1px solid var(--bdr)':''}${isMe?';background:rgba(212,162,78,0.04)':''}">
+        <div style="text-align:center">
+          ${i===0?'<span style="font-size:18px">👑</span>':`<span style="font-weight:900;font-size:${i<3?'17':'14'}px;color:${rankColor};font-family:var(--ff)">${i+1}</span>`}
         </div>
-        <!-- Progress bar -->
-        <div style="margin-top:12px;height:6px;background:var(--inp);border-radius:3px;overflow:hidden">
-          <div style="height:100%;width:${barWidth}%;background:${i<3?rankColor:df>=0?'var(--grn)':'var(--red)'};border-radius:3px;opacity:0.6"></div>
+        <div style="width:42px;height:42px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${i<3?rankColor:isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:15px;flex-shrink:0">${p.n[0].toUpperCase()}</div>
+        <div style="min-width:0">
+          <div style="font-weight:${i===0?'800':'700'};font-size:${i===0?'16':'14'}px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}${deltaHtml}</div>
+          ${gap>0?`<div style="font-size:10px;color:var(--t4);margin-top:2px">-₹${gap.toLocaleString()} from #1</div>`:''}
         </div>
-        <!-- Expandable breakdown -->
-        <button style="background:0;border:0;color:var(--t4);font-size:12px;cursor:pointer;font-weight:700;padding:8px 0 0;display:flex;align-items:center;gap:4px" onclick="const d=$('bd-${i}');d.style.display=d.style.display==='none'?'block':'none';this.querySelector('span').textContent=d.style.display==='none'?'▸':'▾'"><span>▸</span> Balance breakdown</button>
-        <div id="bd-${i}" style="display:none;margin-top:10px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;font-size:13px">
-          ${getBalBreakdown(p.n)}
+        <div style="text-align:right">
+          <div style="font-size:${i===0?'20':'17'}px;font-weight:900;color:${p.b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
         </div>
       </div>`;
     });
+    h+=`</div>`;
+    prevRanks=currentRanks;
   }
 
   // ─── CRYSTAL BALL RESULTS (only after admin publishes) ───
