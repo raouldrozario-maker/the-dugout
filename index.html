@@ -7,46 +7,48 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏏</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#060C1A;--card:#0B1426;--inp:#0F172A;--bdr:#1E293B;--bdr2:#2D3F5E;--t1:#E2E8F0;--t2:#94A3B8;--t3:#475569;--t4:#64748B;--acc:#F59E0B;--hot:#EF4444;--grad:linear-gradient(135deg,#F59E0B,#EF4444);--grn:#34D399;--red:#F87171;--yel:#FBBF24;--ff:'Oswald',sans-serif;--fb:'Source Sans 3',sans-serif}
+:root{--bg:#05070D;--card:#0E1628;--inp:#121D30;--bdr:rgba(255,255,255,0.05);--bdr2:rgba(255,255,255,0.08);--t1:#E8ECF2;--t2:#7C879A;--t3:#4A5568;--t4:#546278;--acc:#D4A24E;--hot:#C4453A;--grad:linear-gradient(135deg,#D4A24E,#C49032);--grn:#3FB08C;--red:#D45B5B;--yel:#D4A24E;--ff:'Oswald',sans-serif;--fb:'Source Sans 3',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes glow{0%,100%{box-shadow:0 0 20px #F59E0B22}50%{box-shadow:0 0 40px #F59E0B44}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px #D4A24E18}50%{box-shadow:0 0 40px #D4A24E30}}
 #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:9999;padding:10px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;box-shadow:0 8px 32px #00000088;transition:transform .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
-header{background:radial-gradient(circle at 20% 0%,rgba(245,166,35,0.06),transparent 40%),linear-gradient(180deg,#0B1220,#0E1628);border-bottom:1px solid #F59E0B22;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px #00000055}
+header{background:radial-gradient(circle at 20% 0%,rgba(212,162,78,0.06),transparent 40%),linear-gradient(180deg,#0B1220,#0E1628);border-bottom:1px solid #D4A24E18;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px #00000055}
 .hi{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .brand-n{font-family:var(--ff);font-size:24px;font-weight:700;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .brand-t{font-size:9px;letter-spacing:3px;color:var(--t3);font-weight:700}
 .upill{display:flex;align-items:center;gap:8px;background:var(--inp);border:1px solid var(--bdr);border-radius:24px;padding:4px 14px 4px 4px}
 .udot{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px}
-nav{display:flex;justify-content:center;gap:1px;padding:2px 10px 10px;max-width:900px;margin:0 auto;overflow-x:auto}
+nav{display:flex;justify-content:center;gap:1px;padding:2px 10px 10px;max-width:900px;margin:0 auto;overflow-x:auto;position:relative}
 .nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;background:0;border:1px solid transparent;color:#8896AB;cursor:pointer;padding:8px 4px;border-radius:10px;font-size:18px;transition:all .2s ease;white-space:nowrap;position:relative}
 .nb:hover{color:#CBD5E1;transform:translateY(-2px)}
 .nb:active{transform:scale(.95)}
-.nb.on{color:var(--acc);background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.4);box-shadow:0 0 10px rgba(245,166,35,0.3)}
-.nb.on::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,#FF8C00,#FFA94D);border-radius:2px}
+.nb.on{color:var(--acc);background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.2);box-shadow:none}
+.nb.on::after{display:none}
 .nb svg{opacity:.55;transition:all .2s ease;width:20px;height:20px}
 .nb:hover svg{opacity:.85}
 .nb.on svg{opacity:1;stroke:var(--acc);filter:none}
 .nb span:last-child{font-size:10px;font-weight:600;letter-spacing:.3px;transition:all .2s ease}
 .nb.on span:last-child{font-weight:800;color:var(--acc)}
 main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
-.card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:24px;margin-bottom:20px;animation:fadeUp .4s}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:28px;margin-bottom:24px;animation:fadeUp .4s;transition:transform .2s ease}
+.card:hover{transform:translateY(-2px)}
 .ch{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.ct{font-family:var(--ff);font-size:18px;font-weight:700;color:var(--acc);letter-spacing:1px}
-.hero{position:relative;background:linear-gradient(135deg,#0B1426,#162040);border:1px solid #F59E0B22;border-radius:20px;padding:28px 20px;margin-bottom:20px;text-align:center;overflow:hidden;animation:glow 3s infinite}
+.ct{font-family:var(--ff);font-size:18px;font-weight:700;color:var(--t1);letter-spacing:1px}
+.hero{position:relative;background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:24px 20px;margin-bottom:20px;text-align:center;overflow:hidden}
 .bdg-c{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:var(--ff);letter-spacing:1px;margin:0 auto;color:#fff}
 .bdg-n{margin-top:6px;font-size:11px;color:var(--t2);font-weight:600;text-align:center}
 .cg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .chip{display:flex;align-items:center;gap:10px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;cursor:pointer;transition:.2s;color:#CBD5E1}
-.chip:hover{border-color:var(--bdr2)}.chip.on{border-color:var(--acc);background:#F59E0B10}
+.chip:hover{border-color:var(--bdr2)}.chip.on{border-color:var(--acc);background:#D4A24E0C}
 .ca{width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:14px;flex-shrink:0}
 .ar{display:flex;gap:8px}
 .inp{flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:12px 16px;color:var(--t1);font-size:15px;outline:0}
 .inp:focus{border-color:var(--bdr2)}
-.bp{background:var(--grad);border:0;border-radius:12px;padding:12px 22px;color:#000;font-weight:800;cursor:pointer;font-size:15px;white-space:nowrap}
+.bp{background:var(--grad);border:0;border-radius:10px;padding:12px 22px;color:#0C1220;font-weight:800;cursor:pointer;font-size:15px;white-space:nowrap;transition:all .2s;box-shadow:0 4px 12px rgba(212,162,78,0.2)}
+.bp:hover{box-shadow:0 6px 16px rgba(212,162,78,0.3);transform:translateY(-1px)}
 .rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px}
 .rc{background:var(--inp);border-radius:12px;padding:14px;border:1px solid var(--bdr)}
 .rc-t{font-size:13px;font-weight:800;color:var(--acc);margin-bottom:4px}.rc-d{font-size:12px;color:var(--t4);line-height:1.4}
@@ -56,7 +58,7 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .bb-a{font-size:24px;font-weight:900;font-family:var(--ff)}
 .fr{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
 .fb{flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;font-size:14px;cursor:pointer;transition:.2s;min-width:60px}
-.fb.on{background:#F59E0B15;border-color:#F59E0B44;color:var(--acc)}
+.fb.on{background:#D4A24E12;border-color:#D4A24E30;color:var(--acc)}
 .mc{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;animation:fadeUp .3s}
 .mc.lk{border-left-color:var(--t3)}.mc.dn{border-left-color:var(--grn)}
 .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
@@ -67,12 +69,12 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .mt{display:flex;align-items:center;justify-content:space-around;padding:8px 0}
 .mvs{font-family:var(--ff);font-size:22px;font-weight:700;color:var(--acc)}
 .mv{font-size:11px;color:var(--t3);text-align:center;max-width:130px}
-.rb{margin-top:12px;padding:10px 16px;background:#10B98115;border:1px solid #10B98130;border-radius:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--grn)}
-.mb{margin-top:12px;padding:10px 16px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:14px;color:var(--yel)}
-.ob{margin-top:12px;width:100%;padding:14px;background:#F59E0B10;border:1px dashed #F59E0B44;border-radius:12px;color:var(--acc);font-weight:800;font-size:15px;cursor:pointer}
+.rb{margin-top:12px;padding:10px 16px;background:#3FB08C10;border:1px solid #3FB08C1A;border-radius:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--grn)}
+.mb{margin-top:12px;padding:10px 16px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:12px;display:flex;flex-wrap:wrap;gap:12px;font-size:14px;color:var(--yel)}
+.ob{margin-top:12px;width:100%;padding:14px;background:#D4A24E0C;border:1px dashed #D4A24E30;border-radius:12px;color:var(--acc);font-weight:800;font-size:15px;cursor:pointer}
 .bf{margin-top:14px;padding:18px;background:var(--inp);border:1px solid var(--bdr2);border-radius:14px;animation:fadeUp .3s}
 .bf-t{font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:16px}
-.bf-s{margin-bottom:16px}
+.bf-s{margin-bottom:12px}
 .bf-l{font-size:13px;color:var(--t4);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .bf-tr{display:flex;gap:8px}
 .bf-tb{padding:10px 20px;border-radius:10px;border:2px solid;font-weight:800;font-size:15px;cursor:pointer;transition:.15s;font-family:var(--ff);background:0}
@@ -81,10 +83,10 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .bf-h{font-size:12px;color:var(--t3);margin-top:6px}
 .bf-q{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .bf-qb{padding:6px 14px;border-radius:8px;border:1px solid var(--bdr);background:var(--bg);color:var(--t2);font-size:13px;cursor:pointer;font-weight:700}
-.bf-qb.ai{background:#EF444420;color:var(--red);border-color:var(--hot)}
+.bf-qb.ai{background:var(--acc)14;color:var(--acc);border-color:var(--acc)}
 .bf-a{display:flex;gap:8px;margin-top:14px}
 .bf-cn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;cursor:pointer;font-size:14px}
-.bf-cf{flex:2;padding:12px;border-radius:10px;border:0;background:var(--grad);color:#000;font-weight:800;cursor:pointer;font-size:15px}
+.bf-cf{flex:2;padding:12px;border-radius:10px;border:0;background:var(--grad);color:#0C1220;font-weight:800;cursor:pointer;font-size:15px;transition:all .2s;box-shadow:0 4px 12px rgba(212,162,78,0.2)}
 .tb{background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;font-weight:700;padding:4px 0;margin-top:10px}
 .bi{display:flex;gap:10px;align-items:center;font-size:13px;padding:8px 12px;background:var(--inp);border-radius:10px;margin-bottom:6px;flex-wrap:wrap}
 .bi-u{font-weight:800;color:var(--t2);min-width:70px}
@@ -102,7 +104,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-input:focus{border-color:var(--bdr2)}
 .sd-input::placeholder{color:var(--t4)}
 .sd-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t4);font-size:11px}
-.sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:240px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
+.sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:280px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
 .sd-dd.open{display:block}
 .sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
 .sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
@@ -113,7 +115,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
 .sd-wrap.has-val .sd-clear{display:block}
 #ru-nav div::-webkit-scrollbar{display:none}
-@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
+@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:20px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:16px}}
 @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes allin-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
 @keyframes wc-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -123,13 +125,13 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
-.mention{color:var(--acc);font-weight:700;background:#F59E0B15;padding:0 4px;border-radius:4px}
+.mention{color:var(--acc);font-weight:700;background:#D4A24E12;padding:0 4px;border-radius:4px}
 </style>
 </head>
 <body>
 <div id="toast"></div>
 <div id="app">
-<header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#F59E0B22;color:#F59E0B">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
+<header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#D4A24E18;color:var(--acc)">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
 <nav>
 <button class="nb on" data-v="home" onclick="nav('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
 <button class="nb" data-v="matches" onclick="nav('matches')"><span class="live-dot"></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
@@ -139,6 +141,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <button class="nb" data-v="analytics" onclick="nav('analytics')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Stats</span></button>
 <button class="nb" data-v="mygame" onclick="nav('mygame')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Locker Room</span></button>
 <button class="nb" data-v="admin" onclick="nav('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Admin</span></button>
+<div id="nav-slider" style="position:absolute;bottom:2px;left:0;height:3px;width:0;background:linear-gradient(90deg,#D4A24E,#C49032);border-radius:3px;transition:left .25s ease,width .25s ease;box-shadow:0 0 8px #D4A24E88;pointer-events:none"></div>
 </nav></header>
 <main>
 <div id="v-home" class="ctr"></div>
@@ -427,7 +430,7 @@ function momDropdown(id,matchId,both=false){
   const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
   const data=JSON.stringify([{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}]);
   return`<div class="sd-wrap" id="${id}-wrap">
-    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
+    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' data-mid="${matchId}" onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
     <button class="sd-clear" onclick="sdClear('${id}')">&times;</button>
     <span class="sd-arrow">▼</span>
     <div class="sd-dd" id="${id}-dd"></div>
@@ -450,6 +453,16 @@ function sdFilter(id){
   const dd=$(id+'-dd');if(!dd)return;
   let groups;
   try{groups=JSON.parse(inp.dataset.sd)}catch(e){return}
+  // Reorder: show selected team's players first
+  const mid=inp.dataset.mid;
+  const selectedTm=mid&&bfs[mid]?bfs[mid].tm:null;
+  if(selectedTm){
+    groups.sort((a,b)=>{
+      if(a.team===selectedTm)return -1;
+      if(b.team===selectedTm)return 1;
+      return 0;
+    });
+  }
   const q=inp.value.toLowerCase().trim();
   let html='';
   let hasResults=false;
@@ -457,7 +470,8 @@ function sdFilter(id){
     const filtered=g.players.filter(p=>!q||p.toLowerCase().includes(q));
     if(filtered.length){
       hasResults=true;
-      html+=`<div class="sd-grp">${g.name}</div>`;
+      const isSelected=g.team===selectedTm;
+      html+=`<div class="sd-grp">${g.name}${isSelected?' ✦':''}</div>`;
       filtered.forEach(p=>{
         html+=`<div class="sd-opt" onmousedown="sdPick('${id}','${p.replace(/'/g,"\\'")}')" ontouchend="event.preventDefault();sdPick('${id}','${p.replace(/'/g,"\\'")}')">${p}<span class="sd-tm">${g.short}</span></div>`;
       });
@@ -562,7 +576,7 @@ function ld(){
       });
       ren();uh();
     });
-    $('mtag').textContent='LIVE';$('mtag').style.background='#10B98122';$('mtag').style.color='#34D399';
+    $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#34D399';
   }catch(e){console.log('FB fail:',e)}}
   if(me&&!S.p[me])me=null;
   uh();nav('home');
@@ -571,7 +585,8 @@ function ld(){
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
-function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none'}
+function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';moveSlider()}
+function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
 function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
@@ -595,7 +610,7 @@ function rH(){
         <div style="font-family:var(--ff);font-size:32px;font-weight:700;color:var(--acc)">VS</div>
         <div style="font-size:14px;color:var(--t2);font-weight:600">${fd(nx.d)}</div>
         <div style="font-size:12px;color:var(--t4)">${ft(nx.t)} IST</div>
-        <div style="margin-top:8px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:800;display:inline-block;background:${l?'#EF444422':'#F59E0B22'};color:${l?'var(--red)':'var(--yel)'}">${l?'🔒 LOCKED':'⏱️ '+cd(nx)}</div>
+        <div style="margin-top:8px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:800;display:inline-block;background:${l?'#EF444422':'#D4A24E18'};color:${l?'var(--red)':'var(--yel)'}">${l?'🔒 LOCKED':'⏱️ '+cd(nx)}</div>
       </div>
       ${bdg(nx.a,60,true)}
     </div>
@@ -618,7 +633,7 @@ function rH(){
   }
 
   // ─── BROADCAST ───
-  if(S.announce){h+=`<div style="background:#F59E0B12;border:1px solid #F59E0B33;border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">📢</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">ANNOUNCEMENT</span></div><div style="font-size:14px;color:var(--t1);line-height:1.5">${S.announce.msg}</div><div style="font-size:11px;color:var(--t3);margin-top:6px">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>`}
+  if(S.announce){h+=`<div style="background:#D4A24E0C;border:1px solid #D4A24E25;border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">📢</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">ANNOUNCEMENT</span></div><div style="font-size:14px;color:var(--t1);line-height:1.5">${S.announce.msg}</div><div style="font-size:11px;color:var(--t3);margin-top:6px">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>`}
 
   // ─── PROFILE (logged in) ───
   if(me){
@@ -630,7 +645,7 @@ function rH(){
     const winArc=myResolved.length?(winPct/100)*circ:0;
     const loseArc=myResolved.length?(losePct/100)*circ:0;
 
-    h+=`<div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
+    h+=`<div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
 
     <!-- Top: Avatar + Name + Logout -->
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
@@ -639,7 +654,7 @@ function rH(){
         <div style="font-weight:800;font-size:18px;color:var(--t1)">${me}</div>
         <div style="font-size:12px;color:var(--t4);margin-top:2px">Rank #${rank} of ${ns.length}</div>
       </div>
-      <button style="background:#EF444415;border:1px solid #EF444433;border-radius:10px;padding:6px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="logout()">Logout</button>
+      <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:6px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="logout()">Logout</button>
     </div>
 
     <!-- Middle: Balance hero + Ring chart side by side -->
@@ -649,7 +664,7 @@ function rH(){
         <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Balance</div>
         <div style="font-size:32px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff);margin-top:4px">₹${b.toLocaleString()}</div>
         <div style="font-size:14px;color:${diff>=0?'#34D399':'#F87171'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
-        ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#F59E0B10;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}
+        ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} ON THE LINE</div>`:''}
       </div>
       <!-- Win/Loss Ring Chart -->
       <div style="flex-shrink:0;text-align:center;position:relative;width:100px;height:100px">
@@ -682,7 +697,7 @@ function rH(){
     </div>
 
     <!-- At Risk breakdown (if any pending bets) -->
-    ${myPending.length?`<div style="background:var(--inp);border:1px solid #F59E0B22;border-radius:12px;padding:14px;margin-bottom:16px">
+    ${myPending.length?`<div style="background:var(--inp);border:1px solid #D4A24E18;border-radius:12px;padding:14px;margin-bottom:16px">
       <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ ON THE LINE</div>
       ${myPending.map(bt=>{const m=gm(bt.mid);const mo=S.odds[bt.mid]||{};const od=parseFloat(bt.od)||2;const potWin=Math.round(bt.am*(od-1));return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${myPending.indexOf(bt)<myPending.length-1?'border-bottom:1px solid var(--bdr)':''}">
         <div style="display:flex;align-items:center;gap:8px">
@@ -710,7 +725,7 @@ function rH(){
       const betThisWeek=Object.values(S.b).filter(x=>x.u===me).some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=ws&&d<new Date(ws.getTime()+7*86400000)});
       if(betThisWeek||currentWeekMatches.length===0)return '';
       const openMatches=currentWeekMatches.filter(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]);
-      return `<div style="background:#EF444415;border:1px solid #EF444433;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      return `<div style="background:#C4453A10;border:1px solid #C4453A25;border-radius:12px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
         <span style="font-size:20px">⚠️</span>
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--red)">You haven't bet this week!</div>
@@ -764,7 +779,7 @@ function rH(){
         const isJackpot=won&&mh&&bt.mt&&bt.mt!==bt.tm;
         if(isJackpot){
           const py=Math.round(bt.am*(od-1))*2+Math.round(bt.am*MOMB);
-          feed.push({ts:rs.ts||bt.ts,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#F59E0B08',border:'#F59E0B25'});
+          feed.push({ts:rs.ts||bt.ts,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#D4A24E08',border:'#D4A24E1A'});
         }else if(won&&mh){
           let py=Math.round(bt.am*(od-1))+Math.round(bt.am*MOMB);
           feed.push({ts:rs.ts||bt.ts,pri:8,type:'win',amount:py,streak:ps.streak,icon:'🎯',text:`<strong>${bt.u}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + nailed the MoM! ${ps.streak>=3&&ps.sType==='W'?'<strong style="color:var(--acc)">'+ps.streak+' wins in a row! 🔥</strong>':''}`});
@@ -826,7 +841,7 @@ function rH(){
 
       recentFeed.forEach((f,i)=>{
         if(i===0&&f.type!=='join'&&f.type!=='talk'){
-          h+=`<div style="position:relative;padding:16px 18px;background:linear-gradient(135deg,#1A2E5A,#0D1B3E);border:1px solid var(--acc);border-radius:14px;box-shadow:0 0 20px #F59E0B18;margin-bottom:4px;overflow:hidden">
+          h+=`<div style="position:relative;padding:16px 18px;background:linear-gradient(135deg,#152240,#0E1528);border:1px solid var(--acc);border-radius:14px;box-shadow:0 0 20px #D4A24E14;margin-bottom:4px;overflow:hidden">
             <div style="position:absolute;top:0;right:0;padding:4px 12px;background:var(--acc);border-radius:0 14px 0 10px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;font-family:var(--ff)">🔥 MOMENT</div>
             <div style="display:flex;align-items:flex-start;gap:12px;margin-top:4px">
               <span style="font-size:28px;flex-shrink:0">${f.icon}</span>
@@ -890,7 +905,7 @@ function rH(){
         <span style="font-size:12px;color:var(--t4)">💎 Biggest Bet</span>
         <span style="font-size:13px;font-weight:800;color:var(--acc)">₹${bigB.am.toLocaleString()} by ${bigB.u}</span>
       </div>`:''}
-      ${activeBettors<ns.length?`<div style="padding:10px 12px;background:#EF444408;border:1px solid #EF444420;border-radius:10px">
+      ${activeBettors<ns.length?`<div style="padding:10px 12px;background:#EF444408;border:1px solid #C4453A18;border-radius:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${noBets.length?'6px':'0'}">
           <span style="font-size:12px;color:var(--red)">😴 ${noBets.length} player${noBets.length!==1?'s':''} still sleeping</span>
         </div>
@@ -917,7 +932,7 @@ function rH(){
       h+=`<div style="display:flex;gap:8px;margin-bottom:14px">
         <div style="flex:1;position:relative">
           <input class="inp" id="tt-msg" placeholder="Talk your smack... (type @ to tag)" style="width:100%" maxlength="150" onkeydown="if(event.key==='Enter'){closeMentionDD();postTrash()}" oninput="mentionAC(this)">
-          <div id="tt-dd" style="display:none;position:absolute;bottom:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-bottom:4px;max-height:180px;overflow-y:auto;z-index:100;box-shadow:0 -4px 20px #00000066"></div>
+          <div id="tt-dd" style="display:none;position:absolute;bottom:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-bottom:4px;max-height:280px;overflow-y:auto;z-index:100;box-shadow:0 -4px 20px #00000066"></div>
         </div>
         <button style="background:var(--grad);border:0;border-radius:10px;padding:8px 16px;color:#000;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0" onclick="postTrash()">Send</button>
       </div>`;
@@ -928,7 +943,7 @@ function rH(){
         const isMe=me===m.u;
         const tagged=me&&hasMention(m.msg,me);
         const ago=timeAgo(m.ts);
-        h+=`<div style="display:flex;gap:10px;padding:8px 0;${i<msgs.length-1?'border-bottom:1px solid var(--bdr)':''}${tagged?' ;background:#F59E0B08;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:8px':''}">
+        h+=`<div style="display:flex;gap:10px;padding:8px 0;${i<msgs.length-1?'border-bottom:1px solid var(--bdr)':''}${tagged?' ;background:#D4A24E08;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:8px':''}">
           <div style="width:30px;height:30px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:1px solid ${isMe?'transparent':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:12px;flex-shrink:0">${m.u[0].toUpperCase()}</div>
           <div style="flex:1;min-width:0">
             <div style="display:flex;justify-content:space-between;align-items:center">
@@ -950,7 +965,7 @@ function rH(){
     <div style="display:flex;flex-wrap:wrap;gap:8px">`;
     ns.forEach(n=>{
       const isMe=me===n;
-      h+=`<div style="display:flex;align-items:center;gap:8px;background:${isMe?'#F59E0B10':'var(--inp)'};border:1px solid ${isMe?'#F59E0B33':'var(--bdr)'};border-radius:10px;padding:6px 12px">
+      h+=`<div style="display:flex;align-items:center;gap:8px;background:${isMe?'#D4A24E0C':'var(--inp)'};border:1px solid ${isMe?'#D4A24E25':'var(--bdr)'};border-radius:10px;padding:6px 12px">
       <div style="width:24px;height:24px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:11px">${n[0].toUpperCase()}</div>
       <span style="font-size:13px;font-weight:${isMe?'800':'600'};color:${isMe?'var(--acc)':'var(--t1)'}">${n}</span></div>`;
     });
@@ -959,7 +974,7 @@ function rH(){
 
   // ─── FIREBASE ───
   if(!db){h+=`<div class="card"><div class="ch"><span style="font-size:18px">🔗</span><span class="ct">CONNECT TO LEAGUE</span></div><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Paste the config code shared by your league admin to sync your bets across all devices.</div><textarea class="inp" id="fb-cfg" rows="2" style="width:100%;font-family:monospace;font-size:11px" placeholder='Paste the code from your WhatsApp group here...'></textarea><button class="bp" style="width:100%;margin-top:8px" onclick="cFB()">🔌 Connect</button><div id="fb-err" style="color:var(--red);font-size:12px;margin-top:8px"></div></div>`}
-  else{h+=`<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#10B98110;border:1px solid #10B98125;border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--grn)">✅ Connected — bets sync across all devices</div>`}
+  else{h+=`<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#3FB08C0C;border:1px solid #3FB08C18;border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--grn)">✅ Connected — bets sync across all devices</div>`}
 
   el.innerHTML=h;
 }
@@ -980,7 +995,7 @@ function rM(){
 
   // ─── FIRST-TIME ONBOARDING ───
   if(myBetCount===0&&!onboardDismissed){
-    h+=`<div style="background:linear-gradient(135deg,#1A2E5A,#0D1B3E);border:1px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;position:relative">
+    h+=`<div style="background:linear-gradient(135deg,#152240,#0E1528);border:1px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;position:relative">
       <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="position:absolute;top:10px;right:14px;background:0;border:0;color:var(--t4);font-size:18px;cursor:pointer">&times;</button>
       <div style="font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:14px">👋 WELCOME TO THE DUGOUT!</div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--t2);line-height:1.5">
@@ -989,7 +1004,7 @@ function rM(){
         <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">3️⃣</span><span><strong style="color:var(--t1)">Pick Man of the Match</strong> (optional) — correct pick = +20% bonus, saves you from a loss if your team loses</span></div>
         <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">4️⃣</span><span><strong style="color:var(--t1)">Confirm before lock</strong> — bets close 40 min before the match. No exceptions!</span></div>
       </div>
-      <div style="margin-top:14px;padding:10px 14px;background:#F59E0B10;border:1px solid #F59E0B22;border-radius:10px;font-size:12px;color:var(--acc)">
+      <div style="margin-top:14px;padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:10px;font-size:12px;color:var(--acc)">
         💡 <strong>Tip:</strong> Bet at least once per week or you'll get a 20% penalty. Check the Rules tab for the full playbook.
       </div>
       <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="width:100%;margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px">Got it — let's go! 🏏</button>
@@ -1006,7 +1021,7 @@ function rM(){
 
     h+=`<div class="mc ${rs?'dn':l?'lk':''}">
     <!-- Match header -->
-    <div class="mh"><div class="mm"><span class="mn">${m.playoff?m.v:'#'+m.id}</span>${dh&&!m.playoff?'<span style="background:#EF444420;color:var(--hot);padding:1px 8px;border-radius:6px;font-size:9px;font-weight:800">DOUBLE HEADER</span>':''}<span class="md">${fd(m.d)} · ${ft(m.t)}</span></div><div class="ms" style="background:${rs?'#10B98120':l?'#EF444420':'#F59E0B20'};color:${rs?'var(--grn)':l?'var(--red)':'var(--yel)'}">${rs?'✅ DONE':l?'🔒 LOCKED':'⏱️ '+cd(m)}</div></div>
+    <div class="mh"><div class="mm"><span class="mn">${m.playoff?m.v:'#'+m.id}</span>${dh&&!m.playoff?'<span style="background:#C4453A18;color:var(--hot);padding:1px 8px;border-radius:6px;font-size:9px;font-weight:800">DOUBLE HEADER</span>':''}<span class="md">${fd(m.d)} · ${ft(m.t)}</span></div><div class="ms" style="background:${rs?'#3FB08C14':l?'#C4453A18':'#D4A24E18'};color:${rs?'var(--grn)':l?'var(--red)':'var(--yel)'}">${rs?'✅ DONE':l?'🔒 LOCKED':'⏱️ '+cd(m)}</div></div>
 
     <!-- Teams VS with bigger badges -->
     <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 0">
@@ -1053,7 +1068,7 @@ function rM(){
     if(my){
       const won=rs&&my.tm===rs.w;const momH=rs&&my.mom&&my.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
       const od=parseFloat(my.od)||2;const potWin=Math.round(my.am*(od-1));
-      h+=`<div style="background:${rs?(won?'#10B98110':'#EF444410'):'#F59E0B08'};border:1px solid ${rs?(won?'#10B98130':'#EF444430'):'#F59E0B25'};border-radius:12px;padding:14px;margin-top:10px">
+      h+=`<div style="background:${rs?(won?'#3FB08C0C':'#C4453A0C'):'#D4A24E08'};border:1px solid ${rs?(won?'#3FB08C1A':'#C4453A22'):'#D4A24E1A'};border-radius:12px;padding:14px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${rs?'0':'8px'}">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${rs?(won?'var(--grn)':'var(--red)'):'var(--acc)'}">YOUR BET</div>
           ${!l&&!rs?`<button style="background:var(--inp);border:1px solid var(--bdr2);border-radius:8px;padding:3px 12px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="editBet(${m.id})">✏️ Edit</button>`:''}
@@ -1086,14 +1101,14 @@ function rM(){
   // Crystal Ball section
   if(me&&S.koOpen&&!S.koRevealed){
     if(!S.ko?.[me]){
-      h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL — SECRET PREDICTION</span></div>
+      h+=`<div class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL — SECRET PREDICTION</span></div>
       <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Pick the team you think will <strong style="color:var(--acc)">lift the IPL trophy</strong>! This bet is <strong style="color:var(--yel)">secret</strong> — only you and the admin can see it until the tournament ends.</div>
       <div class="bf-s"><div class="bf-l">Your pick to win IPL 2026</div><select class="bf-i" id="ko-team"><option value="">-- Pick the champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
       <div class="bf-s"><div class="bf-l">% of your current balance to wager</div><input class="bf-i" type="number" id="ko-pct" min="1" max="100" value="25" placeholder="e.g. 50"><div style="font-size:12px;color:var(--t4);margin-top:4px">Your balance: ₹${bal(me).toLocaleString()} · 25% = ₹${Math.round(bal(me)*0.25).toLocaleString()}</div></div>
       <button class="bp" style="width:100%" onclick="placeKO()">🔒 Lock Secret Bet</button></div>`;
     } else {
       const k=S.ko[me];
-      h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">YOUR CRYSTAL BALL PREDICTION</span></div>
+      h+=`<div class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">YOUR CRYSTAL BALL PREDICTION</span></div>
       <div style="font-size:14px;color:var(--yel);font-weight:700">🔒 ${T[k.team]?.n||k.team} to win IPL 2026</div>
       <div style="font-size:13px;color:var(--t2);margin-top:6px">₹${k.amount.toLocaleString()} wagered (${k.pct}% of balance)</div>
       <div style="font-size:12px;color:var(--t4);margin-top:4px">Win → +₹${k.amount.toLocaleString()} · Lose → -₹${k.amount.toLocaleString()}</div>
@@ -1102,7 +1117,7 @@ function rM(){
   }
   // After reveal — player only sees that Crystal Ball has been settled, not the details
   if(me&&S.ko?.[me]&&S.koRevealed){
-    h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
+    h+=`<div class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
     <div style="font-size:14px;color:var(--t2)">Your Crystal Ball prediction has been settled. The results will be announced by the admin at the final event! 🏆</div></div>`;
   }
   el.innerHTML=h;
@@ -1144,32 +1159,37 @@ function oBF(id,prefill){
   const cdStr=cd(m);
   f.innerHTML=`<div class="bf"><div class="bf-t">${isEdit?'✏️ EDIT YOUR BET':'PLACE YOUR BET'} <span style="float:right;font-size:12px;color:var(--yel);font-weight:600">⏱️ Locks in ${cdStr}</span></div>
   <div class="bf-s"><div class="bf-l">Pick Team</div><div class="bf-tr">
-  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.03);box-shadow:0 0 16px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(×${mo[m.h]||'?'})</span></button>
-  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.03);box-shadow:0 0 16px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(×${mo[m.a]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(×${mo[m.h]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(×${mo[m.a]||'?'})</span></button>
   </div></div>
   <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--acc)';$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="this.classList.remove('allin-pop');void this.offsetWidth;this.classList.add('allin-pop');this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--hot)';$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN ₹${b.toLocaleString()} 🔥</button></div>
-  <div id="wc-${id}" style="margin-top:10px;padding:14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:none;font-size:13px">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--grn);font-weight:600">✅ Win — profit</span>
-      <span style="font-weight:900;color:var(--grn);font-family:var(--ff);font-size:17px" id="wc-win-${id}"></span>
+  <div id="wc-${id}" style="margin-top:16px;padding:0;display:none">
+    <div style="text-align:center;padding:14px 0">
+      <div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Potential profit</div>
+      <div style="font-weight:900;font-family:var(--ff);font-size:32px;color:var(--grn);line-height:1" id="wc-win-${id}"></div>
+      <div id="wc-detail-${id}" style="font-size:10px;color:var(--t3);margin-top:6px"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--acc);font-weight:600">🎯 Win + MoM bonus</span>
-      <span style="font-weight:900;color:var(--acc);font-family:var(--ff);font-size:17px" id="wc-momv-${id}"></span>
+    <div style="border-top:1px solid rgba(255,255,255,0.08);padding:12px 0 4px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:6px 0">
+        <span style="color:var(--t4);font-size:11px">With MoM bonus</span>
+        <div style="text-align:right">
+          <span style="font-weight:700;color:var(--grn);font-family:var(--ff);font-size:14px" id="wc-momv-${id}"></span>
+          <div id="wc-momd-${id}" style="font-size:9px;color:var(--t4)"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:6px 0">
+        <span style="color:var(--t4);font-size:11px">Lose</span>
+        <span style="font-weight:700;color:var(--red);font-family:var(--ff);font-size:14px" id="wc-lose-${id}"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:6px 0">
+        <span style="color:var(--t4);font-size:11px">MoM save</span>
+        <span style="color:var(--t4);font-family:var(--ff);font-size:14px">₹0</span>
+      </div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--red);font-weight:600">❌ Lose</span>
-      <span style="font-weight:900;color:var(--red);font-family:var(--ff);font-size:17px" id="wc-lose-${id}"></span>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--t3)">🛡️ Lose but MoM correct</span>
-      <span style="font-weight:900;color:var(--t4);font-family:var(--ff);font-size:17px">₹0</span>
-    </div>
-    <div id="wc-detail-${id}" style="padding:8px 0 0;font-size:11px;color:var(--t4)"></div>
-    <div id="wc-final-${id}" style="margin-top:8px;padding:8px 12px;background:#10B98110;border:1px solid #10B98125;border-radius:8px;display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="color:var(--grn);font-size:12px;font-weight:700">💰 If you win → new balance</span>
-        <span style="color:var(--grn);font-weight:900;font-family:var(--ff);font-size:15px" id="wc-bal-${id}"></span>
+    <div id="wc-final-${id}" style="display:none;border-top:1px solid rgba(255,255,255,0.08);padding:10px 0 0;margin-top:4px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <span style="color:var(--t3);font-size:11px">Balance after win</span>
+        <span style="color:var(--t1);font-weight:800;font-family:var(--ff);font-size:17px" id="wc-bal-${id}"></span>
       </div>
     </div>
   </div></div>
@@ -1209,16 +1229,15 @@ function calcWin(id){
   const momBonus=Math.round(am*MOMB);
   $('wc-win-'+id).textContent='+₹'+win.toLocaleString();
   $('wc-lose-'+id).textContent='-₹'+am.toLocaleString();
-  $('wc-momv-'+id).textContent='+₹'+win.toLocaleString()+' + ₹'+momBonus.toLocaleString()+' = +₹'+(win+momBonus).toLocaleString();
-  // Calculation detail
+  $('wc-momv-'+id).textContent='+₹'+(win+momBonus).toLocaleString();
+  const momd=$('wc-momd-'+id);
+  if(momd)momd.textContent='includes ₹'+momBonus.toLocaleString()+' MoM bonus';
   const det=$('wc-detail-'+id);
-  if(det)det.innerHTML='₹'+am.toLocaleString()+' × ('+od+' - 1) = ₹'+win.toLocaleString()+' profit';
-  // Balance after win
+  if(det)det.textContent='₹'+am.toLocaleString()+' × ('+od+' - 1) = ₹'+win.toLocaleString();
   const bf=$('wc-final-'+id),bv=$('wc-bal-'+id);
-  if(bf&&bv){const curBal=bal(me);bv.textContent='₹'+(curBal+win).toLocaleString();bf.style.display='block'}
-  // Dynamic CTA
+  if(bf&&bv){const curBal=bal(me);bv.textContent='₹'+(curBal+win).toLocaleString();bf.style.display=''}
   const cta=$('cta-'+id);
-  if(cta)cta.textContent='💰 Bet ₹'+am.toLocaleString()+' on '+f.tm;
+  if(cta)cta.textContent='Bet ₹'+am.toLocaleString()+' on '+f.tm;
 }
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
@@ -1298,7 +1317,7 @@ function rB(){
   }
   else if(!hasDiff){
     // Pre-tournament — clean waiting state
-    h+=`<div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid #F59E0B22;border-radius:20px;padding:32px 24px;text-align:center;margin-bottom:24px">
+    h+=`<div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid #D4A24E18;border-radius:20px;padding:32px 24px;text-align:center;margin-bottom:24px">
       <div style="font-size:36px;margin-bottom:12px">⏳</div>
       <div style="font-family:var(--ff);font-size:20px;font-weight:700;color:var(--acc)">WAITING FOR KICKOFF</div>
       <div style="color:var(--t4);font-size:14px;margin-top:8px">Everyone starts at ₹${ST.toLocaleString()} — rankings update after the first match result</div>
@@ -1359,7 +1378,7 @@ function rB(){
       const rankColors=['#FBBF24','#94A3B8','#D97706'];
       const rankColor=rankColors[i]||'var(--t3)';
 
-      h+=`<div style="background:var(--card);border:1px solid ${isMe?'var(--acc)33':'var(--bdr)'};border-radius:16px;padding:18px;margin-bottom:10px;${isMe?'box-shadow:0 0 20px #F59E0B11':''}">
+      h+=`<div style="background:var(--card);border:1px solid ${isMe?'var(--acc)33':'var(--bdr)'};border-radius:16px;padding:18px;margin-bottom:10px;${isMe?'box-shadow:0 0 20px #D4A24E0A':''}">
         <div style="display:flex;align-items:center;gap:12px">
           <div style="width:36px;text-align:center">
             ${i<3?`<span style="font-size:22px">${['👑','🥈','🥉'][i]}</span>`:`<span style="font-weight:900;font-size:16px;color:var(--t3);font-family:var(--ff)">#${i+1}</span>`}
@@ -1393,7 +1412,7 @@ function rB(){
 
   // ─── CRYSTAL BALL RESULTS (only after admin publishes) ───
   if(S.koPublished&&S.koRevealed&&S.koWinner){
-    h+=`<div style="background:linear-gradient(135deg,#1a0a2e,#0D1B3E);border:2px solid #F59E0B44;border-radius:20px;padding:24px;margin-top:20px">
+    h+=`<div style="background:linear-gradient(135deg,#0E1220,#0E1528);border:2px solid #D4A24E30;border-radius:20px;padding:24px;margin-top:20px">
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:48px;margin-bottom:8px">🔮</div>
       <div class="ct" style="font-size:22px;text-align:center;color:var(--acc)">SECRET BETS REVEALED</div>
@@ -1409,8 +1428,8 @@ function rB(){
       const k=S.ko[n];
       const won=k.team===S.koWinner;
       const baseB=bal(n);
-      h+=`<div style="display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:${won?'#10B98110':'#EF444410'};border:1px solid ${won?'#10B98130':'#EF444430'};border-radius:12px">
-        <div style="width:38px;height:38px;border-radius:50%;background:${won?'#10B98120':'#EF444420'};display:flex;align-items:center;justify-content:center;font-size:18px">${won?'✅':'❌'}</div>
+      h+=`<div style="display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:8px;background:${won?'#3FB08C0C':'#C4453A0C'};border:1px solid ${won?'#3FB08C1A':'#C4453A22'};border-radius:12px">
+        <div style="width:38px;height:38px;border-radius:50%;background:${won?'#3FB08C14':'#C4453A18'};display:flex;align-items:center;justify-content:center;font-size:18px">${won?'✅':'❌'}</div>
         <div style="flex:1">
           <div style="font-weight:700;font-size:14px;color:var(--t1)">${n}</div>
           <div style="font-size:12px;color:var(--t4);margin-top:2px">Picked <strong style="color:${T[k.team]?.c||'var(--acc)'}">${T[k.team]?.s||k.team}</strong></div>
@@ -1429,14 +1448,14 @@ function rB(){
     }
 
     // Final Standings
-    h+=`<div style="margin-top:20px;border-top:1px solid #F59E0B33;padding-top:16px">
+    h+=`<div style="margin-top:20px;border-top:1px solid #D4A24E25;padding-top:16px">
       <div style="text-align:center;margin-bottom:16px"><div class="ct" style="font-size:18px;color:var(--acc);text-align:center">🏆 FINAL STANDINGS</div>
       <div style="font-size:12px;color:var(--t4)">Regular balance + Crystal Ball result</div></div>`;
     const finalL=Object.keys(S.p).map(n=>({n,pub:bal(n),fin:finalBal(n),ko:S.ko?.[n]||null})).sort((a,b)=>b.fin-a.fin);
     finalL.forEach((p,i)=>{
       const isMe=me===p.n;
       const diff=p.fin-p.pub;
-      h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:${isMe?'#F59E0B08':'var(--inp)'};border:1px solid ${isMe?'#F59E0B33':'var(--bdr)'};border-radius:12px">
+      h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px;margin-bottom:6px;background:${isMe?'#D4A24E08':'var(--inp)'};border:1px solid ${isMe?'#D4A24E25':'var(--bdr)'};border-radius:12px">
         <span style="font-weight:900;font-size:16px;width:32px;text-align:center;color:${i<3?['#FBBF24','#94A3B8','#D97706'][i]:'var(--t3)'}">${i<3?['👑','🥈','🥉'][i]:'#'+(i+1)}</span>
         <div style="flex:1">
           <div style="font-weight:700;font-size:14px;color:${isMe?'var(--acc)':'var(--t1)'}">${p.n}${isMe?' (you)':''}</div>
@@ -1531,7 +1550,7 @@ function rRu(){
   </div>
 
   <!-- Rule 4: Double Headers & At Risk -->
-  <div id="ru-4" style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
+  <div id="ru-4" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🏏🏏</span><span class="ct" style="font-size:15px">DOUBLE HEADERS & "AT RISK"</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">On days with two matches, you can <strong style="color:var(--acc)">bet on both matches using your full balance</strong>. Your balance is based on resolved results only — pending (unresolved) bets don't reduce your available balance. Instead, the amount you've wagered on unresolved matches is shown as <strong style="color:var(--acc)">"ON THE LINE"</strong>.</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1572,7 +1591,7 @@ function rRu(){
       Final balance = ₹10,000 + ₹8,000 - ₹5,000 = <strong style="color:var(--yel)">₹13,000</strong><br>
       (DC's profit more than covers the GT loss)
     </div>
-    <div style="margin-top:10px;padding:10px;background:#F59E0B08;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--t4)">
+    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
       💡 <strong>Why it works this way:</strong> Without this, going all-in on the first match would lock you out of the second match entirely — even though you might win the first one. This keeps the game fun and lets everyone participate in every match if they want to.
     </div>
   </div>
@@ -1633,7 +1652,7 @@ function rRu(){
   </div>
 
   <!-- Rule 8: Super Jackpot -->
-  <div id="ru-8" style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
+  <div id="ru-8" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">The ultimate power move. If you bet on the <strong style="color:var(--grn)">winning team</strong> AND correctly predict the MoM from the <strong style="color:var(--hot)">losing team</strong>, you get an <strong style="color:var(--yel)">extra 100% of your winnings</strong>!</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1654,7 +1673,7 @@ function rRu(){
       Jackpot bonus: extra ₹4,000<br>
       <strong style="color:var(--yel)">Total earned: +₹9,600! 🔥🔥</strong>
     </div>
-    <div style="margin-top:10px;padding:10px;background:#F59E0B08;border:1px solid #F59E0B22;border-radius:8px;font-size:12px;color:var(--t4)">
+    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
       💡 <strong>How to trigger the Jackpot:</strong> When placing your bet, pick your MoM from the opponent's team. It's risky — you're predicting the losing team's best player — but the reward is massive.
     </div>
   </div>
@@ -1720,7 +1739,7 @@ function rRu(){
       <div style="font-size:14px;color:var(--t2);line-height:1.7">League-wide analytics: total wagered, total won, MoM accuracy, all-in count. Fun awards like Richest Player, MoM Oracle, Riskiest Bettor, and more. Most backed teams with visual bars. Weekly penalty tracker for full transparency. Your quick stats card at the bottom with a link to Locker Room.</div>
     </div>
 
-    <div style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">👤</span><span class="ct" style="font-size:15px">MY GAME</span></div>
       <div style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:12px">Your personal hub — everything about <strong>your</strong> game in one place. Only you can see your data (admin can view any player's tab).</div>
       <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
@@ -1902,20 +1921,20 @@ function rAn(){
 
   // ─── HERO STATS (4 cards) ───
   h+=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
-    <div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
+    <div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
       <div style="font-size:28px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${totalBet.toLocaleString()}</div>
       <div style="font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Total Wagered</div>
     </div>
-    <div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
+    <div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
       <div style="font-size:28px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${totalWon.toLocaleString()}</div>
       <div style="font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Total Won</div>
     </div>
-    <div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
+    <div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
       <div style="font-size:28px;font-weight:900;color:var(--yel);font-family:var(--ff)">${momTotal?Math.round(momCorrect/momTotal*100):0}%</div>
       <div style="font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px">MoM Accuracy</div>
       <div style="font-size:11px;color:var(--t3);margin-top:2px">${momCorrect}/${momTotal} correct</div>
     </div>
-    <div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
+    <div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
       <div style="font-size:28px;font-weight:900;color:var(--hot);font-family:var(--ff)">${allInCount}</div>
       <div style="font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px">All-in Bets 🔥</div>
     </div>
@@ -1977,18 +1996,18 @@ function rAn(){
     <div style="font-size:12px;color:var(--t4);margin-bottom:14px">At least 1 bet per week (Wed→Tue) or ₹${Math.round(ST*0.2).toLocaleString()} penalty.</div>`;
     penaltyData.weeks.forEach(wk=>{
       const has=wk.defaulters.length>0;
-      h+=`<div style="background:var(--inp);border:1px solid ${has?'#EF444433':'#10B98130'};border-radius:10px;padding:12px;margin-bottom:8px">
+      h+=`<div style="background:var(--inp);border:1px solid ${has?'#C4453A25':'#3FB08C1A'};border-radius:10px;padding:12px;margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${has?'8px':'0'}">
         <span style="font-size:13px;font-weight:700;color:var(--t2)">${wk.label}</span>
         <span style="font-size:12px;color:${has?'var(--red)':'var(--grn)'};font-weight:700">${has?wk.defaulters.length+' penalized':'✅ All clear'}</span>
       </div>`;
-      if(has){h+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;wk.defaulters.forEach(name=>{h+=`<span style="background:#EF444420;border:1px solid #EF444444;border-radius:8px;padding:3px 10px;font-size:12px;color:var(--red);font-weight:700">${name}</span>`});h+=`</div>`}
+      if(has){h+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;wk.defaulters.forEach(name=>{h+=`<span style="background:#C4453A18;border:1px solid #EF444444;border-radius:8px;padding:3px 10px;font-size:12px;color:var(--red);font-weight:700">${name}</span>`});h+=`</div>`}
       h+=`</div>`;
     });
     const totalPenalties=penaltyData.totals;
     if(Object.keys(totalPenalties).length>0){
-      h+=`<div style="margin-top:12px;padding:12px;background:#EF444410;border:1px solid #EF444425;border-radius:10px"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px">TOTAL PENALTIES</div>`;
-      Object.entries(totalPenalties).sort((a,b)=>b[1]-a[1]).forEach(([name,amt])=>{h+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #EF444415"><span style="color:var(--t2)">${name}</span><span style="color:var(--red);font-weight:800">-₹${amt.toLocaleString()}</span></div>`});
+      h+=`<div style="margin-top:12px;padding:12px;background:#C4453A0C;border:1px solid #EF444425;border-radius:10px"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px">TOTAL PENALTIES</div>`;
+      Object.entries(totalPenalties).sort((a,b)=>b[1]-a[1]).forEach(([name,amt])=>{h+=`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid #C4453A10"><span style="color:var(--t2)">${name}</span><span style="color:var(--red);font-weight:800">-₹${amt.toLocaleString()}</span></div>`});
       h+=`</div>`;
     }
     h+=`</div>`;
@@ -2001,7 +2020,7 @@ function rAn(){
     const l=rub.filter(b=>b.tm!==S.r[b.mid].w).length;
     const b=bal(n),diff=rawBal(n)-ST;
     const rank=LB().findIndex(x=>x.n===n)+1;
-    h+=`<div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:16px;padding:20px">
+    h+=`<div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:12px">
           <div style="width:42px;height:42px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:18px;font-family:var(--ff)">${n[0].toUpperCase()}</div>
@@ -2076,7 +2095,7 @@ function rMG(){
 
   // Admin dropdown
   if(adm){
-    h+=`<div style="background:var(--inp);border:1px solid #F59E0B33;border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    h+=`<div style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-size:13px;color:var(--acc);font-weight:700">🔓 ADMIN VIEW:</span>
     <select class="bf-i" style="flex:1;min-width:150px" onchange="mgPlayer=this.value;rMG()">
     ${ns.map(p=>`<option value="${p}" ${p===n?'selected':''}>${p} (₹${bal(p).toLocaleString()})</option>`).join('')}
@@ -2084,7 +2103,7 @@ function rMG(){
   }
 
   // ─── PROFILE & BALANCE ───
-  h+=`<div style="background:linear-gradient(135deg,#0B1426,#162040);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
+  h+=`<div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:18px;padding:24px;margin-bottom:16px">
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
     <div style="width:60px;height:60px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:26px;font-family:var(--ff);flex-shrink:0">${n[0].toUpperCase()}</div>
     <div style="flex:1">
@@ -2101,7 +2120,7 @@ function rMG(){
       <div style="font-size:22px;font-weight:900;color:${diff>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">${diff>=0?'+':''}${diff.toLocaleString()}</div>
       <div style="font-size:10px;color:var(--t4);margin-top:2px">P&L</div>
     </div>
-    ${risk>0?`<div style="flex:1;min-width:75px;background:var(--inp);border:1px solid #F59E0B33;border-radius:12px;padding:12px;text-align:center">
+    ${risk>0?`<div style="flex:1;min-width:75px;background:var(--inp);border:1px solid #D4A24E25;border-radius:12px;padding:12px;text-align:center">
       <div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${risk.toLocaleString()}</div>
       <div style="font-size:10px;color:var(--t4);margin-top:2px">ON THE LINE</div>
     </div>`:''}
@@ -2273,7 +2292,7 @@ function rMG(){
     h+=`<div style="font-size:12px;color:var(--grn);font-weight:700;margin-bottom:8px">UNLOCKED (${unlocked.length}/${badges.length})</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:14px">`;
     unlocked.forEach(b=>{
-      h+=`<div style="background:#10B98110;border:1px solid #10B98130;border-radius:12px;padding:12px;text-align:center">
+      h+=`<div style="background:#3FB08C0C;border:1px solid #3FB08C1A;border-radius:12px;padding:12px;text-align:center">
         <div style="font-size:28px;margin-bottom:4px">${b.icon}</div>
         <div style="font-weight:800;font-size:12px;color:var(--grn)">${b.name}</div>
         <div style="font-size:10px;color:var(--t4);margin-top:2px">${b.desc}</div>
@@ -2440,7 +2459,7 @@ function rA(){
   const dormant=totalPlayers-activePlayers;
   h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <div><div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc);letter-spacing:2px">ADMIN PANEL</div><div style="font-size:13px;color:var(--t4);margin-top:2px">Manage the league</div></div>
-    <button style="background:#EF444415;border:1px solid #EF444433;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;toast('Logged out as Admin');ren()">🔓 Logout</button>
+    <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;toast('Logged out as Admin');ren()">🔓 Logout</button>
   </div>`;
   // Admin jump navigation — grouped
   h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;margin-bottom:20px">
@@ -2464,7 +2483,7 @@ function rA(){
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-broadcast')">📢 Broadcast</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-crystal')">🔮 Crystal Ball</button>
     <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-squads')">🏏 Squads</button>
-    <button style="background:#EF444410;border:1px solid #EF444430;border-radius:8px;padding:6px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-danger')">🗑️ Danger</button>
+    <button style="background:#C4453A0C;border:1px solid #C4453A22;border-radius:8px;padding:6px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-danger')">🗑️ Danger</button>
   </div></div>`;
   h+=`<div id="adm-dash" class="card"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">ADMIN DASHBOARD</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
@@ -2500,7 +2519,7 @@ function rA(){
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button style="background:#25D36615;border:1px solid #25D36644;border-radius:10px;padding:8px 14px;color:#25D366;font-size:13px;cursor:pointer;font-weight:700" onclick="sendReminder(${m.id},'match')">📲 Match Reminder</button>
-        ${notBet.length?`<button style="background:#F59E0B15;border:1px solid #F59E0B44;border-radius:10px;padding:8px 14px;color:var(--acc);font-size:13px;cursor:pointer;font-weight:700" onclick="sendReminder(${m.id},'nudge')">👀 Nudge Slackers</button>`:''}
+        ${notBet.length?`<button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:10px;padding:8px 14px;color:var(--acc);font-size:13px;cursor:pointer;font-weight:700" onclick="sendReminder(${m.id},'nudge')">👀 Nudge Slackers</button>`:''}
       </div>
     </div></div>`;
   })}
@@ -2528,7 +2547,7 @@ function rA(){
   });
   h+=`</div>`;
   // Crystal Ball Admin
-  h+=`<div id="adm-crystal" class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
+  h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
   // Status + toggle
   const koCount=S.ko?Object.keys(S.ko).length:0;
@@ -2540,7 +2559,7 @@ function rA(){
   </div>`;
   // Toggle button
   if(!S.koRevealed){
-    h+=`<button style="width:100%;padding:10px;background:${S.koOpen?'#EF444415':'#10B98115'};border:1px solid ${S.koOpen?'#EF444433':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
+    h+=`<button style="width:100%;padding:10px;background:${S.koOpen?'#C4453A10':'#3FB08C10'};border:1px solid ${S.koOpen?'#C4453A25':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
   }
   // Show secret bets with edit capability (admin only)
   if(koCount>0){
@@ -2552,28 +2571,28 @@ function rA(){
         <span style="color:${T[k.team]?.c||'var(--acc)'};font-weight:800">${T[k.team]?.s||k.team}</span>
         <span style="color:var(--t4)">₹${k.amount.toLocaleString()} (${k.pct}%)</span>
         <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:6px;padding:3px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="editKO('${name.replace(/'/g,"\\'")}')">✏️ Edit</button>
-        <button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="deleteKO('${name.replace(/'/g,"\\'")}')">✕</button>
+        <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="deleteKO('${name.replace(/'/g,"\\'")}')">✕</button>
       </div></div>`;
     });
     h+=`</div>`;
   }
   // Reveal section
   if(koCount>0&&!S.koRevealed){
-    h+=`<div style="margin-top:16px;padding:14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px">
+    h+=`<div style="margin-top:16px;padding:14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px">
     <div class="bf-l">REVEAL & SETTLE</div>
     <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team. This settles all Crystal Ball bets internally. Players will only see "settled — announced at event" until you publish.</div>
     <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
     <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal & Settle (Admin Only)</button></div>`;
   }
   if(S.koRevealed&&!S.koPublished){
-    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">✅ Settled internally! Winner: <strong>${T[S.koWinner]?.n||S.koWinner}</strong></div>`;
-    h+=`<div style="margin-top:8px;padding:14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px">
+    h+=`<div style="margin-top:12px;padding:10px;background:#3FB08C10;border:1px solid #3FB08C1A;border-radius:8px;font-size:13px;color:var(--grn)">✅ Settled internally! Winner: <strong>${T[S.koWinner]?.n||S.koWinner}</strong></div>`;
+    h+=`<div style="margin-top:8px;padding:14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px">
     <div class="bf-l">📢 PUBLISH TO PLAYERS</div>
     <div style="font-size:12px;color:var(--t4);margin-bottom:10px">When you're ready (e.g. at the final event), publish the Crystal Ball results. This will show a "🔮 Secret Bets Revealed" section on the Board tab for everyone to see.</div>
     <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="publishKO()">📢 Publish Crystal Ball Results to Everyone</button></div>`;
   }
   if(S.koPublished){
-    h+=`<div style="margin-top:12px;padding:10px;background:#10B98115;border:1px solid #10B98130;border-radius:8px;font-size:13px;color:var(--grn)">📢 Published! Crystal Ball results are now visible on the Board tab for all players.</div>`;
+    h+=`<div style="margin-top:12px;padding:10px;background:#3FB08C10;border:1px solid #3FB08C1A;border-radius:8px;font-size:13px;color:var(--grn)">📢 Published! Crystal Ball results are now visible on the Board tab for all players.</div>`;
   }
   // Final Standings (admin only — always visible after reveal)
   if(S.koRevealed&&S.koWinner){
@@ -2617,7 +2636,7 @@ function rA(){
   // Admin Place Bet (override — bypasses lock and player login)
   // ── PLAYER & BETS MANAGEMENT ──
   h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--t3);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">👥 PLAYER & BETS MANAGEMENT</div>`;
-  h+=`<div id="adm-placebet" class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:20px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
+  h+=`<div id="adm-placebet" class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Place or override a bet on behalf of a player. Bypasses lock timer and login. Use for special scenarios only.</div>
   <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="ab-player"><option value="">-- Select player --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
   <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
@@ -2626,12 +2645,12 @@ function rA(){
   h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
-  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">×${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
+  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">×${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
   h+=`</div>`;
   // Broadcast Announcement
   h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
-  if(S.announce){h+=`<div style="padding:10px 14px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv();toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
+  if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv();toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // Manual Balance Adjustment
@@ -2651,12 +2670,12 @@ function rA(){
   h+=`</div>`;
   // Participants
   h+=`<div id="adm-players" class="card"><div class="ch"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span></div>`;
-  Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#254AA515;border:1px solid #254AA544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#F59E0B15;border:1px solid #F59E0B44;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#EF444420;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
+  Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#254AA515;border:1px solid #254AA544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
   h+=`</div>`;
   // Final Standings (admin only — includes Crystal Ball)
   if(S.koRevealed&&S.koWinner&&S.ko&&Object.keys(S.ko).length){
     const finalL=Object.keys(S.p).map(n=>({n,pub:bal(n),fin:finalBal(n),ko:S.ko[n]||null})).sort((a,b)=>b.fin-a.fin);
-    h+=`<div class="card" style="border:1px solid #F59E0B33"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">FINAL STANDINGS (ADMIN ONLY)</span></div>
+    h+=`<div class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:18px">🏆</span><span class="ct">FINAL STANDINGS (ADMIN ONLY)</span></div>
     <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Includes Crystal Ball results. Players cannot see this. IPL Winner: <strong style="color:var(--acc)">${T[S.koWinner]?.n||S.koWinner}</strong></div>
     <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <tr style="border-bottom:2px solid var(--bdr)">
@@ -2684,12 +2703,12 @@ function rA(){
   // Danger
   // ── DANGER ZONE ──
   h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">⚠️ DANGER ZONE</div>`;
-  h+=`<div id="adm-danger" class="card" style="border:1px solid #EF444433"><div class="ch"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:10px">
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets? Crystal Ball predictions will remain.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button>
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button>
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results? Balances will recalculate.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
-  <button style="width:100%;padding:12px;background:#EF444415;border:1px solid #EF444433;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button>
-  <button style="width:100%;padding:12px;background:#EF444420;border:1px solid #EF444444;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
+  h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25"><div class="ch"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:10px">
+  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets? Crystal Ball predictions will remain.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button>
+  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button>
+  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL results? Balances will recalculate.')){S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button>
+  <button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button>
+  <button style="width:100%;padding:12px;background:#C4453A18;border:1px solid #EF444444;border-radius:10px;color:var(--red);font-weight:800;cursor:pointer;font-size:14px" onclick="rstAll()">💀 Reset Everything</button></div></div>`;
   el.innerHTML=h;
 }
 
@@ -2699,7 +2718,7 @@ async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=aw
 function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
 
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
-f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">📊 Publish</button>${ex[m.h]?`<button style="flex:0;background:#EF444420;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
+f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">📊 Publish</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
 function sOdds(id){const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
@@ -2714,9 +2733,9 @@ let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><
 </div></div>
 <div class="bf-s"><div class="bf-l">Man of the Match</div>${momDropdown('amm-'+id,id)}</div>
 <button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>
-<button style="width:100%;margin-top:8px;background:#EF444415;border:1px solid #EF444433;border-radius:12px;padding:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="voidMatch(${id})">🌧️ Void Match (Washout / No Result)</button>`;
+<button style="width:100%;margin-top:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:12px;padding:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="voidMatch(${id})">🌧️ Void Match (Washout / No Result)</button>`;
 // Show clear result if already recorded
-if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#10B98115'};border:1px solid ${S.r[id].voided?'#64748B30':'#10B98130'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
+if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
 const ab=Object.values(S.b).filter(x=>x.mid===id);
 if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
 f.innerHTML=h}
@@ -2756,7 +2775,7 @@ function sqTeamChange(){
   sq.forEach((p,i)=>{
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
     <span style="font-size:13px;color:var(--t1)">${p===cap?'👑 ':''}<strong>${p}</strong></span>
-    <button style="background:#EF444420;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="sqRemove('${k}','${p.replace(/'/g,"\\'")}')">✕</button></div>`;
+    <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="sqRemove('${k}','${p.replace(/'/g,"\\'")}')">✕</button></div>`;
   });
   // Add player
   h+=`<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="sq-new" placeholder="New player name..." style="flex:1"><button class="bp" style="padding:8px 14px" onclick="sqAdd('${k}')">+ Add</button></div>`;
@@ -2797,7 +2816,7 @@ function abMatchChange(){
   const player=$('ab-player').value;
   const existing=player?S.b[mid+'-'+player]:null;
   f.innerHTML=`
-  ${existing?`<div style="margin-top:8px;padding:10px;background:#F59E0B10;border:1px solid #F59E0B25;border-radius:8px;font-size:13px;color:var(--yel)">⚠️ ${player} already has a bet on this match: ₹${existing.am.toLocaleString()} on ${existing.tm}. This will override it.</div>`:''}
+  ${existing?`<div style="margin-top:8px;padding:10px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:8px;font-size:13px;color:var(--yel)">⚠️ ${player} already has a bet on this match: ₹${existing.am.toLocaleString()} on ${existing.tm}. This will override it.</div>`:''}
   <div class="bf-s" style="margin-top:12px"><div class="bf-l">Team</div><div style="display:flex;gap:8px">
   <button class="bf-tb" id="ab-t-${m.h}" style="border-color:${T[m.h]?.c};color:${T[m.h]?.c}" onclick="abTeam='${m.h}';$('ab-t-${m.h}').style.background='${T[m.h]?.c}';$('ab-t-${m.h}').style.color='#fff';$('ab-t-${m.a}').style.background='transparent';$('ab-t-${m.a}').style.color='${T[m.a]?.c}'">${T[m.h]?.s} (×${mo[m.h]})</button>
   <button class="bf-tb" id="ab-t-${m.a}" style="border-color:${T[m.a]?.c};color:${T[m.a]?.c}" onclick="abTeam='${m.a}';$('ab-t-${m.a}').style.background='${T[m.a]?.c}';$('ab-t-${m.a}').style.color='#fff';$('ab-t-${m.h}').style.background='transparent';$('ab-t-${m.h}').style.color='${T[m.h]?.c}'">${T[m.a]?.s} (×${mo[m.a]})</button>
@@ -2981,7 +3000,7 @@ function timeAgo(ts){
 }
 
 function confetti(){
-  const colors=['#FBBF24','#F59E0B','#EF4444','#10B981','#3B82F6','#8B5CF6','#EC4899'];
+  const colors=['#D4A24E','#C49032','#C4453A','#3FB08C','#3B82F6','#7C6AB8','#B85C8A'];
   for(let i=0;i<40;i++){
     const el=document.createElement('div');
     el.className='confetti-piece';
@@ -3124,7 +3143,7 @@ db.ref('dugout').once('value').then(snap=>{
   db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=myBet.mom&&myBet.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase(),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOMB);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
-$('mtag').textContent='LIVE';$('mtag').style.background='#10B98122';$('mtag').style.color='#34D399';toast('Firebase connected! 🔗');
+$('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#34D399';toast('Firebase connected! 🔗');
 }catch(e){err.textContent='Invalid JSON'}}
 
 // Boot
@@ -3134,6 +3153,8 @@ setInterval(()=>{
   if(!anyFormOpen&&(vw==='matches'||vw==='home'))ren();
 },30000);
 ld();
+setTimeout(moveSlider,200);
+window.addEventListener('resize',moveSlider);
 </script>
 <div id="ru-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
   <button onclick="$('ru-sheet').style.display=$('ru-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">📋</button>
