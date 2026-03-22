@@ -65,6 +65,11 @@ main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .fb.on{background:#D4A24E12;border-color:#D4A24E30;color:var(--acc)}
 .mc{background:var(--card);border:1px solid var(--bdr);border-left:4px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;animation:fadeUp .3s}
 .mc.lk{border-left-color:var(--t3)}.mc.dn{border-left-color:var(--grn)}
+.mc.urgent-mid{border-left-color:var(--acc);box-shadow:0 0 25px rgba(212,162,78,0.12)}
+.mc.urgent-high{border-left-color:var(--red);animation:pulse-red 1.2s infinite;transform:translateY(-1px)}
+.mc.urgent-high .mn{color:var(--red);font-weight:900}
+.mc.urgent-mid{border-left-color:var(--acc);box-shadow:0 0 16px rgba(212,162,78,0.1)}
+.mc.urgent-high{border-left-color:var(--red);box-shadow:0 0 20px rgba(196,69,58,0.15);animation:pulse-red 1.5s ease-in-out infinite}
 .mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px}
 .mm{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mn{font-weight:800;font-size:13px;color:var(--acc);font-family:var(--ff)}
@@ -218,6 +223,7 @@ function lk(m){if(S.lockOverride&&S.lockOverride[m.id]!==undefined)return S.lock
 function fd(s){return new Date(s+'T00:00:00+05:30').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m} ${hr>=12?'PM':'AM'}`}
 function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.floor(df/864e5),h=Math.floor((df%864e5)/36e5),mn=Math.floor((df%36e5)/6e4);return d>0?d+'d '+h+'h':h>0?h+'h '+mn+'m':mn+'m'}
+function cdUrgency(m){const df=dl(m)-new Date();if(df<=0)return 3;if(df<=10*60000)return 3;if(df<=30*60000)return 2;if(df<=60*60000)return 1;return 0}
 function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function ruJump(id){const el=$(id);if(!el)return;const hdr=document.querySelector('header');const offset=hdr?hdr.offsetHeight+16:120;const y=el.getBoundingClientRect().top+window.pageYOffset-offset;window.scrollTo({top:y,behavior:'smooth'})}
@@ -486,7 +492,7 @@ function getBalBreakdown(n){
 }
 
 function bdg(t,sz=48,nm=false){
-  if(t==='TBD')return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:var(--bdr);font-size:${sz*.25}px;border:2px solid var(--t3)">?</div>${nm?'<div class="bdg-n">TBD</div>':''}</div>`;
+  if(!t||t==='TBD'||!T[t])return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:var(--bdr);font-size:${sz*.25}px;border:2px solid var(--t3)">?</div>${nm?`<div class="bdg-n">${t||'TBD'}</div>`:''}</div>`;
   const x=T[t];return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${x.c},${x.c}CC);border:2px solid ${x.a};box-shadow:0 0 20px ${x.c}44;font-size:${sz*.25}px">${x.s}</div>${nm?`<div class="bdg-n">${x.n}</div>`:''}</div>`
 }
 
@@ -1053,9 +1059,11 @@ function rM(){
     const totalAb=hBets+aBets||1;
     const totalMoney=hMoney+aMoney||1;
 
-    h+=`<div class="mc ${rs?'dn':l?'lk':''}">
+    const urg=l?0:cdUrgency(m);
+    const urgCls=!rs&&!l&&urg>=3?' urgent-high':!rs&&!l&&urg>=2?' urgent-mid':'';
+    h+=`<div class="mc ${rs?'dn':l?'lk':''}${urgCls}">
     <!-- Match header -->
-    <div class="mh"><div class="mm"><span class="mn">${m.playoff?m.v:'#'+m.id}</span>${dh&&!m.playoff?'<span style="background:#C4453A18;color:var(--hot);padding:1px 8px;border-radius:6px;font-size:9px;font-weight:800">DOUBLE HEADER</span>':''}<span class="md">${fd(m.d)} · ${ft(m.t)}</span></div><div class="ms" style="background:${rs?'#3FB08C14':l?'#C4453A18':'#D4A24E18'};color:${rs?'var(--grn)':l?'var(--red)':'var(--yel)'}${l&&!rs?';animation:pulse-red 2s ease-in-out infinite':''}">${rs?(rs.voided?'🌧️ VOIDED':'✅ DONE'):l?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:4px;vertical-align:middle"></span> IN PLAY':'⏱️ '+cd(m)}</div></div>
+    <div class="mh"><div class="mm"><span class="mn">${m.playoff?m.v:'#'+m.id}</span>${dh&&!m.playoff?'<span style="background:#C4453A18;color:var(--hot);padding:1px 8px;border-radius:6px;font-size:9px;font-weight:800">DOUBLE HEADER</span>':''}<span class="md">${fd(m.d)} · ${ft(m.t)}</span></div><div class="ms" style="background:${rs?'#3FB08C14':l?'#C4453A18':urg>=3?'#C4453A22':urg>=2?'#C4453A18':urg===1?'#D4A24E22':'#D4A24E18'};color:${rs?'var(--grn)':l?'var(--red)':urg>=2?'var(--red)':'var(--yel)'}${l&&!rs?';animation:pulse-red 2s ease-in-out infinite':urg>=3?';animation:pulse-red 1.2s ease-in-out infinite':''}">${rs?(rs.voided?'🌧️ VOIDED':'✅ DONE'):l?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:4px;vertical-align:middle"></span> IN PLAY':urg>=3?'⏳ Closing NOW · '+cd(m):urg>=2?'⏳ Closing soon · '+cd(m):urg===1?'⏳ '+cd(m)+' left':'⏱️ '+cd(m)}</div></div>
 
     <!-- Teams VS with bigger badges -->
     <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 0">
@@ -1240,7 +1248,7 @@ function cancelEdit(id,oldBet){
   }
 }
 
-function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.02)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.5'}}});const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Bet ₹'+am.toLocaleString()+' on '+tm:'Confirm Bet'}calcWin(id)}
+function pk(id,tm){bfs[id]=bfs[id]||{};if(bfs[id].tm===tm)return;bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.02)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.5'}}});toast('You picked '+(T[tm]?.s||tm)+' 🔥');const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Bet ₹'+am.toLocaleString()+' on '+tm:'Confirm Bet'}calcWin(id)}
 
 function fmtAmt(el){const raw=el.value.replace(/[^0-9]/g,'');if(!raw){el.value='';el.style.borderColor='var(--bdr)';return}let num=parseInt(raw);const b=betBal(me);if(num>b&&b>0){num=b;el.style.borderColor='var(--red)';setTimeout(()=>{el.style.borderColor='var(--bdr)'},800)}el.value=num.toLocaleString()}
 function parseAmt(id){return parseInt(($('am-'+id)?.value||'').replace(/,/g,''))||0}
