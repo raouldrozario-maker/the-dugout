@@ -2992,7 +2992,7 @@ function rA(){
   // Broadcast Announcement
   h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
-  if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv();toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
+  if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){delete S.announce;sv(['announce']);toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // Manual Balance Adjustment
@@ -3077,7 +3077,7 @@ let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><
 <button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>
 <button style="width:100%;margin-top:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:12px;padding:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="voidMatch(${id})">🌧️ Void Match (Washout / No Result)</button>`;
 // Show clear result if already recorded
-if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv();toast('Result cleared');rA()}">↩️ Undo</button></div>`}
+if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){delete S.r[${id}];sv(['r']);toast('Result cleared');rA()}">↩️ Undo</button></div>`}
 const ab=Object.values(S.b).filter(x=>x.mid===id);
 if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
 f.innerHTML=h}
@@ -3129,7 +3129,7 @@ function setCap(k){
   if(!cap){toast('Select a captain','err');return}
   if(!S.capEdits)S.capEdits={};
   S.capEdits[k]=cap;
-  sv();toast(cap+' is now captain of '+T[k].s+' 👑');sqTeamChange();
+  sv(["capEdits"]);toast(cap+' is now captain of '+T[k].s+' 👑');sqTeamChange();
 }
 function sqAdd(k){
   const name=$('sq-new').value.trim();
@@ -3139,7 +3139,7 @@ function sqAdd(k){
   sq.push(name);
   if(!S.squadEdits)S.squadEdits={};
   S.squadEdits[k]=sq;
-  sv();toast(name+' added to '+T[k].s+' ✅');sqTeamChange();
+  sv(["squadEdits"]);toast(name+' added to '+T[k].s+' ✅');sqTeamChange();
 }
 function sqRemove(k,name){
   if(!confirm('Remove '+name+' from '+T[k].s+'?'))return;
@@ -3148,7 +3148,7 @@ function sqRemove(k,name){
   S.squadEdits[k]=sq;
   // If removed player was captain, clear captain
   if(getCap(k)===name){if(!S.capEdits)S.capEdits={};S.capEdits[k]='';}
-  sv();toast(name+' removed from '+T[k].s);sqTeamChange();
+  sv(["squadEdits"]);toast(name+' removed from '+T[k].s);sqTeamChange();
 }
 function abMatchChange(){
   const mid=parseInt($('ab-match').value),f=$('ab-form');
@@ -3265,11 +3265,11 @@ function addMatch(){
   MM.push({id,d:date,t:time,h:home,a:away,v:venue});
   if(!S.customMatches)S.customMatches=[];
   S.customMatches.push({id,d:date,t:time,h:home,a:away,v:venue});
-  sv();
+  sv(["customMatches"]);
   toast('Match #'+id+' added! ✅');
   rA();
 }
-function setPO(id){const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv();toast('Playoff teams set! 🏟️');rA()}
+function setPO(id){const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');rA()}
 
 function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv(['b']);toast('Bet deleted');rA()}
 
