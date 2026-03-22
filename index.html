@@ -34,6 +34,10 @@ nav{display:flex;justify-content:center;gap:1px;padding:2px 10px 10px;max-width:
 .nb.on span:last-child{font-weight:800;color:var(--acc)}
 main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:28px;margin-bottom:24px;animation:fadeUp .4s;transition:transform .2s ease}
+.tc:hover{transform:translateY(-2px)}.tc{transition:all .25s ease}
+.sq-wrap{overflow:hidden;transition:max-height .2s ease,opacity .2s ease;max-height:0;opacity:0}.sq-wrap.open{max-height:2000px;opacity:1}
+.sq-btn{background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;font-weight:700;padding:10px 0 0;display:flex;align-items:center;gap:6px;transition:color .2s}.sq-btn:hover{color:var(--t1)}
+.sq-chev{display:inline-block;transition:transform .2s ease;font-size:10px}.sq-chev.open{transform:rotate(90deg)}
 .card:hover{transform:translateY(-2px)}
 .ch{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .ct{font-family:var(--ff);font-size:18px;font-weight:700;color:var(--t1);letter-spacing:1px}
@@ -162,13 +166,13 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 // ══════════════════════════════════════════════════════════════
 const T={
 CSK:{n:"Chennai Super Kings",s:"CSK",c:"#F9CD05",a:"#0D47A1",cap:"Ruturaj Gaikwad",sq:["Ruturaj Gaikwad","Ayush Mhatre","Sarfaraz Khan","Dewald Brevis","Sanju Samson","Kartik Sharma","MS Dhoni","Urvil Patel","Shivam Dube","Prashant Veer","Anshul Kamboj","Aman Khan","Matthew William Short","Jamie Overton","Zak Foulkes","Khaleel Ahmed","Noor Ahmad","Rahul Chahar","Mukesh Choudhary","Shreyas Gopal","Gurjapneet Singh","Ramakrishna Ghosh","Matt Henry","Akeal Hosein","Nathan Ellis"]},
-DC:{n:"Delhi Capitals",s:"DC",c:"#17479E",a:"#EF1B23",cap:"Axar Patel",sq:["Axar Patel","KL Rahul","Prithvi Shaw","Karun Nair","Ashutosh Sharma","Sameer Rizvi","Sahil Parakh","Ben Duckett","Tristan Stubbs","Pathum Nissanka","David Miller","Abishek Porel","Nitish Rana","Vipraj Nigam","Madhav Tiwari","Tripurana Vijay","Ajay Mandal","Auqib Dar","Kuldeep Yadav","T. Natarajan","Mukesh Kumar","Mitchell Starc","Lungisani Ngidi","Kyle Jamieson","Dushmantha Chameera"]},
+DC:{n:"Delhi Capitals",s:"DC",c:"#4B8BE5",a:"#EF1B23",cap:"Axar Patel",sq:["Axar Patel","KL Rahul","Prithvi Shaw","Karun Nair","Ashutosh Sharma","Sameer Rizvi","Sahil Parakh","Ben Duckett","Tristan Stubbs","Pathum Nissanka","David Miller","Abishek Porel","Nitish Rana","Vipraj Nigam","Madhav Tiwari","Tripurana Vijay","Ajay Mandal","Auqib Dar","Kuldeep Yadav","T. Natarajan","Mukesh Kumar","Mitchell Starc","Lungisani Ngidi","Kyle Jamieson","Dushmantha Chameera"]},
 GT:{n:"Gujarat Titans",s:"GT",c:"#B88746",a:"#1C1C2B",cap:"Shubman Gill",sq:["Shubman Gill","Sai Sudharsan","Shahrukh Khan","Jos Buttler","Anuj Rawat","Kumar Kushagra","Tom Banton","Washington Sundar","Rahul Tewatia","Jayant Yadav","Nishant Sindhu","Mohd. Arshad Khan","Glenn Phillips","Jason Holder","Rashid Khan","Mohammed Siraj","Prasidh Krishna","Kagiso Rabada","Sai Kishore","Manav Suthar","Gurnoor Singh Brar","Ishant Sharma","Prithvi Raj Yarra","Ashok Sharma","Luke Wood"]},
-KKR:{n:"Kolkata Knight Riders",s:"KKR",c:"#3A225D",a:"#E8C547",cap:"Ajinkya Rahane",sq:["Ajinkya Rahane","Angkrish Raghuvanshi","Rinku Singh","Manish Pandey","Rahul Tripathi","Rovman Powell","Finn Allen","Tim Seifert","Tejasvi Singh","Cameron Green","Sunil Narine","Rachin Ravindra","Ramandeep Singh","Anukul Roy","Daksh Kamra","Sarthak Ranjan","Varun Chakaravarthy","Harshit Rana","Akash Deep","Matheesha Pathirana","Vaibhav Arora","Kartik Tyagi","Prashant Solanki","Umran Malik","Blessing Muzarabani"]},
+KKR:{n:"Kolkata Knight Riders",s:"KKR",c:"#7B5EA7",a:"#E8C547",cap:"Ajinkya Rahane",sq:["Ajinkya Rahane","Angkrish Raghuvanshi","Rinku Singh","Manish Pandey","Rahul Tripathi","Rovman Powell","Finn Allen","Tim Seifert","Tejasvi Singh","Cameron Green","Sunil Narine","Rachin Ravindra","Ramandeep Singh","Anukul Roy","Daksh Kamra","Sarthak Ranjan","Varun Chakaravarthy","Harshit Rana","Akash Deep","Matheesha Pathirana","Vaibhav Arora","Kartik Tyagi","Prashant Solanki","Umran Malik","Blessing Muzarabani"]},
 LSG:{n:"Lucknow Super Giants",s:"LSG",c:"#A72056",a:"#FFCC00",cap:"Rishabh Pant",sq:["Rishabh Pant","Ayush Badoni","Himmat Singh","Aiden Markram","Matthew Breetzke","Akshat Raghuwanshi","Nicholas Pooran","Josh Inglis","Mukul Choudhary","Mitchell Marsh","Wanindu Hasaranga","Shahbaz Ahamad","Arshin Kulkarni","Abdul Samad","Arjun Tendulkar","Mohammad Shami","Mayank Yadav","Avesh Khan","Anrich Nortje","Mohsin Khan","Akash Singh","Digvesh Singh","M. Siddharth","Naman Tiwari","Prince Yadav"]},
-MI:{n:"Mumbai Indians",s:"MI",c:"#004BA0",a:"#D4A843",cap:"Hardik Pandya",sq:["Rohit Sharma","Surya Kumar Yadav","N. Tilak Varma","Danish Malewar","Sherfane Rutherford","Hardik Pandya","Quinton De Kock","Ryan Rickelton","Robin Minz","Will Jacks","Mitchell Santner","Corbin Bosch","Naman Dhir","Raj Angad Bawa","Atharva Ankolekar","Mayank Rawat","Jasprit Bumrah","Trent Boult","Deepak Chahar","Shardul Thakur","Allah Ghazanfar","Ashwani Kumar","Mayank Markande","Mohammad Izhar","Raghu Sharma"]},
+MI:{n:"Mumbai Indians",s:"MI",c:"#1A6FD4",a:"#D4A843",cap:"Hardik Pandya",sq:["Rohit Sharma","Surya Kumar Yadav","N. Tilak Varma","Danish Malewar","Sherfane Rutherford","Hardik Pandya","Quinton De Kock","Ryan Rickelton","Robin Minz","Will Jacks","Mitchell Santner","Corbin Bosch","Naman Dhir","Raj Angad Bawa","Atharva Ankolekar","Mayank Rawat","Jasprit Bumrah","Trent Boult","Deepak Chahar","Shardul Thakur","Allah Ghazanfar","Ashwani Kumar","Mayank Markande","Mohammad Izhar","Raghu Sharma"]},
 PBKS:{n:"Punjab Kings",s:"PBKS",c:"#DD1F2D",a:"#A7A9AC",cap:"Shreyas Iyer",sq:["Shreyas Iyer","Priyansh Arya","Nehal Wadhera","Shashank Singh","Musheer Khan","Harnoor Pannu","Pyla Avinash","Mitch Owen","Prabhsimran Singh","Vishnu Vinod","Marcus Stoinis","Marco Jansen","Cooper Connolly","Azmatullah Omarzai","Harpreet Brar","Suryansh Shedge","Arshdeep Singh","Yuzvendra Chahal","Lockie Ferguson","Xavier Bartlett","Ben Dwarshuis","Vyshak Vijaykumar","Yash Thakur","Pravin Dubey","Vishal Nishad"]},
-RR:{n:"Rajasthan Royals",s:"RR",c:"#254AA5",a:"#E73895",cap:"Riyan Parag",sq:["Yashasvi Jaiswal","Vaibhav Suryavanshi","Shubham Dubey","Aman Rao Perala","Shimron Hetmyer","Riyan Parag","Ravindra Jadeja","Sam Curran","Dhruv Jurel","Ravi Singh","Donovan Ferreira","Lhuan-Dre Pretorius","Ravi Bishnoi","Jofra Archer","Tushar Deshpande","Sandeep Sharma","Adam Milne","Nandre Burger","Kwena Maphaka","Sushant Mishra","Kuldeep Sen","Brijesh Sharma","Vignesh Puthur","Yash Raj Punja","Yudhvir Singh Charak"]},
+RR:{n:"Rajasthan Royals",s:"RR",c:"#E73895",a:"#E73895",cap:"Riyan Parag",sq:["Yashasvi Jaiswal","Vaibhav Suryavanshi","Shubham Dubey","Aman Rao Perala","Shimron Hetmyer","Riyan Parag","Ravindra Jadeja","Sam Curran","Dhruv Jurel","Ravi Singh","Donovan Ferreira","Lhuan-Dre Pretorius","Ravi Bishnoi","Jofra Archer","Tushar Deshpande","Sandeep Sharma","Adam Milne","Nandre Burger","Kwena Maphaka","Sushant Mishra","Kuldeep Sen","Brijesh Sharma","Vignesh Puthur","Yash Raj Punja","Yudhvir Singh Charak"]},
 RCB:{n:"Royal Challengers Bengaluru",s:"RCB",c:"#E4002B",a:"#C8A951",cap:"Rajat Patidar",sq:["Virat Kohli","Rajat Patidar","Devdutt Padikkal","Satvik Deswal","Tim David","Phil Salt","Jitesh Sharma","Jordan Cox","Venkatesh Iyer","Krunal Pandya","Jacob Bethell","Romario Shepherd","Swapnil Singh","Vicky Ostwal","Mangesh Yadav","Kanishk Chouhan","Vihaan Malhotra","Josh Hazlewood","Bhuvneshwar Kumar","Yash Dayal","Nuwan Thushara","Jacob Duffy","Rasikh Dar","Suyash Sharma","Abhinandan Singh"]},
 SRH:{n:"Sunrisers Hyderabad",s:"SRH",c:"#FF822A",a:"#1a1a2e",cap:"Pat Cummins",sq:["Travis Head","Abhishek Sharma","Aniket Verma","Smaran Ravichandran","Pat Cummins","Heinrich Klaasen","Ishan Kishan","Salil Arora","Nitish Kumar Reddy","Kamindu Mendis","Liam Livingstone","Brydon Carse","Jack Edwards","Harsh Dubey","Harshal Patel","Jaydev Unadkat","Shivam Mavi","Eshan Malinga","Zeeshan Ansari","Shivang Kumar","Sakib Hussain","Onkar Tarmale","Amit Kumar","Praful Hinge","Krains Fuletra"]}
 };
@@ -202,7 +206,7 @@ const MM=[
 ];
 
 const ST=10000,MINB=2000,MOMB=.2;
-let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={};
+let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
 
 // ══════════════════════════════════════════════════════════════
 // HELPERS
@@ -214,8 +218,8 @@ function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m}
 function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.floor(df/864e5),h=Math.floor((df%864e5)/36e5),mn=Math.floor((df%36e5)/6e4);return d>0?d+'d '+h+'h':h>0?h+'h '+mn+'m':mn+'m'}
 function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function ruJump(id){const el=$(id);if(!el)return;const y=el.getBoundingClientRect().top+window.pageYOffset-100;window.scrollTo({top:y,behavior:'smooth'})}
-document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none'})
+function ruJump(id){const el=$(id);if(!el)return;const hdr=document.querySelector('header');const offset=hdr?hdr.offsetHeight+16:120;const y=el.getBoundingClientRect().top+window.pageYOffset-offset;window.scrollTo({top:y,behavior:'smooth'})}
+document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
@@ -517,7 +521,7 @@ function sdFilter(id){
   try{groups=JSON.parse(inp.dataset.sd)}catch(e){return}
   // Reorder: show selected team's players first
   const mid=inp.dataset.mid;
-  const selectedTm=mid&&bfs[mid]?bfs[mid].tm:null;
+  const selectedTm=mid&&bfs[mid]?bfs[mid].tm:(mid&&admW[mid]?admW[mid]:null);
   if(selectedTm){
     groups.sort((a,b)=>{
       if(a.team===selectedTm)return -1;
@@ -647,7 +651,7 @@ function ld(){
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
-function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';moveSlider()}
+function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
 function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
@@ -1877,43 +1881,97 @@ function rRu(){
 // ══════════════════════════════════════════════════════════════
 function rT(){
   const el=$('v-teams');
-  let h=`<div style="text-align:center;margin-bottom:20px"><div style="font-size:48px">🏏</div><div class="ct" style="font-size:22px;margin-top:8px;text-align:center">IPL 2026 TEAMS</div><div style="color:var(--t4);font-size:13px;margin-top:4px">10 teams · 250 players · Tap to expand</div></div>`;
+  const allBets=Object.values(S.b);
+  const resolvedBets=allBets.filter(b=>S.r[b.mid]&&!S.r[b.mid].voided);
 
-  // Team filter
-  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;justify-content:center">`;
+  // Compute team game stats for taglines
+  const teamStats={};
   Object.keys(T).forEach(k=>{
-    h+=`<button style="background:${T[k].c}22;border:1px solid ${T[k].c}44;border-radius:8px;padding:6px 12px;color:${T[k].c};font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff);letter-spacing:.5px" onclick="$('team-${k}').scrollIntoView({behavior:'smooth',block:'start'})">${T[k].s}</button>`;
+    const betsOn=allBets.filter(b=>b.tm===k);
+    const betsResolved=resolvedBets.filter(b=>b.tm===k);
+    const wins=betsResolved.filter(b=>b.tm===S.r[b.mid].w);
+    let pl=0;
+    betsResolved.forEach(b=>{
+      const w=b.tm===S.r[b.mid].w,od=parseFloat(b.od)||2;
+      const mh=b.mom&&b.mom.trim().toLowerCase()===(S.r[b.mid].mom||'').trim().toLowerCase();
+      if(w)pl+=Math.round(b.am*(od-1));else if(!mh)pl-=b.am;
+    });
+    teamStats[k]={bets:betsOn.length,wins:wins.length,losses:betsResolved.length-wins.length,pl};
+  });
+
+  const mostBacked=Object.entries(teamStats).sort((a,b)=>b[1].bets-a[1].bets)[0];
+  const mostProfitable=Object.entries(teamStats).filter(([,s])=>s.pl>0).sort((a,b)=>b[1].pl-a[1].pl)[0];
+  const mostDangerous=Object.entries(teamStats).filter(([,s])=>s.pl<0).sort((a,b)=>a[1].pl-b[1].pl)[0];
+
+  function getTagline(k){
+    const s=teamStats[k];if(!s||!s.bets)return '';
+    if(mostProfitable&&mostProfitable[0]===k)return '💰 Most profitable team';
+    if(mostDangerous&&mostDangerous[0]===k)return '💀 Biggest money burner';
+    if(mostBacked&&mostBacked[0]===k)return '🔥 Most backed team';
+    if(s.bets>0&&s.wins>s.losses)return '📈 '+s.wins+'W/'+s.losses+'L · +₹'+s.pl.toLocaleString();
+    if(s.bets>0)return '📊 '+s.bets+' bets · '+s.wins+'W/'+s.losses+'L';
+    return '';
+  }
+
+  // Smart sort: teams playing today/next → top
+  const today=new Date().toISOString().split('T')[0];
+  const todayMatches=gms().filter(m=>m.d===today);
+  const todayTeams=new Set();
+  todayMatches.forEach(m=>{todayTeams.add(m.h);todayTeams.add(m.a)});
+  const teamKeys=Object.keys(T).sort((a,b)=>{
+    const aToday=todayTeams.has(a)?1:0,bToday=todayTeams.has(b)?1:0;
+    if(aToday!==bToday)return bToday-aToday;
+    return 0;
+  });
+
+  let h=`<div style="text-align:center;margin-bottom:20px"><div style="font-size:48px">🏏</div><div class="ct" style="font-size:22px;margin-top:8px;text-align:center">IPL 2026 TEAMS</div><div style="color:var(--t4);font-size:13px;margin-top:4px">10 teams · Tap to expand squad</div></div>`;
+
+  // Team filter pills
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;justify-content:center">`;
+  teamKeys.forEach(k=>{
+    h+=`<button style="background:${T[k].c}22;border:1px solid ${T[k].c}44;border-radius:8px;padding:6px 12px;color:${T[k].c};font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff);letter-spacing:.5px" onclick="ruJump('team-${k}')">${T[k].s}${todayTeams.has(k)?' 🟢':''}</button>`;
   });
   h+=`</div>`;
 
-  Object.keys(T).forEach(k=>{
+  teamKeys.forEach(k=>{
     const sq=getSquad(k);
     const cap=getCap(k);
-    // Categorize players by role (simple heuristic from position in array + known roles)
-    const batters=[],allrounders=[],bowlers=[];
-    // We don't have role data, so show all as one squad list sorted alphabetically
     const sorted=[...sq].sort((a,b)=>a.localeCompare(b));
+    const tagline=getTagline(k);
+    const isOpen=sqOpen[k]||false;
+    const playing=todayTeams.has(k);
 
-    h+=`<div id="team-${k}" class="card" style="border-left:4px solid ${T[k].c}">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+    h+=`<div id="team-${k}" class="card tc" style="border-left:4px solid ${T[k].c};${playing?'box-shadow:0 0 20px '+T[k].c+'15':''}">
+    <div style="display:flex;align-items:center;gap:14px">
     ${bdg(k,52)}
     <div style="flex:1">
-      <div style="font-family:var(--ff);font-size:18px;font-weight:700;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</div>
-      <div style="font-size:13px;color:var(--t2);margin-top:2px">${sq.length} players${cap?' · Captain: <strong style="color:var(--acc)">'+cap+'</strong>':''}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-family:var(--ff);font-size:18px;font-weight:700;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</span>
+        ${playing?'<span style="font-size:9px;background:'+T[k].c+'22;color:'+T[k].c+';padding:2px 8px;border-radius:4px;font-weight:800">PLAYING TODAY</span>':''}
+      </div>
+      ${cap?`<div style="font-size:13px;color:var(--t2);margin-top:3px">👑 Captain: <strong style="color:var(--acc)">${cap}</strong></div>`:''}
+      ${tagline?`<div style="font-size:11px;color:var(--t3);margin-top:3px">${tagline}</div>`:''}
     </div>
-    </div>`;
+    </div>
 
-    // Player grid
-    h+=`<div style="display:flex;flex-wrap:wrap;gap:6px">`;
+    <button class="sq-btn" onclick="sqOpen['${k}']=!sqOpen['${k}'];const w=$('sq-${k}');w.classList.toggle('open');this.querySelector('.sq-chev').classList.toggle('open');this.querySelector('.sq-txt').textContent=sqOpen['${k}']?'Hide squad':'View squad'">
+      <span class="sq-chev${isOpen?' open':''}">▸</span>
+      <span class="sq-txt">${isOpen?'Hide squad':'View squad'}</span>
+      <span style="color:var(--t4);font-weight:600"> · ${sq.length} players</span>
+    </button>
+
+    <div id="sq-${k}" class="sq-wrap${isOpen?' open':''}" style="margin-top:8px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:4px">`;
+
     sorted.forEach(p=>{
       const isCap=p===cap;
-      const isOverseas=!isIndian(p);
       h+=`<div style="display:flex;align-items:center;gap:6px;background:var(--inp);border:1px solid ${isCap?T[k].c+'66':'var(--bdr)'};border-radius:8px;padding:5px 10px;font-size:12px">
       ${isCap?'<span style="font-size:11px">👑</span>':''}
       <span style="color:var(--t1);font-weight:${isCap?'800':'600'}">${p}</span>
       </div>`;
     });
-    h+=`</div></div>`;
+
+    h+=`</div></div></div>`;
   });
 
   el.innerHTML=h;
@@ -1963,7 +2021,7 @@ function rAn(){
   </div>`;
 
   // ─── HERO STATS (4 cards) ───
-  h+=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
+  h+=`<div id="st-hero" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
     <div style="background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr2);border-radius:16px;padding:20px;text-align:center">
       <div style="font-size:28px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${totalBet.toLocaleString()}</div>
       <div style="font-size:11px;color:var(--t4);margin-top:4px;text-transform:uppercase;letter-spacing:1px">Total Wagered</div>
@@ -1987,7 +2045,7 @@ function rAn(){
   if(resolvedBets.length>=1){
     const personalities=players.map(n=>{const p=getPersonality(n);return p?{name:n,p}:null}).filter(Boolean);
     if(personalities.length){
-      h+=`<div class="card">
+      h+=`<div id="st-pers" class="card">
         <div class="ct" style="font-size:14px;margin-bottom:14px">🏷️ PLAYER PERSONALITIES</div>
         <div style="font-size:11px;color:var(--t4);margin-bottom:14px">Based on betting patterns — updates live</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
@@ -2069,7 +2127,7 @@ function rAn(){
     // Legend
     let legend=series.map(s=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)"><span style="width:8px;height:8px;border-radius:50%;background:${s.color};opacity:${s.name===me?'1':'0.6'}"></span>${s.name}</span>`).join(' · ');
 
-    h+=`<div class="card" style="position:relative">
+    h+=`<div id="st-balance" class="card" style="position:relative">
       <div class="ct" style="font-size:14px;margin-bottom:14px">📈 BALANCE OVER TIME</div>
       <div style="margin-bottom:10px;position:relative">
         ${svg}
@@ -2111,7 +2169,7 @@ function rAn(){
       </div>`;
     }).join('');
 
-    h+=`<div class="card">
+    h+=`<div id="st-team" class="card">
       <div class="ct" style="font-size:14px;margin-bottom:14px">🏏 TEAM POPULARITY</div>
       <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
         <div style="flex-shrink:0">${donutSvg}</div>
@@ -2148,7 +2206,7 @@ function rAn(){
         </div>`;
       }).join('');
 
-      h+=`<div class="card">
+      h+=`<div id="st-profit" class="card">
         <div class="ct" style="font-size:14px;margin-bottom:14px">📊 PROFIT BY TEAM</div>
         <div style="font-size:11px;color:var(--t4);margin-bottom:12px">League-wide P&L from betting on each team</div>
         ${bars}
@@ -2189,7 +2247,7 @@ function rAn(){
       dSvg+=`<path d="M${fx2},${fy2} A${R},${R} 0 ${la2} 1 ${fx1},${fy1} L${fi3},${fi4} A${r},${r} 0 ${la2} 0 ${fi1},${fi2}Z" fill="#7C6AB8" opacity="0.7"/>`;
       dSvg+=`</svg>`;
 
-      h+=`<div class="card">
+      h+=`<div id="st-risk" class="card">
         <div class="ct" style="font-size:14px;margin-bottom:14px">🎲 BETTING PERSONALITY</div>
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
           <div style="flex-shrink:0">${dSvg}</div>
@@ -2224,7 +2282,7 @@ function rAn(){
   } // end resolved.length guard
 
   if(awards.length){
-    h+=`<div class="ct" style="font-size:16px;margin-bottom:14px;text-align:center">🏆 AWARDS</div>
+    h+=`<div id="st-awards" class="ct" style="font-size:16px;margin-bottom:14px;text-align:center">🏆 AWARDS</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">`;
     awards.forEach(a=>{
       h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
@@ -2239,7 +2297,7 @@ function rAn(){
 
   // ─── MOST BACKED TEAMS ───
   if(sortedTeams.length){
-    h+=`<div class="card"><div class="ch"><span style="font-size:18px">🔥</span><span class="ct">MOST BACKED TEAMS</span></div>`;
+    h+=`<div id="st-backed" class="card"><div class="ch"><span style="font-size:18px">🔥</span><span class="ct">MOST BACKED TEAMS</span></div>`;
     const maxTeamBets=sortedTeams[0]?sortedTeams[0][1]:1;
     sortedTeams.forEach(([tm,cnt])=>{
       const pct=Math.round(cnt/allBets.length*100);
@@ -2263,7 +2321,7 @@ function rAn(){
   // ─── WEEKLY PENALTY TRACKER ───
   const penaltyData=getPenaltyBreakdown();
   if(penaltyData.weeks.length>0){
-    h+=`<div class="card"><div class="ch"><span style="font-size:18px">⚠️</span><span class="ct">WEEKLY PENALTY TRACKER</span></div>
+    h+=`<div id="st-penalty" class="card"><div class="ch"><span style="font-size:18px">⚠️</span><span class="ct">WEEKLY PENALTY TRACKER</span></div>
     <div style="font-size:12px;color:var(--t4);margin-bottom:14px">At least 1 bet per week (Wed→Tue) or ₹${Math.round(ST*0.2).toLocaleString()} penalty.</div>`;
     penaltyData.weeks.forEach(wk=>{
       const has=wk.defaulters.length>0;
@@ -2403,7 +2461,7 @@ function rMG(){
   // ─── YOUR PLAY STYLE ───
   const personality=getPersonality(n);
   if(personality){
-    h+=`<div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
+    h+=`<div id="mg-style" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:16px;display:flex;align-items:center;gap:16px">
       <span style="font-size:36px">${personality.emoji}</span>
       <div>
         <div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">Play style</div>
@@ -2414,7 +2472,7 @@ function rMG(){
   }
 
   // ─── WALLET JOURNEY (balance over time) ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📈</span><span class="ct">WALLET JOURNEY</span></div>`;
+  h+=`<div id="mg-wallet" class="card"><div class="ch"><span style="font-size:18px">📈</span><span class="ct">WALLET JOURNEY</span></div>`;
   if(!resolved.length){h+=`<div style="color:var(--t3);font-size:13px">No results yet — your journey starts after the first match!</div>`}
   else{
     let runBal=ST;
@@ -2465,7 +2523,7 @@ function rMG(){
   h+=`</div>`;
 
   // ─── MY STATS ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">STATS</span></div>
+  h+=`<div id="mg-stats" class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">STATS</span></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--t1);font-family:var(--ff)">${ub.length}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
     <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:${winPct>=50?'var(--grn)':'var(--red)'};font-family:var(--ff)">${winPct}%</div><div style="font-size:11px;color:var(--t4)">Win Rate (${wins.length}W/${losses.length}L)</div></div>
@@ -2482,7 +2540,7 @@ function rMG(){
   </div></div>`;
 
   // ─── BET HISTORY ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📜</span><span class="ct">BET HISTORY</span></div>`;
+  h+=`<div id="mg-bets" class="card"><div class="ch"><span style="font-size:18px">📜</span><span class="ct">BET HISTORY</span></div>`;
   if(!ub.length){h+=`<div style="color:var(--t3);font-size:13px">No bets placed yet.</div>`}
   else{
     const sorted=[...ub].sort((a,b)=>b.mid-a.mid);
@@ -2518,7 +2576,7 @@ function rMG(){
   h+=`</div>`;
 
   // ─── WEEKLY ACTIVITY ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">📅</span><span class="ct">WEEKLY ACTIVITY</span></div>`;
+  h+=`<div id="mg-weekly" class="card"><div class="ch"><span style="font-size:18px">📅</span><span class="ct">WEEKLY ACTIVITY</span></div>`;
   const pbr=getPenaltyBreakdown();
   if(!pbr.weeks.length){h+=`<div style="color:var(--t3);font-size:13px">No weeks to track yet.</div>`}
   else{
@@ -2535,7 +2593,7 @@ function rMG(){
   h+=`</div>`;
 
   // ─── ACHIEVEMENT BADGES ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">🏅</span><span class="ct">ACHIEVEMENTS</span></div>`;
+  h+=`<div id="mg-achieve" class="card"><div class="ch"><span style="font-size:18px">🏅</span><span class="ct">ACHIEVEMENTS</span></div>`;
   const badges=[];
   // Calculate badges for this player
   const resolvedBets=ub.filter(x=>S.r[x.mid]);
@@ -2599,7 +2657,7 @@ function rMG(){
   h+=`</div>`;
 
   // ─── TEAM PERFORMANCE TRACKER ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">TEAM PERFORMANCE</span></div>`;
+  h+=`<div id="mg-teams" class="card"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">TEAM PERFORMANCE</span></div>`;
   const teamStats={};
   ub.forEach(bt=>{
     if(!teamStats[bt.tm])teamStats[bt.tm]={bets:0,wins:0,losses:0,saves:0,wagered:0,won:0,lost:0};
@@ -2659,7 +2717,7 @@ function rMG(){
   }
 
   // ─── HEAD-TO-HEAD ───
-  h+=`<div class="card"><div class="ch"><span style="font-size:18px">⚔️</span><span class="ct">HEAD-TO-HEAD</span></div>`;
+  h+=`<div id="mg-h2h" class="card"><div class="ch"><span style="font-size:18px">⚔️</span><span class="ct">HEAD-TO-HEAD</span></div>`;
   const h2h={};
   resolved.forEach(bt=>{
     const rs=S.r[bt.mid],m=gm(bt.mid);if(!rs||!m)return;
@@ -3024,7 +3082,7 @@ const ab=Object.values(S.b).filter(x=>x.mid===id);
 if(ab.length){h+=`<div style="margin-top:16px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
 f.innerHTML=h}
 
-function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}})}
+function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});sdFilter('amm-'+id)}
 
 function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);toast('Result saved! 📝');delete admW[id];rA()}
 
@@ -3479,6 +3537,46 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Players</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-danger');$('adm-sheet').style.display='none'">🗑️ Danger Zone</button>
+  </div>
+</div>
+<div id="tm-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
+  <button onclick="$('tm-sheet').style.display=$('tm-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">🏏</button>
+</div>
+<div id="tm-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;min-width:180px">
+  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to team</div>
+  <div id="tm-sheet-list" style="display:flex;flex-direction:column;gap:4px"></div>
+</div>
+<div id="st-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
+  <button onclick="$('st-sheet').style.display=$('st-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">📊</button>
+</div>
+<div id="st-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
+  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-hero');$('st-sheet').style.display='none'">💰 Hero Stats</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-pers');$('st-sheet').style.display='none'">🏷️ Personalities</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-balance');$('st-sheet').style.display='none'">📈 Balance Chart</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-team');$('st-sheet').style.display='none'">🏏 Team Popularity</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-profit');$('st-sheet').style.display='none'">📊 Profit by Team</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-risk');$('st-sheet').style.display='none'">🎲 Betting Personality</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-awards');$('st-sheet').style.display='none'">🏆 Awards</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-backed');$('st-sheet').style.display='none'">🔥 Most Backed</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-penalty');$('st-sheet').style.display='none'">⚠️ Penalties</button>
+  </div>
+</div>
+<div id="mg-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
+  <button onclick="$('mg-sheet').style.display=$('mg-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">🚪</button>
+</div>
+<div id="mg-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
+  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-style');$('mg-sheet').style.display='none'">🏷️ Play Style</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-wallet');$('mg-sheet').style.display='none'">📈 Wallet Journey</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-stats');$('mg-sheet').style.display='none'">📊 Stats</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-bets');$('mg-sheet').style.display='none'">📜 Bet History</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-weekly');$('mg-sheet').style.display='none'">📅 Weekly Activity</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-achieve');$('mg-sheet').style.display='none'">🏅 Achievements</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-teams');$('mg-sheet').style.display='none'">🏏 Team Performance</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-h2h');$('mg-sheet').style.display='none'">⚔️ Head-to-Head</button>
   </div>
 </div>
 </body>
