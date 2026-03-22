@@ -14,19 +14,24 @@
 @keyframes glow{0%,100%{box-shadow:0 0 20px #F59E0B22}50%{box-shadow:0 0 40px #F59E0B44}}
 #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:9999;padding:10px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;box-shadow:0 8px 32px #00000088;transition:transform .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
-header{background:linear-gradient(180deg,#0B1426,var(--bg));border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100}
+header{background:radial-gradient(circle at 20% 0%,rgba(245,166,35,0.06),transparent 40%),linear-gradient(180deg,#0B1220,#0E1628);border-bottom:1px solid #F59E0B22;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px #00000055}
 .hi{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .brand-n{font-family:var(--ff);font-size:24px;font-weight:700;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .brand-t{font-size:9px;letter-spacing:3px;color:var(--t3);font-weight:700}
 .upill{display:flex;align-items:center;gap:8px;background:var(--inp);border:1px solid var(--bdr);border-radius:24px;padding:4px 14px 4px 4px}
 .udot{width:28px;height:28px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:12px}
-nav{display:flex;justify-content:center;gap:2px;padding:0 12px 8px;max-width:900px;margin:0 auto;overflow-x:auto}
-.nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;background:0;border:0;color:var(--t3);cursor:pointer;padding:10px 4px;border-radius:10px;font-size:18px;transition:.2s;white-space:nowrap}
-.nb.on{color:var(--acc);background:#F59E0B12}
-.nb svg{opacity:.6;transition:.2s}
-.nb.on svg{opacity:1;stroke:var(--acc)}
-.nb span:last-child{font-size:11px;font-weight:700;letter-spacing:.5px}
+nav{display:flex;justify-content:center;gap:1px;padding:2px 10px 10px;max-width:900px;margin:0 auto;overflow-x:auto}
+.nb{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;background:0;border:1px solid transparent;color:#8896AB;cursor:pointer;padding:8px 4px;border-radius:10px;font-size:18px;transition:all .2s ease;white-space:nowrap;position:relative}
+.nb:hover{color:#CBD5E1;transform:translateY(-2px)}
+.nb:active{transform:scale(.95)}
+.nb.on{color:var(--acc);background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.4);box-shadow:0 0 10px rgba(245,166,35,0.3)}
+.nb.on::after{content:'';position:absolute;bottom:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,#FF8C00,#FFA94D);border-radius:2px}
+.nb svg{opacity:.55;transition:all .2s ease;width:20px;height:20px}
+.nb:hover svg{opacity:.85}
+.nb.on svg{opacity:1;stroke:var(--acc);filter:none}
+.nb span:last-child{font-size:10px;font-weight:600;letter-spacing:.3px;transition:all .2s ease}
+.nb.on span:last-child{font-weight:800;color:var(--acc)}
 main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:18px;padding:24px;margin-bottom:20px;animation:fadeUp .4s}
 .ch{display:flex;align-items:center;gap:12px;margin-bottom:20px}
@@ -109,6 +114,13 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-wrap.has-val .sd-clear{display:block}
 #ru-nav div::-webkit-scrollbar{display:none}
 @media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:18px}.lb-r{padding:12px 10px}.mc{padding:16px}.bf{padding:14px}}
+@keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes allin-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes wc-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.allin-pop{animation:allin-pop .35s ease}
+.wc-show{animation:wc-in .3s ease}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
+.nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
 .mention{color:var(--acc);font-weight:700;background:#F59E0B15;padding:0 4px;border-radius:4px}
@@ -120,7 +132,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#F59E0B22;color:#F59E0B">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
 <nav>
 <button class="nb on" data-v="home" onclick="nav('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
-<button class="nb" data-v="matches" onclick="nav('matches')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
+<button class="nb" data-v="matches" onclick="nav('matches')"><span class="live-dot"></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
 <button class="nb" data-v="board" onclick="nav('board')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V10"/><path d="M14 22V10"/><path d="M8 6h8l1 3H7z"/></svg><span>Board</span></button>
 <button class="nb" data-v="rules" onclick="nav('rules')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Rules</span></button>
 <button class="nb" data-v="teams" onclick="nav('teams')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Teams</span></button>
@@ -560,7 +572,7 @@ function ld(){
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
 function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none'}
-function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.()}
+function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
 // ══════════════════════════════════════════════════════════════
@@ -1132,30 +1144,37 @@ function oBF(id,prefill){
   const cdStr=cd(m);
   f.innerHTML=`<div class="bf"><div class="bf-t">${isEdit?'✏️ EDIT YOUR BET':'PLACE YOUR BET'} <span style="float:right;font-size:12px;color:var(--yel);font-weight:600">⏱️ Locks in ${cdStr}</span></div>
   <div class="bf-s"><div class="bf-l">Pick Team</div><div class="bf-tr">
-  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'}${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(×${mo[m.h]||'?'})</span></button>
-  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'}${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(×${mo[m.a]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.03);box-shadow:0 0 16px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')">${T[m.h]?.s||m.h} <span style="font-size:11px;opacity:.7">(×${mo[m.h]||'?'})</span></button>
+  <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.03);box-shadow:0 0 16px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')">${T[m.a]?.s||m.a} <span style="font-size:11px;opacity:.7">(×${mo[m.a]||'?'})</span></button>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN 🔥</button></div>
+  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--acc)';$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="this.classList.remove('allin-pop');void this.offsetWidth;this.classList.add('allin-pop');this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--hot)';$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN ₹${b.toLocaleString()} 🔥</button></div>
   <div id="wc-${id}" style="margin-top:10px;padding:14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;display:none;font-size:13px">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--grn)">✅ Win — profit</span>
-      <span style="font-weight:800;color:var(--grn);font-family:var(--ff);font-size:15px" id="wc-win-${id}"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--grn);font-weight:600">✅ Win — profit</span>
+      <span style="font-weight:900;color:var(--grn);font-family:var(--ff);font-size:17px" id="wc-win-${id}"></span>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--acc)">🎯 Win + MoM bonus</span>
-      <span style="font-weight:800;color:var(--acc);font-family:var(--ff);font-size:15px" id="wc-momv-${id}"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--acc);font-weight:600">🎯 Win + MoM bonus</span>
+      <span style="font-weight:900;color:var(--acc);font-family:var(--ff);font-size:17px" id="wc-momv-${id}"></span>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr)">
-      <span style="color:var(--red)">❌ Lose — at risk</span>
-      <span style="font-weight:800;color:var(--red);font-family:var(--ff);font-size:15px" id="wc-lose-${id}"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--red);font-weight:600">❌ Lose</span>
+      <span style="font-weight:900;color:var(--red);font-family:var(--ff);font-size:17px" id="wc-lose-${id}"></span>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
-      <span style="color:var(--t2)">🛡️ Lose but MoM correct — no loss</span>
-      <span style="font-weight:800;color:var(--t4);font-family:var(--ff);font-size:15px">₹0</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span style="color:var(--t3)">🛡️ Lose but MoM correct</span>
+      <span style="font-weight:900;color:var(--t4);font-family:var(--ff);font-size:17px">₹0</span>
+    </div>
+    <div id="wc-detail-${id}" style="padding:8px 0 0;font-size:11px;color:var(--t4)"></div>
+    <div id="wc-final-${id}" style="margin-top:8px;padding:8px 12px;background:#10B98110;border:1px solid #10B98125;border-radius:8px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--grn);font-size:12px;font-weight:700">💰 If you win → new balance</span>
+        <span style="color:var(--grn);font-weight:900;font-family:var(--ff);font-size:15px" id="wc-bal-${id}"></span>
+      </div>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% of bet amount as bonus)</div>${momDropdown('mo-'+id,id)}</div>
-  <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'✅ Confirm Bet'}</button></div></div>`;
+  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% bonus if win · saves you from loss)</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" id="cta-${id}" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'✅ Confirm Bet'}</button></div></div>`;
   // Pre-select team and MoM if editing
   if(prefill){
     if(prefill.tm)pk(id,prefill.tm);
@@ -1175,7 +1194,7 @@ function cancelEdit(id,oldBet){
   }
 }
 
-function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});calcWin(id)}
+function pk(id,tm){bfs[id]=bfs[id]||{};bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.03)';b.style.boxShadow='0 0 16px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.5'}}});const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'💰 Bet ₹'+am.toLocaleString()+' on '+tm:'✅ Confirm Bet'}calcWin(id)}
 
 function fmtAmt(el){const raw=el.value.replace(/[^0-9]/g,'');el.value=raw?parseInt(raw).toLocaleString():''}
 function parseAmt(id){return parseInt(($('am-'+id)?.value||'').replace(/,/g,''))||0}
@@ -1184,13 +1203,22 @@ function calcWin(id){
   const wc=$('wc-'+id);if(!wc)return;
   const f=bfs[id]||{},mo=S.odds[id]||{},am=parseAmt(id);
   if(!f.tm||!am||am<1||!mo[f.tm]){wc.style.display='none';return}
-  wc.style.display='block';
+  const wasHidden=wc.style.display==='none';wc.style.display='block';if(wasHidden){wc.classList.remove('wc-show');void wc.offsetWidth;wc.classList.add('wc-show')}
   const od=parseFloat(mo[f.tm]);
   const win=Math.round(am*(od-1));
   const momBonus=Math.round(am*MOMB);
   $('wc-win-'+id).textContent='+₹'+win.toLocaleString();
   $('wc-lose-'+id).textContent='-₹'+am.toLocaleString();
   $('wc-momv-'+id).textContent='+₹'+win.toLocaleString()+' + ₹'+momBonus.toLocaleString()+' = +₹'+(win+momBonus).toLocaleString();
+  // Calculation detail
+  const det=$('wc-detail-'+id);
+  if(det)det.innerHTML='₹'+am.toLocaleString()+' × ('+od+' - 1) = ₹'+win.toLocaleString()+' profit';
+  // Balance after win
+  const bf=$('wc-final-'+id),bv=$('wc-bal-'+id);
+  if(bf&&bv){const curBal=bal(me);bv.textContent='₹'+(curBal+win).toLocaleString();bf.style.display='block'}
+  // Dynamic CTA
+  const cta=$('cta-'+id);
+  if(cta)cta.textContent='💰 Bet ₹'+am.toLocaleString()+' on '+f.tm;
 }
 function sub(id){
   const m=gm(id);if(!m||lk(m)){toast('Locked!','err');return}
