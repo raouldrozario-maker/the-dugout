@@ -8,13 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#05070D;--card:#0E1628;--inp:#121D30;--bdr:rgba(255,255,255,0.05);--bdr2:rgba(255,255,255,0.08);--t1:#E8ECF2;--t2:#7C879A;--t3:#4A5568;--t4:#6B7A90;--acc:#D4A24E;--hot:#C4453A;--grad:linear-gradient(135deg,#D4A24E,#C49032);--grn:#3FB08C;--red:#D45B5B;--yel:#D4A24E;--ff:'Oswald',sans-serif;--fb:'Source Sans 3',sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);background-image:radial-gradient(ellipse 60% 40% at 0% 0%,rgba(212,162,78,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 100% 0%,rgba(196,69,58,0.05) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 50% 100%,rgba(212,162,78,0.04) 0%,transparent 70%);background-attachment:fixed;color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px #D4A24E18}50%{box-shadow:0 0 40px #D4A24E30}}
 #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:9999;padding:10px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:14px;box-shadow:0 8px 32px #00000088;transition:transform .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
-header{background:radial-gradient(circle at 20% 0%,rgba(212,162,78,0.06),transparent 40%),linear-gradient(180deg,#0B1220,#0E1628);border-bottom:1px solid #D4A24E18;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px #00000055}
+header{background:radial-gradient(ellipse 50% 100% at 0% 50%,rgba(212,162,78,0.07),transparent 50%),radial-gradient(ellipse 50% 100% at 100% 50%,rgba(196,69,58,0.05),transparent 50%),radial-gradient(circle at 20% 0%,rgba(212,162,78,0.06),transparent 40%),linear-gradient(180deg,#0B1220,#0E1628);border-bottom:1px solid #D4A24E18;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px #00000055}
 .hi{max-width:900px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .brand-n{font-family:var(--ff);font-size:24px;font-weight:700;letter-spacing:4px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -33,6 +33,10 @@ nav{display:flex;justify-content:center;gap:1px;padding:2px 10px 10px;max-width:
 .nb span:last-child{font-size:10px;font-weight:600;letter-spacing:.3px;transition:all .2s ease}
 .nb.on span:last-child{font-weight:800;color:var(--acc)}
 main{padding:20px 0 80px}.ctr{max-width:900px;margin:0 auto;padding:0 16px}
+body::before,body::after{content:'';position:fixed;top:0;bottom:0;width:calc((100vw - 900px)/2 - 1px);pointer-events:none;z-index:0}
+body::before{left:0;background:linear-gradient(to right,rgba(212,162,78,0.03) 0%,transparent 100%);border-right:1px solid rgba(212,162,78,0.07)}
+body::after{right:0;background:linear-gradient(to left,rgba(196,69,58,0.025) 0%,transparent 100%);border-left:1px solid rgba(212,162,78,0.07)}
+@media(max-width:932px){body::before,body::after{display:none}}
 .card{background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:28px;margin-bottom:24px;animation:fadeUp .4s;transition:transform .2s ease}
 .tc:hover{transform:translateY(-2px)}.tc{transition:all .25s ease}
 .sq-wrap{overflow:hidden;transition:max-height .2s ease,opacity .2s ease;max-height:0;opacity:0}.sq-wrap.open{max-height:2000px;opacity:1}
