@@ -137,7 +137,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:9999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
+.confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
 .mention{color:var(--acc);font-weight:700;background:#D4A24E12;padding:0 4px;border-radius:4px}
 </style>
 </head>
@@ -236,7 +236,7 @@ document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
-function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length<3)window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},2500)}
+function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length<5)window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},2500)}
 
 // Balance: based on RESOLVED results only — pending bets don't deduct
 // Floor of 2K only applies when balance is genuinely negative/zero after all resolutions
@@ -488,7 +488,7 @@ function getBalBreakdown(n){
   const pen=weeklyPenalty(n);
   const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
   const netPen=Math.max(pen-waived,0);
-  if(pen>0){h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--red)">⚠️ Weekly penalty${waived>0?' (₹'+waived.toLocaleString()+' waived)':''}</span><span style="color:var(--red);font-weight:700">-₹${netPen.toLocaleString()}</span></div>`}
+  if(pen>0){h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--red)">⚠️ No bets placed in ${Math.round(pen/2000)} week${pen>2000?'s':''} → penalty${waived>0?' (₹'+waived.toLocaleString()+' waived)':''}</span><span style="color:var(--red);font-weight:700">-₹${netPen.toLocaleString()}</span></div>`}
   // Manual adjustments
   (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
     h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Admin adjustment'}</span><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">₹${a.type==='add'?'+':'-'}${a.amount.toLocaleString()}</span></div>`});
@@ -510,7 +510,7 @@ function momDropdown(id,matchId,both=false){
   const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
   const data=JSON.stringify([{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}]);
   return`<div class="sd-wrap" id="${id}-wrap">
-    <input class="sd-input" id="${id}" placeholder="Search player..." autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' data-mid="${matchId}" onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
+    <input class="sd-input" id="${id}" placeholder="Search or select player…" autocomplete="off" data-sd='${data.replace(/'/g,"&#39;")}' data-mid="${matchId}" onfocus="sdOpen('${id}')" oninput="sdFilter('${id}')">
     <button class="sd-clear" onclick="sdClear('${id}')">&times;</button>
     <span class="sd-arrow">▼</span>
     <div class="sd-dd" id="${id}-dd"></div>
@@ -745,7 +745,7 @@ function rH(){
       <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Balance</div>
       <div style="font-size:32px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff);margin-top:4px">₹${b.toLocaleString()}</div>
       <div style="font-size:14px;color:${diff>=0?'#3FB08C':'#D45B5B'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
-      ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} AT RISK</div>`:''}
+      ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} AT RISK (~${Math.round(risk/b*100)}% of balance)</div>`:''}
     </div>
 
     <!-- Recent results (up to 2 for double headers) -->
@@ -1058,7 +1058,7 @@ function rM(){
     </div>`;
   }
 
-  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${b!==bAvail?`<div style="font-size:11px;color:var(--t3)">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} AT RISK</div>`:''}</div></div>
+  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${b!==bAvail?`<div style="font-size:11px;color:var(--t3)">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} AT RISK (~${Math.round(risk/b*100)}%)</div>`:''}</div></div>
   <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
@@ -1325,11 +1325,12 @@ function oBF(id,prefill){
     <div style="text-align:center;margin-top:10px">
       <button style="background:0;border:0;color:var(--t4);font-size:11px;cursor:pointer;font-weight:600;padding:4px 8px" onclick="const d=$('wc-calc-${id}');d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'View calculation ▸':'Hide calculation ▾'">View calculation ▸</button>
       <div id="wc-calc-${id}" style="display:none;margin-top:8px;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;text-align:left;font-family:'SF Mono',Menlo,Consolas,monospace;font-size:11px;color:var(--t2);line-height:2">
+        <div style="font-family:var(--fb);font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">How your payout is calculated</div>
         <div id="wc-calcbody-${id}"></div>
       </div>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% bonus if win · saves you from loss)</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% bonus if win · saves you from loss)</div><div style="font-size:10px;color:var(--yel);margin-bottom:4px">⭐ Opponent players shown first — pick from there for a Jackpot chance!</div>${momDropdown('mo-'+id,id)}</div>
   <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" id="cta-${id}" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'Confirm Bet'}</button></div></div>`;
   // Pre-select team and MoM if editing
   if(prefill){
@@ -1764,6 +1765,7 @@ function rRu(){
   <!-- Rule 6: Weekly Mandatory -->
   <div id="ru-6" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⚠️</span><span class="ct" style="font-size:15px">WEEKLY MANDATORY BET</span></div>
+    <div style="padding:8px 12px;background:#C4453A10;border:1px solid #C4453A20;border-radius:8px;font-size:13px;font-weight:700;color:var(--hot);margin-bottom:10px">No bet in a week (Wed–Tue) with completed matches → −₹2,000</div>
     <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (Wednesday to Tuesday). If you miss an entire week, you'll be penalized a <strong style="color:var(--hot)">flat ₹2,000</strong> (20% of starting balance ₹10,000 — this is a fixed amount, not 20% of your current balance).</div>
     <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
       The penalty tracker in the Stats tab shows exactly who missed which week — full transparency.<br>
@@ -1791,7 +1793,7 @@ function rRu(){
       Total profit = <strong style="color:var(--yel)">+₹14,000</strong><br><br>
 
       <span style="color:var(--yel)">🛡️ Scenario D — SRH loses + Head IS MoM:</span><br>
-      <strong>No deduction!</strong> Your MoM pick saves you = <strong>₹0</strong>
+      You lose the match bet, but your MoM pick is correct → <strong style="color:var(--yel)">you lose ₹0!</strong> Your entire ₹10,000 stake is saved. Plus you get the 20% MoM bonus = <strong style="color:var(--yel)">+₹2,000</strong>
     </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
       <strong style="color:var(--acc)">Example 2:</strong> MI vs KKR — Odds: MI ×3, KKR ×1.5<br>
@@ -1800,7 +1802,7 @@ function rRu(){
       <span style="color:var(--grn)">✅ MI wins, Bumrah not MoM:</span> ₹5,000 × (3 - 1) = <strong>+₹10,000</strong><br>
       <span style="color:var(--red)">❌ MI loses, Bumrah not MoM:</span> <strong>-₹5,000</strong><br>
       <span style="color:var(--yel)">🎯 MI wins + Bumrah IS MoM:</span> ₹10,000 + ₹1,000 MoM = <strong>+₹11,000</strong><br>
-      <span style="color:var(--t2)">🛡️ MI loses + Bumrah IS MoM:</span> <strong>₹0 (saved!)</strong>
+      <span style="color:var(--t2)">🛡️ MI loses + Bumrah IS MoM:</span> You lose the match, but MoM saves you → <strong style="color:var(--yel)">₹0 lost (stake saved!) + ₹1,000 MoM bonus</strong>
     </div>
   </div>
 
@@ -1827,7 +1829,7 @@ function rRu(){
       <strong style="color:var(--yel)">Total earned: +₹9,600! 🔥🔥</strong>
     </div>
     <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
-      💡 <strong>How to trigger the Jackpot:</strong> Correct opponent player + your team wins → SUPER JACKPOT. Pick your MoM from the opponent's team. It's risky — you're predicting the losing team's best player — but the reward is massive.
+      💡 <strong>How to trigger:</strong> You pick <strong style="color:var(--grn)">Team A to win</strong> + MoM from <strong style="color:var(--hot)">Team B</strong> → if Team A wins and your MoM is correct → <strong style="color:var(--yel)">SUPER JACKPOT</strong>. It's risky — you're predicting the losing team's best player — but the reward is massive.
     </div>
   </div>
 
