@@ -409,7 +409,7 @@ function getPersonality(name){
   const bigBets=ub.filter(b=>b.am>=ST*0.6).length;
 
   // Streak detection
-  const sorted=rb.sort((a,b)=>a.mid-b.mid);
+  const sorted=[...rb].sort((a,b)=>a.mid-b.mid);
   let curStreak=0,maxLoseStreak=0,curLose=0;
   let minBal=ST,maxDrop=0,recovered=false;
   let runBal=ST;
@@ -1126,8 +1126,76 @@ function rM(){
             ${rs?`<div style="font-size:18px;font-weight:900;color:${won?'var(--grn)':momH?'var(--yel)':'var(--red)'}">${won?'✅ +₹'+potWin.toLocaleString():momH?'🛡️ ₹0':'❌ -₹'+my.am.toLocaleString()}</div>`
             :`<div style="font-size:12px;color:var(--t4)">Potential profit</div><div style="font-size:16px;font-weight:900;color:var(--grn);font-family:var(--ff)">+₹${potWin.toLocaleString()}</div>`}
           </div>
-        </div>
-      </div>`;
+        </div>`;
+      // Post-result breakdown (why you won/lost)
+      if(rs&&!rs.voided){
+        const isJackpot=won&&momH&&my.mt&&my.mt!==my.tm;
+        const momBonus=momH?Math.round(my.am*MOMB):0;
+        const jackpotBonus=isJackpot?Math.round(my.am/od):0;
+        const teamWin=won?Math.round(my.am/od):0;
+        h+=`<div style="margin-top:8px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;font-size:12px;line-height:2">`;
+        if(won){
+          h+=`<div style="color:var(--grn)">✔ Picked winning team (${T[my.tm]?.s}) → +₹${teamWin.toLocaleString()}</div>`;
+          if(momH)h+=`<div style="color:var(--yel)">✔ Correct MoM pick → +₹${momBonus.toLocaleString()}</div>`;
+          if(isJackpot)h+=`<div style="color:var(--acc)">🔥 SUPER JACKPOT (MoM from losing team) → +₹${jackpotBonus.toLocaleString()}</div>`;
+          if(!momH&&my.mom)h+=`<div style="color:var(--t3)">✗ MoM incorrect (picked ${my.mom})</div>`;
+          if(!my.mom)h+=`<div style="color:var(--t3)">— No MoM pick</div>`;
+        }else{
+          h+=`<div style="color:var(--red)">✗ ${T[my.tm]?.s} lost → -₹${my.am.toLocaleString()}</div>`;
+          if(momH)h+=`<div style="color:var(--yel)">✔ But MoM pick correct → loss cancelled! ₹0</div>`;
+          else if(my.mom)h+=`<div style="color:var(--t3)">✗ MoM also wrong (picked ${my.mom})</div>`;
+          else h+=`<div style="color:var(--t3)">— No MoM pick to save you</div>`;
+        }
+        h+=`</div>`;
+      }
+      h+=`</div>`;
+    }
+
+    // Post-result match narrative (social)
+    if(rs&&!rs.voided&&ab.length){
+      const winners=ab.filter(x=>x.tm===rs.w);
+      const losers=ab.filter(x=>x.tm!==rs.w);
+      const winnerNames=winners.map(x=>x.u);
+      const loserNames=losers.map(x=>x.u);
+      h+=`<div style="margin-top:8px;padding:10px 14px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t2);line-height:1.7">`;
+      if(winners.length&&losers.length){
+        h+=`<span style="color:var(--grn)">${winners.length} backed ${T[rs.w]?.s} and won</span> · <span style="color:var(--red)">${losers.length} got it wrong</span>`;
+        if(winners.length<=3)h+=`<br><span style="color:var(--t4)">Winners: <strong>${winnerNames.join(', ')}</strong></span>`;
+        if(losers.length<=3)h+=`<br><span style="color:var(--t4)">Losers: <strong>${loserNames.join(', ')}</strong></span>`;
+      }else if(winners.length&&!losers.length){
+        h+=`<span style="color:var(--grn)">Everyone backed ${T[rs.w]?.s} — all ${winners.length} players won! 🎉</span>`;
+      }else if(!winners.length&&losers.length){
+        h+=`<span style="color:var(--red)">Nobody picked the winner — all ${losers.length} players lost 💀</span>`;
+      }
+      h+=`</div>`;
+
+      // Clutch plays + Near misses
+      const clutchLines=[];
+      let bigWinner=null,bigWinAmt=0;
+      winners.forEach(bt=>{
+        const od=parseFloat(bt.od)||2;const mh=bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase();
+        let py=Math.round(bt.am/od);if(mh)py+=Math.round(bt.am*MOMB);
+        const isJP=mh&&bt.mt&&bt.mt!==bt.tm;if(isJP)py+=Math.round(bt.am/od);
+        if(py>bigWinAmt){bigWinAmt=py;bigWinner={u:bt.u,py,isJP,mh}}
+      });
+      if(bigWinner){
+        if(bigWinner.isJP)clutchLines.push(`<span style="color:var(--acc)">🎯 Perfect call: <strong>${bigWinner.u}</strong> (Win + MoM + Jackpot = +₹${bigWinner.py.toLocaleString()})</span>`);
+        else if(bigWinner.mh)clutchLines.push(`<span style="color:var(--grn)">🔥 Clutch: <strong>${bigWinner.u}</strong> won +₹${bigWinner.py.toLocaleString()} (team + MoM)</span>`);
+        else if(bigWinAmt>=3000)clutchLines.push(`<span style="color:var(--grn)">🔥 Biggest win: <strong>${bigWinner.u}</strong> (+₹${bigWinner.py.toLocaleString()})</span>`);
+      }
+      const nearMom=winners.filter(bt=>bt.mom&&!(bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase()));
+      if(nearMom.length&&rs.mom)clutchLines.push(`<span style="color:var(--t3)">😬 ${nearMom.length} player${nearMom.length!==1?'s':''} picked the right team but wrong MoM — close!</span>`);
+      const momSaves=losers.filter(bt=>bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase());
+      if(momSaves.length)clutchLines.push(`<span style="color:var(--yel)">🛡️ ${momSaves.map(x=>x.u).join(', ')} lost the bet but MoM saved them!</span>`);
+      if(my&&my.tm===rs.w&&my.mom&&my.mom.trim().toLowerCase()!==(rs.mom||'').trim().toLowerCase()&&rs.mom){
+        const missedBonus=Math.round(my.am*MOMB);
+        clutchLines.push(`<span style="color:var(--t3)">😬 You were 1 MoM pick away from +₹${missedBonus.toLocaleString()} bonus</span>`);
+      }
+      if(clutchLines.length){
+        h+=`<div style="margin-top:6px;padding:8px 14px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;font-size:12px;line-height:2">`;
+        clutchLines.forEach(cl=>h+=`<div>${cl}</div>`);
+        h+=`</div>`;
+      }
     }
 
     // Place bet button
@@ -1446,8 +1514,9 @@ function rB(){
         </div>
         <div style="width:42px;height:42px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${i<3?rankColor:isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:15px;flex-shrink:0">${p.n[0].toUpperCase()}</div>
         <div style="min-width:0">
-          <div style="font-weight:${i===0?'800':'700'};font-size:${i===0?'16':'14'}px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}${deltaHtml}</div>
-          ${gap>0?`<div style="font-size:10px;color:var(--t4);margin-top:2px">-₹${gap.toLocaleString()} from #1</div>`:''}
+          <div style="font-weight:${i===0?'800':'700'};font-size:${i===0?'16':'14'}px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}${deltaHtml}${(()=>{const pp=getPersonality(p.n);return pp?' <span title="'+pp.label+'" style="font-size:12px;cursor:help">'+pp.emoji+'</span>':'';})()}</div>
+          ${i===0?`<div style="font-size:10px;color:var(--acc);margin-top:2px">👑 Leading by ₹${L.length>1?(p.b-L[1].b).toLocaleString():'0'}</div>`
+          :gap>0?`<div style="font-size:10px;color:var(--red);margin-top:2px">💣 ₹${gap.toLocaleString()} to overtake #1</div>`:''}
         </div>
         <div style="text-align:right">
           <div style="font-size:${i===0?'20':'17'}px;font-weight:900;color:${p.b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff)">₹${p.b.toLocaleString()}</div>
@@ -1814,6 +1883,7 @@ function rRu(){
         📊 <strong>Stats</strong> — total bets, win rate, total wagered/won/lost, MoM accuracy, favourite team, current streak, biggest win and loss<br>
         📜 <strong>Bet History</strong> — every bet you've placed with result (Won, Lost, Pending, MoM Save, Super Jackpot)<br>
         🏏 <strong>Team Performance</strong> — how each team has performed for you. See which teams are lucky and which cost you<br>
+        ⚡ <strong>Team Exposure</strong> — your open positions. Shows how much money you have riding on each team across pending bets. Helps you avoid overcommitting to one team<br>
         📅 <strong>Upcoming Matches</strong> — matches you haven't bet on yet with countdown and quick "Bet now" button<br>
         ⚔️ <strong>Head-to-Head</strong> — your record against every other player on matches where both of you bet<br>
         📅 <strong>Weekly Activity</strong> — which weeks you were active and which you missed<br>
@@ -2673,6 +2743,42 @@ function rMG(){
     h+=`</div>`;
   }
   h+=`</div>`;
+
+  // ─── TEAM EXPOSURE (pending bets) ───
+  const pendingBets=ub.filter(x=>!S.r[x.mid]);
+  if(pendingBets.length){
+    const exposure={};
+    pendingBets.forEach(bt=>{
+      if(!exposure[bt.tm])exposure[bt.tm]={amount:0,bets:0};
+      exposure[bt.tm].amount+=bt.am;
+      exposure[bt.tm].bets++;
+    });
+    const totalExposure=pendingBets.reduce((s,x)=>s+x.am,0);
+    const sortedExp=Object.entries(exposure).sort((a,b)=>b[1].amount-a[1].amount);
+
+    h+=`<div id="mg-exposure" class="card"><div class="ch"><span style="font-size:20px">⚡</span><span class="ct">TEAM EXPOSURE</span></div>
+    <div style="font-size:13px;color:var(--t4);margin-bottom:14px">Your open positions — <strong style="color:var(--acc)">₹${totalExposure.toLocaleString()}</strong> total at risk across ${pendingBets.length} pending bet${pendingBets.length!==1?'s':''}</div>`;
+
+    sortedExp.forEach(([tm,ex])=>{
+      const pct=Math.round(ex.amount/totalExposure*100);
+      h+=`<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:8px;background:var(--inp);border-left:3px solid ${T[tm]?.c||'var(--acc)'};border-radius:0 12px 12px 0">
+        ${bdg(tm,32)}
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:700;font-size:14px;color:${T[tm]?.c||'var(--t1)'}">${T[tm]?.s||tm}</span>
+            <span style="font-weight:900;font-size:16px;color:var(--acc);font-family:var(--ff)">₹${ex.amount.toLocaleString()}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <span style="font-size:11px;color:var(--t4)">${ex.bets} match${ex.bets!==1?'es':''} · ${pct}% of exposure</span>
+          </div>
+          <div style="margin-top:6px;height:4px;border-radius:2px;background:var(--bdr);overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${T[tm]?.c||'var(--acc)'};border-radius:2px"></div>
+          </div>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
 
   // ─── TEAM PERFORMANCE TRACKER ───
   h+=`<div id="mg-teams" class="card"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">TEAM PERFORMANCE</span></div>`;
@@ -3658,6 +3764,7 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-bets');$('mg-sheet').style.display='none'">📜 Bet History</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-weekly');$('mg-sheet').style.display='none'">📅 Weekly Activity</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-achieve');$('mg-sheet').style.display='none'">🏅 Achievements</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-exposure');$('mg-sheet').style.display='none'">⚡ Team Exposure</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-teams');$('mg-sheet').style.display='none'">🏏 Team Performance</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-h2h');$('mg-sheet').style.display='none'">⚔️ Head-to-Head</button>
   </div>
