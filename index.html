@@ -409,7 +409,7 @@ function getPersonality(name){
   const bigBets=ub.filter(b=>b.am>=ST*0.6).length;
 
   // Streak detection
-  const sorted=[...rb].sort((a,b)=>a.mid-b.mid);
+  const sorted=[...rb].sort((a,b)=>{const ma=gm(a.mid),mb=gm(b.mid);return new Date(ma?.d||0)-new Date(mb?.d||0)});
   let curStreak=0,maxLoseStreak=0,curLose=0;
   let minBal=ST,maxDrop=0,recovered=false;
   let runBal=ST;
@@ -601,7 +601,7 @@ window.addEventListener('online',()=>{
     db.ref('dugout/b').once('value').then(snap=>{
       const remoteB=snap.val()||{};
       // Merge: keep remote bets + add any local-only bets
-      Object.keys(S.b).forEach(k=>{if(!remoteB[k]||!remoteB[k].ts||(S.b[k].ts&&S.b[k].ts>remoteB[k].ts))remoteB[k]=S.b[k]});
+      Object.keys(S.b).forEach(k=>{if(!remoteB[k]||!remoteB[k].ts||(S.b[k].ts&&(!remoteB[k].ts||S.b[k].ts>remoteB[k].ts)))remoteB[k]=S.b[k]});
       S.b=remoteB;
       sv(['b']);
     });
@@ -1179,14 +1179,27 @@ function rM(){
         if(py>bigWinAmt){bigWinAmt=py;bigWinner={u:bt.u,py,isJP,mh}}
       });
       if(bigWinner){
-        if(bigWinner.isJP)clutchLines.push(`<span style="color:var(--acc)">🎯 Perfect call: <strong>${bigWinner.u}</strong> (Win + MoM + Jackpot = +₹${bigWinner.py.toLocaleString()})</span>`);
-        else if(bigWinner.mh)clutchLines.push(`<span style="color:var(--grn)">🔥 Clutch: <strong>${bigWinner.u}</strong> won +₹${bigWinner.py.toLocaleString()} (team + MoM)</span>`);
-        else if(bigWinAmt>=3000)clutchLines.push(`<span style="color:var(--grn)">🔥 Biggest win: <strong>${bigWinner.u}</strong> (+₹${bigWinner.py.toLocaleString()})</span>`);
+        const isYou=bigWinner.u===me;
+        if(bigWinner.isJP)clutchLines.push(`<span style="color:var(--acc)">🎯 ${isYou?'You nailed it — Perfect call':'Perfect call: <strong>'+bigWinner.u+'</strong>'} (Win + MoM + Jackpot = +₹${bigWinner.py.toLocaleString()})</span>`);
+        else if(bigWinner.mh)clutchLines.push(`<span style="color:var(--grn)">🔥 ${isYou?'You crushed it':'Clutch: <strong>'+bigWinner.u+'</strong>'} — won +₹${bigWinner.py.toLocaleString()} (team + MoM)</span>`);
+        else if(bigWinAmt>=3000)clutchLines.push(`<span style="color:var(--grn)">🔥 ${isYou?'Your biggest win':'Biggest win: <strong>'+bigWinner.u+'</strong>'} (+₹${bigWinner.py.toLocaleString()})</span>`);
       }
       const nearMom=winners.filter(bt=>bt.mom&&!(bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase()));
       if(nearMom.length&&rs.mom)clutchLines.push(`<span style="color:var(--t3)">😬 ${nearMom.length} player${nearMom.length!==1?'s':''} picked the right team but wrong MoM — close!</span>`);
       const momSaves=losers.filter(bt=>bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase());
       if(momSaves.length)clutchLines.push(`<span style="color:var(--yel)">🛡️ ${momSaves.map(x=>x.u).join(', ')} lost the bet but MoM saved them!</span>`);
+      // Upset call — ≤30% backed the winner
+      if(winners.length&&losers.length&&winners.length/(winners.length+losers.length)<=0.3){
+        const iCalled=my&&my.tm===rs.w;
+        clutchLines.push(iCalled
+          ?`<span style="color:var(--acc)">⚡ You called the upset — only ${winners.length} backed ${T[rs.w]?.s}</span>`
+          :`<span style="color:var(--acc)">⚡ Upset call — only ${winners.length} backed ${T[rs.w]?.s}</span>`);
+      }
+      // All-in highlight
+      const allInWin=winners.find(bt=>bt.am>=bal(bt.u)*0.9||bt.am>=ST);
+      if(allInWin){const od=parseFloat(allInWin.od)||2;const isYou=allInWin.u===me;clutchLines.push(`<span style="color:var(--grn)">💣 ${isYou?'Your all-in paid off':'All-in: <strong>'+allInWin.u+'</strong>'} — bet ₹${allInWin.am.toLocaleString()} → won +₹${Math.round(allInWin.am/od).toLocaleString()}</span>`)}
+      const allInLoss=losers.find(bt=>(bt.am>=bal(bt.u)*0.9||bt.am>=ST)&&!(bt.mom&&bt.mom.trim().toLowerCase()===(rs.mom||'').trim().toLowerCase()));
+      if(allInLoss){const isYou=allInLoss.u===me;clutchLines.push(`<span style="color:var(--red)">💣 ${isYou?'Your all-in backfired':'All-in failed: <strong>'+allInLoss.u+'</strong>'} — lost ₹${allInLoss.am.toLocaleString()}</span>`)}
       if(my&&my.tm===rs.w&&my.mom&&my.mom.trim().toLowerCase()!==(rs.mom||'').trim().toLowerCase()&&rs.mom){
         const missedBonus=Math.round(my.am*MOMB);
         clutchLines.push(`<span style="color:var(--t3)">😬 You were 1 MoM pick away from +₹${missedBonus.toLocaleString()} bonus</span>`);
@@ -1268,7 +1281,19 @@ function oBF(id,prefill){
   bfs[id]=bfs[id]||{};
   const isEdit=!!prefill;
   const cdStr=cd(m);
+  // Tilt detection — private warning
+  let tiltHtml='';
+  const myResolved=Object.values(S.b).filter(x=>x.u===me&&S.r[x.mid]&&!S.r[x.mid].voided).sort((a,b)=>b.mid-a.mid);
+  let loseStreak=0;for(const bt of myResolved){if(bt.tm!==S.r[bt.mid].w)loseStreak++;else break}
+  if(loseStreak>=3){
+    const recentAmts=myResolved.slice(0,loseStreak).map(x=>x.am);
+    let incCount=0;for(let i=0;i<recentAmts.length-1;i++){if(recentAmts[i]>recentAmts[i+1])incCount++}
+    const increasing=incCount>=2;
+    if(increasing)tiltHtml=`<div style="margin-bottom:10px;padding:8px 12px;background:#EF444410;border:1px solid #EF444425;border-radius:10px;font-size:12px;color:var(--red)">💀 You're chasing losses — ${loseStreak} increasing bets after losses. Take a breath.</div>`;
+    else tiltHtml=`<div style="margin-bottom:10px;padding:8px 12px;background:#F59E0B08;border:1px solid #F59E0B20;border-radius:10px;font-size:12px;color:var(--yel)">⚠️ Careful — ${loseStreak} losses in a row. Don't chase.</div>`;
+  }
   f.innerHTML=`<div class="bf"><div class="bf-t">${isEdit?'✏️ EDIT YOUR BET':'PLACE YOUR BET'} <span style="float:right;font-size:12px;color:var(--yel);font-weight:600">⏱️ Locks in ${cdStr}</span></div>
+  ${tiltHtml}
   <div class="bf-s"><div class="bf-l">Pick Team</div><div class="bf-tr">
   <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')"><span style="font-size:13px;font-weight:800">${T[m.h]?.s||m.h}</span>${mo[m.h]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.h]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.h]*100)}%</span>`:''}</button>
   <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')"><span style="font-size:13px;font-weight:800">${T[m.a]?.s||m.a}</span>${mo[m.a]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.a]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.a]*100)}%</span>`:''}</button>
@@ -1514,7 +1539,7 @@ function rB(){
         </div>
         <div style="width:42px;height:42px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:2px solid ${i<3?rankColor:isMe?'var(--acc)':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:15px;flex-shrink:0">${p.n[0].toUpperCase()}</div>
         <div style="min-width:0">
-          <div style="font-weight:${i===0?'800':'700'};font-size:${i===0?'16':'14'}px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}${deltaHtml}${(()=>{const pp=getPersonality(p.n);return pp?' <span title="'+pp.label+'" style="font-size:12px;cursor:help">'+pp.emoji+'</span>':'';})()}</div>
+          <div style="font-weight:${i===0?'800':'700'};font-size:${i===0?'16':'14'}px;color:${isMe?'var(--acc)':'var(--t1)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.n}${deltaHtml}${(()=>{const pp=getPersonality(p.n);return pp?' <span title="'+pp.label+'" style="font-size:12px;cursor:help">'+pp.emoji+'</span>':'';})()}${(()=>{const ub=Object.values(S.b).filter(x=>x.u===p.n&&S.r[x.mid]&&!S.r[x.mid].voided).sort((a,b)=>b.mid-a.mid);let s=0,t='';for(const bt of ub){const w=bt.tm===S.r[bt.mid].w;if(!t)t=w?'W':'L';if((w&&t==='W')||(!w&&t==='L'))s++;else break}return s>=3?(t==='W'?` <span style="font-size:10px;color:var(--grn);font-weight:800">🔥${s}</span>`:` <span style="font-size:10px;color:var(--red);font-weight:800">💀${s}</span>`):'';})()}</div>
           ${i===0?`<div style="font-size:10px;color:var(--acc);margin-top:2px">👑 Leading by ₹${L.length>1?(p.b-L[1].b).toLocaleString():'0'}</div>`
           :gap>0?`<div style="font-size:10px;color:var(--red);margin-top:2px">💣 ₹${gap.toLocaleString()} to overtake #1</div>`:''}
         </div>
@@ -1729,7 +1754,7 @@ function rRu(){
   <!-- Rule 6: Weekly Mandatory -->
   <div id="ru-6" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⚠️</span><span class="ct" style="font-size:15px">WEEKLY MANDATORY BET</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (Wednesday to Tuesday). If you miss an entire week, you'll be penalized <strong style="color:var(--hot)">20% of starting balance (₹2,000)</strong>.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (Wednesday to Tuesday). If you miss an entire week, you'll be penalized a <strong style="color:var(--hot)">flat ₹2,000</strong> (20% of starting balance ₹10,000 — this is a fixed amount, not 20% of your current balance).</div>
     <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
       The penalty tracker in the Stats tab shows exactly who missed which week — full transparency.
     </div>
