@@ -153,7 +153,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <button class="nb" data-v="teams" onclick="nav('teams')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Teams</span></button>
 <button class="nb" data-v="analytics" onclick="nav('analytics')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Stats</span></button>
 <button class="nb" data-v="mygame" onclick="nav('mygame')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Locker Room</span></button>
-<button class="nb" data-v="admin" onclick="nav('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Admin</span></button>
+<button class="nb" data-v="admin" id="nav-admin" onclick="nav('admin')" style="display:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Admin</span></button>
 <div id="nav-slider" style="position:absolute;bottom:2px;left:0;height:3px;width:0;background:linear-gradient(90deg,#D4A24E,#C49032);border-radius:3px;transition:left .25s ease,width .25s ease;box-shadow:0 0 8px #D4A24E88;pointer-events:none"></div>
 </nav></header>
 <main>
@@ -667,7 +667,13 @@ function ld(){
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
-function nav(v){vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
+function nav(v){
+  // Admin access control
+  if(v==='admin'){
+    if(!adm&&!S.pin){toast('Not allowed','err');return} // no admin system → block entirely
+    // if PIN exists but not logged in → allow through to show login screen (rA handles the gate)
+  }
+  vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
 function ren(){({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
@@ -2950,6 +2956,21 @@ function rMG(){
 // ══════════════════════════════════════════════════════════════
 // ADMIN
 // ══════════════════════════════════════════════════════════════
+function admToggle(id){
+  var el=document.getElementById(id);if(!el)return;
+  var isOpen=el.style.display!=='none';
+  el.style.display=isOpen?'none':'block';
+  var arrow=document.getElementById(id+'-arrow');
+  if(arrow)arrow.textContent=isOpen?'▸':'▾';
+}
+function admSectionHdr(id,icon,title,open){
+  return '<div onclick="admToggle(\''+id+'\')" style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:12px;margin-bottom:'+(open?'0':'12')+'px;cursor:pointer;user-select:none'+(open?';border-radius:12px 12px 0 0':'')+'">'
+    +'<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">'+icon+'</span><span style="font-size:13px;font-weight:800;color:var(--t1);letter-spacing:.5px">'+title+'</span></div>'
+    +'<span id="'+id+'-arrow" style="color:var(--acc);font-size:16px;font-weight:900">'+(open?'▾':'▸')+'</span>'
+    +'</div>'
+    +'<div id="'+id+'" style="display:'+(open?'block':'none')+';border:1px solid var(--bdr);border-top:0;border-radius:0 0 12px 12px;padding:0;margin-bottom:12px">';
+}
+
 function rA(){
   const el=$('v-admin');
   if(!adm){el.innerHTML=`<div class="card" style="max-width:420px;margin:0 auto"><div class="ch"><span style="font-size:18px">${S.pin?'🔑':'⚙️'}</span><span class="ct">${S.pin?'ADMIN LOGIN':'SETUP ADMIN'}</span></div><div style="color:var(--t4);margin-bottom:16px;font-size:13px">${S.pin?'Enter PIN.':'Create a PIN — only you need this.'}</div><input class="inp" type="password" id="adm-pin" placeholder="${S.pin?'Enter PIN':'Create 4+ digit PIN'}" maxlength="8" onkeydown="if(event.key==='Enter')admL()"><button class="bp" style="margin-top:12px;width:100%" onclick="admL()">${S.pin?'Login':'Set PIN'}</button></div>`;return}
@@ -2969,7 +2990,7 @@ function rA(){
     <div><div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--acc);letter-spacing:2px">COMMAND CENTER</div><div style="font-size:13px;color:var(--t4);margin-top:2px">League control panel</div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button style="background:#F5A62315;border:1px solid #F5A62330;border-radius:10px;padding:8px 18px;color:var(--acc);font-size:13px;cursor:pointer;font-weight:700" onclick="openExportModal()">📤 Export</button>
-      <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;toast('Logged out as Admin');ren()">🔓 Logout</button>
+      <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;localStorage.removeItem('dg-adm-vis');var ab=document.getElementById('nav-admin');if(ab)ab.style.display='none';toast('Logged out as Admin');nav('home')">🔓 Logout</button>
     </div>
   </div>`;
 
@@ -2992,32 +3013,53 @@ function rA(){
       <div style="font-size:10px;color:var(--t4)">In Play</div>
     </div>
   </div>`;
-  // Admin jump navigation — grouped
-  h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px;margin-bottom:20px">
-  <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">MATCH OPS</div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-dash')">📋 Dashboard</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-odds')">📊 Odds</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-result')">🎮 Match Control</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-playoff')">🏟️ Playoffs</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-addmatch')">➕ Add Match</button>
-  </div>
-  <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">PLAYER & BETS</div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-placebet')">🔓 Place Bet</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-bets')">🎰 Manage Bets</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-balance')">💰 Balance</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-players')">👥 Players</button>
-  </div>
-  <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">COMMS & SPECIAL</div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px">
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-wa')">📲 WhatsApp</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-broadcast')">📢 Broadcast</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-crystal')">🔮 Crystal Ball</button>
-    <button style="background:var(--inp);border:1px solid var(--bdr);border-radius:8px;padding:6px 12px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-squads')">🏏 Squads</button>
-    <button style="background:#C4453A0C;border:1px solid #C4453A22;border-radius:8px;padding:6px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="ruJump('adm-danger')">🗑️ Danger</button>
-  </div></div>`;
-  h+=`<div id="adm-dash" class="card"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">LEAGUE SNAPSHOT</span></div>
+
+  // ─── PENDING ACTIONS ALERT (what needs doing NOW) ───
+  var pendingResults=allM.filter(m=>!S.r[m.id]&&lk(m)&&m.h!=='TBD');
+  if(pendingResults.length||needsOdds.length){
+    h+=`<div style="background:#F5A62310;border:1px solid #F5A62330;border-radius:14px;padding:14px 16px;margin-bottom:16px">`;
+    h+=`<div style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:8px">⚠️ ACTION NEEDED</div>`;
+    if(pendingResults.length){
+      h+=`<div style="font-size:13px;color:var(--t1);margin-bottom:8px">${pendingResults.length} match${pendingResults.length>1?'es':''} awaiting result</div>`;
+      pendingResults.forEach(function(m){
+        h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F5A62315">
+          <span style="font-size:12px;color:var(--t2)">${m.playoff?m.v:'#'+m.id} <strong>${T[m.h]?T[m.h].s:m.h}</strong> vs <strong>${T[m.a]?T[m.a].s:m.a}</strong></span>
+          <button style="background:var(--grad);border:0;border-radius:8px;padding:4px 14px;color:#000;font-size:11px;font-weight:800;cursor:pointer" onclick="openResultFlow(${m.id})">Record →</button>
+        </div>`;
+      });
+    }
+    if(needsOdds.length)h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px"><span style="color:var(--t1)">${needsOdds.length} match${needsOdds.length>1?'es':''} need odds</span><button style="background:var(--grad);border:0;border-radius:8px;padding:4px 14px;color:#000;font-size:12px;font-weight:800;cursor:pointer" onclick="ruJump('adm-odds')">Set Odds →</button></div>`;
+    h+=`</div>`;
+  }
+
+  // ─── LAST RESULT (quick undo) ───
+  var lastResId=Object.keys(S.r).filter(function(k){return !S.r[k].voided}).sort(function(a,b){return (S.r[b].ts||'').localeCompare(S.r[a].ts||'')})[0];
+  if(lastResId){
+    var lr=S.r[lastResId],lm=gm(parseInt(lastResId));
+    var lrHome=lm?(T[lm.h]?T[lm.h].s:lm.h):'?',lrAway=lm?(T[lm.a]?T[lm.a].s:lm.a):'?';
+    h+=`<div style="background:#3FB08C0C;border:1px solid #3FB08C1A;border-radius:14px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Last Result</div>
+      <div style="font-size:13px;color:var(--t1);margin-top:2px"><strong>${lrHome} vs ${lrAway}</strong> → <span style="color:var(--grn)">${T[lr.w]?T[lr.w].s:lr.w} won</span>${lr.mom?' · MoM: '+lr.mom:''}</div>
+      ${lr.ts?`<div style="font-size:10px;color:var(--t4);margin-top:2px">${new Date(lr.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`:''}</div>
+      <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:10px;padding:8px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="if(confirm('Undo result for ${lrHome} vs ${lrAway}?\\nBalances will recalculate.')){delete S.r[${lastResId}];sv(['r']);toast('Result undone ↩️');rA()}">↩️ Undo</button>
+    </div>`;
+  }
+
+  // ─── QUICK ACTIONS STRIP (context-aware) ───
+  h+=`<div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding:4px 0">`;
+  if(needsOdds.length)h+=`<button style="background:#F5A62320;border:1px solid #F5A62340;border-radius:12px;padding:10px 16px;color:var(--acc);font-size:13px;cursor:pointer;font-weight:800;white-space:nowrap;animation:pulse-red 2s ease-in-out infinite" onclick="ruJump('adm-odds')">📊 Set Odds (${needsOdds.length} pending)</button>`;
+  if(nextLive)h+=`<button style="background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;padding:10px 16px;color:var(--grn);font-size:13px;cursor:pointer;font-weight:800;white-space:nowrap" onclick="ruJump('adm-result')">🎮 Record Result</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:10px 16px;color:var(--t1);font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-odds')">📊 Odds</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:10px 16px;color:var(--t1);font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-result')">🎮 Control</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:10px 16px;color:var(--t1);font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-broadcast')">📢 Broadcast</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:10px 16px;color:var(--t1);font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-balance')">💰 Balance</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:10px 16px;color:var(--t1);font-size:13px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="openExportModal()">📤 Export</button>`;
+  h+=`</div>`;
+
+  // ─── SECTION: MATCH DAY (always open) ───
+  h+=admSectionHdr('sec-matchday','⚡','MATCH DAY',true);
+
+  h+=`<div id="adm-dash" class="card" style="border-radius:0;border:0;border-bottom:1px solid var(--bdr)"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">LEAGUE SNAPSHOT</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">${resolved}/${totalM}</div><div style="font-size:11px;color:var(--t4)">Matches Done</div></div>
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">${totalBets}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
@@ -3074,7 +3116,7 @@ function rA(){
     </div>
   </div></div><div id="odds-f"></div></div>`;
   // Match Control
-  h+=`<div id="adm-result" class="card"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">MATCH CONTROL</span></div><div class="bf-s"><div class="bf-l">Match</div>
+  h+=`<div id="adm-result" class="card" style="border-radius:0;border:0"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">MATCH CONTROL</span></div><div class="bf-s"><div class="bf-l">Match</div>
   <div style="position:relative">
     <div class="bf-i" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center" id="adm-m-display" onclick="admDDToggle('adm-m-dd')"><span id="adm-m-text" style="color:var(--t3)">-- Select match --</span><span style="color:var(--t4)">▼</span></div>
     <input type="hidden" id="adm-m">
@@ -3083,7 +3125,12 @@ function rA(){
       <div class="adm-dd-list">${ctrlMatches.map(m=>`<div class="adm-dd-opt" data-val="${m.id}" data-text="${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${S.r[m.id]?' ✅':''}" onclick="admDDPick('adm-m','${m.id}',this.dataset.text);admMC()" style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center"><span>${m.playoff?m.v:'#'+m.id} <strong style="color:${T[m.h]?.c}">${T[m.h]?.s}</strong> v <strong style="color:${T[m.a]?.c}">${T[m.a]?.s}</strong></span><span style="font-size:11px;color:var(--t4)">${fd(m.d)}${S.r[m.id]?' ✅':''}</span></div>`).join('')}</div>
     </div>
   </div></div><div id="adm-f"></div></div>`;
-  // Set Playoff Teams
+
+  h+=`</div>`; // close sec-matchday inner div
+
+  // ─── SECTION: LEAGUE OPS (open by default) ───
+  h+=admSectionHdr('sec-setup','🔧','SETUP & CONFIG',false);
+
   h+=`<div id="adm-playoff" class="card"><div class="ch"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
@@ -3195,8 +3242,14 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="ab-player"><option value="">-- Select player --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
   <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
   <div id="ab-form"></div></div>`;
+
+  h+=`</div>`; // close sec-setup inner div
+
+  // ─── SECTION: LEAGUE OPS (open by default) ───
+  h+=admSectionHdr('sec-leagueops','📋','LEAGUE MANAGEMENT',true);
+
   // Manage Bets
-  h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
+  h+=`<div id="adm-bets" class="card" style="border-radius:0;border:0;border-bottom:1px solid var(--bdr)"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
   else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">×${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
@@ -3254,9 +3307,13 @@ function rA(){
     });
     h+=`</table></div></div>`;
   }
-  // Danger
+
+  h+=`</div>`; // close sec-leagueops inner div
+
+  // ─── SECTION: DANGER ZONE (collapsed) ───
+  h+=admSectionHdr('sec-danger','🗑️','DANGER ZONE',false);
+
   // ── DANGER ZONE ──
-  h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">⚠️ DANGER ZONE</div>`;
   h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25"><div class="ch"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:10px">
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets across ALL matches for ALL players?\\n\\nCrystal Ball predictions will remain.\\nBalances will reset to ₹10,000.')){S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?\\n\\nAll secret IPL winner bets will be deleted.')){S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
@@ -3264,13 +3321,16 @@ function rA(){
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
   <div style="margin-top:12px;padding-top:12px;border-top:2px solid #C4453A25"><button style="width:100%;padding:14px;background:#C4453A25;border:2px solid #C4453A44;border-radius:10px;color:var(--red);font-weight:900;cursor:pointer;font-size:14px;letter-spacing:1px" onclick="rstAll()">💀 RESET EVERYTHING</button><div style="font-size:10px;color:var(--red);padding:4px 4px 0;font-weight:600">Wipes ALL data — players, bets, results, odds, Crystal Ball, squads, admin PIN. Requires PIN confirmation. Cannot be undone.</div></div>
   </div></div>`;
+
+  h+=`</div>`; // close sec-danger inner div
+
   el.innerHTML=h;
 }
 
 // Admin sub-functions
 // Simple hash for PIN (not cryptographic, but hides plain text from Firebase)
 async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
-function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
 
 function admDDToggle(ddId){const dd=$(ddId);if(!dd)return;const show=dd.style.display==='none';dd.style.display=show?'block':'none';if(show){const inp=dd.querySelector('input');if(inp){inp.value='';inp.focus()}admDDFilter(ddId,'');setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&!dd.previousElementSibling?.previousElementSibling?.contains(e.target)){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}}
 function admDDFilter(ddId,q){const dd=$(ddId);if(!dd)return;const opts=dd.querySelectorAll('.adm-dd-opt');const lq=q.toLowerCase();opts.forEach(o=>{o.style.display=o.dataset.text.toLowerCase().includes(lq)?'flex':'none'})}
@@ -3278,11 +3338,11 @@ function admDDPick(inputId,val,text){$(inputId).value=val;const txt=$(inputId+'-
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
 f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="number" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="number" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
-function sOdds(id){const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
+function sOdds(id){if(!adm){toast("Admin only","err");return}const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1||av<1){toast('Set odds for both','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
   if(existingBets.length>0&&S.odds[id]){if(!confirm(`⚠️ ${existingBets.length} bet(s) already placed on this match! Changing odds will affect existing bets. Existing bets keep their OLD odds. Continue?`))return}
   S.odds[id]={};S.odds[id][m.h]=hv;S.odds[id][m.a]=av;sv(['odds']);toast('Odds published! 📊');oddsMC()}
-function clearOdds(id){const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];sv(['odds']);toast('Odds cleared');oddsMC();rA()}
+function clearOdds(id){if(!adm)return;const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];sv(['odds']);toast('Odds cleared');oddsMC();rA()}
 
 function admMC(){const id=parseInt($('adm-m').value),f=$('adm-f');if(!id){f.innerHTML='';return}const m=gm(id);admW={};
 let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><div class="bf-tr">
@@ -3310,9 +3370,120 @@ f.innerHTML=h}
 
 function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});sdFilter('amm-'+id)}
 
-function sRes(id){const w=admW[id];if(!w){toast('Pick winner!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);toast('Result saved! 📝');delete admW[id];rA()}
+// ─── GUIDED RESULT FLOW ───
+function openResultFlow(mid){
+  if(!adm){toast('Admin only','err');return}
+  const m=gm(mid);if(!m)return;
+  if(m.h==='TBD'||m.a==='TBD'){toast('Set playoff teams first!','err');return}
+  const el=$('v-admin');
+  const hc=T[m.h]?.c||'var(--acc)',ac=T[m.a]?.c||'var(--acc)';
+  const hs=T[m.h]?.s||m.h,as=T[m.a]?.s||m.a;
+  el.innerHTML=`
+    <div style="max-width:480px;margin:0 auto;padding:20px">
+      <button style="background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;margin-bottom:16px" onclick="rA()">← Back to Admin</button>
+      <div class="card" style="text-align:center;padding:24px">
+        <div style="font-size:12px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${m.playoff?m.v:'Match #'+m.id} · ${fd(m.d)}</div>
+        <div style="font-size:22px;font-weight:900;color:var(--t1);margin-bottom:24px"><span style="color:${hc}">${hs}</span> <span style="color:var(--t4)">vs</span> <span style="color:${ac}">${as}</span></div>
+        <div style="font-size:14px;color:var(--t2);margin-bottom:16px">Who won?</div>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <button style="flex:1;padding:20px 16px;background:${hc}15;border:2px solid ${hc}40;border-radius:16px;cursor:pointer;transition:all .2s" onclick="guidedSelectWinner(${mid},'${m.h}')">
+            <div style="font-size:28px;margin-bottom:4px">${bdg(m.h,48)}</div>
+            <div style="font-size:16px;font-weight:900;color:${hc}">${hs}</div>
+          </button>
+          <button style="flex:1;padding:20px 16px;background:${ac}15;border:2px solid ${ac}40;border-radius:16px;cursor:pointer;transition:all .2s" onclick="guidedSelectWinner(${mid},'${m.a}')">
+            <div style="font-size:28px;margin-bottom:4px">${bdg(m.a,48)}</div>
+            <div style="font-size:16px;font-weight:900;color:${ac}">${as}</div>
+          </button>
+        </div>
+        <div id="guided-mom" style="margin-top:24px"></div>
+        <div id="guided-void" style="margin-top:16px"><button style="background:0;border:0;color:var(--t4);font-size:12px;cursor:pointer;text-decoration:underline" onclick="if(confirm('Void this match? All bets will be refunded.')){voidMatch(${mid})}">🌧️ Void this match instead</button></div>
+      </div>
+    </div>`;
+}
 
-function voidMatch(id){
+var _guidedWinner={};
+function guidedSelectWinner(mid,team){
+  if(!adm)return;
+  _guidedWinner[mid]=team;
+  admW[mid]=team; // keep admW in sync for momDropdown filtering
+  const m=gm(mid);
+  const el=$('guided-mom');
+  el.innerHTML=`
+    <div style="border-top:1px solid var(--bdr);padding-top:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--grn);margin-bottom:12px">✅ Winner: <strong>${T[team]?T[team].s:team}</strong></div>
+      <div style="font-size:14px;color:var(--t2);margin-bottom:10px">Select Man of the Match</div>
+      <div style="font-size:10px;color:var(--yel);margin-bottom:6px">⭐ Opponent players shown first for Jackpot tracking</div>
+      ${momDropdown('guided-mom-sel',mid,true)}
+      <button class="bp" style="margin-top:16px;width:100%;padding:16px;font-size:15px" onclick="guidedSubmit(${mid})">✅ Lock Result</button>
+    </div>`;
+  // Auto-focus MoM dropdown
+  setTimeout(function(){var inp=$('guided-mom-sel');if(inp){inp.focus();sdOpen('guided-mom-sel')}},100);
+}
+
+var _guidedSubmitting=false;
+function guidedSubmit(mid){
+  if(_guidedSubmitting)return;
+  if(!adm)return;
+  _guidedSubmitting=true;
+  const w=admW[mid];if(!w){toast('Pick winner!','err');_guidedSubmitting=false;return}
+  const m=gm(mid);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set teams first!','err');_guidedSubmitting=false;return}
+  const momSel=$('guided-mom-sel');const mom=momSel?momSel.value:'';
+  S.r[mid]={w,mom:mom||null,ts:new Date().toISOString()};
+  sv(['r']);
+  // Show confidence summary
+  const mBets=Object.values(S.b).filter(b=>b.mid===mid);
+  const winners=mBets.filter(b=>b.tm===w).length;
+  const losers=mBets.length-winners;
+  const momSaves=mBets.filter(b=>b.tm!==w&&momMatch(b.mom,mom)).length;
+  const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;
+  const el=$('v-admin');
+  el.innerHTML=`
+    <div style="max-width:480px;margin:0 auto;padding:20px;text-align:center">
+      <div style="font-size:64px;margin-bottom:16px">✅</div>
+      <div style="font-size:22px;font-weight:900;color:var(--grn);margin-bottom:8px">Result Locked</div>
+      <div class="card" style="padding:20px;text-align:left;margin:20px 0">
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">Match</span>
+          <span style="color:var(--t1);font-weight:700">${m?(T[m.h]?T[m.h].s:m.h)+' vs '+(T[m.a]?T[m.a].s:m.a):'#'+mid}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">Winner</span>
+          <span style="color:var(--grn);font-weight:800">${T[w]?T[w].s:w}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">MoM</span>
+          <span style="color:var(--yel);font-weight:700">${mom||'Not set'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">Total bets</span>
+          <span style="color:var(--t1);font-weight:700">${mBets.length}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">Winners / Losers</span>
+          <span><span style="color:var(--grn);font-weight:700">${winners}W</span> / <span style="color:var(--red);font-weight:700">${losers}L</span></span>
+        </div>
+        ${momSaves?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
+          <span style="color:var(--t4)">MoM Saves</span>
+          <span style="color:var(--yel);font-weight:700">🛡️ ${momSaves}</span>
+        </div>`:''}
+        ${jp?`<div style="display:flex;justify-content:space-between;padding:8px 0">
+          <span style="color:var(--t4)">Super Jackpots</span>
+          <span style="color:var(--acc);font-weight:800">⭐ ${jp} 🔥</span>
+        </div>`:''}
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="bp" style="flex:1;min-width:120px;padding:14px" onclick="rA()">← Admin Panel</button>
+        <button style="flex:1;min-width:120px;padding:14px;background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;color:var(--grn);font-weight:700;cursor:pointer;font-size:14px" onclick="var nx=gms().filter(function(m){return !S.r[m.id]&&lk(m)&&m.h!=='TBD'})[0];if(nx){openResultFlow(nx.id)}else{toast('All caught up ✅');rA()}">Next Pending →</button>
+        <button style="flex:1;min-width:120px;padding:14px;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;color:var(--red);font-weight:700;cursor:pointer;font-size:14px" onclick="if(confirm('Undo this result?\\nBalances will recalculate.')){delete S.r[${mid}];sv(['r']);toast('Result undone ↩️');rA()}">↩️ Undo</button>
+      </div>
+    </div>`;
+  delete admW[mid];
+  _guidedSubmitting=false;
+}
+
+function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(!w){toast('Pick winner!','err');return}const m=gm(id);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set playoff teams first!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);const mBets=Object.values(S.b).filter(b=>b.mid===id);const winners=mBets.filter(b=>b.tm===w).length;const losers=mBets.length-winners;const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;toast('✅ '+(T[w]?T[w].s:w)+' won'+(mom?' · MoM: '+mom:'')+' · '+winners+'W/'+losers+'L'+(jp?' · '+jp+' jackpot🔥':''));delete admW[id];rA()}
+
+function voidMatch(id){if(!adm)return;
   const m=gm(id);
   const bets=Object.values(S.b).filter(x=>x.mid===id);
   const msg=`🌧️ VOID MATCH — ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n\n` +
@@ -3395,7 +3566,7 @@ function abMatchChange(){
   <button class="bp" style="width:100%;margin-top:8px" onclick="adminPlaceBet(${mid})">🔓 Place Bet as Admin</button>`;
 }
 let abTeam='';
-function adminPlaceBet(mid){
+function adminPlaceBet(mid){if(!adm)return;
   const player=$('ab-player').value;
   if(!player){toast('Select a player','err');return}
   if(!abTeam){toast('Pick a team','err');return}
@@ -3437,7 +3608,7 @@ function sendReminder(id,type){
   }
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
-function toggleKO(){S.koOpen=!S.koOpen;sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
+function toggleKO(){if(!adm)return;S.koOpen=!S.koOpen;sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
 
 function editKO(name){
   const k=S.ko[name];if(!k)return;
@@ -3466,7 +3637,7 @@ function publishKO(){
   S.koPublished=true;
   sv();toast('Crystal Ball results published! 📢 Visible on Board tab.');rA();
 }
-function revealKO(){
+function revealKO(){if(!adm)return;
   const winner=$('ko-winner').value;
   if(!winner){toast('Select the IPL winner!','err');return}
   if(!confirm(`🔮 REVEAL ALL CRYSTAL BALL PREDICTIONS\n\nIPL 2026 Winner: ${T[winner]?.n}\n\nThis will:\n• Show everyone's secret picks\n• Add/deduct points from balances\n• Cannot be undone!\n\nProceed?`))return;
@@ -3477,7 +3648,7 @@ const IPL_VENUES=['M. Chinnaswamy Stadium, Bengaluru','Wankhede Stadium, Mumbai'
 function nmTeamSync(){const h=$('nm-home').value,aSel=$('nm-away');const cur=aSel.value;aSel.innerHTML='<option value="">--</option>';Object.keys(T).forEach(k=>{if(k!==h)aSel.innerHTML+=`<option value="${k}" ${k===cur?'selected':''}>${T[k].s}</option>`})}
 function nmVenueOpen(){const dd=$('nm-venue-dd');dd.style.display='block';nmVenueFilter();setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&e.target.id!=='nm-venue'){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}
 function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background=''" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">${v}</div>`).join(''):'<div style="padding:10px 14px;color:var(--t4);font-size:12px">No venues found</div>'}
-function addMatch(){
+function addMatch(){if(!adm)return;
   const id=parseInt($('nm-id').value)||MM.length+1;
   const day=parseInt($('nm-day').value);
   const month=$('nm-month').value;
@@ -3499,7 +3670,7 @@ function addMatch(){
   toast('Match #'+id+' added! ✅');
   rA();
 }
-function setPO(id){const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');rA()}
+function setPO(id){if(!adm)return;const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');rA()}
 
 function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv(['b']);toast('Bet deleted');rA()}
 
@@ -3679,7 +3850,7 @@ function applyAdj(){
   S.adj.push({type:adjType,player,amount:amt,reason,ts:new Date().toISOString()});
   sv(['adj']);toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);rA();
 }
-function editName(old){
+function editName(old){if(!adm)return;
   const nw=prompt('Edit name for "'+old+'":\n\nEnter new name:',old);
   if(!nw||!nw.trim())return;
   const newName=nw.trim();
@@ -3705,8 +3876,8 @@ function editName(old){
   sv();toast(old+' → '+newName+' ✅');rA();
 }
 function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
-function remP(n){if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
-function rstAll(){if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
+function remP(n){if(!adm)return;if(!confirm('Remove '+n+' and all their bets?'))return;delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
+function rstAll(){if(!adm)return;if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
 
 function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
 if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
@@ -4054,6 +4225,40 @@ function runExport(){
 ld();
 setTimeout(moveSlider,200);
 window.addEventListener('resize',moveSlider);
+
+// Secret admin reveal — triple-tap the brand logo
+(function(){
+  var tapCount=0,tapTimer=null;
+  var brand=document.querySelector('.brand');
+  if(!brand)return;
+  brand.addEventListener('click',function(e){
+    tapCount++;
+    if(tapCount===1){tapTimer=setTimeout(function(){tapCount=0},600)}
+    if(tapCount>=3){
+      clearTimeout(tapTimer);tapCount=0;
+      var btn=document.getElementById('nav-admin');
+      if(btn){
+        if(btn.style.display==='none'){
+          btn.style.display='';
+          localStorage.setItem('dg-adm-vis','1');
+          moveSlider();
+          toast('🔓 Admin unlocked');
+        }else{
+          btn.style.display='none';
+          localStorage.removeItem('dg-adm-vis');
+          if(document.querySelector('.nb.on')&&document.querySelector('.nb.on').dataset.v==='admin')nav('home');
+          moveSlider();
+          toast('🔒 Admin hidden');
+        }
+      }
+    }
+  });
+  // Also restore admin tab if already logged in as admin (session persistence)
+  if(localStorage.getItem('dg-adm-vis')==='1'){
+    var btn=document.getElementById('nav-admin');
+    if(btn)btn.style.display='';
+  }
+})();
 </script>
 <div id="ru-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
   <button onclick="$('ru-sheet').style.display=$('ru-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">📋</button>
@@ -4080,23 +4285,24 @@ window.addEventListener('resize',moveSlider);
 </div>
 <div id="adm-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
   <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
-  <div style="display:flex;flex-direction:column;gap:4px">
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 Dashboard</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Match Control</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-addmatch');$('adm-sheet').style.display='none'">➕ Add Match</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-wa');$('adm-sheet').style.display='none'">📲 WhatsApp</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-crystal');$('adm-sheet').style.display='none'">🔮 Crystal Ball</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-squads');$('adm-sheet').style.display='none'">🏏 Squads</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-placebet');$('adm-sheet').style.display='none'">🔓 Place Bet</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-bets');$('adm-sheet').style.display='none'">🎰 Manage Bets</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Players</button>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:6px 10px 2px">⚡ Match Day</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 Dashboard</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Match Control</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">🔧 Setup</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="var s=document.getElementById('sec-setup');if(s)s.style.display='block';ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="var s=document.getElementById('sec-setup');if(s)s.style.display='block';ruJump('adm-crystal');$('adm-sheet').style.display='none'">🔮 Crystal Ball</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="var s=document.getElementById('sec-setup');if(s)s.style.display='block';ruJump('adm-squads');$('adm-sheet').style.display='none'">🏏 Squads</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="var s=document.getElementById('sec-setup');if(s)s.style.display='block';ruJump('adm-addmatch');$('adm-sheet').style.display='none'">➕ Add Match</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📋 League Mgmt</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-bets');$('adm-sheet').style.display='none'">🎰 Manage Bets</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Players</button>
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="$('adm-sheet').style.display='none';openExportModal()">📤 Export Report</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-danger');$('adm-sheet').style.display='none'">🗑️ Danger Zone</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="$('adm-sheet').style.display='none';openExportModal()">📤 Export Report</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="var s=document.getElementById('sec-danger');if(s)s.style.display='block';ruJump('adm-danger');$('adm-sheet').style.display='none'">🗑️ Danger Zone</button>
   </div>
 </div>
 <div id="tm-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
