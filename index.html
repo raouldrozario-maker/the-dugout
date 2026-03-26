@@ -215,12 +215,20 @@ const MM=[
 ];
 
 const ST=10000,MINB=2000,MOM_BONUS=.2;
+const ALL_IN_THRESHOLD=0.6; // % of balance to flag as all-in personality
+const TILT_MULTIPLIER=1.3;  // bet increase ratio to detect tilting
+const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
+const LOCK_MINUTES=40;      // minutes before match to lock betting
+// Safe odds parser — logs warning instead of silent fallback
+function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.warn('Invalid odds on bet',bt.mid,bt.u,bt.od);return 2}return v}
+// Jackpot condition helper — readable shorthand
+function isJackpot(bt,mh){return mh&&bt.mt&&bt.mt!==bt.tm}
 let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
 
 // ══════════════════════════════════════════════════════════════
 // HELPERS
 // ══════════════════════════════════════════════════════════════
-function dl(m){const[h,mn]=m.t.split(':').map(Number);const d=new Date(m.d+'T00:00:00+05:30');d.setHours(h,mn,0,0);d.setMinutes(d.getMinutes()-40);return d}
+function dl(m){const[h,mn]=m.t.split(':').map(Number);const d=new Date(m.d+'T00:00:00+05:30');d.setHours(h,mn,0,0);d.setMinutes(d.getMinutes()-LOCK_MINUTES);return d}
 function lk(m){if(S.lockOverride&&S.lockOverride[m.id]!==undefined)return S.lockOverride[m.id];return new Date()>=dl(m)}
 function fd(s){return new Date(s+'T00:00:00+05:30').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function ft(s){const[h,m]=s.split(':');const hr=+h;return`${hr>12?hr-12:hr}:${m} ${hr>=12?'PM':'AM'}`}
@@ -238,44 +246,16 @@ function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
 function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length<5)window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},2500)}
 
-// Balance: based on RESOLVED results only — pending bets don't deduct
-// Floor of 2K only applies when balance is genuinely negative/zero after all resolutions
-function bal(n){
+// Core balance computation — single source of truth
+function _coreBal(n){
   let b=ST;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
   userBets.forEach(bt=>{
     const rs=S.r[bt.mid];
     if(rs&&!rs.voided){
-      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2;
-      if(w){const py=Math.round(bt.am*(od-1));b+=py;if(mh)b+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
-      else{if(!mh)b-=bt.am}
-    }
-  });
-  // Weekly penalty
-  let pen=weeklyPenalty(n);
-  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
-  pen=Math.max(pen-waived,0);
-  b-=pen;
-  // Manual adjustments
-  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
-    if(a.type==='add')b+=a.amount;
-    else if(a.type==='deduct')b-=a.amount;
-  });
-  if(b<MINB)b=MINB;
-  return Math.round(b);
-}
-
-// Bettable balance — same as bal() but NO MINB floor
-// Prevents infinite money exploit at ₹2,000 floor
-// Does NOT deduct pending bets (allows double header over-commitment per rules)
-function betBal(n){
-  let b=ST;
-  const userBets=Object.values(S.b).filter(x=>x.u===n);
-  userBets.forEach(bt=>{
-    const rs=S.r[bt.mid];
-    if(rs&&!rs.voided){
-      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2;
-      if(w){const py=Math.round(bt.am*(od-1));b+=py;if(mh)b+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
+      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
+      const py=Math.round(bt.am*(od-1));
+      if(w){b+=py;if(mh)b+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))b+=py}
       else{if(!mh)b-=bt.am}
     }
   });
@@ -286,8 +266,14 @@ function betBal(n){
   (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
     if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
   });
-  return Math.max(Math.round(b),0);
+  return Math.round(b);
 }
+
+// Player-facing balance (floored at MINB safety net)
+function bal(n){return Math.max(_coreBal(n),MINB)}
+
+// Bettable balance (no floor — prevents infinite money exploit at ₹2K)
+function betBal(n){return Math.max(_coreBal(n),0)}
 
 // Amount at risk in pending (unresolved) bets
 function atRisk(n){
@@ -295,26 +281,7 @@ function atRisk(n){
 }
 
 // Raw balance without floor — for true P&L calculation
-function rawBal(n){
-  let b=ST;
-  const userBets=Object.values(S.b).filter(x=>x.u===n);
-  userBets.forEach(bt=>{
-    const rs=S.r[bt.mid];
-    if(rs&&!rs.voided){
-      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2;
-      if(w){const py=Math.round(bt.am*(od-1));b+=py;if(mh)b+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)b+=py}
-      else{if(!mh)b-=bt.am}
-    }
-  });
-  let pen=weeklyPenalty(n);
-  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
-  pen=Math.max(pen-waived,0);
-  b-=pen;
-  (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
-    if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
-  });
-  return Math.round(b);
-}
+function rawBal(n){return _coreBal(n)}
 
 // Final balance including Crystal Ball — admin eyes only
 function finalBal(n){
@@ -349,7 +316,7 @@ function weeklyPenalty(n){
     const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(matchesThisWeek.length>0&&resultsThisWeek.length>0){
       const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
-      if(!betThisWeek)penalty+=Math.round(ST*0.2);
+      if(!betThisWeek)penalty+=PENALTY_AMOUNT;
     }
     weekStart=new Date(weekEnd);
   }
@@ -379,7 +346,7 @@ function getPenaltyBreakdown(){
       players.forEach(n=>{
         const userBets=Object.values(S.b).filter(x=>x.u===n);
         const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
-        if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+Math.round(ST*0.2)}
+        if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+PENALTY_AMOUNT}
       });
       weeks.push({label:`Week ${weekNum} (${wsLabel} – ${weLabel})`,defaulters,matchCount:matchesThisWeek.length,start:weekStart.toISOString().slice(0,10),end:new Date(weekEnd.getTime()-86400000).toISOString().slice(0,10)});
     }
@@ -413,7 +380,7 @@ function getPersonality(name){
 
   // All-in detection (bet >= 60% of player's balance — using betBal for accuracy)
   const playerBal=bal(name);
-  const bigBets=ub.filter(b=>b.am>=Math.max(playerBal,ST)*0.6).length;
+  const bigBets=ub.filter(b=>b.am>=Math.max(playerBal,ST)*ALL_IN_THRESHOLD).length;
 
   // Streak detection
   const sorted=[...rb].sort((a,b)=>{const ma=gm(a.mid),mb=gm(b.mid);return new Date(ma?.d||0)-new Date(mb?.d||0)});
@@ -421,7 +388,7 @@ function getPersonality(name){
   let minBal=ST,maxDrop=0,recovered=false;
   let runBal=ST;
   sorted.forEach(bt=>{
-    const w=bt.tm===S.r[bt.mid].w,od=parseFloat(bt.od)||2;
+    const w=bt.tm===S.r[bt.mid].w,od=safeOd(bt);
     const mh=momMatch(bt.mom,S.r[bt.mid].mom);
     if(w){runBal+=Math.round(bt.am*(od-1));curLose=0}
     else{if(!mh)runBal-=bt.am;curLose++}
@@ -437,7 +404,7 @@ function getPersonality(name){
   for(let i=1;i<sorted.length;i++){
     const prev=sorted[i-1],cur=sorted[i];
     const prevLost=prev.tm!==S.r[prev.mid]?.w;
-    if(prevLost&&cur.am>prev.am*1.3){tiltCount++}else{tiltCount=0}
+    if(prevLost&&cur.am>prev.am*TILT_MULTIPLIER){tiltCount++}else{tiltCount=0}
     if(tiltCount>=2)tilting=true;
   }
 
@@ -461,7 +428,7 @@ function getBalBreakdown(n){
     const m=gm(bt.mid);
     const won=bt.tm===rs.w;
     const momH=momMatch(bt.mom,rs.mom);
-    const od=parseFloat(bt.od)||2;
+    const od=safeOd(bt);
     let change=0,detail='';
     if(won){
       const py=Math.round(bt.am*(od-1));change=py;detail=`Profit ₹${py.toLocaleString()} (₹${bt.am.toLocaleString()} × (${od} - 1))`;
@@ -477,7 +444,7 @@ function getBalBreakdown(n){
   // Pending bets (at risk)
   const pendingBets=ub.filter(bt=>!S.r[bt.mid]);
   if(pendingBets.length){
-    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK (pending bets)</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
+    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK — max downside (pending bets)</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
     pendingBets.forEach(bt=>{
       const m=gm(bt.mid);
       h+=`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--t3);gap:8px"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -488,7 +455,7 @@ function getBalBreakdown(n){
   const pen=weeklyPenalty(n);
   const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
   const netPen=Math.max(pen-waived,0);
-  if(pen>0){h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--red)">⚠️ No bets placed in ${Math.round(pen/2000)} week${pen>2000?'s':''} → penalty${waived>0?' (₹'+waived.toLocaleString()+' waived)':''}</span><span style="color:var(--red);font-weight:700">-₹${netPen.toLocaleString()}</span></div>`}
+  if(pen>0){h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--red)">⚠️ No bets placed in ${Math.round(pen/PENALTY_AMOUNT)} week${pen>PENALTY_AMOUNT?'s':''} → penalty${waived>0?' (₹'+waived.toLocaleString()+' waived)':''}</span><span style="color:var(--red);font-weight:700">-₹${netPen.toLocaleString()}</span></div>`}
   // Manual adjustments
   (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
     h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Admin adjustment'}</span><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">₹${a.type==='add'?'+':'-'}${a.amount.toLocaleString()}</span></div>`});
@@ -647,7 +614,7 @@ function ld(){
           if(!oldR[mid]&&!S.r[mid].voided){
             const myBet=S.b[mid+'-'+me];
             if(myBet){
-              const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=parseFloat(myBet.od)||2;
+              const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);
               if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}
               else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}
               else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}
@@ -704,7 +671,7 @@ function rH(){
     </div>
     <div style="margin-top:14px;font-size:12px;color:var(--t3)">📍 ${nx.v}</div>
     ${(()=>{const nxBets=Object.values(S.b).filter(x=>x.mid===nx.id);const nxWagered=nxBets.reduce((s,x)=>s+x.am,0);return nxBets.length?`<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:13px;font-weight:700"><span style="color:var(--hot)">🔥 ₹${nxWagered.toLocaleString()} in play</span><span style="color:var(--t2)">⚔️ ${nxBets.length} bet${nxBets.length!==1?'s':''}</span></div>`:''})()}
-    ${(()=>{if(!me)return '';const myBet=S.b[nx.id+'-'+me];if(myBet){const od=parseFloat(myBet.od)||2;const potWin=Math.round(myBet.am*(od-1));return `<div style="margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:10px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;color:var(--t2)">Your bet: <strong style="color:${T[myBet.tm]?.c||'var(--acc)'}">${T[myBet.tm]?.s}</strong> · ₹${myBet.am.toLocaleString()}</div><div style="font-size:12px;font-weight:800;color:var(--grn)">Win +₹${potWin.toLocaleString()}</div></div>`}return ''})()}
+    ${(()=>{if(!me)return '';const myBet=S.b[nx.id+'-'+me];if(myBet){const od=safeOd(myBet);const potWin=Math.round(myBet.am*(od-1));return `<div style="margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:10px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;color:var(--t2)">Your bet: <strong style="color:${T[myBet.tm]?.c||'var(--acc)'}">${T[myBet.tm]?.s}</strong> · ₹${myBet.am.toLocaleString()}</div><div style="font-size:12px;font-weight:800;color:var(--grn)">Win +₹${potWin.toLocaleString()}</div></div>`}return ''})()}
     ${me&&!l&&S.odds[nx.id]&&!S.b[nx.id+'-'+me]?`<button style="margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px 28px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="nav('matches')">💰 Place Your Bet</button>`:''}
     </div>`;
   } else if(!ns.length){
@@ -764,7 +731,7 @@ function rH(){
         const rs=S.r[bt.mid],m=gm(bt.mid);if(!rs||!m)return;
         const won=bt.tm===rs.w;
         const mh=momMatch(bt.mom,rs.mom);
-        const od=parseFloat(bt.od)||2;
+        const od=safeOd(bt);
         const py=won?Math.round(bt.am*(od-1)):0;
         const momBonus=won&&mh?Math.round(bt.am*MOM_BONUS):0;
         const total=won?py+momBonus:mh?0:-bt.am;
@@ -789,7 +756,7 @@ function rH(){
     <!-- At Risk breakdown (if any pending bets) -->
     ${myPending.length?`<div style="background:var(--inp);border:1px solid #D4A24E18;border-radius:12px;padding:14px;margin-bottom:16px">
       <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ AT RISK</div>
-      ${myPending.map(bt=>{const m=gm(bt.mid);const mo=S.odds[bt.mid]||{};const od=parseFloat(bt.od)||2;const potWin=Math.round(bt.am*(od-1));return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${myPending.indexOf(bt)<myPending.length-1?'border-bottom:1px solid var(--bdr)':''}">
+      ${myPending.map(bt=>{const m=gm(bt.mid);const mo=S.odds[bt.mid]||{};const od=safeOd(bt);const potWin=Math.round(bt.am*(od-1));return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${myPending.indexOf(bt)<myPending.length-1?'border-bottom:1px solid var(--bdr)':''}">
         <div style="display:flex;align-items:center;gap:8px">
           ${bdg(bt.tm,28)}
           <div>
@@ -819,7 +786,7 @@ function rH(){
         <span style="font-size:20px">⚠️</span>
         <div>
           <div style="font-size:13px;font-weight:700;color:var(--red)">You haven't bet this week!</div>
-          <div style="font-size:12px;color:var(--t4)">Miss the week = 20% penalty (₹${Math.round(ST*0.2).toLocaleString()})${openMatches.length?' · '+openMatches.length+' match'+(openMatches.length>1?'es':'')+' still open':''}</div>
+          <div style="font-size:12px;color:var(--t4)">Miss the week = 20% penalty (₹${PENALTY_AMOUNT.toLocaleString()})${openMatches.length?' · '+openMatches.length+' match'+(openMatches.length>1?'es':'')+' still open':''}</div>
         </div>
       </div>`;
     })()}
@@ -865,9 +832,9 @@ function rH(){
       if(rs&&!rs.voided){
         const won=bt.tm===rs.w;
         const mh=momMatch(bt.mom,rs.mom);
-        const od=parseFloat(bt.od)||2;
-        const isJackpot=won&&mh&&bt.mt&&bt.mt!==bt.tm;
-        if(isJackpot){
+        const od=safeOd(bt);
+        const isJP=won&&isJackpot(bt,mh);
+        if(isJP){
           const py=Math.round(bt.am*(od-1))*2+Math.round(bt.am*MOM_BONUS);
           feed.push({ts:rs.ts||bt.ts,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${bt.u}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#D4A24E08',border:'#D4A24E1A'});
         }else if(won&&mh){
@@ -1126,7 +1093,7 @@ function rM(){
     // Bet slip style (your active bet)
     if(my){
       const won=rs&&my.tm===rs.w;const momH=rs&&momMatch(my.mom,rs.mom);
-      const od=parseFloat(my.od)||2;const potWin=Math.round(my.am*(od-1));
+      const od=safeOd(my);const potWin=Math.round(my.am*(od-1));
       h+=`<div style="background:${rs?(won?'#3FB08C0C':'#C4453A0C'):'#D4A24E08'};border:1px solid ${rs?(won?'#3FB08C1A':'#C4453A22'):'#D4A24E1A'};border-radius:12px;padding:14px;margin-top:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${rs?'0':'8px'}">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${rs?(won?'var(--grn)':'var(--red)'):'var(--acc)'}">YOUR BET</div>
@@ -1145,15 +1112,15 @@ function rM(){
         </div>`;
       // Post-result breakdown (why you won/lost)
       if(rs&&!rs.voided){
-        const isJackpot=won&&momH&&my.mt&&my.mt!==my.tm;
+        const isJP=won&&isJackpot(my,momH);
         const momBonus=momH?Math.round(my.am*MOM_BONUS):0;
-        const jackpotBonus=isJackpot?Math.round(my.am/od):0;
+        const jackpotBonus=isJP?Math.round(my.am/od):0;
         const teamWin=won?Math.round(my.am/od):0;
         h+=`<div style="margin-top:8px;padding:10px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;font-size:12px;line-height:2">`;
         if(won){
           h+=`<div style="color:var(--grn)">✔ Picked winning team (${T[my.tm]?.s}) → +₹${teamWin.toLocaleString()}</div>`;
           if(momH)h+=`<div style="color:var(--yel)">✔ Correct MoM pick → +₹${momBonus.toLocaleString()}</div>`;
-          if(isJackpot)h+=`<div style="color:var(--acc)">🔥 SUPER JACKPOT (MoM from losing team) → +₹${jackpotBonus.toLocaleString()}</div>`;
+          if(isJP)h+=`<div style="color:var(--acc)">🔥 SUPER JACKPOT (MoM from losing team) → +₹${jackpotBonus.toLocaleString()}</div>`;
           if(!momH&&my.mom)h+=`<div style="color:var(--t3)">✗ MoM incorrect (picked ${my.mom})</div>`;
           if(!my.mom)h+=`<div style="color:var(--t3)">— No MoM pick</div>`;
         }else{
@@ -1189,9 +1156,9 @@ function rM(){
       const clutchLines=[];
       let bigWinner=null,bigWinAmt=0;
       winners.forEach(bt=>{
-        const od=parseFloat(bt.od)||2;const mh=momMatch(bt.mom,rs.mom);
+        const od=safeOd(bt);const mh=momMatch(bt.mom,rs.mom);
         let py=Math.round(bt.am/od);if(mh)py+=Math.round(bt.am*MOM_BONUS);
-        const isJP=mh&&bt.mt&&bt.mt!==bt.tm;if(isJP)py+=Math.round(bt.am/od);
+        const isJP=isJackpot(bt,mh);if(isJP)py+=Math.round(bt.am/od);
         if(py>bigWinAmt){bigWinAmt=py;bigWinner={u:bt.u,py,isJP,mh}}
       });
       if(bigWinner){
@@ -1213,7 +1180,7 @@ function rM(){
       }
       // All-in highlight
       const allInWin=winners.find(bt=>bt.am>=bal(bt.u)*0.9||bt.am>=ST);
-      if(allInWin){const od=parseFloat(allInWin.od)||2;const isYou=allInWin.u===me;clutchLines.push(`<span style="color:var(--grn)">💣 ${isYou?'Your all-in paid off':'All-in: <strong>'+allInWin.u+'</strong>'} — bet ₹${allInWin.am.toLocaleString()} → won +₹${Math.round(allInWin.am/od).toLocaleString()}</span>`)}
+      if(allInWin){const od=safeOd(allInWin);const isYou=allInWin.u===me;clutchLines.push(`<span style="color:var(--grn)">💣 ${isYou?'Your all-in paid off':'All-in: <strong>'+allInWin.u+'</strong>'} — bet ₹${allInWin.am.toLocaleString()} → won +₹${Math.round(allInWin.am/od).toLocaleString()}</span>`)}
       const allInLoss=losers.find(bt=>(bt.am>=bal(bt.u)*0.9||bt.am>=ST)&&!(momMatch(bt.mom,rs.mom)));
       if(allInLoss){const isYou=allInLoss.u===me;clutchLines.push(`<span style="color:var(--red)">💣 ${isYou?'Your all-in backfired':'All-in failed: <strong>'+allInLoss.u+'</strong>'} — lost ₹${allInLoss.am.toLocaleString()}</span>`)}
       if(my&&my.tm===rs.w&&my.mom&&my.mom.trim().toLowerCase()!==(rs.mom||'').trim().toLowerCase()&&rs.mom){
@@ -1989,7 +1956,7 @@ function rRu(){
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
       <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">AT RISK</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6">The total amount you've wagered on matches that haven't been played yet. This money isn't deducted from your balance — it shows what you could lose if all pending bets go wrong.</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">The total amount you've wagered on matches that haven't been played yet. This is your <strong>max downside</strong> — what you could lose if all pending bets go wrong. Actual loss may be lower if MoM saves kick in.</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
@@ -2024,7 +1991,7 @@ function rT(){
     const wins=betsResolved.filter(b=>b.tm===S.r[b.mid].w);
     let pl=0;
     betsResolved.forEach(b=>{
-      const w=b.tm===S.r[b.mid].w,od=parseFloat(b.od)||2;
+      const w=b.tm===S.r[b.mid].w,od=safeOd(b);
       const mh=momMatch(b.mom,S.r[b.mid].mom);
       if(w)pl+=Math.round(b.am*(od-1));else if(!mh)pl-=b.am;
     });
@@ -2210,9 +2177,9 @@ function rAn(){
         const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));
         const rs=S.r[mid];
         if(bt&&rs){
-          const w=bt.tm===rs.w,od=parseFloat(bt.od)||2;
+          const w=bt.tm===rs.w,od=safeOd(bt);
           const mh=momMatch(bt.mom,rs.mom);
-          if(w){b+=Math.round(bt.am*(od-1));if(mh)b+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)b+=Math.round(bt.am*(od-1))}
+          if(w){b+=Math.round(bt.am*(od-1));if(mh)b+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))b+=Math.round(bt.am*(od-1))}
           else{if(!mh)b-=bt.am}
         }
         if(b<MINB)b=MINB;
@@ -2316,10 +2283,10 @@ function rAn(){
     const teamPL={};
     resolvedBets.forEach(bt=>{
       const rs=S.r[bt.mid];if(!rs)return;
-      const w=bt.tm===rs.w,od=parseFloat(bt.od)||2;
+      const w=bt.tm===rs.w,od=safeOd(bt);
       const mh=momMatch(bt.mom,rs.mom);
       let change=0;
-      if(w){change=Math.round(bt.am*(od-1));if(mh)change+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)change+=Math.round(bt.am*(od-1))}
+      if(w){change=Math.round(bt.am*(od-1));if(mh)change+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))change+=Math.round(bt.am*(od-1))}
       else{change=mh?0:-bt.am}
       if(!teamPL[bt.tm])teamPL[bt.tm]=0;
       teamPL[bt.tm]+=change;
@@ -2455,7 +2422,7 @@ function rAn(){
   const penaltyData=getPenaltyBreakdown();
   if(penaltyData.weeks.length>0){
     h+=`<div id="st-penalty" class="card"><div class="ch"><span style="font-size:18px">⚠️</span><span class="ct">WEEKLY PENALTY TRACKER</span></div>
-    <div style="font-size:12px;color:var(--t4);margin-bottom:14px">At least 1 bet per week (Wed→Tue) or ₹${Math.round(ST*0.2).toLocaleString()} penalty.</div>`;
+    <div style="font-size:12px;color:var(--t4);margin-bottom:14px">At least 1 bet per week (Wed→Tue) or ₹${PENALTY_AMOUNT.toLocaleString()} penalty.</div>`;
     penaltyData.weeks.forEach(wk=>{
       const has=wk.defaulters.length>0;
       h+=`<div style="background:var(--inp);border:1px solid ${has?'#C4453A25':'#3FB08C1A'};border-radius:10px;padding:12px;margin-bottom:8px">
@@ -2525,8 +2492,8 @@ function rMG(){
   const totalWagered=ub.reduce((s,x)=>s+x.am,0);
   let totalWon=0,totalLost=0;
   resolved.forEach(bt=>{
-    const rs=S.r[bt.mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2;
-    if(w){let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)py+=Math.round(bt.am*(od-1));totalWon+=py}
+    const rs=S.r[bt.mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
+    if(w){let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));totalWon+=py}
     else{if(!mh)totalLost+=bt.am}
   });
   // Favourite team
@@ -2548,8 +2515,8 @@ function rMG(){
   // Biggest win/loss
   let bigWin=0,bigLoss=0,bigWinMatch='',bigLossMatch='';
   resolved.forEach(bt=>{
-    const rs=S.r[bt.mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2,m=gm(bt.mid);
-    if(w){let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)py+=Math.round(bt.am*(od-1));if(py>bigWin){bigWin=py;bigWinMatch=`${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'}`}}
+    const rs=S.r[bt.mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),m=gm(bt.mid);
+    if(w){let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));if(py>bigWin){bigWin=py;bigWinMatch=`${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'}`}}
     else{if(!mh&&bt.am>bigLoss){bigLoss=bt.am;bigLossMatch=`${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'}`}}
   });
 
@@ -2615,12 +2582,12 @@ function rMG(){
     sortedAll.forEach(bt=>{
       const rs=S.r[bt.mid],m=gm(bt.mid),w=bt.tm===rs.w;
       const mh=momMatch(bt.mom,rs.mom);
-      const od=parseFloat(bt.od)||2;
+      const od=safeOd(bt);
       let change=0,label='';
       if(w){
         change=Math.round(bt.am*(od-1));label=`Won`;
         if(mh){change+=Math.round(bt.am*MOM_BONUS);label+=` + MoM`}
-        if(mh&&bt.mt&&bt.mt!==bt.tm){change+=Math.round(bt.am*(od-1));label+=` + Jackpot`}
+        if(isJackpot(bt,mh)){change+=Math.round(bt.am*(od-1));label+=` + Jackpot`}
       }else{
         if(mh){change=0;label='MoM save'}
         else{change=-bt.am;label='Lost'}
@@ -2643,7 +2610,7 @@ function rMG(){
       h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Adjustment'}</span><span style="font-weight:700"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">${a.type==='add'?'+':'-'}₹${a.amount.toLocaleString()}</span> <span style="color:var(--t3)">→ ₹${Math.max(runBal,MINB).toLocaleString()}</span></span></div>`});
     // Pending
     if(pending.length){
-      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
+      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK — max downside (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
       pending.forEach(bt=>{
         const m=gm(bt.mid);
         h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:var(--t3)"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -2678,7 +2645,7 @@ function rMG(){
   else{
     const sorted=[...ub].sort((a,b)=>b.mid-a.mid);
     sorted.forEach(bt=>{
-      const m=gm(bt.mid),rs=S.r[bt.mid],od=parseFloat(bt.od)||2;
+      const m=gm(bt.mid),rs=S.r[bt.mid],od=safeOd(bt);
       let status='',statusClr='',amount='';
       if(!rs){status='⏳ Pending';statusClr='var(--acc)';amount=`₹${bt.am.toLocaleString()} on the line`}
       else{
@@ -2834,8 +2801,8 @@ function rMG(){
     ts.bets++;ts.wagered+=bt.am;
     const rs=S.r[bt.mid];
     if(rs){
-      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=parseFloat(bt.od)||2;
-      if(w){ts.wins++;let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm)py+=Math.round(bt.am*(od-1));ts.won+=py}
+      const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
+      if(w){ts.wins++;let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));ts.won+=py}
       else{if(mh){ts.saves++}else{ts.losses++;ts.lost+=bt.am}}
     }
   });
@@ -3887,7 +3854,7 @@ db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
   else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=parseFloat(myBet.od)||2;if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
@@ -3932,7 +3899,7 @@ function runExport(){
     sorted.forEach(function(bt){
       var rs=S.r[bt.mid];var m=gm(bt.mid);
       var mLabel=(m?((T[m.h]?T[m.h].s:m.h)+' v '+(T[m.a]?T[m.a].s:m.a)):'M#'+bt.mid);
-      var od=parseFloat(bt.od)||2;
+      var od=safeOd(bt);
       if(!rs){rows.push({mid:bt.mid,match:mLabel,date:m?m.d:'',team:T[bt.tm]?T[bt.tm].s:bt.tm,amount:bt.am,odds:od,mom:bt.mom||'—',status:'⏳ Pending',change:'—',balAfter:'⏳',ts:bt.ts||'',adm:bt.adminBet?'🔑':''});return}
       if(rs.voided){rows.push({mid:bt.mid,match:mLabel,date:m?m.d:'',team:T[bt.tm]?T[bt.tm].s:bt.tm,amount:bt.am,odds:od,mom:bt.mom||'—',status:'🌧️ Voided',change:0,balAfter:running,ts:bt.ts||'',adm:bt.adminBet?'🔑':''});return}
       var won=bt.tm===rs.w;
@@ -4029,7 +3996,7 @@ function runExport(){
     var h='<h2>🏟️ Team Analytics</h2><table><thead><tr><th>Team</th><th>Bets</th><th>Staked</th><th>Wins</th><th>Win%</th><th>Net P&L</th></tr></thead><tbody>';
     var ts2={};
     allBets.forEach(function(b){if(!ts2[b.tm])ts2[b.tm]={count:0,staked:0,wins:0,pl:0};ts2[b.tm].count++;ts2[b.tm].staked+=b.am;
-      var rs=S.r[b.mid];if(rs&&!rs.voided){var won=b.tm===rs.w;var od=parseFloat(b.od)||2;var momH=momMatch(b.mom,rs.mom);
+      var rs=S.r[b.mid];if(rs&&!rs.voided){var won=b.tm===rs.w;var od=safeOd(b);var momH=momMatch(b.mom,rs.mom);
         if(won){ts2[b.tm].wins++;ts2[b.tm].pl+=Math.round(b.am*(od-1));if(momH)ts2[b.tm].pl+=Math.round(b.am*MOM_BONUS)}else{if(!momH)ts2[b.tm].pl-=b.am}}});
     Object.keys(ts2).sort(function(a,b2){return ts2[b2].staked-ts2[a].staked}).forEach(function(tm){var t=ts2[tm];var res2=allBets.filter(function(x){return x.tm===tm&&S.r[x.mid]&&!S.r[x.mid].voided}).length;
       h+='<tr><td><strong>'+(T[tm]?T[tm].s:tm)+'</strong></td><td>'+t.count+'</td><td>₹'+t.staked.toLocaleString()+'</td><td>'+t.wins+'</td><td>'+(res2?Math.round(t.wins/res2*100):0)+'%</td><td class="'+(t.pl>=0?'grn':'red')+'">'+(t.pl>=0?'+':'')+t.pl.toLocaleString()+'</td></tr>';
@@ -4111,7 +4078,7 @@ function runExport(){
       h+='<div style="margin-bottom:20px"><h3 style="color:#F5A623;font-size:14px">'+(m.playoff?m.v:'#'+m.id)+' — '+(T[m.h]?T[m.h].s:m.h)+' vs '+(T[m.a]?T[m.a].s:m.a)+' ('+fd(m.d)+')'+(rs?(rs.voided?' — 🌧️ VOIDED':' — Winner: '+(T[rs.w]?T[rs.w].s:rs.w)+(rs.mom?' · MoM: '+rs.mom:'')):'')+'</h3>';
       h+='<table><thead><tr><th>Player</th><th>Team</th><th>Stake</th><th>Odds</th><th>MoM Pick</th><th>Placed At</th><th>Result</th><th>P&L</th></tr></thead><tbody>';
       mBets.forEach(function(bt){
-        var od=parseFloat(bt.od)||2;
+        var od=safeOd(bt);
         var tsStr=bt.ts?new Date(bt.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
         var admFlag=bt.adminBet?' 🔑':'';
         var result='⏳',pl='—';
