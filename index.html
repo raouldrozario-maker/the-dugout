@@ -220,7 +220,7 @@ const TILT_MULTIPLIER=1.3;  // bet increase ratio to detect tilting
 const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
 const LOCK_MINUTES=40;      // minutes before match to lock betting
 // Safe odds parser — logs warning instead of silent fallback
-function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.warn('Invalid odds on bet',bt.mid,bt.u,bt.od);return 2}return v}
+function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);return 2}return v}
 // Jackpot condition helper — readable shorthand
 function isJackpot(bt,mh){return mh&&bt.mt&&bt.mt!==bt.tm}
 let db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
@@ -2691,6 +2691,18 @@ function rMG(){
         <span>${missed?`<span style="color:var(--red);font-weight:700">❌ Missed${waived2?' (waived)':' (-₹2,000)'}</span>`:`<span style="color:var(--grn);font-weight:700">✅ Active</span>`}</span>
       </div>`;
     });
+    // Show current week status if no bet placed yet
+    const cwStart=new Date('2026-03-26T00:00:00+05:30');const cwNow=new Date();
+    let cws=new Date(cwStart);while(cws<cwNow){const cwe=new Date(cws);cwe.setDate(cwe.getDate()+7);if(cwe>cwNow)break;cws=new Date(cwe)}
+    const cwEnd=new Date(cws.getTime()+7*86400000);
+    const cwMatches=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=cws&&md<cwEnd});
+    const cwBet=ub.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=cws&&d<cwEnd});
+    if(cwMatches.length>0&&!cwBet){
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px">
+        <span style="color:var(--t2)">${cws.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} → ${new Date(cwEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short'})} <span style="font-size:10px;color:var(--acc)">(this week)</span></span>
+        <span style="color:var(--acc);font-weight:700">⏳ No bet yet</span>
+      </div>`;
+    }
   }
   h+=`</div>`;
 
@@ -3339,116 +3351,150 @@ f.innerHTML=h}
 
 function apw(id,tm){admW[id]=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('aw-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888'}}});sdFilter('amm-'+id)}
 
-// ─── GUIDED RESULT FLOW ───
+// ─── MATCH CONTROL PANEL (Stepper UI) ───
+var _mcpState={step:1,mid:null,winner:null,mom:null};
+var _guidedSubmitting=false;
+var _guidedWinner={};
+
 function openResultFlow(mid){
   if(!adm){toast('Admin only','err');return}
   const m=gm(mid);if(!m)return;
   if(m.h==='TBD'||m.a==='TBD'){toast('Set playoff teams first!','err');return}
+  _mcpState={step:1,mid:mid,winner:null,mom:null};
+  if(S.odds[mid]&&S.odds[mid][m.h]&&S.odds[mid][m.a])_mcpState.step=2;
+  if(lk(m)&&S.odds[mid])_mcpState.step=3;
+  if(S.r[mid]&&!S.r[mid].voided){_mcpState.step=5;_mcpState.winner=S.r[mid].w;_mcpState.mom=S.r[mid].mom}
+  renderMCP();
+}
+
+function renderMCP(){
+  const mid=_mcpState.mid,step=_mcpState.step;
+  const m=gm(mid);if(!m)return;
   const el=$('v-admin');
   const hc=T[m.h]?.c||'var(--acc)',ac=T[m.a]?.c||'var(--acc)';
   const hs=T[m.h]?.s||m.h,as=T[m.a]?.s||m.a;
-  el.innerHTML=`
-    <div style="max-width:480px;margin:0 auto;padding:20px">
-      <button style="background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;margin-bottom:16px" onclick="rA()">← Back to Admin</button>
-      <div class="card" style="text-align:center;padding:24px">
-        <div style="font-size:12px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${m.playoff?m.v:'Match #'+m.id} · ${fd(m.d)}</div>
-        <div style="font-size:22px;font-weight:900;color:var(--t1);margin-bottom:24px"><span style="color:${hc}">${hs}</span> <span style="color:var(--t4)">vs</span> <span style="color:${ac}">${as}</span></div>
-        <div style="font-size:14px;color:var(--t2);margin-bottom:16px">Who won?</div>
-        <div style="display:flex;gap:12px;justify-content:center">
-          <button style="flex:1;padding:20px 16px;background:${hc}15;border:2px solid ${hc}40;border-radius:16px;cursor:pointer;transition:all .2s" onclick="guidedSelectWinner(${mid},'${m.h}')">
-            <div style="font-size:28px;margin-bottom:4px">${bdg(m.h,48)}</div>
-            <div style="font-size:16px;font-weight:900;color:${hc}">${hs}</div>
-          </button>
-          <button style="flex:1;padding:20px 16px;background:${ac}15;border:2px solid ${ac}40;border-radius:16px;cursor:pointer;transition:all .2s" onclick="guidedSelectWinner(${mid},'${m.a}')">
-            <div style="font-size:28px;margin-bottom:4px">${bdg(m.a,48)}</div>
-            <div style="font-size:16px;font-weight:900;color:${ac}">${as}</div>
-          </button>
-        </div>
-        <div id="guided-mom" style="margin-top:24px"></div>
-        <div id="guided-void" style="margin-top:16px"><button style="background:0;border:0;color:var(--t4);font-size:12px;cursor:pointer;text-decoration:underline" onclick="if(confirm('Void this match? All bets will be refunded.')){voidMatch(${mid})}">🌧️ Void this match instead</button></div>
+  const mo=S.odds[mid]||{};
+  const locked=lk(m);
+  const mBets=Object.values(S.b).filter(function(b){return b.mid===mid});
+
+  let h=`<div style="max-width:520px;margin:0 auto;padding:20px">
+    <button style="background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;margin-bottom:16px" onclick="rA()">← Back to Admin</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px">${m.playoff?m.v:'Match #'+m.id} · ${fd(m.d)}</div>
+      <div style="font-size:24px;font-weight:900;margin-top:4px"><span style="color:${hc}">${hs}</span> <span style="color:var(--t4);font-size:16px">vs</span> <span style="color:${ac}">${as}</span></div>
+      <div style="font-size:12px;color:var(--t3);margin-top:4px">${mBets.length} bet${mBets.length!==1?'s':''} placed · ${locked?'🔒 Locked':'🟢 Open'}</div>
+    </div>`;
+
+  // Stepper indicator
+  h+=`<div style="display:flex;justify-content:center;gap:6px;margin-bottom:24px">`;
+  ['Odds','Status','Result','Preview','Done'].forEach(function(label,i){
+    const s=i+1;const active=s===step;const done=s<step;
+    h+=`<div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;${done?'background:var(--grn);color:#000':active?'background:var(--acc);color:#000':'background:var(--inp);color:var(--t4);border:1px solid var(--bdr)'}">${done?'✓':s}</div>
+      <div style="font-size:9px;color:${active?'var(--acc)':'var(--t4)'};font-weight:${active?'700':'400'}">${label}</div>
+    </div>`;
+    if(i<4)h+=`<div style="width:24px;height:2px;background:${done?'var(--grn)':'var(--bdr)'};margin-top:14px"></div>`;
+  });
+  h+=`</div>`;
+
+  if(step===1){
+    const hOd=mo[m.h]||'',aOd=mo[m.a]||'';
+    h+=`<div class="card" style="padding:20px">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px">STEP 1 — Set Odds</div>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <div style="flex:1"><div style="font-size:12px;font-weight:700;color:${hc};margin-bottom:4px">${hs}</div><input class="bf-i" type="number" id="mcp-od-h" value="${hOd}" min="1" step="0.1" placeholder="e.g. 1.85"></div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:700;color:${ac};margin-bottom:4px">${as}</div><input class="bf-i" type="number" id="mcp-od-a" value="${aOd}" min="1" step="0.1" placeholder="e.g. 2.10"></div>
+      </div>
+      <div style="font-size:11px;color:var(--t4);margin-bottom:16px;text-align:center">${hOd&&aOd?'📊 Implied: '+hs+' '+Math.round(1/hOd*100)+'% vs '+as+' '+Math.round(1/aOd*100)+'%':'Enter odds for both teams'}</div>
+      <button class="bp" style="width:100%;padding:14px" onclick="mcpSaveOdds()">Save Odds & Continue →</button>
+      ${hOd?`<button style="background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;margin-top:8px;width:100%;text-align:center" onclick="_mcpState.step=2;renderMCP()">Skip — odds already set →</button>`:''}
+    </div>`;
+  }else if(step===2){
+    const timeLeft=dl(m)-new Date();const minsLeft=Math.max(0,Math.round(timeLeft/60000));
+    h+=`<div class="card" style="padding:20px">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px">STEP 2 — Betting Status</div>
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:48px;margin-bottom:8px">${locked?'🔒':'🟢'}</div>
+        <div style="font-size:18px;font-weight:800;color:${locked?'var(--red)':'var(--grn)'}">${locked?'Betting Locked':'Betting Open'}</div>
+        ${!locked?`<div style="font-size:13px;color:var(--t3);margin-top:4px">Auto-locks in ${minsLeft} min</div>`:''}
+        <div style="font-size:13px;color:var(--t2);margin-top:12px">${mBets.length} bet${mBets.length!==1?'s':''} placed · ₹${mBets.reduce(function(s,b){return s+b.am},0).toLocaleString()} wagered</div>
+        ${mBets.length>0?`<div style="font-size:12px;color:var(--t4);margin-top:4px">${mBets.filter(function(b){return b.tm===m.h}).length} on ${hs} · ${mBets.filter(function(b){return b.tm===m.a}).length} on ${as}</div>`:''}
+      </div>
+      <button class="bp" style="width:100%;padding:14px;margin-top:12px" onclick="_mcpState.step=3;renderMCP()">Continue to Result →</button>
+    </div>`;
+  }else if(step===3){
+    h+=`<div class="card" style="padding:20px;text-align:center">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px;text-align:left">STEP 3 — Match Result</div>
+      <div style="font-size:14px;color:var(--t2);margin-bottom:16px">Who won?</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:20px">
+        <button style="flex:1;padding:20px 16px;background:${_mcpState.winner===m.h?hc+'30':hc+'10'};border:2px solid ${_mcpState.winner===m.h?hc:hc+'40'};border-radius:16px;cursor:pointer" onclick="mcpPickWinner('${m.h}')">
+          ${bdg(m.h,48)}<div style="font-size:16px;font-weight:900;color:${hc};margin-top:4px">${hs}</div>
+          ${mo[m.h]?`<div style="font-size:11px;color:var(--t4);margin-top:2px">×${mo[m.h]}</div>`:''}
+        </button>
+        <button style="flex:1;padding:20px 16px;background:${_mcpState.winner===m.a?ac+'30':ac+'10'};border:2px solid ${_mcpState.winner===m.a?ac:ac+'40'};border-radius:16px;cursor:pointer" onclick="mcpPickWinner('${m.a}')">
+          ${bdg(m.a,48)}<div style="font-size:16px;font-weight:900;color:${ac};margin-top:4px">${as}</div>
+          ${mo[m.a]?`<div style="font-size:11px;color:var(--t4);margin-top:2px">×${mo[m.a]}</div>`:''}
+        </button>
+      </div>
+      <div id="mcp-mom-area"></div>
+      <div style="margin-top:16px"><button style="background:#64748B10;border:1px solid #64748B30;border-radius:10px;padding:8px 16px;color:var(--t3);font-size:12px;cursor:pointer;font-weight:600" onclick="if(confirm('🌧️ Void this match?\\n\\nAll ${mBets.length} bet(s) will be refunded.\\nThis cannot be undone.')){voidMatch(${mid})}">🌧️ Void Match (rain/no result)</button></div>
+    </div>`;
+  }else if(step===4){
+    const w=_mcpState.winner,mom=_mcpState.mom||'';
+    const winners=[],losers=[],saves=[],jackpots=[];
+    mBets.forEach(function(bt){const od=safeOd(bt);const won=bt.tm===w;const mh=momMatch(bt.mom,mom);
+      if(won){let py=Math.round(bt.am*(od-1));if(mh)py+=Math.round(bt.am*MOM_BONUS);if(mh&&bt.mt&&bt.mt!==bt.tm){py+=Math.round(bt.am*(od-1));jackpots.push({n:bt.u,py:py})}else{winners.push({n:bt.u,py:py})}}
+      else if(mh){saves.push({n:bt.u,saved:bt.am,bonus:Math.round(bt.am*MOM_BONUS)})}
+      else{losers.push({n:bt.u,lost:bt.am})}});
+    h+=`<div class="card" style="padding:20px">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px">STEP 4 — Review Impact</div>
+      <div style="background:var(--inp);border-radius:12px;padding:14px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--t4)">Winner</span><span style="color:var(--grn);font-weight:800">${T[w]?T[w].s:w}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--t4)">MoM</span><span style="color:var(--yel);font-weight:700">${mom||'Not set'}</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;text-align:center">
+        <div style="background:#3FB08C10;border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--grn)">${winners.length+jackpots.length}</div><div style="font-size:10px;color:var(--t4)">Winners</div></div>
+        <div style="background:#C4453A10;border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--red)">${losers.length}</div><div style="font-size:10px;color:var(--t4)">Losers</div></div>
+        ${saves.length?`<div style="background:#D4A24E10;border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--yel)">${saves.length}</div><div style="font-size:10px;color:var(--t4)">MoM Saves</div></div>`:''}
+        ${jackpots.length?`<div style="background:#F5A62310;border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--acc)">${jackpots.length}</div><div style="font-size:10px;color:var(--t4)">Jackpots 🔥</div></div>`:''}
+      </div>`;
+    const allOut=[...jackpots.map(function(x){return{n:x.n,v:x.py,t:'⭐'}}),...winners.map(function(x){return{n:x.n,v:x.py,t:'✅'}}),...saves.map(function(x){return{n:x.n,v:x.bonus,t:'🛡️'}}),...losers.map(function(x){return{n:x.n,v:-x.lost,t:'💀'}})].sort(function(a,b){return b.v-a.v});
+    if(allOut.length){h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Player Impact</div>`;
+      allOut.forEach(function(o){h+=`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:13px"><span style="color:var(--t2)">${o.t} ${o.n}</span><span style="font-weight:700;color:${o.v>=0?'var(--grn)':'var(--red)'}">${o.v>=0?'+':''}₹${Math.abs(o.v).toLocaleString()}</span></div>`})}
+    h+=`<div style="display:flex;gap:10px;margin-top:20px">
+        <button style="flex:1;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;color:var(--t1);font-weight:700;cursor:pointer" onclick="_mcpState.step=3;renderMCP()">← Back</button>
+        <button class="bp" style="flex:2;padding:14px;font-size:15px" onclick="mcpConfirm()">✅ Confirm & Publish</button>
+      </div></div>`;
+  }else if(step===5){
+    const w=_mcpState.winner,mom=_mcpState.mom||'';
+    h+=`<div style="text-align:center;padding:20px">
+      <div style="font-size:64px;margin-bottom:12px">✅</div>
+      <div style="font-size:22px;font-weight:900;color:var(--grn)">Result Published</div>
+      <div style="font-size:14px;color:var(--t2);margin-top:4px">${T[w]?T[w].s:w} won${mom?' · MoM: '+mom:''}</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap">
+        <button class="bp" style="flex:1;min-width:110px;padding:14px" onclick="rA()">← Admin</button>
+        <button style="flex:1;min-width:110px;padding:14px;background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;color:var(--grn);font-weight:700;cursor:pointer" onclick="var nx=gms().filter(function(m){return !S.r[m.id]&&lk(m)&&m.h!=='TBD'})[0];if(nx){openResultFlow(nx.id)}else{toast('All caught up ✅');rA()}">Next Pending →</button>
+        <button style="flex:1;min-width:110px;padding:14px;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;color:var(--red);font-weight:700;cursor:pointer" onclick="if(confirm('Undo?\\nBalances recalculate.')){delete S.r[${mid}];sv(['r']);toast('Undone ↩️');rA()}">↩️ Undo</button>
       </div>
     </div>`;
+  }
+  h+=`</div>`;el.innerHTML=h;
+  if(step===3&&_mcpState.winner)renderMCPMom();
 }
 
-var _guidedWinner={};
-function guidedSelectWinner(mid,team){
-  if(!adm)return;
-  _guidedWinner[mid]=team;
-  admW[mid]=team; // keep admW in sync for momDropdown filtering
-  const m=gm(mid);
-  const el=$('guided-mom');
-  el.innerHTML=`
-    <div style="border-top:1px solid var(--bdr);padding-top:16px">
-      <div style="font-size:12px;font-weight:700;color:var(--grn);margin-bottom:12px">✅ Winner: <strong>${T[team]?T[team].s:team}</strong></div>
-      <div style="font-size:14px;color:var(--t2);margin-bottom:10px">Select Man of the Match</div>
-      <div style="font-size:10px;color:var(--yel);margin-bottom:6px">⭐ Opponent players shown first for Jackpot tracking</div>
-      ${momDropdown('guided-mom-sel',mid,true)}
-      <button class="bp" style="margin-top:16px;width:100%;padding:16px;font-size:15px" onclick="guidedSubmit(${mid})">✅ Lock Result</button>
-    </div>`;
-  // Auto-focus MoM dropdown
-  setTimeout(function(){var inp=$('guided-mom-sel');if(inp){inp.focus();sdOpen('guided-mom-sel')}},100);
-}
-
-var _guidedSubmitting=false;
-function guidedSubmit(mid){
-  if(_guidedSubmitting)return;
-  if(!adm)return;
-  _guidedSubmitting=true;
-  const w=admW[mid];if(!w){toast('Pick winner!','err');_guidedSubmitting=false;return}
-  const m=gm(mid);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set teams first!','err');_guidedSubmitting=false;return}
-  const momSel=$('guided-mom-sel');const mom=momSel?momSel.value:'';
-  S.r[mid]={w,mom:mom||null,ts:new Date().toISOString()};
-  sv(['r']);
-  // Show confidence summary
-  const mBets=Object.values(S.b).filter(b=>b.mid===mid);
-  const winners=mBets.filter(b=>b.tm===w).length;
-  const losers=mBets.length-winners;
-  const momSaves=mBets.filter(b=>b.tm!==w&&momMatch(b.mom,mom)).length;
-  const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;
-  const el=$('v-admin');
-  el.innerHTML=`
-    <div style="max-width:480px;margin:0 auto;padding:20px;text-align:center">
-      <div style="font-size:64px;margin-bottom:16px">✅</div>
-      <div style="font-size:22px;font-weight:900;color:var(--grn);margin-bottom:8px">Result Locked</div>
-      <div class="card" style="padding:20px;text-align:left;margin:20px 0">
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">Match</span>
-          <span style="color:var(--t1);font-weight:700">${m?(T[m.h]?T[m.h].s:m.h)+' vs '+(T[m.a]?T[m.a].s:m.a):'#'+mid}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">Winner</span>
-          <span style="color:var(--grn);font-weight:800">${T[w]?T[w].s:w}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">MoM</span>
-          <span style="color:var(--yel);font-weight:700">${mom||'Not set'}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">Total bets</span>
-          <span style="color:var(--t1);font-weight:700">${mBets.length}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">Winners / Losers</span>
-          <span><span style="color:var(--grn);font-weight:700">${winners}W</span> / <span style="color:var(--red);font-weight:700">${losers}L</span></span>
-        </div>
-        ${momSaves?`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bdr)">
-          <span style="color:var(--t4)">MoM Saves</span>
-          <span style="color:var(--yel);font-weight:700">🛡️ ${momSaves}</span>
-        </div>`:''}
-        ${jp?`<div style="display:flex;justify-content:space-between;padding:8px 0">
-          <span style="color:var(--t4)">Super Jackpots</span>
-          <span style="color:var(--acc);font-weight:800">⭐ ${jp} 🔥</span>
-        </div>`:''}
-      </div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="bp" style="flex:1;min-width:120px;padding:14px" onclick="rA()">← Admin Panel</button>
-        <button style="flex:1;min-width:120px;padding:14px;background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;color:var(--grn);font-weight:700;cursor:pointer;font-size:14px" onclick="var nx=gms().filter(function(m){return !S.r[m.id]&&lk(m)&&m.h!=='TBD'})[0];if(nx){openResultFlow(nx.id)}else{toast('All caught up ✅');rA()}">Next Pending →</button>
-        <button style="flex:1;min-width:120px;padding:14px;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;color:var(--red);font-weight:700;cursor:pointer;font-size:14px" onclick="if(confirm('Undo this result?\\nBalances will recalculate.')){delete S.r[${mid}];sv(['r']);toast('Result undone ↩️');rA()}">↩️ Undo</button>
-      </div>
-    </div>`;
-  delete admW[mid];
-  _guidedSubmitting=false;
-}
+function mcpSaveOdds(){const mid=_mcpState.mid,m=gm(mid);const hv=parseFloat($('mcp-od-h').value),av=parseFloat($('mcp-od-a').value);if(!hv||!av||hv<1||av<1){toast('Set valid odds for both','err');return}if(!S.odds[mid])S.odds[mid]={};S.odds[mid][m.h]=hv;S.odds[mid][m.a]=av;sv(['odds']);toast('Odds saved ✅');_mcpState.step=2;renderMCP()}
+function mcpPickWinner(team){_mcpState.winner=team;admW[_mcpState.mid]=team;_guidedWinner[_mcpState.mid]=team;renderMCP()}
+function renderMCPMom(){const mid=_mcpState.mid;const el=document.getElementById('mcp-mom-area');if(!el)return;
+  el.innerHTML=`<div style="border-top:1px solid var(--bdr);padding-top:16px;text-align:left">
+    <div style="font-size:12px;font-weight:700;color:var(--grn);margin-bottom:10px">✅ Winner: <strong>${T[_mcpState.winner]?T[_mcpState.winner].s:_mcpState.winner}</strong></div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:6px">Select Man of the Match</div>
+    <div style="font-size:10px;color:var(--yel);margin-bottom:6px">⭐ Opponent first for Jackpot tracking</div>
+    ${momDropdown('mcp-mom-sel',mid,true)}
+    <button class="bp" style="margin-top:16px;width:100%;padding:14px" onclick="_mcpState.mom=$('mcp-mom-sel')?$('mcp-mom-sel').value:'';_mcpState.step=4;renderMCP()">Preview Impact →</button>
+  </div>`;setTimeout(function(){var inp=$('mcp-mom-sel');if(inp){inp.focus();sdOpen('mcp-mom-sel')}},150)}
+function mcpConfirm(){if(_guidedSubmitting)return;if(!adm)return;_guidedSubmitting=true;const mid=_mcpState.mid,w=_mcpState.winner,mom=_mcpState.mom||'';if(!w){toast('Pick winner!','err');_guidedSubmitting=false;return}const m=gm(mid);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set teams first!','err');_guidedSubmitting=false;return}S.r[mid]={w:w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);_mcpState.step=5;_guidedSubmitting=false;delete admW[mid];renderMCP()}
+function guidedSelectWinner(mid,team){mcpPickWinner(team)}
+function guidedSubmit(mid){mcpConfirm()}
 
 function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(!w){toast('Pick winner!','err');return}const m=gm(id);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set playoff teams first!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);const mBets=Object.values(S.b).filter(b=>b.mid===id);const winners=mBets.filter(b=>b.tm===w).length;const losers=mBets.length-winners;const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;toast('✅ '+(T[w]?T[w].s:w)+' won'+(mom?' · MoM: '+mom:'')+' · '+winners+'W/'+losers+'L'+(jp?' · '+jp+' jackpot🔥':''));delete admW[id];rA()}
 
