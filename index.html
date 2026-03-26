@@ -476,19 +476,48 @@ function momDropdown(id,matchId,both=false){
   const aSq=typeof getSquad==='function'?getSquad(m.a):(T[m.a]?.sq||[]);
   const hName=T[m.h]?.n||m.h, aName=T[m.a]?.n||m.a;
   const hShort=T[m.h]?.s||m.h, aShort=T[m.a]?.s||m.a;
-  // Determine opponent-first order for Jackpot visibility
   const mid=matchId;
   const selectedTm=bfs[mid]?bfs[mid].tm:(admW[mid]||null);
   let groups=[{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}];
   if(selectedTm){groups=[...groups].sort((a,b)=>a.team===selectedTm?1:b.team===selectedTm?-1:0)}
-  let opts='<option value="">-- Select Man of the Match --</option>';
-  groups.forEach(g=>{
-    const isOpponent=selectedTm&&g.team!==selectedTm;
-    opts+=`<optgroup label="${g.name} (${g.short})${isOpponent?' ⭐ Jackpot eligible':''}">`;
-    g.players.forEach(p=>{opts+=`<option value="${p}">${p}</option>`});
-    opts+=`</optgroup>`;
+  const data=JSON.stringify(groups).replace(/'/g,"&#39;");
+  return`<div style="position:relative" id="${id}-wrap">
+    <input class="bf-i" id="${id}" placeholder="Search or select player…" autocomplete="off" data-groups='${data}' data-selectedtm='${selectedTm||""}' style="font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;box-sizing:border-box"
+      onfocus="momDDOpen('${id}')" oninput="momDDFilter('${id}')">
+    <div id="${id}-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px #000c"></div>
+  </div>`;
+}
+function momDDOpen(id){
+  var inp=$(id),dd=$(id+'-dd');if(!inp||!dd)return;
+  if(dd.style.display!=='none')return;
+  momDDFilter(id);dd.style.display='block';
+  if(window._momCloser)document.removeEventListener('click',window._momCloser);
+  window._momCloser=function(e){
+    if($(id+'-wrap')&&$(id+'-wrap').contains(e.target))return;
+    dd.style.display='none';document.removeEventListener('click',window._momCloser);window._momCloser=null;
+  };
+  setTimeout(function(){document.addEventListener('click',window._momCloser)},50);
+}
+function momDDFilter(id){
+  var inp=$(id),dd=$(id+'-dd');if(!inp||!dd)return;
+  var groups;try{groups=JSON.parse(inp.dataset.groups)}catch(e){return}
+  var q=(inp.value||'').toLowerCase().trim();
+  var html='';
+  groups.forEach(function(g){
+    var filtered=g.players.filter(function(p){return !q||p.toLowerCase().includes(q)});
+    if(!filtered.length)return;
+    var selTm=inp.dataset.selectedtm||'';var isOpp=selTm&&g.team!==selTm;
+    html+='<div style="padding:6px 14px;font-size:11px;font-weight:700;color:var(--t4);background:var(--inp);border-bottom:1px solid var(--bdr)">'+g.name+' ('+g.short+')'+(isOpp?' <span style="color:var(--yel)">⭐ Jackpot</span>':'')+'</div>';
+    filtered.forEach(function(p){
+      html+='<div style="padding:10px 14px;font-size:14px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background=\'var(--inp)\'" onmouseout="this.style.background=\'\'" onclick="momDDPick(\''+id+'\',\''+p.replace(/'/g,"\\'")+'\')">'+p+'<span style="font-size:11px;color:var(--t4)">'+g.short+'</span></div>';
+    });
   });
-  return`<select class="bf-i" id="${id}" style="font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;appearance:auto;cursor:pointer">${opts}</select>`;
+  if(!html)html='<div style="padding:12px 14px;color:var(--t4);font-size:13px">No players found</div>';
+  dd.innerHTML=html;dd.style.display='block';
+}
+function momDDPick(id,val){
+  var inp=$(id),dd=$(id+'-dd');
+  if(inp)inp.value=val;if(dd)dd.style.display='none';
 }
 
 function sdOpen(id){
@@ -1337,7 +1366,7 @@ function cancelEdit(id,oldBet){
   }
 }
 
-function pk(id,tm){bfs[id]=bfs[id]||{};if(bfs[id].tm===tm)return;bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.02)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.5'}}});toast('You picked '+(T[tm]?.s||tm)+' 🔥');const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Bet ₹'+am.toLocaleString()+' on '+tm:'Confirm Bet'}calcWin(id);var momWrap=$('mo-'+id);if(momWrap){momWrap.outerHTML=momDropdown('mo-'+id,id)}}
+function pk(id,tm){bfs[id]=bfs[id]||{};if(bfs[id].tm===tm)return;bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.02)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.5'}}});toast('You picked '+(T[tm]?.s||tm)+' 🔥');const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Bet ₹'+am.toLocaleString()+' on '+tm:'Confirm Bet'}calcWin(id);var momWrap=$('mo-'+id);if(momWrap){var momInp=$(('mo-'+id));if(momInp)momInp.value='';momWrap.outerHTML=momDropdown('mo-'+id,id)}}
 
 function fmtAmt(el){const raw=el.value.replace(/[^0-9]/g,'');if(!raw){el.value='';el.style.borderColor='var(--bdr)';return}let num=parseInt(raw);const b=betBal(me);if(num>b&&b>0){num=b;el.style.borderColor='var(--red)';setTimeout(()=>{el.style.borderColor='var(--bdr)'},800)}el.value=num.toLocaleString()}
 function parseAmt(id){return parseInt(($('am-'+id)?.value||'').replace(/,/g,''))||0}
@@ -1427,6 +1456,11 @@ function sub(id){
   if(ai)ch+=`<div style="text-align:center;font-size:16px;font-weight:900;color:var(--acc);margin-top:4px">🔥 ALL IN!</div>`;
   showBetConfirm(ch).then(function(ok){
     if(!ok)return;
+    // Re-validate at confirm time (prevents race conditions / stale state)
+    if(lk(gm(id))){toast('Match just locked!','err');return}
+    if(S.r[id]){toast('Result already in!','err');return}
+    if(!f.tm||!am||am<=0){toast('Invalid bet data','err');return}
+    if(am>betBal(me)){toast('Balance changed — not enough!','err');return}
     S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
     sv(['b']);toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
   });
