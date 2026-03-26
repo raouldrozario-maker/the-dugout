@@ -3744,12 +3744,12 @@ function sqTeamChange(){
   var kp=S.keyPlayers&&S.keyPlayers[k]?S.keyPlayers[k]:[];
   h+=`<div style="margin-top:14px;padding:12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px">`;
   h+=`<div class="bf-l" style="color:var(--yel)">⭐ Key Players <span style="font-weight:400;color:var(--t4)">(tap to toggle · max 5 · shown on Teams page)</span></div>`;
-  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
+  h+=`<div id="kp-chips-${k}" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
   sq.forEach(function(pl){
     var isKey=kp.includes(pl);
     h+=`<button style="background:${isKey?T[k].c+'22':'var(--card)'};border:1px solid ${isKey?T[k].c+'66':'var(--bdr)'};border-radius:8px;padding:5px 12px;font-size:12px;color:${isKey?T[k].c:'var(--t3)'};cursor:pointer;font-weight:${isKey?'800':'600'}" onclick="toggleKeyPlayer('${k}','${pl.replace(/'/g,"\\'")}')">${isKey?'⭐ ':''}${pl}</button>`;
   });
-  h+=`</div></div>`;
+  h+=`</div><button id="kp-save-${k}" style="display:none;margin-top:10px;width:100%;padding:10px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer" onclick="saveKeyPlayers('${k}')">💾 Save Key Players</button></div>`;
 
   // Current squad
   h+=`<div class="bf-l" style="margin-top:12px">Squad (${sq.length} players)</div>`;
@@ -3767,10 +3767,29 @@ function toggleKeyPlayer(k,name){
   if(!S.keyPlayers)S.keyPlayers={};
   if(!S.keyPlayers[k])S.keyPlayers[k]=[];
   var idx=S.keyPlayers[k].indexOf(name);
-  if(idx>=0){S.keyPlayers[k].splice(idx,1);toast(name+' removed from key players')}
-  else{if(S.keyPlayers[k].length>=5){toast('Max 5 key players per team','err');return}S.keyPlayers[k].push(name);toast('⭐ '+name+' added as key player')}
-  adminLog('key_player_toggle',k+': '+name+(idx>=0?' removed':' added'));
-  sv(['keyPlayers','logs']);sqTeamChange();
+  if(idx>=0){S.keyPlayers[k].splice(idx,1)}
+  else{if(S.keyPlayers[k].length>=5){toast('Max 5 key players per team','err');return}S.keyPlayers[k].push(name)}
+  // Re-render just the key players chips (no full panel rebuild, no scroll reset)
+  var container=$('kp-chips-'+k);
+  if(container){
+    var sq=getSquad(k),kp=S.keyPlayers[k]||[];
+    var ch='';
+    sq.forEach(function(pl){
+      var isKey=kp.includes(pl);
+      ch+='<button style="background:'+(isKey?T[k].c+'22':'var(--card)')+';border:1px solid '+(isKey?T[k].c+'66':'var(--bdr)')+';border-radius:8px;padding:5px 12px;font-size:12px;color:'+(isKey?T[k].c:'var(--t3)')+';cursor:pointer;font-weight:'+(isKey?'800':'600')+'" onclick="toggleKeyPlayer(\''+k+'\',\''+pl.replace(/'/g,"\\'")+'\')">'+( isKey?'⭐ ':'')+pl+'</button>';
+    });
+    container.innerHTML=ch;
+  }
+  // Update save button visibility
+  var saveBtn=$('kp-save-'+k);
+  if(saveBtn)saveBtn.style.display='block';
+}
+function saveKeyPlayers(k){
+  adminLog('key_players_set',k+': '+(S.keyPlayers[k]||[]).join(', '));
+  sv(['keyPlayers','logs']);
+  toast('⭐ Key players saved for '+T[k].s);
+  var saveBtn=$('kp-save-'+k);
+  if(saveBtn)saveBtn.style.display='none';
 }
 function setCap(k){
   const cap=$('sq-cap').value;
