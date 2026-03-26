@@ -626,7 +626,7 @@ window.addEventListener('online',()=>{
 
 function ld(){
   // Load local state
-  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.lockOverride=S.lockOverride||{};S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
+  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.lockOverride=S.lockOverride||{};S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};S.keyPlayers=S.keyPlayers||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
   // Try Firebase
   const cfg=localStorage.getItem('dg-fb');
   if(cfg&&typeof firebase!=='undefined'){try{
@@ -647,7 +647,7 @@ function ld(){
       // Now start real-time listener
       db.ref('dugout').on('value',sn=>{
         const oldR={...S.r};
-        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         // Detect new results for logged-in player
         if(me){Object.keys(S.r).forEach(mid=>{
           if(!oldR[mid]&&!S.r[mid].voided){
@@ -2069,7 +2069,6 @@ function rT(){
   const allBets=Object.values(S.b);
   const resolvedBets=allBets.filter(b=>S.r[b.mid]&&!S.r[b.mid].voided);
 
-  // Compute team game stats for taglines
   const teamStats={};
   Object.keys(T).forEach(k=>{
     const betsOn=allBets.filter(b=>b.tm===k);
@@ -2084,21 +2083,20 @@ function rT(){
     teamStats[k]={bets:betsOn.length,wins:wins.length,losses:betsResolved.length-wins.length,pl};
   });
 
-  const mostBacked=Object.entries(teamStats).sort((a,b)=>b[1].bets-a[1].bets)[0];
-  const mostProfitable=Object.entries(teamStats).filter(([,s])=>s.pl>0).sort((a,b)=>b[1].pl-a[1].pl)[0];
-  const mostDangerous=Object.entries(teamStats).filter(([,s])=>s.pl<0).sort((a,b)=>a[1].pl-b[1].pl)[0];
+  // Team personality map
+  const teamVibes={
+    RCB:'High Risk, High Drama 🔥',CSK:'The Calculated Empire 🧠',MI:'Legacy Builders 💎',
+    KKR:'Unpredictable Force ⚡',DC:'Rising Contenders 🌊',SRH:'Fearless Attackers 💥',
+    RR:'Royal Renaissance 👑',PBKS:'All Heart, No Brakes ❤️',GT:'New Blood, Big Bite 🦁',LSG:'Quiet Storm ⛈️'
+  };
 
   function getTagline(k){
     const s=teamStats[k];if(!s||!s.bets)return '';
-    if(mostProfitable&&mostProfitable[0]===k)return '💰 Most profitable team';
-    if(mostDangerous&&mostDangerous[0]===k)return '💀 Biggest money burner';
-    if(mostBacked&&mostBacked[0]===k)return '🔥 Most backed team';
     if(s.bets>0&&s.wins>s.losses)return '📈 '+s.wins+'W/'+s.losses+'L · +₹'+s.pl.toLocaleString();
     if(s.bets>0)return '📊 '+s.bets+' bets · '+s.wins+'W/'+s.losses+'L';
     return '';
   }
 
-  // Smart sort: teams playing today/next → top
   const today=new Date().toISOString().split('T')[0];
   const todayMatches=gms().filter(m=>m.d===today);
   const todayTeams=new Set();
@@ -2109,54 +2107,89 @@ function rT(){
     return 0;
   });
 
-  let h=`<div style="text-align:center;margin-bottom:20px"><div style="font-size:48px">🏏</div><div class="ct" style="font-size:22px;margin-top:8px;text-align:center">IPL 2026 TEAMS</div><div style="color:var(--t4);font-size:13px;margin-top:4px">10 teams · Tap to expand squad</div></div>`;
+  let h=`<div style="text-align:center;margin-bottom:24px"><div style="font-family:var(--ff);font-size:28px;font-weight:900;color:var(--acc);letter-spacing:2px">IPL 2026 TEAMS</div><div style="color:var(--t4);font-size:13px;margin-top:4px">10 franchises · Tap to explore</div></div>`;
 
-  // Team filter pills
-  h+=`<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px">`;
+  // Quick jump strip
+  h+=`<div style="display:flex;gap:8px;margin-bottom:20px;padding:4px 0;justify-content:center;flex-wrap:wrap">`;
   teamKeys.forEach(k=>{
-    h+=`<button style="background:${T[k].c}22;border:1px solid ${T[k].c}44;border-radius:8px;padding:8px 6px;color:${T[k].c};font-size:12px;font-weight:800;cursor:pointer;font-family:var(--ff);letter-spacing:.5px;text-align:center" onclick="ruJump('team-${k}')">${T[k].s}${todayTeams.has(k)?' 🟢':''}</button>`;
+    h+=`<button style="background:${T[k].c}18;border:2px solid ${T[k].c}44;border-radius:10px;padding:12px 20px;color:${T[k].c};font-size:14px;font-weight:800;cursor:pointer;font-family:var(--ff);white-space:nowrap;flex-shrink:0;min-width:60px;text-align:center" onclick="ruJump('team-${k}')">${T[k].s}${todayTeams.has(k)?' 🟢':''}</button>`;
   });
   h+=`</div>`;
 
   teamKeys.forEach(k=>{
     const sq=getSquad(k);
     const cap=getCap(k);
-    const sorted=[...sq].sort((a,b)=>a.localeCompare(b));
+    const keyPlayers=(S.keyPlayers&&S.keyPlayers[k]&&S.keyPlayers[k].length)?S.keyPlayers[k]:sq.slice(0,5);
     const tagline=getTagline(k);
+    const vibe=teamVibes[k]||'';
     const isOpen=sqOpen[k]||false;
     const playing=todayTeams.has(k);
+    const s=teamStats[k]||{bets:0,wins:0,losses:0,pl:0};
 
-    h+=`<div id="team-${k}" class="card tc" style="border-left:4px solid ${T[k].c};${playing?'box-shadow:0 0 20px '+T[k].c+'15':''}">
-    <div style="display:flex;align-items:center;gap:14px">
-    ${bdg(k,52)}
-    <div style="flex:1">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-family:var(--ff);font-size:18px;font-weight:700;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</span>
-        ${playing?'<span style="font-size:9px;background:'+T[k].c+'22;color:'+T[k].c+';padding:2px 8px;border-radius:4px;font-weight:800">PLAYING TODAY</span>':''}
-      </div>
-      ${cap?`<div style="font-size:13px;color:var(--t2);margin-top:3px">👑 Captain: <strong style="color:var(--acc)">${cap}</strong></div>`:''}
-      ${tagline?`<div style="font-size:11px;color:var(--t3);margin-top:3px">${tagline}</div>`:''}
-    </div>
-    </div>
+    // Hero card
+    h+=`<div id="team-${k}" style="position:relative;background:linear-gradient(135deg,${T[k].c}12,var(--card));border:1px solid ${T[k].c}33;border-radius:20px;padding:0;margin-bottom:20px;overflow:hidden${playing?';box-shadow:0 0 30px '+T[k].c+'20':''}">`;
 
-    <button class="sq-btn" onclick="sqOpen['${k}']=!sqOpen['${k}'];const w=$('sq-${k}');w.classList.toggle('open');this.querySelector('.sq-chev').classList.toggle('open');this.querySelector('.sq-txt').textContent=sqOpen['${k}']?'Hide squad':'View squad'">
+    // Top color bar
+    h+=`<div style="height:4px;background:linear-gradient(90deg,${T[k].c},${T[k].c}66,transparent)"></div>`;
+
+    // Main content
+    h+=`<div style="padding:24px 24px 20px">`;
+
+    // Badge + Name + Vibe row
+    h+=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">`;
+    h+=`<div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,${T[k].c},${T[k].c}AA);border:3px solid ${T[k].a||T[k].c};display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;font-family:var(--ff);box-shadow:0 4px 16px ${T[k].c}44;flex-shrink:0">${T[k].s}</div>`;
+    h+=`<div style="flex:1;min-width:0">`;
+    h+=`<div style="font-family:var(--ff);font-size:20px;font-weight:900;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</div>`;
+    if(vibe)h+=`<div style="font-size:12px;color:var(--t3);margin-top:3px;font-style:italic">"${vibe}"</div>`;
+    if(playing)h+=`<span style="display:inline-block;margin-top:4px;font-size:10px;background:${T[k].c}22;color:${T[k].c};padding:2px 10px;border-radius:4px;font-weight:800">🟢 PLAYING TODAY</span>`;
+    h+=`</div></div>`;
+
+    // Captain + Stats row
+    h+=`<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">`;
+    if(cap)h+=`<div style="flex:1;min-width:120px;background:var(--inp);border:1px solid ${T[k].c}33;border-radius:12px;padding:10px 14px"><div style="font-size:10px;color:var(--t4);font-weight:700">👑 CAPTAIN</div><div style="font-size:14px;font-weight:800;color:var(--acc);margin-top:2px">${cap}</div></div>`;
+    h+=`<div style="flex:1;min-width:80px;background:var(--inp);border-radius:12px;padding:10px 14px;text-align:center"><div style="font-size:18px;font-weight:900;color:var(--t1);font-family:var(--ff)">${sq.length}</div><div style="font-size:10px;color:var(--t4)">Squad</div></div>`;
+    if(s.bets)h+=`<div style="flex:1;min-width:80px;background:var(--inp);border-radius:12px;padding:10px 14px;text-align:center"><div style="font-size:18px;font-weight:900;color:${s.pl>=0?'var(--grn)':'var(--red)'};font-family:var(--ff)">${s.wins}W/${s.losses}L</div><div style="font-size:10px;color:var(--t4)">${s.pl>=0?'+':''}₹${s.pl.toLocaleString()}</div></div>`;
+    h+=`</div>`;
+
+    // Tagline
+    if(tagline)h+=`<div style="font-size:11px;color:var(--t3);margin-bottom:12px">${tagline}</div>`;
+
+    // Key Players strip
+    if(keyPlayers.length){
+      h+=`<div style="margin-bottom:14px"><div style="font-size:10px;font-weight:800;color:var(--t4);letter-spacing:1px;margin-bottom:8px">⭐ KEY PLAYERS</div>`;
+      h+=`<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px">`;
+      keyPlayers.forEach(p=>{
+        const isCap=p===cap;
+        h+=`<div style="flex-shrink:0;background:${T[k].c}12;border:1px solid ${T[k].c}33;border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:6px">`;
+        if(isCap)h+=`<span style="font-size:12px">👑</span>`;
+        h+=`<span style="font-size:13px;font-weight:700;color:var(--t1);white-space:nowrap">${p}</span>`;
+        h+=`</div>`;
+      });
+      h+=`</div></div>`;
+    }
+
+    // Squad toggle
+    h+=`<button class="sq-btn" style="width:100%;padding:10px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;color:var(--t2);font-size:13px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px" onclick="sqOpen['${k}']=!sqOpen['${k}'];var w=$('sq-${k}');w.classList.toggle('open');this.querySelector('.sq-chev').classList.toggle('open');this.querySelector('.sq-txt').textContent=sqOpen['${k}']?'Hide full squad':'View full squad ('+${sq.length}+')'">
       <span class="sq-chev${isOpen?' open':''}">▸</span>
-      <span class="sq-txt">${isOpen?'Hide squad':'View squad'}</span>
-      <span style="color:var(--t4);font-weight:600"> · ${sq.length} players</span>
-    </button>
+      <span class="sq-txt">${isOpen?'Hide full squad':'View full squad ('+sq.length+')'}</span>
+    </button>`;
 
-    <div id="sq-${k}" class="sq-wrap${isOpen?' open':''}" style="margin-top:8px">
-      <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:4px">`;
-
+    // Collapsible squad
+    h+=`<div id="sq-${k}" class="sq-wrap${isOpen?' open':''}" style="margin-top:10px">`;
+    h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0">`;
+    const sorted=[...sq].sort((a,b)=>a.localeCompare(b));
     sorted.forEach(p=>{
       const isCap=p===cap;
-      h+=`<div style="display:flex;align-items:center;gap:6px;background:var(--inp);border:1px solid ${isCap?T[k].c+'66':'var(--bdr)'};border-radius:8px;padding:5px 10px;font-size:12px">
-      ${isCap?'<span style="font-size:11px">👑</span>':''}
-      <span style="color:var(--t1);font-weight:${isCap?'800':'600'}">${p}</span>
-      </div>`;
+      const isKey=keyPlayers.includes(p);
+      h+=`<div style="display:flex;align-items:center;gap:5px;background:${isKey?T[k].c+'12':'var(--inp)'};border:1px solid ${isCap?T[k].c+'66':isKey?T[k].c+'33':'var(--bdr)'};border-radius:8px;padding:5px 10px;font-size:12px">`;
+      if(isCap)h+=`<span style="font-size:10px">👑</span>`;
+      h+=`<span style="color:var(--t1);font-weight:${isCap?'800':isKey?'700':'600'}">${p}</span>`;
+      h+=`</div>`;
     });
+    h+=`</div></div>`;
 
-    h+=`</div></div></div>`;
+    h+=`</div></div>`; // close padding + card
+
   });
 
   el.innerHTML=h;
@@ -3707,6 +3740,17 @@ function sqTeamChange(){
   let h=`<div style="margin-top:12px">`;
   // Captain
   h+=`<div class="bf-s"><div class="bf-l" style="color:var(--acc)">Captain</div><div style="display:flex;gap:8px"><select class="bf-i" id="sq-cap" style="flex:1"><option value="">-- Select captain --</option>${sq.map(p=>`<option value="${p}" ${p===cap?'selected':''}>${p}</option>`).join('')}</select><button class="bp" style="padding:8px 14px" onclick="setCap('${k}')">Set</button></div></div>`;
+  // Key Players selector
+  var kp=S.keyPlayers&&S.keyPlayers[k]?S.keyPlayers[k]:[];
+  h+=`<div style="margin-top:14px;padding:12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px">`;
+  h+=`<div class="bf-l" style="color:var(--yel)">⭐ Key Players <span style="font-weight:400;color:var(--t4)">(tap to toggle · max 5 · shown on Teams page)</span></div>`;
+  h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">`;
+  sq.forEach(function(pl){
+    var isKey=kp.includes(pl);
+    h+=`<button style="background:${isKey?T[k].c+'22':'var(--card)'};border:1px solid ${isKey?T[k].c+'66':'var(--bdr)'};border-radius:8px;padding:5px 12px;font-size:12px;color:${isKey?T[k].c:'var(--t3)'};cursor:pointer;font-weight:${isKey?'800':'600'}" onclick="toggleKeyPlayer('${k}','${pl.replace(/'/g,"\\'")}')">${isKey?'⭐ ':''}${pl}</button>`;
+  });
+  h+=`</div></div>`;
+
   // Current squad
   h+=`<div class="bf-l" style="margin-top:12px">Squad (${sq.length} players)</div>`;
   sq.forEach((p,i)=>{
@@ -3718,6 +3762,15 @@ function sqTeamChange(){
   h+=`<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" id="sq-new" placeholder="New player name..." style="flex:1"><button class="bp" style="padding:8px 14px" onclick="sqAdd('${k}')">+ Add</button></div>`;
   h+=`</div>`;
   p.innerHTML=h;
+}
+function toggleKeyPlayer(k,name){
+  if(!S.keyPlayers)S.keyPlayers={};
+  if(!S.keyPlayers[k])S.keyPlayers[k]=[];
+  var idx=S.keyPlayers[k].indexOf(name);
+  if(idx>=0){S.keyPlayers[k].splice(idx,1);toast(name+' removed from key players')}
+  else{if(S.keyPlayers[k].length>=5){toast('Max 5 key players per team','err');return}S.keyPlayers[k].push(name);toast('⭐ '+name+' added as key player')}
+  adminLog('key_player_toggle',k+': '+name+(idx>=0?' removed':' added'));
+  sv(['keyPlayers','logs']);sqTeamChange();
 }
 function setCap(k){
   const cap=$('sq-cap').value;
@@ -4085,7 +4138,7 @@ db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
   else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
