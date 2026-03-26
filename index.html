@@ -223,7 +223,7 @@ const LOCK_MINUTES=40;      // minutes before match to lock betting
 // Safe odds parser — logs warning instead of silent fallback
 function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2 (real odds may differ — check Firebase)');return 2}return v}
 // Jackpot condition helper — readable shorthand
-function isJackpot(bt,mh){return mh&&bt.mt&&bt.mt!==bt.tm}
+function isJackpot(bt,mh){return mh&&bt.mt&&bt.tm&&bt.mt!==bt.tm}
 let _uiDDCount=0,db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
 
 // ══════════════════════════════════════════════════════════════
@@ -491,12 +491,12 @@ function momDDOpen(id){
   var inp=$(id),dd=$(id+'-dd');if(!inp||!dd)return;
   if(dd.style.display!=='none')return;
   momDDFilter(id);dd.style.display='block';
-  if(window._momCloser)document.removeEventListener('click',window._momCloser);
-  window._momCloser=function(e){
+  if(window['_momC_'+id])document.removeEventListener('click',window['_momC_'+id]);
+  window['_momC_'+id]=function(e){
     if($(id+'-wrap')&&$(id+'-wrap').contains(e.target))return;
-    dd.style.display='none';document.removeEventListener('click',window._momCloser);window._momCloser=null;
+    dd.style.display='none';document.removeEventListener('click',window['_momC_'+id]);window['_momC_'+id]=null;
   };
-  setTimeout(function(){document.addEventListener('click',window._momCloser)},50);
+  setTimeout(function(){document.addEventListener('click',window['_momC_'+id])},50);
 }
 function momDDFilter(id){
   var inp=$(id),dd=$(id+'-dd');if(!inp||!dd)return;
