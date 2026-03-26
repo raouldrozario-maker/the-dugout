@@ -128,7 +128,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
 .sd-wrap.has-val .sd-clear{display:block}
 #ru-nav div::-webkit-scrollbar{display:none}
-@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:20px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:16px}}
+@media(max-width:768px){.card{padding:22px}.nb span:last-child{font-size:9px}}@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:16px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:14px}.nb{padding:6px 2px}.nb span:first-child{font-size:16px}}
 @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes pulse-red{0%,100%{opacity:1;box-shadow:0 0 4px #C4453A}50%{opacity:.6;box-shadow:0 0 8px #C4453A}}
 @keyframes allin-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
@@ -1399,20 +1399,49 @@ function sub(id){
   if(mom){const mx2=gm(id);if(getSquad(mx2.h).includes(mom))mt=mx2.h;else if(getSquad(mx2.a).includes(mom))mt=mx2.a}
   const potWin=Math.round(am*(od-1));
   const momBonus=mom?Math.round(am*MOM_BONUS):0;
-  let confirmMsg=isEditing?`✏️ Update your bet:\n\n`:`🏏 Confirm your bet:\n\n`;
-  confirmMsg+=`Match: ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n` +
-    `Team: ${T[f.tm]?.n||f.tm}\n` +
-    `Amount: ₹${am.toLocaleString()} @ ×${od}\n` +
-    `Potential profit: ₹${potWin.toLocaleString()}` +
-    (mom?` (+₹${momBonus.toLocaleString()} MoM bonus)`:'') + `\n` +
-    (mom?`MoM pick: ${mom}\n`:'No MoM selected\n') +
-    (ai?`\n🔥 ALL IN!\n`:'') +
-    `\n${isEditing?'Update':'Place'} this bet?`;
-  if(!confirm(confirmMsg))return;
-  S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
-  sv(['b']);toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
+  const isJackpotPick=mom&&mt&&mt!==f.tm;
+  const jackpotBonus=isJackpotPick?potWin:0;
+  const totalPotential=potWin+momBonus+jackpotBonus;
+  let ch=`<div style="text-align:center;margin-bottom:12px"><div style="font-size:18px;font-weight:900;color:var(--acc);font-family:var(--ff)">${isEditing?'✏️ UPDATE BET':'🏏 CONFIRM BET'}</div></div>`;
+  ch+=`<div style="background:var(--inp);border-radius:12px;padding:14px;margin-bottom:12px">`;
+  ch+=`<div style="font-size:13px;color:var(--t4)">Match</div><div style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px">${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}</div>`;
+  ch+=`<div style="display:flex;gap:12px">`;
+  ch+=`<div style="flex:1"><div style="font-size:11px;color:var(--t4)">Team</div><div style="font-weight:700;color:${T[f.tm]?.c||'var(--t1)'}">${T[f.tm]?.s||f.tm}</div></div>`;
+  ch+=`<div style="flex:1"><div style="font-size:11px;color:var(--t4)">Amount</div><div style="font-weight:700;color:var(--t1)">₹${am.toLocaleString()} @ ×${od}</div></div>`;
+  ch+=`</div>`;
+  if(mom)ch+=`<div style="margin-top:8px"><div style="font-size:11px;color:var(--t4)">MoM Pick</div><div style="font-weight:700;color:${isJackpotPick?'var(--yel)':'var(--t1)'}">${mom}${isJackpotPick?' ⭐ JACKPOT':'  '}</div></div>`;
+  ch+=`</div>`;
+  ch+=`<div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap">`;
+  ch+=`<div style="flex:1;min-width:140px;background:#3FB08C10;border:1px solid #3FB08C25;border-radius:10px;padding:12px;text-align:center">`;
+  ch+=`<div style="font-size:10px;font-weight:700;color:var(--grn);margin-bottom:4px">IF YOU WIN</div>`;
+  ch+=`<div style="font-size:22px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${(am+totalPotential).toLocaleString()}</div>`;
+  ch+=`<div style="font-size:11px;color:var(--t4)">₹${potWin.toLocaleString()} profit`;
+  if(momBonus)ch+=` + ₹${momBonus.toLocaleString()} MoM`;
+  if(jackpotBonus)ch+=` + ₹${jackpotBonus.toLocaleString()} 🔥`;
+  ch+=`</div></div>`;
+  ch+=`<div style="flex:1;min-width:140px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:12px;text-align:center">`;
+  ch+=`<div style="font-size:10px;font-weight:700;color:var(--red);margin-bottom:4px">IF YOU LOSE</div>`;
+  if(mom){ch+=`<div style="font-size:13px;color:var(--t2)"><div style="margin-bottom:4px">MoM correct → <strong style="color:var(--grn)">₹0 loss</strong></div><div>MoM wrong → <strong style="color:var(--red)">-₹${am.toLocaleString()}</strong></div></div>`}
+  else{ch+=`<div style="font-size:22px;font-weight:900;color:var(--red);font-family:var(--ff)">-₹${am.toLocaleString()}</div>`}
+  ch+=`</div></div>`;
+  if(ai)ch+=`<div style="text-align:center;font-size:16px;font-weight:900;color:var(--acc);margin-top:4px">🔥 ALL IN!</div>`;
+  showBetConfirm(ch).then(function(ok){
+    if(!ok)return;
+    S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
+    sv(['b']);toast('₹'+am.toLocaleString()+' on '+f.tm+'! 🔥');delete bfs[id];confetti();rM();
+  });
 }
 
+function showBetConfirm(html){
+  return new Promise(function(resolve){
+    var modal=$('bet-confirm-modal'),body=$('bet-confirm-body');
+    body.innerHTML=html;modal.style.display='flex';
+    var yes=$('bet-confirm-yes'),no=$('bet-confirm-no');
+    function cleanup(){modal.style.display='none';yes.onclick=null;no.onclick=null}
+    yes.onclick=function(){cleanup();resolve(true)};
+    no.onclick=function(){cleanup();resolve(false)};
+  });
+}
 function shareWA(id){
   const m=gm(id),mo=S.odds[id]||{},dl_time=getDeadlineStr(m);
   let msg=`🏏 *THE DUGOUT — Match #${id}*\n\n`;
@@ -4478,6 +4507,7 @@ window.addEventListener('resize',moveSlider);
   </div>
 </div>
 <!-- Export Modal -->
+<div id="bet-confirm-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:#000a;backdrop-filter:blur(6px);align-items:center;justify-content:center"><div style="background:var(--bg);border:1px solid var(--bdr2);border-radius:20px;padding:24px;max-width:400px;width:90%;box-shadow:0 16px 64px #000c"><div id="bet-confirm-body"></div><div id="bet-confirm-btns" style="display:flex;gap:10px;margin-top:16px"><button id="bet-confirm-no" style="flex:1;padding:14px;background:var(--inp);border:1px solid var(--bdr);border-radius:12px;color:var(--t1);font-weight:700;font-size:14px;cursor:pointer">Cancel</button><button id="bet-confirm-yes" style="flex:2;padding:14px;background:var(--grad);border:0;border-radius:12px;color:#000;font-weight:900;font-size:14px;cursor:pointer">Confirm Bet</button></div></div></div>
 <div id="exp-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:#000a;backdrop-filter:blur(6px);align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
   <div style="background:var(--bg);border:1px solid var(--bdr2);border-radius:20px;padding:24px;max-width:440px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 16px 64px #000c">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
