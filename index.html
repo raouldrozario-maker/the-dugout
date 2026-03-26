@@ -3447,7 +3447,11 @@ function rA(){
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){adminLog('trash_clear','All messages cleared');S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
   <div style="margin-top:12px;padding-top:12px;border-top:2px solid #C4453A25"><button style="width:100%;padding:14px;background:#C4453A25;border:2px solid #C4453A44;border-radius:10px;color:var(--red);font-weight:900;cursor:pointer;font-size:14px;letter-spacing:1px" onclick="rstAll()">💀 RESET EVERYTHING</button><div style="font-size:10px;color:var(--red);padding:4px 4px 0;font-weight:600">Wipes ALL data — players, bets, results, odds, Crystal Ball, squads, admin PIN. Requires PIN confirmation. Cannot be undone.</div></div>
   </div></div>`;
+  // Preserve admin state across re-render
+  var _sqTeam=$('sq-team')?$('sq-team').value:'';
   el.innerHTML=h;
+  // Restore squad team selection and re-render panel
+  if(_sqTeam){var sel=$('sq-team');if(sel){sel.value=_sqTeam;sqTeamChange()}}
 }
 
 // Admin sub-functions
