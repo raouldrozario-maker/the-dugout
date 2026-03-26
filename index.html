@@ -2087,7 +2087,6 @@ function isIndian(name){
 // ══════════════════════════════════════════════════════════════
 function rAn(){
   const el=$('v-analytics');
-  if(Object.keys(S.b).length===0){el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🏏</div><div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:8px">No data yet</div><div style="font-size:14px;color:var(--t3)">IPL starts 28 Mar — analytics will light up once bets roll in!</div></div>';return}
   const allBets=Object.values(S.b),resolved=Object.keys(S.r),players=Object.keys(S.p);
   const totalBet=allBets.reduce((s,b)=>s+b.am,0);
   const resolvedBets=allBets.filter(b=>S.r[b.mid]&&!S.r[b.mid].voided);
@@ -2119,6 +2118,9 @@ function rAn(){
     <div class="ct" style="font-size:26px;margin-top:10px;text-align:center">THE DUGOUT STATS</div>
     <div style="color:var(--t4);font-size:13px;margin-top:4px">${resolved.length} matches · ${allBets.length} bets · ${players.length} players</div>
   </div>`;
+  if(allBets.length===0){
+    h+=`<div style="text-align:center;padding:20px;margin-bottom:16px;background:var(--card);border:1px solid #D4A24E25;border-radius:14px"><div style="font-size:28px;margin-bottom:6px">🏏</div><div style="font-size:14px;font-weight:700;color:var(--acc)">Season hasn't kicked off yet!</div><div style="font-size:12px;color:var(--t3);margin-top:4px">Once bets and results roll in, this page lights up with analytics</div></div>`;
+  }
 
   // ─── HERO STATS (4 cards) ───
   h+=`<div id="st-hero" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
