@@ -12,8 +12,6 @@
 *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);background-image:radial-gradient(ellipse 60% 40% at 0% 0%,rgba(212,162,78,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 100% 0%,rgba(196,69,58,0.05) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 50% 100%,rgba(212,162,78,0.04) 0%,transparent 70%);background-attachment:fixed;color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.tip-panel{max-height:0;opacity:0;overflow:hidden;transition:max-height .15s ease,opacity .15s ease;font-size:10px;color:var(--t4);margin-top:0;padding:0 10px;background:rgba(255,255,255,0.04);border-radius:6px;line-height:1.5}
-.tip-panel.open{max-height:60px;opacity:1;margin-top:4px;padding:6px 10px}
 @keyframes betSuccess{0%{box-shadow:0 0 0 0 rgba(58,175,135,0)}10%{box-shadow:0 0 0 1px rgba(58,175,135,0.35)}20%{box-shadow:0 0 0 2px rgba(58,175,135,0.28),0 0 22px rgba(58,175,135,0.16)}60%{box-shadow:0 0 0 1px rgba(58,175,135,0.12),0 0 12px rgba(58,175,135,0.08)}100%{box-shadow:0 2px 16px rgba(0,0,0,0.25)}}
 @keyframes checkPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px #D4A24E18}50%{box-shadow:0 0 40px #D4A24E30}}
@@ -157,7 +155,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#D4A24E18;color:var(--acc)">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
 <nav>
 <button class="nb on" data-v="home" onclick="nav('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
-<button class="nb" data-v="matches" onclick="nav('matches')"><span class="live-dot"></span><span class="cb-dot" style="width:6px;height:6px;border-radius:50%;background:var(--acc);position:absolute;top:6px;right:calc(50% - 24px);display:none;box-shadow:0 0 6px var(--acc)"></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
+<button class="nb" data-v="matches" onclick="nav('matches')"><span class="live-dot"></span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Matches</span></button>
 <button class="nb" data-v="board" onclick="nav('board')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 22V10"/><path d="M14 22V10"/><path d="M8 6h8l1 3H7z"/></svg><span>Board</span></button>
 <button class="nb" data-v="rules" onclick="nav('rules')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Rules</span></button>
 <button class="nb" data-v="teams" onclick="nav('teams')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Teams</span></button>
@@ -224,7 +222,7 @@ const MM=[
 {id:94,d:"2026-05-31",t:"19:30",h:"TBD",a:"TBD",v:"🏆 FINAL",playoff:true}
 ];
 
-const ST=10000,MINB=2000,MOM_BONUS=.2,RESULT_LOCK_MS=10*60*1000; // 10 min result edit window
+const ST=10000,MINB=2000,MOM_BONUS=.2;
 const ALL_IN_THRESHOLD=0.6; // % of balance to flag as all-in personality
 const TILT_MULTIPLIER=1.3;  // bet increase ratio to detect tilting
 const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
@@ -232,7 +230,7 @@ const LOCK_MINUTES=40;      // minutes before match to lock betting
 // Safe odds parser — logs warning instead of silent fallback
 function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2 (real odds may differ — check Firebase)');bt._fb=true;return 2}return v}
 // Jackpot condition helper — readable shorthand
-function isJackpot(bt,mh){return !!(mh&&bt.mt&&bt.tm&&typeof bt.mt==='string'&&typeof bt.tm==='string'&&bt.mt.trim()!==''&&bt.mt!==bt.tm)}
+function isJackpot(bt,mh){return mh&&bt.mt&&bt.tm&&bt.mt!==bt.tm}
 let _uiDDCount=0,db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
 
 // ══════════════════════════════════════════════════════════════
@@ -248,19 +246,7 @@ function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 // Fuzzy MoM matching — normalizes names to handle "Rohit Sharma" vs "R. Sharma" vs "rohit sharma"
 function momNorm(s){if(!s)return'';return s.trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ')}
-function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);
-  // All squad players for uniqueness checks
-  const allPlayers=Object.values(T).flatMap(function(t){return(t.sq||[]).map(momNorm)});
-  // Exact match — but check for duplicate names across squads first
-  if(a===b){const exactMatches=allPlayers.filter(function(p){return p===a});if(exactMatches.length===1)return true;return false;}
-  const ap=a.split(' '),bp=b.split(' ');
-  if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){
-    // Full first name match
-    if(ap[0]===bp[0]&&ap[0].length>2)return true;
-    // Initial match — only if unique collision
-    if(ap[0].length<=2||bp[0].length<=2){const initial=ap[0].length<=2?ap[0][0]:bp[0][0];const surname=ap[ap.length-1];
-      const collisions=allPlayers.filter(function(p){const pp=p.split(' ');return pp.length>=2&&pp[pp.length-1]===surname&&pp[0][0]===initial});
-      if(collisions.length===1)return true;return false;}}return false;}
+function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0]&&ap[ap.length-1]===bp[bp.length-1])return true}return false}
 function ruJump(id){const el=$(id);if(!el)return;const hdr=document.querySelector('header');const offset=hdr?hdr.offsetHeight+16:120;const y=el.getBoundingClientRect().top+window.pageYOffset-offset;window.scrollTo({top:y,behavior:'smooth'})}
 document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
@@ -337,8 +323,7 @@ function weeklyPenalty(n){
     // Only penalize if matches happened AND at least one non-voided result was recorded that week
     const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(resultsThisWeek.length>=2){
-      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;if(bt.am<500)return false; // min ₹500 to count as participation
-const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
       if(!betThisWeek)penalty+=PENALTY_AMOUNT;
     }
     weekStart=new Date(weekEnd);
@@ -368,7 +353,7 @@ function getPenaltyBreakdown(){
       const defaulters=[];
       players.forEach(n=>{
         const userBets=Object.values(S.b).filter(x=>x.u===n);
-        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;if(bt.am<500)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
         if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+PENALTY_AMOUNT}
       });
       weeks.push({label:`Week ${weekNum} (${wsLabel} – ${weLabel})`,defaulters,matchCount:matchesThisWeek.length,start:weekStart.toISOString().slice(0,10),end:new Date(weekEnd.getTime()-86400000).toISOString().slice(0,10)});
@@ -467,7 +452,7 @@ function getBalBreakdown(n){
   // Pending bets (at risk)
   const pendingBets=ub.filter(bt=>!S.r[bt.mid]);
   if(pendingBets.length){
-    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--t2);font-weight:600">Locked in pending bets</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
+    h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK — max downside (pending bets)</span><span style="color:var(--acc);font-weight:700">₹${pendingBets.reduce((s,x)=>s+x.am,0).toLocaleString()}</span></div>`;
     pendingBets.forEach(bt=>{
       const m=gm(bt.mid);
       h+=`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;color:var(--t3);gap:8px"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -704,7 +689,7 @@ function nav(v){
   }
   vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
-function ren(){if(_uiDDCount>0)return;({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive);const cbDot=mb.querySelector('.cb-dot');if(cbDot)cbDot.style.display=(S.koOpen&&!S.koRevealed&&me&&!S.ko?.[me])?'block':'none'}}
+function ren(){if(_uiDDCount>0)return;({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
 // ══════════════════════════════════════════════════════════════
@@ -777,10 +762,10 @@ function rH(){
 
     <!-- Balance hero -->
     <div style="margin-bottom:16px">
-      <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Current Balance</div>
+      <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:1px">Balance</div>
       <div style="font-size:32px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'};font-family:var(--ff);margin-top:4px">₹${b.toLocaleString()}</div>
       <div style="font-size:14px;color:${diff>=0?'#3FB08C':'#D45B5B'};font-weight:700;margin-top:2px">${diff>=0?'▲':'▼'} ₹${Math.abs(diff).toLocaleString()} P&L</div>
-      ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:${Math.round(risk/b*100)>70&&bAvail<3000?'rgba(212,162,78,0.08)':`rgba(255,255,255,0.03)`};border:1px solid ${Math.round(risk/b*100)>70&&bAvail<3000?'rgba(212,162,78,0.2)':`var(--bdr)`};border-radius:8px;font-size:12px;color:var(--t2);font-weight:600">₹${risk.toLocaleString()} locked in bets (~${Math.round(risk/b*100)}%) <span onclick="var el=this.nextElementSibling;var wasOpen=el.classList.contains('open');document.querySelectorAll('.tip-panel').forEach(function(p){p.classList.remove('open')});if(!wasOpen)el.classList.add('open')" style="cursor:pointer;opacity:0.5;font-size:10px;padding:0 2px">ⓘ</span><div class="tip-panel">Bets on matches not yet settled. Releases when the result is entered.</div>${Math.round(risk/b*100)>70&&bAvail<3000?'<div style="font-size:10px;color:var(--yel);margin-top:3px;font-weight:500">Most of your balance is locked in bets</div>':''}</div>`:''}
+      ${risk>0?`<div style="margin-top:10px;padding:8px 12px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--acc);font-weight:700">⚡ ₹${risk.toLocaleString()} AT RISK (~${Math.round(risk/b*100)}% of balance)</div>`:''}
     </div>
 
     <!-- Recent results (up to 2 for double headers) -->
@@ -817,7 +802,7 @@ function rH(){
 
     <!-- At Risk breakdown (if any pending bets) -->
     ${myPending.length?`<div style="background:var(--inp);border:1px solid #D4A24E18;border-radius:12px;padding:14px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Locked in bets</div>
+      <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚠️ AT RISK</div>
       ${myPending.map(bt=>{const m=gm(bt.mid);const mo=S.odds[bt.mid]||{};const od=safeOd(bt);const potWin=Math.round(bt.am*(od-1));return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;${myPending.indexOf(bt)<myPending.length-1?'border-bottom:1px solid var(--bdr)':''}">
         <div style="display:flex;align-items:center;gap:8px">
           ${bdg(bt.tm,28)}
@@ -1095,17 +1080,8 @@ function rM(){
     </div>`;
   }
 
-  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Current Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':b<=MINB?'var(--yel)':'var(--red)'}">₹${b.toLocaleString()}</div>${b<=MINB&&bAvail===0?`<div style="font-size:11px;color:var(--yel);margin-top:2px">Safety floor — no bets available</div>`:b!==bAvail?`<div style="font-size:11px;color:var(--t3)">Available to bet: ₹${bAvail.toLocaleString()}</div><div style="font-size:10px;color:var(--t4);margin-top:1px;opacity:0.5;font-style:italic;letter-spacing:.1px">Balance − ₹${risk.toLocaleString()} locked = ₹${bAvail.toLocaleString()}</div>`:''}${risk>0&&Math.round(risk/b*100)>70&&bAvail<3000?`<div style="margin-top:6px;padding:5px 10px;background:rgba(212,162,78,0.08);border:1px solid rgba(212,162,78,0.2);border-radius:8px;font-size:11px;color:var(--yel)">Most of your balance is locked in bets</div>`:risk>0?`<div style="font-size:11px;color:var(--t2)">₹${risk.toLocaleString()} locked in bets (~${Math.round(risk/b*100)}%) <span onclick="var el=this.nextElementSibling;var wasOpen=el.classList.contains('open');document.querySelectorAll('.tip-panel').forEach(function(p){p.classList.remove('open')});if(!wasOpen)el.classList.add('open')" style="cursor:pointer;opacity:0.55;font-size:10px;padding:0 2px">ⓘ</span><div class="tip-panel">Bets on matches not yet settled. Releases when the result is entered.</div></div>`:''}</div></div>
+  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${b!==bAvail?`<div style="font-size:11px;color:var(--t3)">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:11px;color:var(--acc)">⚠️ ₹${risk.toLocaleString()} AT RISK (~${Math.round(risk/b*100)}%)</div>`:''}</div></div>
   <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
-  // Crystal Ball open banner — shown at top of Matches tab
-  if(me&&S.koOpen&&!S.koRevealed&&!S.ko?.[me]){
-    h+=`<div style="margin-bottom:16px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,162,78,0.1),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.3);border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="document.querySelector('.mc')?.scrollIntoView({behavior:'smooth'});setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),100)">
-      <span style="font-size:22px;flex-shrink:0">🔮</span>
-      <div style="flex:1"><div style="font-size:13px;font-weight:800;color:var(--acc)">Crystal Ball is LIVE — pick your playoff winner</div>
-      <div style="font-size:11px;color:var(--t4);margin-top:2px">Secret prediction · Scroll down to place your bet</div></div>
-      <span style="color:var(--acc);font-size:16px">↓</span>
-    </div>`;
-  }
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
     const l=lk(m),bk=m.id+'-'+me,my=S.b[bk],rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
@@ -1274,10 +1250,8 @@ function rM(){
     }
 
     // Place bet button
-    const validOdds=mo&&parseFloat(mo[m.h])>=1&&parseFloat(mo[m.a])>=1;
-    if(!l&&!my&&validOdds&&!rs)h+=`<button class="ob" id="ob-${m.id}" onclick="oBF(${m.id})">💰 Place Bet</button><div id="bf-${m.id}" style="display:none"></div>`;
-    else if(!l&&!my&&mo&&!validOdds&&!rs)h+=`<div style="margin-top:10px;padding:10px 14px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t4);text-align:center;cursor:not-allowed">💰 Place Bet &nbsp;<span style="opacity:0.5">(Odds pending)</span></div>`;
-    else if(!l&&!my&&!mo&&!rs)h+=`<div style="margin-top:10px;padding:10px 14px;background:var(--inp);border-radius:10px;font-size:12px;color:var(--t4);text-align:center">⏳ Betting opens once admin sets odds</div>`;
+    if(!l&&!my&&mo&&!rs)h+=`<button class="ob" id="ob-${m.id}" onclick="oBF(${m.id})">💰 Place Bet</button><div id="bf-${m.id}" style="display:none"></div>`;
+    else if(!l&&!my&&!mo&&!rs)h+=`<div style="margin-top:8px;padding:8px 12px;background:var(--inp);border-radius:8px;font-size:12px;color:var(--t4);text-align:center">⏳ Waiting for admin to set odds</div>`;
     if(!l&&my&&!rs)h+=`<div id="bf-${m.id}" style="display:none"></div>`;
 
     // All bets (after lock)
@@ -1338,10 +1312,6 @@ function editBet(id){
 
 // Bet form with squad dropdown — supports edit mode
 function oBF(id,prefill){
-  {const _mg=gm(id);const _mo=S.odds[id];
-  if(!_mo||!_mg||!_mo[_mg.h]||!_mo[_mg.a]||parseFloat(_mo[_mg.h])<1||parseFloat(_mo[_mg.a])<1){
-    toast('Odds not set for this match — betting unavailable','err');return;
-  }}
   const f=$('bf-'+id),btn=$('ob-'+id);
   if(f&&f.style.display!=='none'&&!prefill){f.style.display='none';if(btn)btn.style.display='block';return}
   if(btn)btn.style.display='none';
@@ -1368,7 +1338,7 @@ function oBF(id,prefill){
   <button class="bf-tb" id="pk-${id}-${m.h}" style="border-color:${T[m.h]?.c||'#888'};color:${T[m.h]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.h?`;background:${T[m.h].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.h].c}44`:''}" onclick="pk(${id},'${m.h}')"><span style="font-size:13px;font-weight:800">${T[m.h]?.s||m.h}</span>${mo[m.h]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.h]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.h]*100)}%</span>`:''}</button>
   <button class="bf-tb" id="pk-${id}-${m.a}" style="border-color:${T[m.a]?.c||'#888'};color:${T[m.a]?.c||'#888'};transition:all .2s;flex-direction:column;gap:2px${prefill&&prefill.tm===m.a?`;background:${T[m.a].c};color:#fff;transform:scale(1.02);box-shadow:0 0 8px ${T[m.a].c}44`:''}" onclick="pk(${id},'${m.a}')"><span style="font-size:13px;font-weight:800">${T[m.a]?.s||m.a}</span>${mo[m.a]?`<span style="font-size:20px;font-weight:900;font-family:var(--ff)">×${mo[m.a]}</span><span style="font-size:10px;opacity:.45">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.a]*100)}%</span>`:''}</button>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Amount (₹)</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Up to ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div style="font-size:11px;color:var(--t4);margin-top:5px;opacity:0.8">You can bet up to <strong style="color:var(--t2)">₹${mx.toLocaleString()}</strong>${risk>0?' · ₹'+risk.toLocaleString()+' already locked in bets':''}</div><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--acc)';$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="this.classList.remove('allin-pop');void this.offsetWidth;this.classList.add('allin-pop');this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--hot)';$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN ₹${b.toLocaleString()} 🔥</button></div>
+  <div class="bf-s"><div class="bf-l">Amount (₹) — Available: ₹${b.toLocaleString()}</div><input class="bf-i" type="text" inputmode="numeric" id="am-${id}" value="${prefill?prefill.am.toLocaleString():''}" placeholder="Max: ₹${mx.toLocaleString()}" oninput="fmtAmt(this);calcWin(${id})"><div class="bf-q">${[1000,2000,5000].filter(v=>v<=mx).map(v=>`<button class="bf-qb" onclick="this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--acc)';$('am-${id}').value='${v.toLocaleString()}';calcWin(${id})">₹${v.toLocaleString()}</button>`).join('')}<button class="bf-qb ai" onclick="this.classList.remove('allin-pop');void this.offsetWidth;this.classList.add('allin-pop');this.parentElement.querySelectorAll('.bf-qb').forEach(x=>x.style.borderColor='var(--bdr)');this.style.borderColor='var(--hot)';$('am-${id}').value='${b.toLocaleString()}';calcWin(${id})">ALL IN ₹${b.toLocaleString()} 🔥</button></div>
   <div id="wc-${id}" style="margin-top:20px;padding:0;display:none">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div style="padding:20px;border-radius:14px;border:1px solid rgba(63,176,140,0.25);background:linear-gradient(180deg,rgba(63,176,140,0.08),var(--card));transform:scale(1.01);box-shadow:0 6px 24px rgba(63,176,140,0.12)">
@@ -1505,7 +1475,7 @@ function sub(id){
     if(lk(gm(id))){toast('Match just locked!','err');return}
     if(S.r[id]){toast('Result already in!','err');return}
     if(!f.tm||!am||am<=0){toast('Invalid bet data','err');return}
-    const _freshBal=betBal(me);const _freshRisk=atRisk(me);if(am>_freshBal){toast('Balance changed — not enough!','err');return}if(_freshRisk+am>_freshBal+_freshRisk){toast('Balance updated. Please refresh and try again.','err');return}
+    if(am>betBal(me)){toast('Balance changed — not enough!','err');return}
     S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
     sv(['b']);delete bfs[id];
     // Delight moment: flash the card green before re-render
@@ -1906,7 +1876,7 @@ function rRu(){
   <!-- Rule 9: Odds -->
   <div id="ru-9" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
-    <div style="font-size:13px;color:var(--t3);margin-bottom:10px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px">ℹ️ The admin controls odds, results, and playoff team assignments. Everything else — bets, balances, penalties — is calculated automatically.</div><div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your profit = bet amount × (odds − 1). Higher odds = underdog (risky, bigger profit). Lower odds = favourite (safer, smaller profit). You always get your stake back if you win. If odds are unavailable for a match due to a system issue, a default of ×2 is applied.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your profit = bet amount × (odds − 1). Higher odds = underdog (risky, bigger profit). Lower odds = favourite (safer, smaller profit). You always get your stake back if you win. If odds are unavailable for a match due to a system issue, a default of ×2 is applied.</div>
     <div style="padding:12px;background:var(--card);border-radius:8px;margin-bottom:12px">
       <div style="font-size:13px;color:var(--t2);line-height:1.8"><strong style="color:var(--acc)">Why "odds − 1"?</strong> The odds number includes your original bet. ×1.8 means your total return is 1.8× your bet — but you already had the bet amount, so your <em>profit</em> is only the 0.8× part. Think of it this way: you bet ₹10,000 at ×1.8. If you win, you get back ₹18,000 total (₹10,000 original + ₹8,000 profit). The formula just calculates the profit portion: ₹10,000 × 0.8 = ₹8,000.</div>
     </div>
@@ -1922,17 +1892,14 @@ function rRu(){
   </div>
 
   <!-- Rule 10: Crystal Ball -->
-  <div id="ru-10" style="background:var(--inp);border:1px solid #D4A24E22;border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span><span style="font-size:11px;font-weight:700;color:var(--t3);background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:8px;letter-spacing:.5px">OPTIONAL</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Once the top 4 teams qualify for the playoffs, the admin opens the <strong style="color:var(--acc)">Crystal Ball</strong> — a one-time secret bet on who lifts the IPL 2026 trophy. You pick from the 4 qualifying teams and wager any percentage of your current balance. <strong style="color:var(--yel)">Completely optional</strong>, but here's the thing: it's settled at the very end, after all match bets are done — so it can flip the leaderboard like nobody saw it coming.</div>
-    <div style="margin-top:-4px;margin-bottom:14px;padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6">🏏 <strong style="color:var(--acc)">You can only choose from the 4 teams that qualify for the playoffs</strong> (shown once the Crystal Ball opens). Your pick stays secret — nobody sees it until the admin reveals results at the end.</div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-bottom:10px">
-      <strong style="color:var(--acc)">Example:</strong> You're sitting 3rd on the leaderboard with ₹50,000. You bet 60% on RCB to win the IPL — that's ₹30,000 on the line. Everyone keeps playing normally. Nobody knows you did this.<br><br>
-      <span style="color:var(--grn)">✅ RCB wins the IPL:</span> Your final score + ₹30,000 — you could jump from 3rd to 1st<br>
-      <span style="color:var(--red)">❌ RCB doesn't win:</span> Your final score − ₹30,000 — you could drop from 3rd to last
-    </div>
-    <div style="padding:10px 14px;background:#C4453A08;border:1px solid #C4453A20;border-radius:10px;font-size:12px;color:var(--t4);line-height:1.6">
-      ⚡ <strong style="color:var(--t2)">Why this matters:</strong> The leaderboard you see during the season doesn't include Crystal Ball. The final standings — revealed at the end-of-season event — do. Someone in last place could win the whole thing. Someone in first could lose it all.
+  <div id="ru-10" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span></div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Once the top 4 teams qualify for the playoffs, the admin will define those teams and open the <strong style="color:var(--acc)">Crystal Ball</strong>. You'll see exactly those 4 teams — pick who you think will lift the IPL 2026 trophy, and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div><div style="margin-top:-4px;margin-bottom:12px;padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6">🏏 <strong style="color:var(--acc)">You can only choose from the 4 teams that qualify for the playoffs</strong> (these will be shown once the Crystal Ball opens).</div>
+    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Example:</strong> You have ₹50,000 and bet 50% on RCB to win the IPL.<br>
+      That's ₹25,000 on the line. You continue betting normally.<br><br>
+      <span style="color:var(--grn)">If RCB wins the IPL:</span> Your final score + ₹25,000<br>
+      <span style="color:var(--red)">If RCB doesn't win:</span> Your final score − ₹25,000
     </div>
   </div>
 
@@ -2686,7 +2653,7 @@ function rMG(){
     </div>
     ${risk>0?`<div style="flex:1;min-width:75px;background:var(--inp);border:1px solid #D4A24E25;border-radius:12px;padding:12px;text-align:center">
       <div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹${risk.toLocaleString()}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px">Locked in bets</div>
+      <div style="font-size:10px;color:var(--t4);margin-top:2px">AT RISK</div>
     </div>`:''}
   </div>
   <div style="height:6px;background:var(--inp);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.max(Math.min(b/ST*50,100),5)}%;background:${diff>=0?'var(--grn)':'var(--red)'};border-radius:3px;opacity:.6"></div></div>
@@ -2745,7 +2712,7 @@ function rMG(){
       h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">💰 ${a.reason||'Adjustment'}</span><span style="font-weight:700"><span style="color:${a.type==='add'?'var(--grn)':'var(--red)'}">${a.type==='add'?'+':'-'}₹${a.amount.toLocaleString()}</span> <span style="color:var(--t3)">→ ₹${Math.max(runBal,MINB).toLocaleString()}</span></span></div>`});
     // Pending
     if(pending.length){
-      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--t2);font-weight:600">Locked in bets (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
+      h+=`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="color:var(--acc);font-weight:700">⚠️ AT RISK — max downside (${pending.length} pending)</span><span style="color:var(--acc);font-weight:700">₹${risk.toLocaleString()}</span></div>`;
       pending.forEach(bt=>{
         const m=gm(bt.mid);
         h+=`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:var(--t3)"><span>M#${bt.mid} ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'} · ${T[bt.tm]?.s} · ₹${bt.am.toLocaleString()}</span><span>⏳</span></div>`;
@@ -2916,7 +2883,7 @@ function rMG(){
     const sortedExp=Object.entries(exposure).sort((a,b)=>b[1].amount-a[1].amount);
 
     h+=`<div id="mg-exposure" class="card"><div class="ch"><span style="font-size:20px">⚡</span><span class="ct">TEAM EXPOSURE</span></div>
-    <div style="font-size:13px;color:var(--t4);margin-bottom:14px">₹${totalExposure.toLocaleString()} locked across ${pendingBets.length} pending bet${pendingBets.length!==1?'s':''} — results pending</div>`;
+    <div style="font-size:13px;color:var(--t4);margin-bottom:14px">Your open positions — <strong style="color:var(--acc)">₹${totalExposure.toLocaleString()}</strong> total at risk across ${pendingBets.length} pending bet${pendingBets.length!==1?'s':''}</div>`;
 
     sortedExp.forEach(([tm,ex])=>{
       const pct=Math.round(ex.amount/totalExposure*100);
@@ -3118,10 +3085,7 @@ function rA(){
       const lastLeagueMatch=leagueMatches[leagueMatches.length-1];
       const lastLeagueResolved=lastLeagueMatch&&!!S.r[lastLeagueMatch.id];
       const resultsCount=Object.keys(S.r||{}).length;
-      // Also trigger if first playoff match is within 48hrs and window still closed
-      const firstPlayoff=MM.filter(function(m){return m.playoff&&m.h!=='TBD'}).sort(function(a,b){return a.d.localeCompare(b.d)})[0];
-      const playoffImminent=firstPlayoff&&(new Date(firstPlayoff.d+'T00:00:00+05:30')-new Date()<48*3600*1000);
-      if(lastLeagueResolved||playoffAssigned||resultsCount>=leagueMatches.length||playoffImminent){
+      if(lastLeagueResolved||playoffAssigned||resultsCount>=leagueMatches.length){
         h+=`<div style="margin-bottom:16px;padding:14px 16px;background:#D4A24E14;border:2px solid #D4A24E44;border-radius:14px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="document.getElementById('adm-crystal')?.scrollIntoView({behavior:'smooth'})">
         <span style="font-size:24px;flex-shrink:0">🔮</span>
         <div><div style="font-weight:900;color:var(--acc);font-size:13px;letter-spacing:.5px;margin-bottom:4px">⚠️ PLAYOFFS APPROACHING — SET CRYSTAL BALL TEAMS</div>
@@ -3572,7 +3536,7 @@ function admDDFilter(ddId,q){const dd=$(ddId);if(!dd)return;const opts=dd.queryS
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
 f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
-function adminLog(action,detail){try{if(!S.logs)S.logs=[];S.logs.push({action:action,detail:detail,by:me||'admin',ts:new Date().toISOString()});if(S.logs.length>500)S.logs=S.logs.slice(-500)}catch(e){console.warn('[Dugout] adminLog failed:',action,detail,e)}}
+function adminLog(action,detail){if(!S.logs)S.logs=[];S.logs.push({action:action,detail:detail,by:me||"admin",ts:new Date().toISOString()});if(S.logs.length>500)S.logs=S.logs.slice(-500)}
 function sOdds(id){if(!adm){toast("Admin only","err");return}const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1.01||av<1.01||isNaN(hv)||isNaN(av)){toast('Invalid odds — must be > 1.00 for both teams','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
   if(existingBets.length>0&&S.odds[id]){if(!confirm(`⚠️ ${existingBets.length} bet(s) already placed on this match! Changing odds will affect existing bets. Existing bets keep their OLD odds. Continue?`))return}
@@ -3715,7 +3679,6 @@ function renderMCP(){
       <div style="background:var(--inp);border-radius:12px;padding:14px;margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--t4)">Winner</span><span style="color:var(--grn);font-weight:800">${T[w]?T[w].s:w}</span></div>
         <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--t4)">MoM</span><span style="color:var(--yel);font-weight:700">${mom||'Not set'}</span></div>
-        ${(function(){if(!mom)return '';const momPickBets=mBets.filter(function(b){return b.mom});const momHits=momPickBets.filter(function(b){return momMatch(b.mom,mom)});if(momPickBets.length===0)return '<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:var(--t4)">MoM picks</span><span style="font-size:11px;color:var(--t4)">No players picked MoM</span></div>';if(momHits.length===0)return '<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:var(--t4)">MoM match</span><span style="font-size:11px;color:var(--yel);font-weight:700">⚠️ 0/'+momPickBets.length+' matched — check spelling</span></div>';return '<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="font-size:11px;color:var(--t4)">MoM match</span><span style="font-size:11px;color:var(--grn);font-weight:700">✅ '+momHits.length+'/'+momPickBets.length+' picked correctly</span></div>';})()}
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;text-align:center">
         <div style="background:#3FB08C10;border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:900;color:var(--grn)">${winners.length+jackpots.length}</div><div style="font-size:10px;color:var(--t4)">Winners</div></div>
@@ -3740,7 +3703,6 @@ function renderMCP(){
       <div style="font-size:64px;margin-bottom:12px">✅</div>
       <div style="font-size:22px;font-weight:900;color:var(--grn)">Result Published</div>
       <div style="font-size:14px;color:var(--t2);margin-top:4px">${T[w]?T[w].s:w} won${mom?' · MoM: '+mom:''}</div>
-      ${(function(){if(!mom)return '';const bets=Object.values(S.b).filter(function(b){return b.mid===mid&&b.mom});const matched=bets.filter(function(b){return momMatch(b.mom,mom)});if(bets.length>0&&matched.length===0){return '<div style="margin-top:10px;padding:8px 14px;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:8px;font-size:12px;color:var(--yel)">⚠️ <strong>No player MoM picks matched \"'+mom+'\"</strong> — check spelling. If incorrect, go back and correct before closing.</div>'}if(matched.length>0){return '<div style="margin-top:6px;font-size:12px;color:var(--grn)">✅ '+matched.length+' player MoM pick'+(matched.length>1?'s':'')+' matched</div>'}return '';})()}
       <div id="mcp-undo-timer" style="font-size:12px;color:var(--acc);margin-top:12px">⏱ Quick undo available for <span id="mcp-undo-sec">10</span>s</div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
         <button class="bp" style="flex:1;min-width:110px;padding:14px" onclick="rA()">← Admin</button>
@@ -3764,7 +3726,7 @@ function renderMCP(){
       if(sec<=0){
         clearInterval(undoTimer);
         btn.style.opacity='0.3';btn.style.pointerEvents='none';btn.textContent='↩️ Undo (expired)';
-        if(timer)timer.innerHTML='Result locked — void match to correct it';
+        if(timer)timer.innerHTML='To edit this result, use Match Control in admin panel';
       }
     },1000);
   }
@@ -3780,12 +3742,11 @@ function renderMCPMom(){const mid=_mcpState.mid;const el=document.getElementById
     ${momDropdown('mcp-mom-sel',mid,true)}
     <button class="bp" style="margin-top:16px;width:100%;padding:14px" onclick="_mcpState.mom=$('mcp-mom-sel')?$('mcp-mom-sel').value:'';_mcpState.step=4;renderMCP()">Preview Impact →</button>
   </div>`;setTimeout(function(){var inp=$('mcp-mom-sel');if(inp)inp.focus()},150)}
-function mcpConfirm(){if(_guidedSubmitting)return;if(!adm)return;_guidedSubmitting=true;const mid=_mcpState.mid,w=_mcpState.winner,mom=_mcpState.mom||'';if(!w){toast('Pick winner!','err');_guidedSubmitting=false;return}const m=gm(mid);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set teams first!','err');_guidedSubmitting=false;return}if(S.r[mid]&&!S.r[mid].voided){const _ts=S.r[mid].originalTs||S.r[mid].ts;const age=Date.now()-new Date(_ts).getTime();if(age>RESULT_LOCK_MS){toast('Result locked after 10 min — void the match first to correct it','err');_guidedSubmitting=false;return}if(!confirm('⚠️ Result already published for this match ('+(T[S.r[mid].w]?.s||S.r[mid].w)+' won).\n\nOverwriting will recalculate all balances. Players who saw their result will see a different outcome.\n\nProceed only if this is a genuine correction within 10 minutes of the original entry.')){_guidedSubmitting=false;return}adminLog('result_overwrite','M#'+mid+' old:'+S.r[mid].w+' new:'+w)}const _prevOrigTsMCP=S.r[mid]?.originalTs||null;S.r[mid]={w:w,mom:mom||null,ts:new Date().toISOString(),edited:!!_prevOrigTsMCP,originalTs:_prevOrigTsMCP};adminLog('result_publish','M#'+mid+' Winner:'+w+(mom?' MoM:'+mom:''));sv(['r','logs']);_mcpState.step=5;_guidedSubmitting=false;delete admW[mid];renderMCP()}
+function mcpConfirm(){if(_guidedSubmitting)return;if(!adm)return;_guidedSubmitting=true;const mid=_mcpState.mid,w=_mcpState.winner,mom=_mcpState.mom||'';if(!w){toast('Pick winner!','err');_guidedSubmitting=false;return}const m=gm(mid);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set teams first!','err');_guidedSubmitting=false;return}if(S.r[mid]&&!S.r[mid].voided){if(!confirm('Result already exists for this match. Overwrite?')){_guidedSubmitting=false;return}}S.r[mid]={w:w,mom:mom||null,ts:new Date().toISOString()};adminLog('result_publish','M#'+mid+' Winner:'+w+(mom?' MoM:'+mom:''));sv(['r','logs']);_mcpState.step=5;_guidedSubmitting=false;delete admW[mid];renderMCP()}
 function guidedSelectWinner(mid,team){mcpPickWinner(team)}
 function guidedSubmit(mid){mcpConfirm()}
 
-function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(!w){toast('Pick winner!','err');return}const m=gm(id);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set playoff teams first!','err');return}if(S.r[id]&&!S.r[id].voided){const _ts=S.r[id].originalTs||S.r[id].ts;const age=Date.now()-new Date(_ts).getTime();if(age>RESULT_LOCK_MS){toast('Result locked after 10 min — void the match first to correct it','err');return}if(!confirm('⚠️ Result already set for this match ('+(T[S.r[id].w]?.s||S.r[id].w)+' won).\n\nOverwriting will recalculate all balances. Players who saw their result will see a different outcome.\n\nProceed only if this is a genuine correction within 10 minutes of the original entry.')){return}adminLog('result_overwrite','M#'+id+' old:'+S.r[id].w+' new:'+w)}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';const _prevOrigTs=S.r[id]?.originalTs||null;S.r[id]={w,mom:mom||null,ts:new Date().toISOString(),edited:true,originalTs:_prevOrigTs};sv(['r']);const mBets=Object.values(S.b).filter(b=>b.mid===id);const winners=mBets.filter(b=>b.tm===w).length;const losers=mBets.length-winners;const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;toast('✅ '+(T[w]?T[w].s:w)+' won'+(mom?' · MoM: '+mom:'')+' · '+winners+'W/'+losers+'L'+(jp?' · '+jp+' jackpot🔥':''));
-  if(mom){const momBets=mBets.filter(b=>b.mom);const momHits=momBets.filter(b=>momMatch(b.mom,mom));if(momBets.length>0&&momHits.length===0){setTimeout(()=>toast('⚠️ MoM: no player picks matched "'+mom+'" — verify spelling','err'),1800)}}delete admW[id];rA()}
+function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(!w){toast('Pick winner!','err');return}const m=gm(id);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set playoff teams first!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);const mBets=Object.values(S.b).filter(b=>b.mid===id);const winners=mBets.filter(b=>b.tm===w).length;const losers=mBets.length-winners;const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;toast('✅ '+(T[w]?T[w].s:w)+' won'+(mom?' · MoM: '+mom:'')+' · '+winners+'W/'+losers+'L'+(jp?' · '+jp+' jackpot🔥':''));delete admW[id];rA()}
 
 function voidMatch(id){if(!adm)return;
   const m=gm(id);
@@ -3800,7 +3761,7 @@ function voidMatch(id){if(!adm)return;
   // Delete all bets for this match
   Object.keys(S.b).forEach(k=>{if(S.b[k].mid===id)delete S.b[k]});
   // Record as voided (so it doesn't show as pending)
-  const _origTs=S.r[id]&&!S.r[id].voided?S.r[id].ts:null;S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString(),originalTs:_origTs};adminLog('void_match','M#'+id+(_origTs?' (had result from '+_origTs+')':''));
+  S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};adminLog('void_match','M#'+id);
   sv(['r','b']);toast('Match voided — all bets refunded 🌧️');rA();
 }
 
