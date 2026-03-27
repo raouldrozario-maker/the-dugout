@@ -221,7 +221,7 @@ const TILT_MULTIPLIER=1.3;  // bet increase ratio to detect tilting
 const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
 const LOCK_MINUTES=40;      // minutes before match to lock betting
 // Safe odds parser — logs warning instead of silent fallback
-function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2 (real odds may differ — check Firebase)');return 2}return v}
+function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2 (real odds may differ — check Firebase)');bt._fb=true;return 2}return v}
 // Jackpot condition helper — readable shorthand
 function isJackpot(bt,mh){return mh&&bt.mt&&bt.tm&&bt.mt!==bt.tm}
 let _uiDDCount=0,db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
@@ -239,7 +239,7 @@ function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 // Fuzzy MoM matching — normalizes names to handle "Rohit Sharma" vs "R. Sharma" vs "rohit sharma"
 function momNorm(s){if(!s)return'';return s.trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ')}
-function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0])return true}return false}
+function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0]&&ap[ap.length-1]===bp[bp.length-1])return true}return false}
 function ruJump(id){const el=$(id);if(!el)return;const hdr=document.querySelector('header');const offset=hdr?hdr.offsetHeight+16:120;const y=el.getBoundingClientRect().top+window.pageYOffset-offset;window.scrollTo({top:y,behavior:'smooth'})}
 document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
@@ -381,7 +381,7 @@ function getPersonality(name){
 
   // All-in detection (bet >= 60% of player's balance — using betBal for accuracy)
   const playerBal=betBal(name);
-  const bigBets=ub.filter(b=>b.am>=Math.max(playerBal,ST)*ALL_IN_THRESHOLD).length;
+  const bigBets=ub.filter(b=>b.am>=(playerBal>0?playerBal:ST*0.5)*ALL_IN_THRESHOLD).length;
 
   // Streak detection
   const sorted=[...rb].sort((a,b)=>{const ma=gm(a.mid),mb=gm(b.mid);return new Date(ma?.d||0)-new Date(mb?.d||0)});
@@ -404,7 +404,7 @@ function getPersonality(name){
   let tilting=false,tiltCount=0;
   for(let i=1;i<sorted.length;i++){
     const prev=sorted[i-1],cur=sorted[i];
-    const prevLost=prev.tm!==S.r[prev.mid]?.w;
+    if(!S.r[prev.mid])continue;const prevLost=prev.tm!==S.r[prev.mid].w;
     if(prevLost&&cur.am>prev.am*TILT_MULTIPLIER){tiltCount++}else{tiltCount=0}
     if(tiltCount>=2)tilting=true;
   }
@@ -479,7 +479,7 @@ function momDropdown(id,matchId,both=false){
   const mid=matchId;
   const selectedTm=bfs[mid]?bfs[mid].tm:(admW[mid]||null);
   let groups=[{team:m.h,name:hName,short:hShort,players:hSq},{team:m.a,name:aName,short:aShort,players:aSq}];
-  if(selectedTm){groups=[...groups].sort((a,b)=>a.team===selectedTm?1:b.team===selectedTm?-1:0)}
+  if(selectedTm){groups=[...groups].sort((a,b)=>a.team===selectedTm?-1:b.team===selectedTm?1:0)}
   const data=JSON.stringify(groups).replace(/'/g,"&#39;");
   return`<div style="position:relative" id="${id}-wrap">
     <input class="bf-i" id="${id}" placeholder="Search or select player…" autocomplete="off" data-groups='${data}' data-selectedtm='${selectedTm||""}' style="font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;box-sizing:border-box"
@@ -1345,7 +1345,7 @@ function oBF(id,prefill){
       </div>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% bonus if win · saves you from loss)</div><div style="font-size:10px;color:var(--yel);margin-bottom:4px">⭐ Opponent players shown first — pick from there for a Jackpot chance!</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-s"><div class="bf-l">Man of the Match (optional · +20% bonus if win · saves you from loss)</div><div style="font-size:10px;color:var(--yel);margin-bottom:4px">💡 Opponent MoM = 2× bonus but harder to predict. High risk, high reward!</div>${momDropdown('mo-'+id,id)}</div>
   <div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/"/g,'&quot;'):''})">Cancel</button><button class="bf-cf" id="cta-${id}" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'Confirm Bet'}</button></div></div>`;
   // Pre-select team and MoM if editing
   if(prefill){
@@ -1863,6 +1863,9 @@ function rRu(){
       <span style="color:var(--yel)">🎯 MI wins + Bumrah IS MoM:</span> ₹10,000 + ₹1,000 MoM = <strong>+₹11,000</strong><br>
       <span style="color:var(--t2)">🛡️ MI loses + Bumrah IS MoM:</span> You lose the match, but MoM saves you → <strong style="color:var(--yel)">₹0 lost (stake saved!) + ₹1,000 MoM bonus</strong>
     </div>
+    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--yel)">
+      ⚡ <strong>Key takeaway:</strong> If your team loses but you picked the correct MoM, your entire stake is protected — you lose ₹0. This is the MoM safety net.
+    </div>
   </div>
 
   <!-- Rule 8: Super Jackpot -->
@@ -1890,12 +1893,15 @@ function rRu(){
     <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
       💡 <strong>How to trigger:</strong> You pick <strong style="color:var(--grn)">Team A to win</strong> + MoM from <strong style="color:var(--hot)">Team B</strong> → if Team A wins and your MoM is correct → <strong style="color:var(--yel)">SUPER JACKPOT</strong>. It's risky — you're predicting the losing team's best player — but the reward is massive.
     </div>
+    <div style="margin-top:10px;padding:10px;background:#C4453A10;border:1px solid #C4453A20;border-radius:8px;font-size:12px;color:var(--red)">
+      ⚠️ <strong>In plain English:</strong> Jackpot = your full profit is doubled. A ₹5K profit becomes ₹10K. This is on top of the 20% MoM bonus. High risk, massive reward.
+    </div>
   </div>
 
   <!-- Rule 9: Odds -->
   <div id="ru-9" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your profit = bet amount × (odds − 1). Higher odds = underdog (risky, bigger profit). Lower odds = favourite (safer, smaller profit). You always get your stake back if you win.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your profit = bet amount × (odds − 1). Higher odds = underdog (risky, bigger profit). Lower odds = favourite (safer, smaller profit). You always get your stake back if you win. If odds are unavailable for a match due to a system issue, a default of ×2 is applied.</div>
     <div style="padding:12px;background:var(--card);border-radius:8px;margin-bottom:12px">
       <div style="font-size:13px;color:var(--t2);line-height:1.8"><strong style="color:var(--acc)">Why "odds − 1"?</strong> The odds number includes your original bet. ×1.8 means your total return is 1.8× your bet — but you already had the bet amount, so your <em>profit</em> is only the 0.8× part. Think of it this way: you bet ₹10,000 at ×1.8. If you win, you get back ₹18,000 total (₹10,000 original + ₹8,000 profit). The formula just calculates the profit portion: ₹10,000 × 0.8 = ₹8,000.</div>
     </div>
