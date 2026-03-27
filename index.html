@@ -3392,7 +3392,7 @@ function rA(){
   h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
-  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:${b._fb?'var(--yel)':'var(--t4)'}">×${b.od}${b._fb?'⚠️':''}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
+  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:${b._fb?'var(--yel)':'var(--t4)'}">×${b.od}${b._fb?'⚠️':''}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}','${b.u.replace(/'/g,"\\'")}','${b.tm}',${b.am})">✕</button></div>`})}
   h+=`</div>`;
   // Broadcast Announcement
   h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
@@ -3986,7 +3986,7 @@ function addMatch(){if(!adm)return;
 }
 function setPO(id){if(!adm)return;const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');rA()}
 
-function delBet(k){if(!confirm('Delete this bet?'))return;delete S.b[k];sv(['b']);toast('Bet deleted');rA()}
+function delBet(k,player,team,amt){const msg=player&&team&&amt?`Delete ${player}'s bet on ${T[team]?.s||team} (₹${parseInt(amt).toLocaleString()})?\n\nThis cannot be undone.`:'Delete this bet?\n\nThis cannot be undone.';if(!confirm(msg))return;adminLog('bet_delete',k);delete S.b[k];sv(['b']);toast('Bet deleted ↩️');rA()}
 
 // Player actions
 let pendingLogin='';
