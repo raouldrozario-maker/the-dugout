@@ -432,7 +432,7 @@ function getBalBreakdown(n){
     const od=safeOd(bt);
     let change=0,detail='';
     if(won){
-      const py=Math.round(bt.am*(od-1));change=py;detail=`Profit ₹${py.toLocaleString()} (₹${bt.am.toLocaleString()} × (${od} - 1))`;
+      const py=Math.round(bt.am*(od-1));change=py;detail=`Profit ₹${py.toLocaleString()} (₹${bt.am.toLocaleString()} × (${od} - 1))${bt._fb?' ⚠️ default odds':''}`;
       if(momH){const mb=Math.round(bt.am*MOM_BONUS);change+=mb;detail+=` + MoM ₹${mb.toLocaleString()}`}
       if(momH&&bt.mt&&bt.mt!==bt.tm){change+=py;detail+=` + Jackpot ₹${py.toLocaleString()}`}
     }else{
@@ -626,7 +626,7 @@ window.addEventListener('online',()=>{
 
 function ld(){
   // Load local state
-  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.lockOverride=S.lockOverride||{};S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};S.keyPlayers=S.keyPlayers||{};if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
+  try{const r=JSON.parse(localStorage.getItem('dg-s'));if(r){S=r;S.p=S.p||{};S.b=S.b||{};S.r=S.r||{};S.pin=S.pin||null;S.odds=S.odds||{};S.ko=S.ko||{};S.po=S.po||{};S.adj=S.adj||[];S.lockOverride=S.lockOverride||{};S.announce=S.announce||null;S.squadEdits=S.squadEdits||{};S.capEdits=S.capEdits||{};S.keyPlayers=S.keyPlayers||{};S.cbTeams=S.cbTeams||[];if(S.customMatches)(S.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}}catch{}
   // Try Firebase
   const cfg=localStorage.getItem('dg-fb');
   if(cfg&&typeof firebase!=='undefined'){try{
@@ -638,7 +638,7 @@ function ld(){
       const d=snap.val();
       if(d&&Object.keys(d.p||{}).length>0){
         // Remote has data — use it (don't overwrite with empty local)
-        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
@@ -647,7 +647,7 @@ function ld(){
       // Now start real-time listener
       db.ref('dugout').on('value',sn=>{
         const oldR={...S.r};
-        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         // Detect new results for logged-in player
         if(me){Object.keys(S.r).forEach(mid=>{
           if(!oldR[mid]&&!S.r[mid].voided){
@@ -806,7 +806,7 @@ function rH(){
         </div>
         <div style="text-align:right">
           <div style="font-size:14px;font-weight:800;color:var(--acc);font-family:var(--ff)">₹${bt.am.toLocaleString()}</div>
-          <div style="font-size:10px;color:var(--grn)">Win: +₹${potWin.toLocaleString()} <span style="color:var(--t4)">(Locked ×${od})</span></div>
+          <div style="font-size:10px;color:var(--grn)">Win: +₹${potWin.toLocaleString()} <span style="color:var(--t4)">(Locked ×${od}${bt._fb?' ⚠️ default':''})</span></div>
         </div>
       </div>`}).join('')}
     </div>`:''}
@@ -1242,7 +1242,7 @@ function rM(){
     if(!l&&my&&!rs)h+=`<div id="bf-${m.id}" style="display:none"></div>`;
 
     // All bets (after lock)
-    if(ab.length&&l){h+=`<button class="tb" onclick="tBL(${m.id})">👁 All bets (${ab.length})</button><div id="bl-${m.id}" style="display:none">`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span><span style="color:var(--t4)">×${x.od}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
+    if(ab.length&&l){h+=`<button class="tb" onclick="tBL(${m.id})">👁 All bets (${ab.length})</button><div id="bl-${m.id}" style="display:none">`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${x.u}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span><span style="color:${x._fb?'var(--yel)':'var(--t4)'}">×${x.od}${x._fb?'<span title="Odds unavailable at bet time — ×2 default applied" style="margin-left:2px;cursor:help">⚠️</span>':''}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
     else if(ab.length&&!l){h+=`<div style="margin-top:8px;font-size:12px;color:var(--t3)">🔒 ${ab.length} bet${ab.length>1?'s':''} placed — revealed after lock</div>`}
     if(!rs)h+=`<button style="margin-top:8px;background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;font-weight:600" onclick="shareWA(${m.id})">📤 Share on WhatsApp</button>`;
     h+=`</div>`;
@@ -1251,8 +1251,10 @@ function rM(){
   if(me&&S.koOpen&&!S.koRevealed){
     if(!S.ko?.[me]){
       h+=`<div class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL — SECRET PREDICTION</span></div>
-      <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Pick the team you think will <strong style="color:var(--acc)">lift the IPL trophy</strong>! This bet is <strong style="color:var(--yel)">secret</strong> — only you and the admin can see it until the tournament ends.</div>
-      <div class="bf-s"><div class="bf-l">Your pick to win IPL 2026</div><select class="bf-i" id="ko-team"><option value="">-- Pick the champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
+      <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Pick which of the <strong style="color:var(--acc)">4 playoff teams</strong> you think will <strong style="color:var(--acc)">lift the IPL trophy</strong>! This bet is <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div>
+      <div class="bf-s"><div class="bf-l">Your pick to win IPL 2026</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">${(S.cbTeams&&S.cbTeams.length?S.cbTeams:Object.keys(T)).map(k=>`<button type="button" id="ko-btn-${k}" onclick="selectKOTeam('${k}')" style="padding:12px 8px;border-radius:12px;border:2px solid ${T[k]?.c||'var(--acc)'}44;background:${T[k]?.c||'var(--acc)'}11;color:${T[k]?.c||'var(--acc)'};font-weight:800;font-size:14px;cursor:pointer;transition:.15s;font-family:var(--ff)">${T[k]?.s||k}</button>`).join('')}</div>
+      <input type="hidden" id="ko-team" value=""></div>
       <div class="bf-s"><div class="bf-l">% of your current balance to wager</div><input class="bf-i" type="number" id="ko-pct" min="1" max="100" value="25" placeholder="e.g. 50"><div style="font-size:12px;color:var(--t4);margin-top:4px">Your balance: ₹${bal(me).toLocaleString()} · 25% = ₹${Math.round(bal(me)*0.25).toLocaleString()}</div></div>
       <button class="bp" style="width:100%" onclick="placeKO()">🔒 Lock Secret Bet</button></div>`;
     } else {
@@ -1273,8 +1275,8 @@ function rM(){
 }
 
 function placeKO(){
-  const team=$('ko-team').value,pct=parseInt($('ko-pct').value);
-  if(!team){toast('Pick a team!','err');return}
+  const team=($('ko-team')?.value||'').trim(),pct=parseInt($('ko-pct').value);
+  if(!team){toast('Tap a team to pick your champion!','err');return}
   if(!pct||pct<1||pct>100){toast('Enter 1-100%','err');return}
   const b=betBal(me),amount=Math.round(b*pct/100);
   if(!confirm(`🔒 SECRET BET\n\n${T[team]?.n} to win IPL 2026\n₹${amount.toLocaleString()} (${pct}% of your balance)\n\nThis is permanent — you cannot change it.\nOnly you and the admin will see this until the reveal.\n\nConfirm?`))return;
@@ -1707,29 +1709,18 @@ function rRu(){
   <!-- Rule 1: Starting Balance & Safety Net -->
   <div id="ru-1" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">💰</span><span class="ct" style="font-size:15px">STARTING BALANCE & SAFETY NET</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Everyone starts with <strong style="color:var(--acc)">₹10,000</strong> fun money. There's a <strong style="color:var(--yel)">₹2,000 safety net</strong> — if your balance drops below ₹2,000 after match results are settled, it gets <strong>set to ₹2,000</strong> (not ₹2,000 added on top). It's a minimum floor, not a bonus.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="padding:10px 14px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹10,000</div><div style="font-size:11px;color:var(--t4);margin-top:2px">Starting balance</div></div>
+      <div style="padding:10px 14px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">₹2,000</div><div style="font-size:11px;color:var(--t4);margin-top:2px">Minimum floor</div></div>
+    </div>
+    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+      The safety net is a <strong style="color:var(--acc)">floor, not a bonus</strong>. If your balance drops below ₹2,000 after any result, it gets <em>set to</em> ₹2,000 — not ₹2,000 added on top of what you have.
+    </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Important:</strong> The ₹2,000 safety net ONLY activates when your balance genuinely hits zero or goes negative after a result. It is <strong>not</strong> free money — it's a lifeline to keep you in the game.<br><br>
-
-      <span style="color:var(--grn)">✅ Example A — Safety net kicks in (balance hits zero):</span><br>
-      You have ₹3,000 → bet ₹3,000 all-in → lose<br>
-      Balance = ₹3,000 - ₹3,000 = ₹0 → set to <strong>₹2,000</strong><br><br>
-
-      <span style="color:var(--grn)">✅ Example B — Safety net tops up the difference only:</span><br>
-      You have ₹2,500 → bet ₹2,500 all-in → lose<br>
-      Balance = ₹2,500 - ₹2,500 = ₹0 → set to <strong>₹2,000</strong><br>
-      Another loss: balance drops to ₹1,500 → set to <strong>₹2,000</strong> (only ₹500 added, NOT ₹2,000 on top)<br><br>
-
-      <span style="color:var(--grn)">✅ Example C — Safety net NOT needed:</span><br>
-      You have ₹10,000 → bet ₹10,000 all-in → win (odds ×2)<br>
-      Balance = ₹10,000 + ₹10,000 profit = <strong>₹20,000</strong><br>
-      No safety net involved — you never went below ₹2,000<br><br>
-
-      <span style="color:var(--red)">❌ Common misconceptions:</span><br>
-      "My balance is ₹1,500, so I'll get ₹2,000 added = ₹3,500"<br>
-      <strong>Wrong!</strong> Your balance is SET TO ₹2,000. You get ₹500, not ₹2,000.<br><br>
-      "I went all-in, so I automatically get ₹2,000 in my wallet"<br>
-      <strong>Wrong!</strong> The safety net only activates if you actually lose and your balance falls below ₹2,000.
+      <span style="color:var(--grn)">✅ You lose everything (balance = ₹0)</span> → set to <strong>₹2,000</strong><br>
+      <span style="color:var(--grn)">✅ Balance drops to ₹1,500</span> → set to <strong>₹2,000</strong> (only ₹500 added, not ₹2,000)<br>
+      <span style="color:var(--t3)">⭕ You win or stay above ₹2,000</span> → safety net never activates<br><br>
+      <span style="color:var(--red)">❌ "I went all-in so I get ₹2,000"</span> — <strong>Wrong.</strong> You only get the floor if you actually lose and drop below it.
     </div>
   </div>
 
@@ -1755,47 +1746,21 @@ function rRu(){
   <!-- Rule 4: Double Headers & At Risk -->
   <div id="ru-4" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🏏🏏</span><span class="ct" style="font-size:15px">DOUBLE HEADERS & "AT RISK"</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">On days with two matches, you can <strong style="color:var(--acc)">bet on both matches using your full balance</strong>. Your balance is based on resolved results only — pending (unresolved) bets don't reduce your available balance. Instead, the amount you've wagered on unresolved matches is shown as <strong style="color:var(--acc)">"AT RISK"</strong>.</div>
+    <div style="padding:10px 14px;background:#3FB08C0C;border-left:3px solid var(--grn);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+      On double-header days, <strong style="color:var(--grn)">you can bet on both matches — even if you've gone all-in on the first one.</strong> Your visible balance doesn't deduct pending bets; the amount at stake is shown separately as <strong style="color:var(--acc)">"AT RISK"</strong>.
+    </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example — Double header day:</strong><br>
-      Match 1: DC vs MI (3:30 PM, odds: DC ×1.8, MI ×2.5)<br>
-      Match 2: GT vs RR (7:30 PM, odds: GT ×2.5, RR ×1.8)<br>
-      Your balance: <strong>₹10,000</strong><br><br>
-
-      <span style="color:var(--grn)">Step 1:</span> You bet <strong>₹10,000 all-in on DC</strong> (Match 1)<br>
-      → Your balance still shows ₹10,000 (pending bets don't deduct)<br>
-      → On the line: ₹10,000<br><br>
-
-      <span style="color:var(--grn)">Step 2:</span> You also bet <strong>₹5,000 on GT</strong> (Match 2)<br>
-      → Balance still ₹10,000 · On the line now ₹15,000<br><br>
-
-      <span style="color:var(--t1);font-weight:700">Now results come in — here's what happens in each scenario:</span><br><br>
-
-      <span style="color:var(--grn)">✅ Both win:</span><br>
-      DC win: ₹10,000 × 1.8 = ₹8,000 profit<br>
-      GT win: ₹5,000 × 2.5 = ₹7,500 profit<br>
-      Final balance = ₹10,000 + ₹8,000 + ₹7,500 = <strong style="color:var(--grn)">₹25,500</strong><br><br>
-
-      <span style="color:var(--red)">❌ Both lose:</span><br>
-      DC loss: -₹10,000<br>
-      GT loss: -₹5,000<br>
-      Calculation = ₹10,000 - ₹10,000 - ₹5,000 = -₹5,000<br>
-      Safety net kicks in → <strong style="color:var(--red)">₹2,000</strong><br><br>
-
-      <span style="color:var(--yel)">🔀 DC loses, GT wins:</span><br>
-      DC loss: -₹10,000<br>
-      GT win: ₹5,000 × 2.5 = ₹7,500 profit<br>
-      Final balance = ₹10,000 - ₹10,000 + ₹7,500 = <strong style="color:var(--yel)">₹7,500</strong><br>
-      (GT's profit partially covers the all-in loss)<br><br>
-
-      <span style="color:var(--yel)">🔀 DC wins, GT loses:</span><br>
-      DC win: ₹10,000 × 1.8 = ₹8,000 profit<br>
-      GT loss: -₹5,000<br>
-      Final balance = ₹10,000 + ₹8,000 - ₹5,000 = <strong style="color:var(--yel)">₹13,000</strong><br>
-      (DC's profit more than covers the GT loss)
+      <strong style="color:var(--acc)">Example — Double header day:</strong> Your balance ₹10,000<br>
+      Match 1 (3:30 PM): You go <strong>₹10,000 all-in on DC</strong> (×1.8) — balance still shows ₹10,000, AT RISK: ₹10,000<br>
+      Match 2 (7:30 PM): You also bet <strong>₹5,000 on GT</strong> (×2.5) — AT RISK: ₹15,000<br><br>
+      <span style="color:var(--t1);font-weight:700">Results — all 4 scenarios:</span><br><br>
+      <span style="color:var(--grn)">✅ Both win:</span> +₹8,000 (DC) + ₹7,500 (GT) = <strong style="color:var(--grn)">₹25,500</strong><br>
+      <span style="color:var(--red)">❌ Both lose:</span> −₹10,000 − ₹5,000 = −₹5,000 → safety net → <strong style="color:var(--red)">₹2,000</strong><br>
+      <span style="color:var(--yel)">🔀 DC loses, GT wins:</span> −₹10,000 + ₹7,500 = <strong style="color:var(--yel)">₹7,500</strong><br>
+      <span style="color:var(--yel)">🔀 DC wins, GT loses:</span> +₹8,000 − ₹5,000 = <strong style="color:var(--yel)">₹13,000</strong>
     </div>
     <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
-      💡 <strong>Why it works this way:</strong> Without this, going all-in on the first match would lock you out of the second match entirely — even though you might win the first one. This keeps the game fun and lets everyone participate in every match if they want to.
+      💡 Without this rule, going all-in on Match 1 would lock you out of Match 2 entirely — even if you win the first one. This keeps everyone in every match.
     </div>
   </div>
 
@@ -1835,66 +1800,56 @@ function rRu(){
   <!-- Rule 7: Man of the Match -->
   <div id="ru-7" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🎯</span><span class="ct" style="font-size:15px">MAN OF THE MATCH (OPTIONAL)</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Along with your team pick, you can optionally predict the <strong style="color:var(--yel)">Man of the Match</strong>. If correct, you get a flat <strong style="color:var(--yel)">20% bonus on your bet amount</strong> — regardless of odds.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="padding:10px 12px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:15px;font-weight:900;color:var(--yel);font-family:var(--ff)">+20%</div><div style="font-size:11px;color:var(--t4);margin-top:2px">bonus if MoM correct</div></div>
+      <div style="padding:10px 12px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:15px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹0 lost</div><div style="font-size:11px;color:var(--t4);margin-top:2px">if team loses + MoM correct</div></div>
+    </div>
+    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--yel);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+      Optionally pick the Man of the Match alongside your team. Two separate rewards: a <strong style="color:var(--yel)">20% bonus</strong> on your bet if correct, and a <strong style="color:var(--grn)">full stake save</strong> if your team loses but your MoM is right.
+    </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example 1:</strong> RCB vs SRH — Odds: RCB ×1.9, SRH ×2.2<br>
-      You bet: <strong>₹10,000 on SRH</strong> | MoM pick: <strong>Travis Head</strong><br><br>
-
-      <span style="color:var(--grn)">✅ Scenario A — SRH wins, Head is NOT MoM:</span><br>
-      Profit = ₹10,000 × (2.2 - 1) = <strong>+₹12,000</strong><br><br>
-
-      <span style="color:var(--red)">❌ Scenario B — SRH loses, Head is NOT MoM:</span><br>
-      You lose your bet = <strong>-₹10,000</strong><br><br>
-
-      <span style="color:var(--grn)">🎯 Scenario C — SRH wins + Head IS MoM:</span><br>
-      Profit = ₹10,000 × (2.2 - 1) = ₹12,000<br>
-      MoM bonus = 20% of ₹10,000 = <strong>₹2,000</strong><br>
-      Total profit = <strong style="color:var(--yel)">+₹14,000</strong><br><br>
-
-      <span style="color:var(--yel)">🛡️ Scenario D — SRH loses + Head IS MoM:</span><br>
-      You lose the match bet, but your MoM pick is correct → <strong style="color:var(--yel)">you lose ₹0!</strong> Your entire ₹10,000 stake is saved. Plus you get the 20% MoM bonus = <strong style="color:var(--yel)">+₹2,000</strong>
+      <strong style="color:var(--acc)">Example:</strong> RCB vs SRH — You bet <strong>₹10,000 on SRH (×2.2)</strong>, MoM pick: <strong>Travis Head</strong><br><br>
+      <span style="color:var(--grn)">✅ SRH wins, Head NOT MoM:</span> ₹10,000 × (2.2−1) = <strong>+₹12,000</strong><br>
+      <span style="color:var(--grn)">🎯 SRH wins + Head IS MoM:</span> ₹12,000 + ₹2,000 bonus = <strong style="color:var(--yel)">+₹14,000</strong><br>
+      <span style="color:var(--red)">❌ SRH loses, Head NOT MoM:</span> <strong>−₹10,000</strong><br>
+      <span style="color:var(--yel)">🛡️ SRH loses + Head IS MoM:</span> Stake saved + 20% bonus = <strong style="color:var(--yel)">+₹2,000 (lost ₹0!)</strong>
     </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
-      <strong style="color:var(--acc)">Example 2:</strong> MI vs KKR — Odds: MI ×3, KKR ×1.5<br>
-      You bet: <strong>₹5,000 on MI</strong> | MoM pick: <strong>Jasprit Bumrah</strong><br><br>
-
-      <span style="color:var(--grn)">✅ MI wins, Bumrah not MoM:</span> ₹5,000 × (3 - 1) = <strong>+₹10,000</strong><br>
-      <span style="color:var(--red)">❌ MI loses, Bumrah not MoM:</span> <strong>-₹5,000</strong><br>
-      <span style="color:var(--yel)">🎯 MI wins + Bumrah IS MoM:</span> ₹10,000 + ₹1,000 MoM = <strong>+₹11,000</strong><br>
-      <span style="color:var(--t2)">🛡️ MI loses + Bumrah IS MoM:</span> You lose the match, but MoM saves you → <strong style="color:var(--yel)">₹0 lost (stake saved!) + ₹1,000 MoM bonus</strong>
+    <div style="margin-top:8px;font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
+      <strong style="color:var(--acc)">Second example:</strong> MI vs KKR — You bet <strong>₹5,000 on MI (×3)</strong>, MoM pick: <strong>Bumrah</strong><br><br>
+      <span style="color:var(--grn)">✅ MI wins, Bumrah not MoM:</span> <strong>+₹10,000</strong><br>
+      <span style="color:var(--grn)">🎯 MI wins + Bumrah IS MoM:</span> +₹10,000 + ₹1,000 = <strong style="color:var(--yel)">+₹11,000</strong><br>
+      <span style="color:var(--red)">❌ MI loses, Bumrah not MoM:</span> <strong>−₹5,000</strong><br>
+      <span style="color:var(--yel)">🛡️ MI loses + Bumrah IS MoM:</span> <strong style="color:var(--yel)">₹0 lost + ₹1,000 bonus</strong>
     </div>
-    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--yel)">
-      ⚡ <strong>Key takeaway:</strong> If your team loses but you picked the correct MoM, your entire stake is protected — you lose ₹0. This is the MoM safety net.
+    <div style="margin-top:10px;padding:10px;background:#3FB08C0C;border:1px solid #3FB08C25;border-radius:8px;font-size:12px;color:var(--grn)">
+      🛡️ <strong>The MoM safety net:</strong> If your team loses but your MoM pick is correct — you lose ₹0 and still collect the 20% bonus. It's the best insurance in the game.
     </div>
   </div>
 
   <!-- Rule 8: Super Jackpot -->
   <div id="ru-8" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">The ultimate power move. If you bet on the <strong style="color:var(--grn)">winning team</strong> AND correctly predict the MoM from the <strong style="color:var(--hot)">losing team</strong>, you get an <strong style="color:var(--yel)">extra 100% of your winnings</strong>!</div>
+    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
+      <strong style="color:var(--acc)">How to trigger:</strong> Bet on <strong style="color:var(--grn)">Team A to win</strong> + pick MoM from <strong style="color:var(--hot)">Team B (the losing side)</strong>. If Team A wins and your MoM is right → your entire profit is <strong style="color:var(--yel)">doubled</strong>. High risk, massive reward.
+    </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example 1:</strong> RCB vs MI — Odds: RCB ×2, MI ×3<br>
-      You bet: <strong>₹10,000 on MI</strong> | MoM pick: <strong>Virat Kohli (RCB — the losing team!)</strong><br>
-      MI wins AND Kohli is MoM!<br><br>
-      Normal profit: ₹10,000 × (3 - 1) = ₹20,000<br>
-      MoM bonus: 20% of ₹10,000 = ₹2,000<br>
-      Jackpot bonus: extra 100% of profit = +₹20,000<br>
-      <strong style="color:var(--yel)">Total earned: +₹42,000! 🔥</strong>
+      <strong style="color:var(--acc)">Example 1:</strong> RCB vs MI — You bet <strong>₹10,000 on MI (×3)</strong> | MoM: <strong>Kohli (RCB — the losers)</strong><br>
+      MI wins + Kohli is MoM 🔥<br><br>
+      Normal profit: ₹10,000 × (3−1) = ₹20,000<br>
+      MoM bonus (20%): +₹2,000<br>
+      Jackpot (100% of profit): +₹20,000<br>
+      <strong style="color:var(--yel)">Total: +₹42,000! 🔥</strong>
     </div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
-      <strong style="color:var(--acc)">Example 2:</strong> CSK vs PBKS — Odds: CSK ×1.5, PBKS ×3<br>
-      You bet: <strong>₹8,000 on CSK</strong> | MoM pick: <strong>Arshdeep Singh (PBKS — the losing team!)</strong><br>
-      CSK wins AND Arshdeep is MoM!<br><br>
-      Normal profit: ₹8,000 × (1.5 - 1) = ₹4,000<br>
-      MoM bonus: 20% of ₹8,000 = ₹1,600<br>
-      Jackpot bonus: extra ₹4,000<br>
-      <strong style="color:var(--yel)">Total earned: +₹9,600! 🔥🔥</strong>
-    </div>
-    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
-      💡 <strong>How to trigger:</strong> You pick <strong style="color:var(--grn)">Team A to win</strong> + MoM from <strong style="color:var(--hot)">Team B</strong> → if Team A wins and your MoM is correct → <strong style="color:var(--yel)">SUPER JACKPOT</strong>. It's risky — you're predicting the losing team's best player — but the reward is massive.
+      <strong style="color:var(--acc)">Example 2:</strong> CSK vs PBKS — You bet <strong>₹8,000 on CSK (×1.5)</strong> | MoM: <strong>Arshdeep (PBKS — the losers)</strong><br>
+      CSK wins + Arshdeep is MoM 🔥<br><br>
+      Normal profit: ₹8,000 × (1.5−1) = ₹4,000<br>
+      MoM bonus (20%): +₹1,600<br>
+      Jackpot (100% of profit): +₹4,000<br>
+      <strong style="color:var(--yel)">Total: +₹9,600! 🔥🔥</strong>
     </div>
     <div style="margin-top:10px;padding:10px;background:#C4453A10;border:1px solid #C4453A20;border-radius:8px;font-size:12px;color:var(--red)">
-      ⚠️ <strong>In plain English:</strong> Jackpot = your full profit is doubled. A ₹5K profit becomes ₹10K. MoM bonus and Jackpot rewards stack — if both conditions are met, you get both. High risk, massive reward.
+      ⚠️ <strong>The catch:</strong> You're predicting the best player from the team that <em>loses</em>. You're going against the grain on both calls. Get it right — and your profit doubles.
     </div>
   </div>
 
@@ -1919,7 +1874,7 @@ function rRu(){
   <!-- Rule 10: Crystal Ball -->
   <div id="ru-10" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Before the playoffs begin, the admin will open the <strong style="color:var(--acc)">Crystal Ball</strong> — your chance to secretly predict who will lift the IPL 2026 trophy. Choose a team and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Once the top 4 teams qualify for the playoffs, the admin will define those teams and open the <strong style="color:var(--acc)">Crystal Ball</strong>. You'll see exactly those 4 teams — pick who you think will lift the IPL 2026 trophy, and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div><div style="margin-top:-4px;margin-bottom:12px;padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6">🏏 <strong style="color:var(--acc)">You can only choose from the 4 teams that qualify for the playoffs</strong> (these will be shown once the Crystal Ball opens).</div>
     <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
       <strong style="color:var(--acc)">Example:</strong> You have ₹50,000 and bet 50% on RCB to win the IPL.<br>
       That's ₹25,000 on the line. You continue betting normally.<br><br>
@@ -1939,7 +1894,7 @@ function rRu(){
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">📅</span><span class="ct" style="font-size:15px">MATCHES</span></div>
-      <div style="font-size:14px;color:var(--t2);line-height:1.7">Where the action happens. Filter matches by Open, Locked, Results, or My Bets. Place bets (pick team, enter amount, optional MoM prediction), edit bets before lock, see odds, check results, and view everyone's bets after a match locks. Share matches to WhatsApp. The Crystal Ball prediction also appears here when open.</div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">Where the action happens. Filter matches by Open, Locked, Results, or My Bets. Place bets (pick team, enter amount, optional MoM prediction), edit bets before lock, see odds, check results, and view everyone's bets after a match locks. Share matches to WhatsApp. The Crystal Ball prediction (choose from the 4 playoff teams) also appears here once the admin opens it.</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
@@ -2038,7 +1993,7 @@ function rRu(){
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
       <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">🔮 Crystal Ball</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6">A secret one-time prediction before the playoffs. Pick who wins the IPL and wager a % of your balance. Results revealed by the admin at the end-of-season event.</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">A secret one-time prediction — available only after the 4 playoff qualifiers are confirmed. Pick which of the 4 teams wins the IPL and wager a % of your balance. Results revealed by the admin at the end-of-season event.</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
@@ -2790,7 +2745,7 @@ function rMG(){
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
           <div>
             <div style="font-weight:700;font-size:14px;color:var(--t1)">M#${bt.mid} ${T[m?.h]?.s||'?'} vs ${T[m?.a]?.s||'?'}</div>
-            <div style="font-size:12px;color:var(--t4);margin-top:2px">${fd(m?.d)} · Bet on <span style="color:${T[bt.tm]?.c||'var(--acc)'};font-weight:700">${T[bt.tm]?.s||bt.tm}</span> · ₹${bt.am.toLocaleString()} @ ×${od}${bt.mom?' · MoM: '+bt.mom:''}</div>
+            <div style="font-size:12px;color:var(--t4);margin-top:2px">${fd(m?.d)} · Bet on <span style="color:${T[bt.tm]?.c||'var(--acc)'};font-weight:700">${T[bt.tm]?.s||bt.tm}</span> · ₹${bt.am.toLocaleString()} @ ×${od}${bt._fb?'<span title="Default ×2 applied — odds were unavailable" style="margin-left:3px;cursor:help;color:var(--yel)">⚠️</span>':''}${bt.mom?' · MoM: '+bt.mom:''}</div>
           </div>
           <div style="text-align:right">
             <div style="font-weight:800;font-size:15px;color:${statusClr}">${amount}</div>
@@ -3100,6 +3055,24 @@ function rA(){
     </div>
   </div>`;
 
+  // ─── CRYSTAL BALL REMINDER BANNER ───
+  {
+    const cbTeams=S.cbTeams||[];
+    const playoffAssigned=S.po&&Object.keys(S.po).length>0;
+    if(!S.koOpen&&!S.koRevealed&&!S.koPublished&&cbTeams.length!==4){
+      // Check if any league match results exist (roughly: late-season signal)
+      const leagueMatches=MM.filter(m=>!m.playoff);
+      const lastLeagueMatch=leagueMatches[leagueMatches.length-1];
+      const lastLeagueResolved=lastLeagueMatch&&!!S.r[lastLeagueMatch.id];
+      const resultsCount=Object.keys(S.r||{}).length;
+      if(lastLeagueResolved||playoffAssigned||resultsCount>=leagueMatches.length){
+        h+=`<div style="margin-bottom:16px;padding:14px 16px;background:#D4A24E14;border:2px solid #D4A24E44;border-radius:14px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="document.getElementById('adm-crystal')?.scrollIntoView({behavior:'smooth'})">
+        <span style="font-size:24px;flex-shrink:0">🔮</span>
+        <div><div style="font-weight:900;color:var(--acc);font-size:13px;letter-spacing:.5px;margin-bottom:4px">⚠️ PLAYOFFS APPROACHING — SET CRYSTAL BALL TEAMS</div>
+        <div style="font-size:13px;color:var(--t4);line-height:1.5">The last league match result is in. <strong style="color:var(--t1)">Define the 4 qualifying teams</strong> in the Crystal Ball section below, then open the betting window so participants can place their secret predictions. <span style="color:var(--acc);font-weight:700">Tap to jump there ↓</span></div></div></div>`;
+      }
+    }
+  }
   // ─── SYSTEM STATUS (top strip) ───
   h+=`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
     <div style="flex:1;min-width:100px;background:${db?'#3FB08C10':'#C4453A10'};border:1px solid ${db?'#3FB08C25':'#C4453A25'};border-radius:12px;padding:10px 14px;text-align:center;display:flex;align-items:center;justify-content:center">
@@ -3287,6 +3260,32 @@ function rA(){
   // Crystal Ball Admin
   h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
+  // ── STEP 1: Set Qualifying Teams ──
+  const cbTeams=S.cbTeams||[];
+  const cbReady=cbTeams.length===4;
+  if(!cbReady&&!S.koRevealed){
+    h+=`<div style="margin-bottom:16px;padding:14px 16px;background:#D4A24E0C;border:1px solid #D4A24E33;border-radius:12px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:16px">⚠️</span><span style="font-weight:800;color:var(--acc);font-size:13px;letter-spacing:.5px">ACTION REQUIRED — DEFINE THE PLAYOFF 4</span></div>
+    <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Once the top 4 qualifying teams are known, set them here. Participants will only be able to choose among these 4 teams when placing their Crystal Ball bet.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      ${[0,1,2,3].map(i=>`<select class="bf-i" id="cb-t${i}" style="min-height:40px"><option value="">Team ${i+1}</option>${Object.keys(T).map(k=>`<option value="${k}" ${cbTeams[i]===k?'selected':''}>${T[k].n}</option>`).join('')}</select>`).join('')}
+    </div>
+    <button style="width:100%;padding:10px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="saveCBTeams()">✅ Save Qualifying Teams & Unlock Crystal Ball</button>
+    </div>`;
+  } else if(cbReady){
+    h+=`<div style="margin-bottom:14px;padding:10px 14px;background:#3FB08C10;border:1px solid #3FB08C33;border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div><div style="font-size:11px;color:var(--grn);font-weight:800;letter-spacing:1px;margin-bottom:4px">✅ PLAYOFF 4 SET</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${cbTeams.map(k=>`<span style="padding:3px 10px;border-radius:8px;font-size:12px;font-weight:800;background:${T[k]?.c||'#888'}22;color:${T[k]?.c||'#888'};border:1px solid ${T[k]?.c||'#888'}44">${T[k]?.s||k}</span>`).join('')}</div></div>
+    ${!S.koOpen&&!S.koRevealed?`<button style="padding:6px 12px;background:var(--inp);border:1px solid var(--bdr);border-radius:8px;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="resetCBTeams()">✏️ Edit</button>`:''}
+    </div>`;
+    // Nudge: cbTeams set but playoff match slots not assigned yet
+    const poAssigned=S.po&&Object.keys(S.po).length>=4;
+    if(!poAssigned&&!S.koOpen&&!S.koRevealed){
+      h+=`<div style="margin-bottom:12px;padding:10px 14px;background:#4B8BE50C;border:1px solid #4B8BE530;border-radius:10px;font-size:12px;color:#60A5FA;display:flex;align-items:center;gap:8px">
+      <span style="font-size:15px">📋</span><span>Don't forget — also <strong>assign teams to the playoff match slots</strong> in the <strong>Set Playoff Teams</strong> section above, so bets can be placed on those matches.</span>
+      <button style="flex-shrink:0;background:0;border:1px solid #4B8BE540;border-radius:6px;padding:3px 10px;color:#60A5FA;font-size:11px;cursor:pointer;font-weight:700" onclick="document.getElementById('adm-playoff')?.scrollIntoView({behavior:'smooth',block:'center'})">Go ↑</button></div>`;
+    }
+  }
   // Status + toggle
   const koCount=S.ko?Object.keys(S.ko).length:0;
   h+=`<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
@@ -3295,9 +3294,14 @@ function rA(){
   <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koRevealed?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koRevealed?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Revealed</div></div>
   <div style="flex:1;min-width:100px;background:var(--inp);border-radius:10px;padding:10px;text-align:center"><div style="font-size:16px;font-weight:900;color:${S.koPublished?'var(--grn)':'var(--t3)'};font-family:var(--ff)">${S.koPublished?'YES':'NO'}</div><div style="font-size:10px;color:var(--t4)">Published</div></div>
   </div>`;
-  // Toggle button
+  // Toggle button — gated on cbTeams being set
   if(!S.koRevealed){
-    h+=`<button style="width:100%;padding:10px;background:${S.koOpen?'#C4453A10':'#3FB08C10'};border:1px solid ${S.koOpen?'#C4453A25':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
+    if(!cbReady){
+      h+=`<button style="width:100%;padding:10px;background:#1E293B;border:1px solid var(--bdr);border-radius:10px;color:var(--t3);font-weight:700;font-size:13px;margin-bottom:8px;cursor:not-allowed" disabled title="Set the 4 qualifying teams first">🔒 Open Betting Window &nbsp;(set Playoff 4 first)</button>`;
+    } else {
+      h+=`<button id="cb-open-btn" style="width:100%;padding:10px;background:${S.koOpen?'#C4453A10':'#3FB08C10'};border:1px solid ${S.koOpen?'#C4453A25':'#10B98133'};border-radius:10px;color:${S.koOpen?'var(--red)':'var(--grn)'};font-weight:700;cursor:pointer;font-size:13px;margin-bottom:8px;transition:all .3s" onclick="toggleKO()">${S.koOpen?'🔒 Close Betting Window':'🔓 Open Betting Window'}</button>`;
+      if(!S.koOpen)h+=`<div style="padding:10px 14px;background:#3FB08C08;border:1px solid #3FB08C22;border-radius:10px;font-size:12px;color:var(--grn);display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:15px">👆</span><span><strong>Don't forget:</strong> participants can't see the Crystal Ball until you hit Open above.</span></div>`;
+    }
   }
   // Show secret bets with edit capability (admin only)
   if(koCount>0){
@@ -3319,7 +3323,7 @@ function rA(){
     h+=`<div style="margin-top:16px;padding:14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px">
     <div class="bf-l">REVEAL & SETTLE</div>
     <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team. This settles all Crystal Ball bets internally. Players will only see "settled — announced at event" until you publish.</div>
-    <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n}</option>`).join('')}</select></div>
+    <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${(S.cbTeams&&S.cbTeams.length?S.cbTeams:Object.keys(T)).map(k=>`<option value="${k}">${T[k]?.n||k}</option>`).join('')}</select></div>
     <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal & Settle (Admin Only)</button></div>`;
   }
   if(S.koRevealed&&!S.koPublished){
@@ -3388,7 +3392,7 @@ function rA(){
   h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
-  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:var(--t4)">×${b.od}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
+  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${b.u}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:${b._fb?'var(--yel)':'var(--t4)'}">×${b.od}${b._fb?'⚠️':''}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}')">✕</button></div>`})}
   h+=`</div>`;
   // Broadcast Announcement
   h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
@@ -3448,7 +3452,7 @@ function rA(){
   h+=`<div style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin:24px 0 12px;padding-left:4px">⚠️ DANGER ZONE</div>`;
   h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25"><div class="ch"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><div style="display:flex;flex-direction:column;gap:10px">
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL bets across ALL matches for ALL players?\\n\\nCrystal Ball predictions will remain.\\nBalances will reset to ₹10,000.')){adminLog('bets_clear_all','All bets cleared');S.b={};sv();toast('All bets cleared');rA()}">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
-  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?\\n\\nAll secret IPL winner bets will be deleted.')){adminLog('crystal_clear','All predictions cleared');S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL Crystal Ball predictions and reset the Crystal Ball state?\\n\\nAll secret IPL winner bets will be deleted.')){adminLog('crystal_clear','All predictions cleared');S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;S.cbTeams=[];sv();toast('Crystal Ball cleared');rA()}">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL match results?\\n\\nAll balances will recalculate to reflect no results.\\nBets remain — only results are removed.')){adminLog('results_clear_all','All results cleared');S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared');rA()}">📝 Clear All Results</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all match results. Bets stay — balances recalculate without wins/losses.</div></div>
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="if(confirm('Clear ALL trash talk messages?')){adminLog('trash_clear','All messages cleared');S.trash=[];sv();toast('Trash talk cleared');rA()}">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
   <div style="margin-top:12px;padding-top:12px;border-top:2px solid #C4453A25"><button style="width:100%;padding:14px;background:#C4453A25;border:2px solid #C4453A44;border-radius:10px;color:var(--red);font-weight:900;cursor:pointer;font-size:14px;letter-spacing:1px" onclick="rstAll()">💀 RESET EVERYTHING</button><div style="font-size:10px;color:var(--red);padding:4px 4px 0;font-weight:600">Wipes ALL data — players, bets, results, odds, Crystal Ball, squads, admin PIN. Requires PIN confirmation. Cannot be undone.</div></div>
@@ -3888,7 +3892,37 @@ function sendReminder(id,type){
   }
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
-function toggleKO(){if(!adm)return;S.koOpen=!S.koOpen;adminLog(S.koOpen?'crystal_open':'crystal_close',S.koOpen?'Predictions opened':'Predictions closed');sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
+function toggleKO(){if(!adm)return;
+  if(!S.koOpen&&(!S.cbTeams||S.cbTeams.length!==4)){toast('Set the 4 qualifying teams first!','err');return}
+  S.koOpen=!S.koOpen;adminLog(S.koOpen?'crystal_open':'crystal_close',S.koOpen?'Predictions opened':'Predictions closed');sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
+function saveCBTeams(){
+  const picks=[0,1,2,3].map(i=>$('cb-t'+i)?.value||'').filter(Boolean);
+  const unique=[...new Set(picks)];
+  if(unique.length!==4){toast('Pick exactly 4 different teams!','err');return}
+  S.cbTeams=unique;adminLog('crystal_teams_set','Teams: '+unique.join(', '));sv();
+  toast('Playoff 4 saved! 🏏 Now open the betting window.');
+  rA();
+  setTimeout(()=>{
+    const card=document.getElementById('adm-crystal');
+    if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
+    // Flash the open button to draw the eye
+    setTimeout(()=>{
+      const btn=document.getElementById('cb-open-btn');
+      if(btn){btn.style.transform='scale(1.03)';btn.style.boxShadow='0 0 24px rgba(63,176,140,0.5)';setTimeout(()=>{btn.style.transform='';btn.style.boxShadow=''},1200);}
+    },400);
+  },150);}
+function resetCBTeams(){
+  if(S.koOpen){toast('Close the betting window first!','err');return}
+  if(!confirm('Reset the 4 qualifying teams? This will not delete any existing predictions.'))return;
+  S.cbTeams=[];sv();rA()}
+function selectKOTeam(k){
+  const inp=$('ko-team');if(!inp)return;
+  inp.value=k;
+  const teams=S.cbTeams&&S.cbTeams.length?S.cbTeams:Object.keys(T);
+  teams.forEach(t=>{const btn=$('ko-btn-'+t);if(!btn)return;
+    if(t===k){btn.style.border='2px solid '+(T[t]?.c||'var(--acc)');btn.style.background=(T[t]?.c||'var(--acc)')+'33';btn.style.transform='scale(1.04)';btn.style.boxShadow='0 0 14px '+(T[t]?.c||'var(--acc)')+'44'}
+    else{btn.style.border='2px solid '+(T[t]?.c||'var(--acc)')+'44';btn.style.background=(T[t]?.c||'var(--acc)')+'11';btn.style.transform='';btn.style.boxShadow=''}
+  })}
 
 function editKO(name){
   const k=S.ko[name];if(!k)return;
@@ -4157,7 +4191,7 @@ function editName(old){if(!adm)return;
 }
 function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
 function remP(n){if(!adm)return;if(!confirm('Remove '+n+' and all their bets?'))return;adminLog('player_remove',n);delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
-function rstAll(){if(!adm)return;if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
+function rstAll(){if(!adm)return;if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[],cbTeams:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
 
 function cFB(){const raw=$('fb-cfg').value.trim(),err=$('fb-err');err.textContent='';
 if(typeof firebase==='undefined'){err.textContent='Firebase SDK not loaded. Deploy to Netlify first, or check your internet connection.';return}
@@ -4166,8 +4200,8 @@ try{const c=JSON.parse(raw);if(!c.databaseURL){err.textContent='Missing database
 db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
-  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
+  else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(mh)py+=Math.round(myBet.am*MOM_BONUS);toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));ren();uh()});
   ren();uh();
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
