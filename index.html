@@ -587,8 +587,8 @@ function momDDFilter(id){
   groups.forEach(function(g){
     var filtered=g.players.filter(function(p){return !q||p.toLowerCase().includes(q)});
     if(!filtered.length)return;
-    var selTm=inp.dataset.selectedtm||'';var isOpp=selTm&&g.team!==selTm;
-    html+='<div style="padding:6px 14px;font-size:11px;font-weight:700;color:'+(isOpp?'var(--t4)':'var(--t2)')+';background:var(--inp);border-bottom:1px solid var(--bdr)">'+g.name+' ('+g.short+')'+(isOpp?' <span style="color:var(--yel);font-weight:600"> · Jackpot eligible ⭐</span>':' <span style="color:var(--t4);font-weight:400"> · Your team</span>')+'</div>';
+    var selTm=inp.dataset.selectedtm||'';var isOpp=selTm&&g.team!==selTm;var isMine=selTm&&g.team===selTm;
+    html+='<div style="padding:6px 14px;font-size:11px;font-weight:700;color:'+(isOpp?'var(--t4)':'var(--t2)')+';background:var(--inp);border-bottom:1px solid var(--bdr)">'+g.name+' ('+g.short+')'+(isOpp?' <span style="color:var(--yel);font-weight:600"> · Jackpot eligible ⭐</span>':(isMine?' <span style="color:var(--t4);font-weight:400"> · Your team</span>':''))+'</div>';
     filtered.forEach(function(p){
       html+='<div style="padding:10px 14px;font-size:14px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background=\'var(--inp)\'" onmouseout="this.style.background=\'\'" onclick="momDDPick(\''+id+'\',\''+p.replace(/'/g,"\\'")+'\')">'+p+'<span style="font-size:11px;color:var(--t3)">'+g.short+'</span></div>';
     });
