@@ -1100,7 +1100,7 @@ function rM(){
     <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:16px 0">
       <div style="text-align:center;flex:1">
         ${bdg(m.h,56)}
-        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff);margin-top:6px">×${mo[m.h]}</div><div style="font-size:10px;color:var(--t4)">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.h]*100)}%</div>`:''}
+        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--t2);font-family:var(--ff);margin-top:6px">×${mo[m.h]}</div><div style="font-size:10px;color:var(--t4);opacity:0.7">${parseFloat(mo[m.h])<=parseFloat(mo[m.a])?"Fav":"Dog"} · ${Math.round(1/mo[m.h]*100)}%</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
         <div style="font-family:var(--ff);font-size:28px;font-weight:700;color:var(--t2)">VS</div>
@@ -1108,7 +1108,7 @@ function rM(){
       </div>
       <div style="text-align:center;flex:1">
         ${bdg(m.a,56)}
-        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff);margin-top:6px">×${mo[m.a]}</div><div style="font-size:10px;color:var(--t4)">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Favourite":"Underdog"} · ${Math.round(1/mo[m.a]*100)}%</div>`:''}
+        ${mo?`<div style="font-size:22px;font-weight:900;color:var(--t2);font-family:var(--ff);margin-top:6px">×${mo[m.a]}</div><div style="font-size:10px;color:var(--t4);opacity:0.7">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Fav":"Dog"} · ${Math.round(1/mo[m.a]*100)}%</div>`:''}
       </div>
     </div>`;
 
