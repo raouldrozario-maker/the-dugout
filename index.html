@@ -1404,7 +1404,7 @@ function rM(){
 
       // All picks — grouped by team
       h+=`<button class="tb" onclick="tBL(${m.id})" style="padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--t2);font-size:12px;font-weight:700;width:100%;text-align:center;cursor:pointer;transition:all .18s">👥 All ${ab.length} picks — tap to reveal</button>`;
-      h+=`<div id="bl-${m.id}" style="display:none;margin-top:8px">`;
+      h+=`<div id="bl-${m.id}" style="display:${window._blOpen&&window._blOpen[m.id]?'block':'none'};margin-top:8px">`;
 
       // Team groups
       [m.h,m.a].forEach(tm=>{
@@ -1796,7 +1796,7 @@ function shareWA(id){
 }
 function getDeadlineStr(m){const d=dl(m);return d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true})+' IST'}
 
-function tBL(id){const e=$('bl-'+id);if(e)e.style.display=e.style.display==='none'?'block':'none'}
+function tBL(id){const e=$('bl-'+id);if(e){const open=e.style.display==='none';e.style.display=open?'block':'none';if(!window._blOpen)window._blOpen={};window._blOpen[id]=open}}
 
 // ══════════════════════════════════════════════════════════════
 // LEADERBOARD
