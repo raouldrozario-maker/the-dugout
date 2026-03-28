@@ -937,10 +937,45 @@ function rH(){
 
   // ─── LOGIN (not logged in) ───
   if(!me){
-    h+=`<div class="card"><div class="ch"><span style="font-size:18px">👤</span><span class="ct">JOIN THE DUGOUT</span></div>`;
-    if(ns.length){h+=`<div style="font-size:13px;color:var(--t4);margin-bottom:10px">Tap your name to log in:</div><div class="cg">`;ns.forEach(n=>{const b=bal(n);h+=`<div class="chip" onclick="promptLogin('${n.replace(/'/g,"\\'")}')"><div class="ca">${n[0].toUpperCase()}</div><div><div style="font-weight:700;font-size:13px">${n}</div><div style="font-size:12px;font-weight:700;color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div></div></div>`});h+=`</div>`}
+    h+=`<div class="card"><div class="ch"><span style="font-size:18px">👤</span><span class="ct">SELECT YOUR PROFILE TO ENTER</span></div>`;
+    if(ns.length){
+      // Last logged-in shortcut
+      const lastUser=localStorage.getItem('dg-last-user');
+      if(lastUser&&S.p[lastUser]){
+        h+=`<div onclick="promptLogin('${lastUser.replace(/'/g,"\\\\'")}')" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
+          <div class="ca" style="width:36px;height:36px;font-size:16px">${lastUser[0].toUpperCase()}</div>
+          <div style="flex:1"><div style="font-size:11px;color:var(--t4);font-weight:700">⚡ CONTINUE AS</div><div style="font-weight:800;font-size:15px;color:var(--acc)">${lastUser}</div></div>
+          <div style="font-size:18px;color:var(--acc);opacity:.5">→</div>
+        </div>`;
+      }
+      // Search
+      h+=`<div style="position:relative;margin-bottom:14px"><input class="inp" id="login-search" placeholder="🔍 Search your name..." style="width:100%;padding-left:14px" oninput="filterLoginList(this.value)"></div>`;
+      // Alphabetical groups
+      const grouped={};ns.forEach(n=>{const letter=n[0].toUpperCase();if(!grouped[letter])grouped[letter]=[];grouped[letter].push(n)});
+      h+=`<div id="login-list">`;
+      Object.keys(grouped).sort().forEach(letter=>{
+        h+=`<div class="login-group" data-letter="${letter}"><div style="font-size:12px;font-weight:800;color:var(--acc);font-family:var(--ff);padding:6px 0;border-bottom:1px solid var(--bdr);margin-bottom:6px">${letter}</div>`;
+        grouped[letter].forEach(n=>{
+          const b=bal(n);
+          h+=`<div class="login-row" data-name="${n.toLowerCase()}" onclick="promptLogin('${n.replace(/'/g,"\\\\'")}')" style="display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background='transparent'">
+            <div class="ca" style="width:32px;height:32px;font-size:14px;flex-shrink:0">${n[0].toUpperCase()}</div>
+            <div style="flex:1;font-weight:700;font-size:14px;color:var(--t1)">${n}</div>
+            <div style="font-size:12px;font-weight:700;color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>
+          </div>`;
+        });
+        h+=`</div>`;
+      });
+      h+=`</div>`;
+    }
     h+=`<div id="login-prompt" style="display:none;margin-bottom:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <span id="login-prompt-name"></span></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
-    h+=`<div style="border-top:1px solid var(--bdr);padding-top:12px;margin-top:12px"><div style="font-size:12px;color:var(--t4);margin-bottom:8px">New player? Register below:</div><div class="ar"><input class="inp" id="inp-n" placeholder="Your name..." onkeydown="if(event.key==='Enter')showRegister()"><button class="bp" onclick="showRegister()">Join</button></div></div>`;
+    h+=`<div style="margin-top:20px;background:linear-gradient(135deg,var(--card),var(--surf));border:1px solid var(--bdr-strong);border-radius:16px;padding:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-size:20px">🏏</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">NEW TO THE DUGOUT?</span></div>
+      <div style="font-size:13px;color:var(--t3);margin-bottom:14px">Enter your name and take your seat</div>
+      <div style="display:flex;border:1px solid var(--bdr2);border-radius:12px;overflow:hidden;background:var(--inp)">
+        <input class="inp" id="inp-n" placeholder="Your name..." style="flex:1;border:0;border-radius:12px 0 0 12px;background:transparent" onkeydown="if(event.key==='Enter')showRegister()">
+        <button style="background:var(--grad);border:0;padding:12px 22px;color:#000;font-weight:800;cursor:pointer;font-size:14px;white-space:nowrap" onclick="showRegister()">Join →</button>
+      </div>
+    </div>`;
     h+=`<div id="register-prompt" style="display:none;margin-top:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Set your PIN</div><div style="font-size:12px;color:var(--t4);margin-bottom:8px">You'll need this every time you log in. Don't forget it!</div><div class="ar"><input class="inp" type="password" id="reg-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')addP()"><button class="bp" onclick="addP()">Register</button></div><div id="reg-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`</div>`;
   }
@@ -4344,6 +4379,13 @@ function delBet(k,player,team,amt){const msg=player&&team&&amt?`Delete ${player}
 
 // Player actions
 let pendingLogin='';
+function filterLoginList(q){
+  q=q.toLowerCase().trim();
+  const rows=document.querySelectorAll('.login-row');
+  const groups=document.querySelectorAll('.login-group');
+  rows.forEach(r=>{r.style.display=!q||r.dataset.name.includes(q)?'flex':'none'});
+  groups.forEach(g=>{const visible=g.querySelectorAll('.login-row[style*="flex"]');g.style.display=visible.length?'block':'none'});
+}
 function promptLogin(n){
   if(me===n)return;
   pendingLogin=n;
@@ -4371,7 +4413,7 @@ function confirmLogin(){
   const pdata=S.p[pendingLogin];
   if(!pdata||!pdata.pin){$('login-err').textContent='Account error — contact admin';return}
   hashPin(pin).then(h=>{
-    if(h===pdata.pin){me=pendingLogin;localStorage.setItem('dg-me',me);pendingLogin='';uh();nav('matches');toast('Welcome back, '+me+'! 🏏')}
+    if(h===pdata.pin){me=pendingLogin;localStorage.setItem('dg-me',me);localStorage.setItem('dg-last-user',me);pendingLogin='';uh();nav('matches');toast('Welcome back, '+me+'! 🏏')}
     else{$('login-err').textContent='Wrong PIN!'}
   });
 }
