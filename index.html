@@ -1095,7 +1095,7 @@ function rH(){
   // ─── COMPACT STATUS STRIP ───
   if(ns.length>1){
     const totalWagered=Object.values(S.b).reduce((s,b)=>s+b.am,0);
-    const hasDiff=L.some(p=>p.b!==ST);
+    const hasDiff=L.length>=2&&L[0].b>L[1].b;
     const leader=L[0];
 
     h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:16px">
@@ -1183,7 +1183,7 @@ function rM(){
   // Cache lock state once to prevent race condition between filter and card render
   const _lkCache={};allM.forEach(m=>{_lkCache[m.id]=lk(m)});
   const lkC=m=>_lkCache[m.id]!==undefined?_lkCache[m.id]:lk(m);
-  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lkC(m)):mf==='locked'?allM.filter(m=>lkC(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):allM;
+  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lkC(m)):mf==='locked'?allM.filter(m=>lkC(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):mf==='livebets'?allM.filter(m=>Object.values(S.b).some(b=>b.mid===m.id)):allM;
   // Auto-switch to most relevant filter if current shows nothing
   if(!fm.length&&mf==='upcoming'){const locked=allM.filter(m=>lkC(m)&&!S.r[m.id]);const results=allM.filter(m=>S.r[m.id]);if(locked.length){mf='locked';fm=locked}else if(results.length){mf='results';fm=results}}
   const risk=me?atRisk(me):0;
@@ -1211,10 +1211,112 @@ function rM(){
 
   if(me){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?'<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active</div>':''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk</div>`:''}</div></div>`}
   else if(adm){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">⚙️</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Viewing as</div><div style="font-weight:800;font-size:15px;color:var(--acc)">Admin</div></div></div></div>`}
-  h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
-  if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
+  h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">👁 Live</button>`:''}</div>`;
+  if(mf==='livebets'&&adm){
+    h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 16px;background:rgba(212,162,78,0.04);border:1px solid rgba(212,162,78,0.12);border-radius:12px">
+      <span style="font-size:18px">👁</span>
+      <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">ADMIN — LIVE BET MONITOR</div><div style="font-size:11px;color:var(--t4)">Real-time view of all bets across matches · Only you can see this</div></div>
+    </div>`;
+  }
+  if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">${mf==='livebets'?'No bets placed yet.':'Nothing here yet.'}</div>`;
   fm.forEach(m=>{
     const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
+
+    // Admin Live tab — compact collapsible view
+    if(mf==='livebets'&&adm){
+      const hB=ab.filter(x=>x.tm===m.h),aB=ab.filter(x=>x.tm===m.a);
+      const tAm=ab.reduce((s,x)=>s+x.am,0);
+      const statusTag=rs?(rs.voided?'🌧️':'✅'):l?'🔒':'🟢';
+      h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.lv-chev').textContent=el.style.display==='block'?'▾':'▸'">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="lv-chev" style="color:var(--acc);font-size:14px;font-weight:700">▸</span>
+            <span style="font-weight:800;font-size:14px;color:var(--t1)">M${m.id} · ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}</span>
+            <span style="font-size:11px;color:var(--t4)">${statusTag}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:12px;color:var(--t3)">${ab.length} bet${ab.length>1?'s':''}</span>
+            <span style="font-size:13px;font-weight:800;font-family:var(--ff);color:var(--acc)">₹${tAm.toLocaleString()}</span>
+          </div>
+        </div>
+        <div style="display:none;padding:0 18px 14px;background:var(--card)">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);padding:8px 0;border-bottom:1px solid var(--bdr)">
+            <span><span style="color:${T[m.h]?.c||'var(--t2)'};font-weight:700">${hB.length}×${T[m.h]?.s}</span> · <span style="color:${T[m.a]?.c||'var(--t2)'};font-weight:700">${aB.length}×${T[m.a]?.s}</span></span>
+            <span>${fd(m.d)} · ${ft(m.t)}</span>
+          </div>`;
+      ab.sort((a,b)=>a.u.localeCompare(b.u)).forEach(x=>{
+        h+=`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(x.u)}</span>
+              <span style="background:${T[x.tm]?.c||'var(--acc)'};color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:4px">${T[x.tm]?.s}</span>
+            </div>
+            <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:var(--t2)">₹${x.am.toLocaleString()}</span>
+          </div>
+          ${x.mom?`<div style="font-size:10px;color:var(--yel);margin-top:2px">🎯 ${x.mom}</div>`:''}
+        </div>`;
+      });
+      h+=`</div></div>`;
+      return; // skip full card rendering
+    }
+
+    // Results tab — compact collapsible cards
+    if(mf==='results'&&rs){
+      const winners=ab.filter(x=>x.tm===rs.w),losers=ab.filter(x=>x.tm!==rs.w);
+      const tAm=ab.reduce((s,x)=>s+x.am,0);
+      const momHits=ab.filter(x=>momMatch(x.mom,rs.mom));
+      h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.rs-chev').textContent=el.style.display==='block'?'▾':'▸'">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="rs-chev" style="color:var(--acc);font-size:14px;font-weight:700">▸</span>
+            <span style="font-weight:800;font-size:14px;color:var(--t1)">${T[m.h]?.s} vs ${T[m.a]?.s}</span>
+            ${rs.voided?'<span style="font-size:11px;color:var(--t4)">🌧️ Voided</span>':`<span style="font-size:11px;color:var(--grn);font-weight:700">🏆 ${T[rs.w]?.s} won</span>`}
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            ${rs.mom?`<span style="font-size:11px;color:var(--yel)">🏅 ${rs.mom}</span>`:''}
+            <span style="font-size:12px;color:var(--t4)">${fd(m.d)}</span>
+          </div>
+        </div>
+        <div style="display:none;padding:14px 18px;background:var(--card);border-top:1px solid var(--bdr)">
+          <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+            <div style="font-size:12px;color:var(--grn)">✅ ${winners.length} won</div>
+            <div style="font-size:12px;color:var(--red)">❌ ${losers.length} lost</div>
+            ${momHits.length?`<div style="font-size:12px;color:var(--yel)">🎯 ${momHits.length} MoM correct</div>`:''}
+            <div style="font-size:12px;color:var(--t4)">₹${tAm.toLocaleString()} wagered</div>
+          </div>`;
+      // Winners
+      if(winners.length){
+        h+=`<div style="font-size:10px;font-weight:700;color:var(--grn);text-transform:uppercase;letter-spacing:1px;padding:6px 0;border-bottom:1px solid var(--bdr)">WON (${winners.length})</div>`;
+        winners.sort((a,b)=>b.am-a.am).forEach(x=>{
+          const od=safeOd(x),mh=momMatch(x.mom,rs.mom);
+          const profit=Math.round(x.am*(od-1))+(mh?Math.round(x.am*MOM_BONUS):0);
+          h+=`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(x.u)}</span>
+              <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:var(--grn)">+₹${profit.toLocaleString()}</span>
+            </div>
+            <div style="font-size:10px;color:var(--t4);margin-top:2px">₹${x.am.toLocaleString()} @ ×${x.od}${mh?' · 🎯 MoM bonus':''}</div>
+          </div>`;
+        });
+      }
+      // Losers
+      if(losers.length){
+        h+=`<div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:1px;padding:6px 0;border-bottom:1px solid var(--bdr);margin-top:8px">LOST (${losers.length})</div>`;
+        losers.sort((a,b)=>b.am-a.am).forEach(x=>{
+          const mh=momMatch(x.mom,rs.mom);
+          h+=`<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(x.u)}</span>
+              <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:${mh?'var(--grn)':'var(--red)'}">${mh?'₹0 saved':'-₹'+x.am.toLocaleString()}</span>
+            </div>
+            <div style="font-size:10px;color:var(--t4);margin-top:2px">₹${x.am.toLocaleString()} on ${T[x.tm]?.s}${mh?' · 🛡️ MoM save':''}</div>
+          </div>`;
+        });
+      }
+      h+=`</div></div>`;
+      return;
+    }
+
     const hBets=ab.filter(x=>x.tm===m.h).length,aBets=ab.filter(x=>x.tm===m.a).length;
     const hMoney=ab.filter(x=>x.tm===m.h).reduce((s,x)=>s+x.am,0),aMoney=ab.filter(x=>x.tm===m.a).reduce((s,x)=>s+x.am,0);
     const totalAb=hBets+aBets||1;
@@ -4003,12 +4105,39 @@ function rA(){
   h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
-  else{allBets.forEach(([k,b])=>{h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${rpn(b.u)}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>₹${b.am.toLocaleString()}</span><span style="color:${b._fb?'var(--yel)':'var(--t4)'}">×${b.od}${b._fb?'⚠️':''}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}<span style="color:var(--t3);font-size:11px">M${b.mid}</span></div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\'")}','${b.u.replace(/'/g,"\\'")}','${b.tm}',${b.am})">✕</button></div>`})}
+  else{
+    const betsByMatch={};
+    allBets.forEach(([k,b])=>{if(!betsByMatch[b.mid])betsByMatch[b.mid]=[];betsByMatch[b.mid].push([k,b])});
+    const matchIds=Object.keys(betsByMatch).sort((a,b)=>parseInt(b)-parseInt(a));
+    h+=`<div style="font-size:12px;color:var(--t4);margin-bottom:10px">${allBets.length} total bets across ${matchIds.length} match${matchIds.length>1?'es':''}</div>`;
+    matchIds.forEach(mid=>{
+      const mBets=betsByMatch[mid];
+      const m=gm(parseInt(mid));
+      const mLabel=m?`${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}`:'Match #'+mid;
+      const hasResult=!!S.r[mid];
+      h+=`<div style="margin-bottom:8px;border:1px solid var(--bdr);border-radius:10px;overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--inp);cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.ab-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="ab-chev" style="color:var(--t4);font-size:12px">\u25b8</span>
+            <span style="font-weight:700;font-size:13px;color:var(--t1)">M${mid} \u00b7 ${mLabel}</span>
+            <span style="font-size:11px;color:var(--t3)">${mBets.length} bet${mBets.length>1?'s':''}</span>
+            ${hasResult?'<span style="font-size:10px;color:var(--grn)">\u2705</span>':''}
+          </div>
+          <span style="font-size:12px;color:var(--t4);font-family:var(--ff)">\u20b9${mBets.reduce((s,[,b])=>s+b.am,0).toLocaleString()}</span>
+        </div>
+        <div style="display:none">`;
+      mBets.sort((a,b)=>a[1].u.localeCompare(b[1].u)).forEach(([k,b])=>{
+        h+=`<div class="bi" style="justify-content:space-between"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="bi-u">${rpn(b.u)}</span><span style="color:${T[b.tm]?.c||'var(--acc)'};font-weight:800">${b.tm}</span><span>\u20b9${b.am.toLocaleString()}</span><span style="color:${b._fb?'var(--yel)':'var(--t4)'}">\u00d7${b.od}${b._fb?'\u26a0\ufe0f':''}</span>${b.mom?`<span style="color:var(--yel)">🎯${b.mom}</span>`:''}</div><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="delBet('${k.replace(/'/g,"\\\\'")}','${b.u.replace(/'/g,"\\\\'")}','${b.tm}',${b.am})">\u2715</button></div>`;
+      });
+      h+=`</div></div>`;
+    });
+  }
   h+=`</div>`;
+
   // Broadcast Announcement
   h+=`<div id="adm-broadcast" class="card"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
-  if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
+  if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // Manual Balance Adjustment
