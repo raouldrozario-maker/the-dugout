@@ -1836,6 +1836,37 @@ function calcWin(id){
     var hint=$('conf-hint-'+id);if(hint){hint.textContent=hasMom?'🔥 Strong combo — MoM locked in':''}
   }
 }
+function getScoutRec(m){
+  if(!m||m.h==='TBD')return null;
+  // Scout's logic: home advantage, historical league data, balanced action targeting
+  const hBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.h).length;
+  const aBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.a).length;
+  const hWins=Object.values(S.r).filter(r=>r.w===m.h).length;
+  const aWins=Object.values(S.r).filter(r=>r.w===m.a).length;
+  // Home team gets slight advantage (lower odds = favourite)
+  // Base: home 1.8, away 2.1 — adjust based on league history
+  let hBase=1.85,aBase=2.10;
+  if(hWins>aWins+1){hBase=1.65;aBase=2.40}
+  else if(aWins>hWins+1){hBase=2.20;aBase=1.75}
+  else if(hWins>aWins){hBase=1.75;aBase=2.20}
+  else if(aWins>hWins){hBase=2.05;aBase=1.85}
+  // Venue factor
+  const venue=m.v2||'';
+  const homeVenue=T[m.h]?.home||'';
+  const isHome=venue&&homeVenue&&venue.toLowerCase().includes(homeVenue.toLowerCase());
+  if(isHome){hBase=Math.max(1.5,hBase-0.1);aBase=Math.min(3.0,aBase+0.15)}
+  // Round to 1 decimal
+  const hOd=Math.round(hBase*10)/10;
+  const aOd=Math.round(aBase*10)/10;
+  const hPct=Math.round(1/hOd*100),aPct=Math.round(1/aOd*100);
+  // Build reason
+  let reasons=[];
+  if(isHome)reasons.push(T[m.h]?.s+' playing at home');
+  if(hWins>aWins)reasons.push(T[m.h]?.s+' has '+hWins+'W vs '+aWins+'W in league');
+  else if(aWins>hWins)reasons.push(T[m.a]?.s+' leads '+aWins+'W to '+hWins+'W in league');
+  reasons.push('Target: ~60/40 split for balanced action');
+  return{hOd:hOd.toFixed(1),aOd:aOd.toFixed(1),reason:reasons.join(' · ')};
+}
 function buildMatchView(mid){
   const bets=Object.values(S.b).filter(b=>b.mid===mid);
   const m=gm(mid);if(!m)return null;
@@ -4355,7 +4386,18 @@ function admDDToggle(ddId){
 }
 function admDDFilter(ddId,q){const dd=$(ddId);if(!dd)return;const opts=dd.querySelectorAll('.adm-dd-opt');const lq=q.toLowerCase();opts.forEach(o=>{o.style.display=o.dataset.text.toLowerCase().includes(lq)?'flex':'none'})}
 function oddsMC(){const id=parseInt($('odds-m').value),f=$('odds-f');if(!id){f.innerHTML='';return}const m=gm(id),ex=S.odds[id]||{};
-f.innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
+const scRec=getScoutRec(m);
+f.innerHTML=`${scRec&&!ex[m.h]?`<div style="background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.18);border-radius:10px;padding:12px 14px;margin:12px 0">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:10px;font-weight:700;color:var(--acc);letter-spacing:1px">💡 SCOUT\'S RECOMMENDATION</span>
+    <button style="background:var(--grad);border:0;border-radius:6px;padding:4px 12px;color:#000;font-size:10px;font-weight:800;cursor:pointer" onclick="$('od-h-${id}').value='${scRec.hOd}';$('od-a-${id}').value='${scRec.aOd}'">Apply →</button>
+  </div>
+  <div style="display:flex;gap:16px;margin-bottom:6px">
+    <span style="font-weight:800;font-size:14px;color:${T[m.h]?.c}">${T[m.h]?.s} ×${scRec.hOd}</span>
+    <span style="font-weight:800;font-size:14px;color:${T[m.a]?.c}">${T[m.a]?.s} ×${scRec.aOd}</span>
+  </div>
+  <div style="font-size:11px;color:var(--t4);line-height:1.4">${scRec.reason}</div>
+</div>`:''}<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
 function adminLog(action,detail){if(!S.logs)S.logs=[];S.logs.push({action:action,detail:detail,by:me||"admin",ts:new Date().toISOString()});if(S.logs.length>500)S.logs=S.logs.slice(-500)}
 function sOdds(id){if(!adm){toast("Admin only","err");return}const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1.01||av<1.01||isNaN(hv)||isNaN(av)){toast('Invalid odds — must be > 1.00 for both teams','err');return}
@@ -4440,8 +4482,23 @@ function renderMCP(){
   if(step===1){
     const hOd=mo[m.h]||'',aOd=mo[m.a]||'';
     h+=`<div class="card" style="padding:20px">
-      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px">STEP 1 — Set Odds</div>
-      <div style="display:flex;gap:12px;margin-bottom:12px">
+      <div style="font-size:14px;font-weight:800;color:var(--acc);margin-bottom:16px">STEP 1 — Set Odds</div>`;
+    // Scout's recommendation
+    const scoutRec=getScoutRec(m);
+    if(scoutRec&&!hOd){
+      h+=`<div style="background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.18);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:10px;font-weight:700;color:var(--acc);letter-spacing:1px">💡 SCOUT'S RECOMMENDATION</span>
+          <button style="background:var(--grad);border:0;border-radius:6px;padding:4px 12px;color:#000;font-size:10px;font-weight:800;cursor:pointer" onclick="$('mcp-od-h').value='${scoutRec.hOd}';$('mcp-od-a').value='${scoutRec.aOd}'">Apply →</button>
+        </div>
+        <div style="display:flex;gap:16px;margin-bottom:6px">
+          <span style="font-weight:800;font-size:14px;color:${hc}">${hs} ×${scoutRec.hOd}</span>
+          <span style="font-weight:800;font-size:14px;color:${ac}">${as} ×${scoutRec.aOd}</span>
+        </div>
+        <div style="font-size:11px;color:var(--t4);line-height:1.4">${scoutRec.reason}</div>
+      </div>`;
+    }
+    h+=`<div style="display:flex;gap:12px;margin-bottom:12px">
         <div style="flex:1"><div style="font-size:12px;font-weight:700;color:${hc};margin-bottom:4px">${hs}</div><input class="bf-i" type="text" inputmode="decimal" id="mcp-od-h" value="${hOd}" placeholder="e.g. 1.85" oninput="this.value=this.value.replace(/[^0-9.]/g,'')"></div>
         <div style="flex:1"><div style="font-size:12px;font-weight:700;color:${ac};margin-bottom:4px">${as}</div><input class="bf-i" type="text" inputmode="decimal" id="mcp-od-a" value="${aOd}" placeholder="e.g. 2.10" oninput="this.value=this.value.replace(/[^0-9.]/g,'')"></div>
       </div>
