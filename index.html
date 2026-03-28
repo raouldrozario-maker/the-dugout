@@ -600,10 +600,13 @@ function momDDPick(id,val){
   var inp=$(id),dd=$(id+'-dd');
   if(inp)inp.value=val;if(dd)dd.style.display='none';
   var clr=$(id+'-clear');if(clr)clr.style.display=val?'block':'none';
+  // Extract match ID from the input ID (format: mo-{matchId}) and recalculate
+  var mid=id.replace('mo-','');if(mid&&!isNaN(parseInt(mid)))calcWin(parseInt(mid));
 }
 function momDDClear(id){
   var inp=$(id);if(inp){inp.value='';inp.focus()}
   var clr=$(id+'-clear');if(clr)clr.style.display='none';
+  var mid=id.replace('mo-','');if(mid&&!isNaN(parseInt(mid)))calcWin(parseInt(mid));
   momDDOpen(id);
 }
 
@@ -1482,8 +1485,8 @@ function rM(){
       }
     }
 
-    // Social signal — bet crowd bias (only after lock when bets are public)
-    if(ab.length>=2&&m.h!=='TBD'&&(l||rs)){
+    // Social signal — bet crowd bias (only on results, locked uses the reveal's crowd split)
+    if(ab.length>=2&&m.h!=='TBD'&&rs){
       const hBets=ab.filter(x=>x.tm===m.h).length,aBets=ab.filter(x=>x.tm===m.a).length;
       const hAm=ab.filter(x=>x.tm===m.h).reduce((s,x)=>s+x.am,0),aAm=ab.filter(x=>x.tm===m.a).reduce((s,x)=>s+x.am,0);
       if(hBets+aBets>0){
@@ -1492,8 +1495,7 @@ function rM(){
       }
     }
 
-    // Lock state label
-    if(l&&!rs){h+=`<div style="margin-top:10px;text-align:center;font-size:13px;color:var(--t4);font-weight:700">🔒 Betting Closed</div>`}
+    // Lock state — no separate label needed, the reveal view communicates it
 
     // Place bet button
     if(!l&&!my&&mo&&!rs){
@@ -1505,31 +1507,24 @@ function rM(){
 
     // All bets (after lock) — narrative view
     if(ab.length&&l){
-      const hBets=ab.filter(x=>x.tm===m.h),aBets=ab.filter(x=>x.tm===m.a);
-      const hAm=hBets.reduce((s,x)=>s+x.am,0),aAm=aBets.reduce((s,x)=>s+x.am,0);
-      const totalAm=hAm+aAm;
-      const hPct=totalAm?Math.round(hAm/totalAm*100):50,aPct=100-hPct;
-      // MoM grouping
-      const momGroups={};ab.forEach(x=>{if(x.mom){if(!momGroups[x.mom])momGroups[x.mom]={count:0,am:0,tm:x.tm,players:[]};momGroups[x.mom].count++;momGroups[x.mom].am+=x.am;momGroups[x.mom].players.push(x)}});
-      const momSorted=Object.entries(momGroups).sort((a,b)=>b[1].count-a[1].count);
-      const loneWolves=momSorted.filter(([,v])=>v.count===1);
-      const topMom=momSorted.filter(([,v])=>v.count>=2);
-      const maxBet=Math.max(...ab.map(x=>x.am));
-      const bigBettor=ab.find(x=>x.am===maxBet);
+      const vm=buildMatchView(m.id);
+      if(vm){
+      const hTm=vm.teams[m.h]||{bets:[],total:0,amount:0,heat:0},aTm=vm.teams[m.a]||{bets:[],total:0,amount:0,heat:0};
+      const hPct=vm.totalAmount?Math.round(hTm.amount/vm.totalAmount*100):50,aPct=100-hPct;
 
       h+=`<div style="margin-top:14px">`;
       // Crowd split bar
       h+=`<div style="background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${T[m.h]?.s} · ${hBets.length} bets · ₹${hAm.toLocaleString()}</span><span style="color:${T[m.a]?.c||'var(--t2)'}">₹${aAm.toLocaleString()} · ${aBets.length} bets · ${T[m.a]?.s}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${T[m.h]?.s} · ${hTm.total} bets · ₹${hTm.amount.toLocaleString()}</span><span style="color:${T[m.a]?.c||'var(--t2)'}">₹${aTm.amount.toLocaleString()} · ${aTm.total} bets · ${T[m.a]?.s}</span></div>
         <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--inp)"><div style="width:${hPct}%;background:${T[m.h]?.c||'var(--acc)'};border-radius:4px 0 0 4px;opacity:.7"></div><div style="width:${aPct}%;background:${T[m.a]?.c||'var(--t3)'};border-radius:0 4px 4px 0;opacity:.7"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900;font-family:var(--ff);margin-top:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${hPct}%</span><span style="font-size:12px;color:var(--t4);align-self:center">₹${totalAm.toLocaleString()} total</span><span style="color:${T[m.a]?.c||'var(--t2)'}">${aPct}%</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900;font-family:var(--ff);margin-top:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${hPct}%</span><span style="font-size:12px;color:var(--t4);align-self:center">₹${vm.totalAmount.toLocaleString()} total</span><span style="color:${T[m.a]?.c||'var(--t2)'}">${aPct}%</span></div>
       </div>`;
 
       // Top MoM picks (2+ players)
-      if(topMom.length){
+      if(vm.topMom.length){
         h+=`<div style="margin-bottom:10px">`;
         h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔥 Popular MoM Picks</div>`;
-        topMom.slice(0,3).forEach(([name,data])=>{
+        vm.topMom.slice(0,3).forEach(([name,data])=>{
           h+=`<div style="background:var(--inp);border:1px solid var(--bdr);border-left:3px solid ${T[data.tm]?.c||'var(--acc)'};border-radius:10px;padding:10px 12px;margin-bottom:6px">
             <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:800;color:var(--t1);font-size:13px">🎯 ${name}</span><span style="font-size:11px;color:var(--t3)">${data.count} players · ₹${data.am.toLocaleString()}</span></div>
             <div style="font-size:11px;color:var(--t4);margin-top:3px">${data.players.map(p=>rpn(p.u)).join(', ')}</div>
@@ -1542,17 +1537,14 @@ function rM(){
       h+=`<button class="tb" onclick="tBL(${m.id})" style="padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--t2);font-size:12px;font-weight:700;width:100%;text-align:center;cursor:pointer;transition:all .18s">👥 All ${ab.length} picks — tap to reveal</button>`;
       h+=`<div id="bl-${m.id}" style="display:${window._blOpen&&window._blOpen[m.id]?'block':'none'};margin-top:8px">`;
 
-      // Compute heat + MoM counts for this match
-      const hCount=ab.filter(x=>x.tm===m.h).length,aCount=ab.filter(x=>x.tm===m.a).length;
-      const maxCount=Math.max(hCount,aCount,1);
-      const momCounts={};ab.forEach(x=>{if(x.mom){momCounts[x.mom]=(momCounts[x.mom]||0)+1}});
+      // Use view model for heat + MoM counts
 
       // Team groups
       [m.h,m.a].forEach(tm=>{
         const teamBets=ab.filter(x=>x.tm===tm).sort((a,b)=>b.am-a.am);
         if(!teamBets.length)return;
         const teamAm=teamBets.reduce((s,x)=>s+x.am,0);
-        const heat=teamBets.length/maxCount;
+        const heat=vm.teams[tm]?vm.teams[tm].heat:0;
         const isHot=heat>0.7;const isCold=heat<0.4;
         const heatLabel=isHot?'🔥 Crowd Favourite':isCold?'🧊 Underdog':'';
         const glowStyle=isHot?';box-shadow:0 0 '+Math.round(16*heat)+'px rgba(212,162,78,'+(0.1+heat*0.2).toFixed(2)+');background:rgba(212,162,78,'+(0.03+heat*0.08).toFixed(2)+')':'';
@@ -1561,8 +1553,8 @@ function rM(){
           <span style="font-size:12px;color:var(--t4);font-weight:700;font-family:var(--ff)">₹${teamAm.toLocaleString()}</span>
         </div>`;
         teamBets.forEach(x=>{
-          const isBig=x.am>=maxBet*0.8;
-          const isLone=x.mom&&momCounts[x.mom]===1;
+          const isBig=x.am>=vm.maxBet*0.8;
+          const isLone=x.mom&&vm.momCounts[x.mom]===1;
           h+=`<div style="padding:10px 4px 8px;border-bottom:1px solid rgba(255,255,255,0.02)">
             <div style="display:flex;align-items:center;justify-content:space-between">
               <span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(x.u)}</span>
@@ -1574,9 +1566,9 @@ function rM(){
       });
 
       // Lone wolves
-      if(loneWolves.length){
+      if(vm.loneWolves.length){
         h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 0 6px;border-bottom:1px solid var(--bdr)">🧊 Lone Wolf MoM Picks</div>`;
-        loneWolves.forEach(([name,data])=>{
+        vm.loneWolves.forEach(([name,data])=>{
           const p=data.players[0];
           h+=`<div style="padding:10px 4px 8px;border-bottom:1px solid rgba(255,255,255,0.02)">
             <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1588,7 +1580,7 @@ function rM(){
         });
       }
       h+=`</div></div>`;
-    }
+    }}
     else if(ab.length&&!l){h+=`<div style="margin-top:10px;padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;font-size:12px;color:var(--t3);text-align:center">🔒 ${ab.length} bet${ab.length>1?'s':''} placed — revealed after lock</div>`}
     if(!rs)h+=`<button style="margin-top:8px;background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;font-weight:600" onclick="shareWA(${m.id})">📤 Share on WhatsApp</button>`;
     h+=`</div>`;
@@ -1736,10 +1728,10 @@ function cancelEdit(id,oldBet){
   }
 }
 
-function pk(id,tm){bfs[id]=bfs[id]||{};if(bfs[id].tm===tm)return;bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.05)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.35'}}});toast('You\'re backing '+(T[tm]?.s||tm)+' 💪');const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Lock ₹'+am.toLocaleString()+' on '+(T[tm]?.s||tm)+' 🔒':'Confirm Bet'}calcWin(id);
+function pk(id,tm){bfs[id]=bfs[id]||{};if(bfs[id].tm===tm)return;bfs[id].tm=tm;const m=gm(id);[m.h,m.a].forEach(t=>{const b=$('pk-'+id+'-'+t);if(b){if(t===tm){b.style.background=T[t]?.c||'#888';b.style.color='#fff';b.style.transform='scale(1.05)';b.style.boxShadow='0 0 8px '+(T[t]?.c||'#888')+'44';b.style.opacity='1'}else{b.style.background='transparent';b.style.color=T[t]?.c||'#888';b.style.transform='scale(1)';b.style.boxShadow='none';b.style.opacity='.35'}}});const momEl=$('mo-'+id);if(momEl)momEl.dataset.selectedtm=tm;toast('You\'re backing '+(T[tm]?.s||tm)+' 💪');const cta=$('cta-'+id);if(cta){const am=parseAmt(id);cta.textContent=am?'Lock ₹'+am.toLocaleString()+' on '+(T[tm]?.s||tm)+' 🔒':'Confirm Bet'}calcWin(id);
   // Auto-prime amount if empty (removes blank state)
   var amInp=$('am-'+id);
-  if(amInp&&!amInp.value){var defAmt=Math.min(2000,betBal(me));if(defAmt>=500){amInp.value=defAmt.toLocaleString();clsVis(amInp);calcWin(id);var qbs=amInp.closest('.bf-s');if(qbs){qbs.querySelectorAll('.bf-qb').forEach(function(b){if(b.textContent.indexOf('₹'+defAmt.toLocaleString())>=0&&!b.classList.contains('ai'))b.style.borderColor='var(--acc)';else b.style.borderColor='var(--bdr)'})}setTimeout(function(){var ct=$('cta-'+id);if(ct){ct.classList.remove('cta-ready');void ct.offsetWidth;ct.classList.add('cta-ready')}},150)}}  try{var momWrap=$('mo-'+id);if(momWrap){var momInp=$(('mo-'+id));if(momInp)momInp.value='';momWrap.outerHTML=momDropdown('mo-'+id,id)}}catch(e){console.error('MoM re-render:',e)}}
+  if(amInp&&!amInp.value){var defAmt=Math.min(2000,betBal(me));if(defAmt>=500){amInp.value=defAmt.toLocaleString();clsVis(amInp);calcWin(id);var qbs=amInp.closest('.bf-s');if(qbs){qbs.querySelectorAll('.bf-qb').forEach(function(b){if(b.textContent.indexOf('₹'+defAmt.toLocaleString())>=0&&!b.classList.contains('ai'))b.style.borderColor='var(--acc)';else b.style.borderColor='var(--bdr)'})}setTimeout(function(){var ct=$('cta-'+id);if(ct){ct.classList.remove('cta-ready');void ct.offsetWidth;ct.classList.add('cta-ready')}},150)}}}
 
 function fmtAmt(el){const raw=el.value.replace(/[^0-9]/g,'');if(!raw){el.value='';el.style.borderColor='var(--bdr)';return}let num=parseInt(raw);const b=betBal(me);if(num>b&&b>0){num=b;el.style.borderColor='var(--red)';setTimeout(()=>{el.style.borderColor='var(--bdr)'},800)}el.value=num.toLocaleString()}
 function clsVis(el){el.classList.toggle('has-val',!!el.value)}
@@ -1768,14 +1760,23 @@ function calcWin(id){
   const newBalLose=Math.max(curBal-am,MINB);
   const momSel=$('mo-'+id);
   const hasMom=momSel&&momSel.value.trim();
-  // Hook teaser — shows total payout (stake back + profit + mom)
-  const totalPayout=am+win+(hasMom?momBonus:0);
-  const netProfit=win+(hasMom?momBonus:0);
+  const m=gm(id);
+  // Detect jackpot (MoM from opposing team)
+  let isJackpotPick=false;
+  if(hasMom&&f.tm&&m){
+    const oppTeam=f.tm===m.h?m.a:m.h;
+    const oppSq=typeof getSquad==='function'?getSquad(oppTeam):(T[oppTeam]?.sq||[]);
+    isJackpotPick=oppSq.some(p=>p.toLowerCase()===hasMom.toLowerCase());
+  }
+  const jackpotBonus=isJackpotPick?Math.round(am*(od-1)):0;
+  // Hook teaser — shows total payout (stake back + profit + mom + jackpot)
+  const totalPayout=am+win+(hasMom?momBonus:0)+jackpotBonus;
+  const netProfit=win+(hasMom?momBonus:0)+jackpotBonus;
   // Win/Lose hero cards
   const bv=$('wc-bal-'+id);
   if(bv){bv.textContent='₹'+totalPayout.toLocaleString();bv.style.color='var(--grn)'}
   const wd=$('wc-windetail-'+id);
-  if(wd)wd.innerHTML='+₹'+win.toLocaleString()+' profit'+(hasMom?'<br><span style="color:var(--acc);font-size:11px">+₹'+momBonus.toLocaleString()+' if '+hasMom+' hits MoM</span>':'');
+  if(wd)wd.innerHTML='+₹'+win.toLocaleString()+' profit'+(isJackpotPick?'<br><span style="color:var(--yel);font-size:11px">⭐ JACKPOT +₹'+(momBonus+jackpotBonus).toLocaleString()+' if '+hasMom+' hits MoM</span>':hasMom?'<br><span style="color:var(--acc);font-size:11px">+₹'+momBonus.toLocaleString()+' if '+hasMom+' hits MoM</span>':'');
   const lv=$('wc-lose-'+id);
   if(lv){lv.textContent=(hasMom?'₹0 loss':'−₹'+am.toLocaleString());lv.style.color='var(--red)'}
   const ll=$('wc-loselabel-'+id);
@@ -1802,7 +1803,7 @@ function calcWin(id){
     s+=`<div class="calc-foot-item calc-foot-lose"><strong>Lose →</strong> ${hasMom?'₹0 loss (MoM saves you)':'₹'+newBalLose.toLocaleString()+' balance'}</div>`;
     s+=`</div>`;
     if(hasMom)s+=`<div class="calc-confidence">Solid upside with safety net 🔥</div>`;
-    s+=`<div class="calc-trust">${bt._fb?'⚠️ Default ×2 odds applied — admin to update':'✓ Calculated live from match odds'}</div>`;
+    s+=`<div class="calc-trust">✓ Calculated live from match odds</div>`;
     sb.innerHTML=s;
   }
   // CTA button
@@ -1811,6 +1812,30 @@ function calcWin(id){
     cta.textContent='Lock ₹'+am.toLocaleString()+' on '+tmName+' 🔒';
     var hint=$('conf-hint-'+id);if(hint){hint.textContent=hasMom?'🔥 Strong combo — MoM locked in':''}
   }
+}
+function buildMatchView(mid){
+  const bets=Object.values(S.b).filter(b=>b.mid===mid);
+  const m=gm(mid);if(!m)return null;
+  const teams={};
+  bets.forEach(b=>{
+    if(!teams[b.tm])teams[b.tm]={bets:[],momMap:{},total:0,amount:0};
+    teams[b.tm].bets.push(b);
+    teams[b.tm].total++;
+    teams[b.tm].amount+=b.am;
+    const mom=b.mom||null;
+    if(mom)teams[b.tm].momMap[mom]=(teams[b.tm].momMap[mom]||0)+1;
+  });
+  const maxCount=Math.max(...Object.values(teams).map(t=>t.total),1);
+  const maxBet=Math.max(...bets.map(x=>x.am),0);
+  // Global MoM counts across all teams
+  const momCounts={};bets.forEach(b=>{if(b.mom)momCounts[b.mom]=(momCounts[b.mom]||0)+1});
+  // MoM groups sorted
+  const momGroups={};bets.forEach(b=>{if(b.mom){if(!momGroups[b.mom])momGroups[b.mom]={count:0,am:0,tm:b.tm,players:[]};momGroups[b.mom].count++;momGroups[b.mom].am+=b.am;momGroups[b.mom].players.push(b)}});
+  const momSorted=Object.entries(momGroups).sort((a,b)=>b[1].count-a[1].count);
+  Object.keys(teams).forEach(t=>{teams[t].heat=teams[t].total/maxCount});
+  return{teams,bets,momCounts,momGroups,momSorted,maxBet,totalAmount:bets.reduce((s,x)=>s+x.am,0),
+    topMom:momSorted.filter(([,v])=>v.count>=2),
+    loneWolves:momSorted.filter(([,v])=>v.count===1)};
 }
 function narrateOutcome(bt){
   const rs=S.r[bt.mid];if(!rs||rs.voided)return'';
