@@ -1115,26 +1115,6 @@ function rH(){
     }
   }
 
-  // ─── COMPACT STATUS STRIP ───
-  if(ns.length>1){
-    const totalWagered=Object.values(S.b).reduce((s,b)=>s+b.am,0);
-    const hasDiff=L.length>=2&&L[0].b>L[1].b;
-    const leader=L[0];
-
-    h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-          <div style="font-size:13px;color:var(--t2)">🔥 <span style="font-weight:900;color:var(--acc);font-family:var(--ff)">₹${totalWagered.toLocaleString()}</span> in play</div>
-          <div style="font-size:12px;color:var(--t4)"><span style="font-weight:800;color:var(--t2)">${ns.length}</span> players · <span style="font-weight:800;color:var(--t2)">${totalBets}</span> bets</div>
-        </div>
-        ${hasDiff&&leader?`<div style="font-size:12px;color:var(--t4)">👑 <span style="font-weight:800;color:var(--acc)">${leader.n}</span> leads</div>`:''}
-      </div>
-      <div style="margin-top:10px;text-align:center">
-        <button style="background:0;border:0;color:var(--acc);cursor:pointer;font-size:12px;font-weight:700" onclick="nav('board')">View full leaderboard →</button>
-      </div>
-    </div>`;
-  }
-
   // ─── TRASH TALK WALL ───
   if(ns.length>1){
     const allMsgs=(S.trash||[]).slice().reverse();
@@ -1151,31 +1131,38 @@ function rH(){
         <button style="background:var(--grad);border:0;border-radius:10px;padding:8px 16px;color:#000;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0" onclick="postTrash()">Send</button>
       </div>`;
     }
-    if(!allMsgs.length){h+=`<div style="color:var(--t3);font-size:13px;text-align:center;padding:12px">No trash talk yet — be the first! 🎤</div>`}
+    if(!allMsgs.length){h+=`<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">No trash talk yet — drop the first message 🎤</div>`}
     else{
-      // Time grouping
-      let lastGroup='';
+      let lastGroup='',lastUser='',lastIsMe=null;
       msgs.forEach((m,i)=>{
         const isMe=me===m.u;
         const tagged=me&&hasMention(m.msg,me);
-        const ago=timeAgo(m.ts);
         const d=new Date(m.ts);const now=new Date();
         const isToday=d.toDateString()===now.toDateString();
         const isYesterday=d.toDateString()===new Date(now-86400000).toDateString();
         const grp=isToday?'TODAY':isYesterday?'YESTERDAY':d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-        if(grp!==lastGroup){lastGroup=grp;h+=`<div style="font-size:9px;font-weight:800;color:var(--t4);letter-spacing:1.5px;padding:8px 0 4px;text-align:center">${grp}</div>`}
-        h+=`<div style="display:flex;gap:8px;padding:6px 0;align-items:flex-start${tagged?';background:#D4A24E08;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:6px':''}">
-          <div style="width:24px;height:24px;border-radius:50%;background:${isMe?'var(--grad)':'var(--inp)'};border:1px solid ${isMe?'transparent':'var(--bdr)'};display:flex;align-items:center;justify-content:center;color:${isMe?'#000':'var(--t2)'};font-weight:900;font-size:10px;flex-shrink:0;margin-top:2px">${m.u[0].toUpperCase()}</div>
-          <div style="flex:1;min-width:0">
-            <span style="font-weight:700;font-size:12px;color:${isMe?'var(--acc)':'var(--t1)'}">${m.u}</span>
-            <span style="font-size:12px;color:var(--t2);margin-left:6px">${renderMention(m.msg)}</span>
-            ${tagged?'<span style="font-size:9px;color:var(--acc);margin-left:4px">📣</span>':''}
-          </div>
-          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-            <span style="font-size:9px;color:var(--t4)">${ago}</span>
-            ${adm?`<button style="background:0;border:0;color:var(--red);font-size:9px;cursor:pointer;padding:0 2px" onclick="delTrash(${allMsgs.length-1-i})">\u2715</button>`:''}
-          </div>
-        </div>`;
+        if(grp!==lastGroup){lastGroup=grp;lastUser='';lastIsMe=null;h+=`<div style="text-align:center;padding:14px 0 8px"><span style="font-size:9px;font-weight:500;color:var(--t4);letter-spacing:1.5px;background:var(--card);padding:0 12px;position:relative;z-index:1">${grp}</span></div>`}
+        const sameUser=m.u===lastUser&&isMe===lastIsMe;
+        const sideSwitch=lastIsMe!==null&&isMe!==lastIsMe;
+        lastUser=m.u;lastIsMe=isMe;
+        const mt=sameUser?'1px':sideSwitch?'14px':'10px';
+        const timeStr=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+        if(isMe){
+          h+=`<div style="display:flex;justify-content:flex-end;margin-top:${mt}">
+            <div style="max-width:75%;display:flex;flex-direction:column;align-items:flex-end">
+              <div style="padding:8px 12px;background:rgba(212,162,78,0.1);border:0.5px solid rgba(212,162,78,0.18);border-radius:${sameUser?'12px 4px 4px 12px':'12px 12px 4px 12px'};font-size:13px;color:var(--t1);line-height:1.45;word-wrap:break-word;position:relative${tagged?';box-shadow:0 0 0 1.5px rgba(212,162,78,0.35)':''}">${renderMention(m.msg)}</div><div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:2px 2px 0"><span style="font-size:8px;color:rgba(212,162,78,0.4)">${timeStr}</span>${adm?`<button style="background:0;border:0;color:var(--red);font-size:8px;cursor:pointer;padding:0;line-height:1" onclick="delTrash(${allMsgs.length-1-i})">\u2715</button>`:''}</div>
+            </div>
+          </div>`;
+        }else{
+          const showAvatar=!sameUser;
+          h+=`<div style="display:flex;align-items:flex-end;gap:6px;margin-top:${mt}">
+            <div style="width:26px;flex-shrink:0;padding-bottom:2px">${showAvatar?`<div style="width:26px;height:26px;border-radius:50%;background:var(--surf);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--t3);font-weight:800;font-size:10px">${m.u[0].toUpperCase()}</div>`:''}</div>
+            <div style="max-width:75%">
+              ${!sameUser?`<div style="font-size:10px;font-weight:600;color:var(--t4);margin-bottom:2px;padding-left:2px">${m.u}</div>`:''}
+              <div style="padding:8px 12px;background:var(--surf);border:0.5px solid var(--bdr);border-radius:${sameUser?'4px 12px 12px 4px':'12px 12px 12px 4px'};font-size:13px;color:var(--t1);line-height:1.45;word-wrap:break-word;position:relative${tagged?';box-shadow:0 0 0 1.5px rgba(212,162,78,0.35)':''}">${renderMention(m.msg)}${tagged?'<span style="font-size:8px;color:var(--acc);margin-left:3px">📣</span>':''}</div><div style="display:flex;align-items:center;gap:6px;padding:2px 2px 0"><span style="font-size:8px;color:var(--t4);opacity:0.4">${timeStr}</span>${adm?`<button style="background:0;border:0;color:var(--red);font-size:8px;cursor:pointer;padding:0;line-height:1" onclick="delTrash(${allMsgs.length-1-i})">\u2715</button>`:''}</div>
+            </div>
+          </div>`;
+        }
       });
       if(ttCollapsed&&allMsgs.length>5){
         h+=`<div style="text-align:center;padding:8px 0"><button style="background:0;border:1px solid var(--bdr);border-radius:8px;padding:6px 16px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="window._ttExpanded=true;rH()">View all ${allMsgs.length} messages →</button></div>`;
