@@ -1147,10 +1147,13 @@ function rM(){
   const _rawB=me?_coreBal(me):0;
   const safetyNet=me&&_rawB<MINB;
   const bAvail=me?betBal(me):0;
-  const allM=gms().filter(m=>!m.playoff||m.h!=='TBD'); // only show playoffs with assigned teams
-  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):allM;
+  const allM=gms().filter(m=>!m.playoff||m.h!=='TBD');
+  // Cache lock state once to prevent race condition between filter and card render
+  const _lkCache={};allM.forEach(m=>{_lkCache[m.id]=lk(m)});
+  const lkC=m=>_lkCache[m.id]!==undefined?_lkCache[m.id]:lk(m);
+  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lkC(m)):mf==='locked'?allM.filter(m=>lkC(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):allM;
   // Auto-switch to most relevant filter if current shows nothing
-  if(!fm.length&&mf==='upcoming'){const locked=allM.filter(m=>lk(m)&&!S.r[m.id]);const results=allM.filter(m=>S.r[m.id]);if(locked.length){mf='locked';fm=locked}else if(results.length){mf='results';fm=results}}
+  if(!fm.length&&mf==='upcoming'){const locked=allM.filter(m=>lkC(m)&&!S.r[m.id]);const results=allM.filter(m=>S.r[m.id]);if(locked.length){mf='locked';fm=locked}else if(results.length){mf='results';fm=results}}
   const risk=me?atRisk(me):0;
   const myBetCount=Object.values(S.b).filter(x=>x.u===me).length;
   const onboardDismissed=localStorage.getItem('dg-onboard-done');
@@ -1179,7 +1182,7 @@ function rM(){
   h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
-    const l=lk(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
+    const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
     const hBets=ab.filter(x=>x.tm===m.h).length,aBets=ab.filter(x=>x.tm===m.a).length;
     const hMoney=ab.filter(x=>x.tm===m.h).reduce((s,x)=>s+x.am,0),aMoney=ab.filter(x=>x.tm===m.a).reduce((s,x)=>s+x.am,0);
     const totalAb=hBets+aBets||1;
