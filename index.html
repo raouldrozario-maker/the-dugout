@@ -1851,7 +1851,7 @@ function getScoutRec(m){
   else if(hWins>aWins){hBase=1.75;aBase=2.20}
   else if(aWins>hWins){hBase=2.05;aBase=1.85}
   // Venue factor
-  const venue=m.v2||'';
+  const venue=m.v||'';
   const homeVenue=T[m.h]?.home||'';
   const isHome=venue&&homeVenue&&venue.toLowerCase().includes(homeVenue.toLowerCase());
   if(isHome){hBase=Math.max(1.5,hBase-0.1);aBase=Math.min(3.0,aBase+0.15)}
