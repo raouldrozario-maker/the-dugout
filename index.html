@@ -137,7 +137,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
 .sd-wrap.has-val .sd-clear{display:block}
 #ru-nav div::-webkit-scrollbar{display:none}
-@media(max-width:768px){.card{padding:22px}.nb span:last-child{font-size:11px}}@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:16px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:10px 0 0}.nb{padding:10px 4px;min-height:48px}.nb span:first-child{font-size:16px}}
+@media(max-width:768px){.card{padding:22px}.nb span:last-child{font-size:10px}}@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:16px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:10px 0 0}.nb{padding:8px 2px;min-height:48px;min-width:0}.nb span:last-child{font-size:8px;letter-spacing:0}.nb svg{width:18px;height:18px}}@media(max-width:380px){.nb span:last-child{font-size:7px}}
 @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes pulse-red{0%,100%{opacity:1;box-shadow:0 0 4px #C4453A}50%{opacity:.6;box-shadow:0 0 8px #C4453A}}
 @keyframes allin-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
@@ -181,8 +181,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <button class="nb tier2" data-v="rules" onclick="nav('rules')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span>Rules</span></button>
 <button class="nb tier2" data-v="teams" onclick="nav('teams')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Teams</span></button>
 <button class="nb tier2" data-v="analytics" onclick="nav('analytics')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Stats</span></button>
-<button class="nb" data-v="mygame" onclick="nav('mygame')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Locker Room</span></button>
-<button class="nb" data-v="admin" id="nav-admin" onclick="nav('admin')" style="display:none;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span id="adm-badge" style="display:none;position:absolute;top:4px;right:8px;background:var(--hot);color:#fff;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;padding:0 4px;line-height:16px;text-align:center;pointer-events:none;box-shadow:0 0 8px rgba(196,69,58,0.5)"></span><span>Admin</span></button>
+<button class="nb" data-v="mygame" onclick="nav('mygame')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Locker Room</span></button><button class="nb" data-v="admin" id="nav-admin" onclick="nav('admin')" style="display:none;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span id="adm-badge" style="display:none;position:absolute;top:4px;right:8px;background:var(--hot);color:#fff;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;padding:0 4px;line-height:16px;text-align:center;pointer-events:none;box-shadow:0 0 8px rgba(196,69,58,0.5)"></span><span>Admin</span></button>
 <div id="nav-slider" style="position:absolute;bottom:2px;left:0;height:3px;width:0;background:linear-gradient(90deg,#D4A24E,#C49032);border-radius:3px;transition:left .25s ease,width .25s ease;box-shadow:0 0 8px #D4A24E88;pointer-events:none"></div>
 </nav></header>
 <main>
@@ -1084,7 +1083,7 @@ function rH(){
   if(ns.length>1){
     const msgs=(S.trash||[]).slice().reverse().slice(0,20);
     h+=`<div class="card"><div class="ch"><span style="font-size:18px">🗣️</span><span class="ct">TRASH TALK</span></div>`;
-    if(me){
+    if(me||adm){
       h+=`<div style="display:flex;gap:8px;margin-bottom:14px">
         <div style="flex:1;position:relative">
           <input class="inp" id="tt-msg" placeholder="Talk your smack... (type @ to tag)" style="width:100%" maxlength="150" onkeydown="if(event.key==='Enter'){closeMentionDD();postTrash()}" oninput="mentionAC(this)">
@@ -1368,8 +1367,75 @@ function rM(){
     else if(!l&&!my&&!mo&&!rs)h+=`<div style="margin-top:8px;padding:8px 12px;background:var(--inp);border-radius:8px;font-size:12px;color:var(--t4);text-align:center">⏳ Waiting for admin to set odds</div>`;
     if(!l&&my&&!rs)h+=`<div id="bf-${m.id}" style="display:none"></div>`;
 
-    // All bets (after lock)
-    if(ab.length&&l){h+=`<button class="tb" onclick="tBL(${m.id})" style="margin-top:14px;padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--t2);font-size:12px;font-weight:700;width:100%;text-align:center;cursor:pointer;transition:all .18s">👁 All bets (${ab.length}) — tap to reveal</button><div id="bl-${m.id}" style="display:none">`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${rpn(x.u)}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span><span style="color:${x._fb?'var(--yel)':'var(--t4)'}">×${x.od}${x._fb?'<span title="Odds unavailable at bet time — ×2 default applied" style="margin-left:2px;cursor:help">⚠️</span>':''}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
+    // All bets (after lock) — narrative view
+    if(ab.length&&l){
+      const hBets=ab.filter(x=>x.tm===m.h),aBets=ab.filter(x=>x.tm===m.a);
+      const hAm=hBets.reduce((s,x)=>s+x.am,0),aAm=aBets.reduce((s,x)=>s+x.am,0);
+      const totalAm=hAm+aAm;
+      const hPct=totalAm?Math.round(hAm/totalAm*100):50,aPct=100-hPct;
+      // MoM grouping
+      const momGroups={};ab.forEach(x=>{if(x.mom){if(!momGroups[x.mom])momGroups[x.mom]={count:0,am:0,tm:x.tm,players:[]};momGroups[x.mom].count++;momGroups[x.mom].am+=x.am;momGroups[x.mom].players.push(x)}});
+      const momSorted=Object.entries(momGroups).sort((a,b)=>b[1].count-a[1].count);
+      const loneWolves=momSorted.filter(([,v])=>v.count===1);
+      const topMom=momSorted.filter(([,v])=>v.count>=2);
+      const maxBet=Math.max(...ab.map(x=>x.am));
+      const bigBettor=ab.find(x=>x.am===maxBet);
+
+      h+=`<div style="margin-top:14px">`;
+      // Crowd split bar
+      h+=`<div style="background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${T[m.h]?.s} · ${hBets.length} bets · ₹${hAm.toLocaleString()}</span><span style="color:${T[m.a]?.c||'var(--t2)'}">₹${aAm.toLocaleString()} · ${aBets.length} bets · ${T[m.a]?.s}</span></div>
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--inp)"><div style="width:${hPct}%;background:${T[m.h]?.c||'var(--acc)'};border-radius:4px 0 0 4px;opacity:.7"></div><div style="width:${aPct}%;background:${T[m.a]?.c||'var(--t3)'};border-radius:0 4px 4px 0;opacity:.7"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:900;font-family:var(--ff);margin-top:6px"><span style="color:${T[m.h]?.c||'var(--t2)'}">${hPct}%</span><span style="font-size:12px;color:var(--t4);align-self:center">₹${totalAm.toLocaleString()} total</span><span style="color:${T[m.a]?.c||'var(--t2)'}">${aPct}%</span></div>
+      </div>`;
+
+      // Top MoM picks (2+ players)
+      if(topMom.length){
+        h+=`<div style="margin-bottom:10px">`;
+        h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🔥 Popular MoM Picks</div>`;
+        topMom.slice(0,3).forEach(([name,data])=>{
+          h+=`<div style="background:var(--inp);border:1px solid var(--bdr);border-left:3px solid ${T[data.tm]?.c||'var(--acc)'};border-radius:10px;padding:10px 12px;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:800;color:var(--t1);font-size:13px">🎯 ${name}</span><span style="font-size:11px;color:var(--t3)">${data.count} players · ₹${data.am.toLocaleString()}</span></div>
+            <div style="font-size:11px;color:var(--t4);margin-top:3px">${data.players.map(p=>rpn(p.u)).join(', ')}</div>
+          </div>`;
+        });
+        h+=`</div>`;
+      }
+
+      // All picks — grouped by team
+      h+=`<button class="tb" onclick="tBL(${m.id})" style="padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;color:var(--t2);font-size:12px;font-weight:700;width:100%;text-align:center;cursor:pointer;transition:all .18s">👥 All ${ab.length} picks — tap to reveal</button>`;
+      h+=`<div id="bl-${m.id}" style="display:none;margin-top:8px">`;
+
+      // Team groups
+      [m.h,m.a].forEach(tm=>{
+        const teamBets=ab.filter(x=>x.tm===tm).sort((a,b)=>b.am-a.am);
+        if(!teamBets.length)return;
+        h+=`<div style="font-size:11px;font-weight:700;color:${T[tm]?.c||'var(--t2)'};text-transform:uppercase;letter-spacing:1px;padding:10px 0 6px;border-bottom:1px solid var(--bdr)">${T[tm]?.s} (${teamBets.length})</div>`;
+        teamBets.forEach(x=>{
+          const isBig=x.am>=maxBet*0.8;
+          h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.02)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(x.u)}</span>
+              ${x.mom?`<span style="font-size:11px;color:var(--yel)">🎯${x.mom}</span>`:''}
+            </div>
+            <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:${isBig?'var(--acc)':'var(--t2)'}">₹${x.am.toLocaleString()}${isBig?' 💣':''}</span>
+          </div>`;
+        });
+      });
+
+      // Lone wolves
+      if(loneWolves.length){
+        h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 0 6px;border-bottom:1px solid var(--bdr)">🧊 Lone Wolf MoM Picks</div>`;
+        loneWolves.forEach(([name,data])=>{
+          const p=data.players[0];
+          h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.02)">
+            <div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;font-size:13px;color:var(--t1)">${rpn(p.u)}</span><span style="font-size:11px;color:${T[p.tm]?.c||'var(--t2)'};font-weight:700">${T[p.tm]?.s}</span><span style="font-size:11px;color:var(--yel)">🎯${name}</span></div>
+            <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:var(--t2)">₹${p.am.toLocaleString()}</span>
+          </div>`;
+        });
+      }
+      h+=`</div></div>`;
+    }
     else if(ab.length&&!l){h+=`<div style="margin-top:10px;padding:8px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;font-size:12px;color:var(--t3);text-align:center">🔒 ${ab.length} bet${ab.length>1?'s':''} placed — revealed after lock</div>`}
     if(!rs)h+=`<button style="margin-top:8px;background:0;border:0;color:var(--t3);font-size:12px;cursor:pointer;font-weight:600" onclick="shareWA(${m.id})">📤 Share on WhatsApp</button>`;
     h+=`</div>`;
@@ -4375,17 +4441,18 @@ function hasMention(msg,player){
 }
 
 function postTrash(){
-  if(!me){toast('Login first','err');return}
+  const poster=me||(adm?'Admin':null);
+  if(!poster){toast('Login first','err');return}
   const inp=$('tt-msg');let msg=inp.value.trim();
   msg=msg.replace(/<[^>]*>/g,'').trim(); // Strip HTML tags
   if(!msg){toast('Type something!','err');return}
   if(msg.length>150){toast('Max 150 characters','err');return}
   if(!S.trash)S.trash=[];
-  const ttKey='dg-tt-rl-'+me;
+  const ttKey='dg-tt-rl-'+poster;
   const lastTT=parseInt(localStorage.getItem(ttKey)||'0');
   if(Date.now()-lastTT<10000){toast('Easy tiger — wait '+(10-Math.floor((Date.now()-lastTT)/1000))+'s','err');return}
   localStorage.setItem(ttKey,Date.now().toString());
-  S.trash.push({u:me,msg,ts:new Date().toISOString()});
+  S.trash.push({u:poster,msg,ts:new Date().toISOString()});
   // Keep last 50 messages
   if(S.trash.length>50)S.trash=S.trash.slice(-50);
   sv(['trash']);inp.value='';rH();
