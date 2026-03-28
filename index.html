@@ -12,6 +12,7 @@
 *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);background-image:radial-gradient(ellipse 60% 40% at 0% 0%,rgba(212,162,78,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 100% 0%,rgba(196,69,58,0.05) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 50% 100%,rgba(212,162,78,0.04) 0%,transparent 70%);background-attachment:fixed;color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(58,175,135,0.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(58,175,135,0)}}
 @keyframes betSuccess{0%{box-shadow:0 0 0 0 rgba(58,175,135,0)}10%{box-shadow:0 0 0 1px rgba(58,175,135,0.35)}20%{box-shadow:0 0 0 2px rgba(58,175,135,0.28),0 0 22px rgba(58,175,135,0.16)}60%{box-shadow:0 0 0 1px rgba(58,175,135,0.12),0 0 12px rgba(58,175,135,0.08)}100%{box-shadow:0 2px 16px rgba(0,0,0,0.25)}}
 @keyframes checkPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
 @keyframes glow{0%,100%{box-shadow:0 0 20px #D4A24E18}50%{box-shadow:0 0 40px #D4A24E30}}
@@ -2712,8 +2713,8 @@ function rT(){
     return '';
   }
 
-  const today=new Date().toISOString().split('T')[0];
-  const todayMatches=gms().filter(m=>m.d===today);
+  const today=(()=>{const n=new Date();n.setMinutes(n.getMinutes()+330-n.getTimezoneOffset());return n.toISOString().split('T')[0]})();
+  const todayMatches=gms().filter(m=>m.d===today&&!S.r[m.id]);
   const todayTeams=new Set();
   todayMatches.forEach(m=>{todayTeams.add(m.h);todayTeams.add(m.a)});
   const teamKeys=Object.keys(T).sort((a,b)=>{
@@ -2727,7 +2728,7 @@ function rT(){
   // Quick jump strip
   h+=`<div style="display:flex;gap:8px;margin-bottom:20px;padding:4px 0;justify-content:center;flex-wrap:wrap">`;
   teamKeys.forEach(k=>{
-    h+=`<button style="background:${T[k].c}18;border:2px solid ${T[k].c}44;border-radius:10px;padding:12px 20px;color:${T[k].c};font-size:14px;font-weight:800;cursor:pointer;font-family:var(--ff);white-space:nowrap;flex-shrink:0;min-width:60px;text-align:center" onclick="ruJump('team-${k}')">${T[k].s}${todayTeams.has(k)?' 🟢':''}</button>`;
+    h+=`<button style="background:${T[k].c}18;border:2px solid ${T[k].c}44;border-radius:10px;padding:12px 20px;color:${T[k].c};font-size:14px;font-weight:800;cursor:pointer;font-family:var(--ff);white-space:nowrap;flex-shrink:0;min-width:60px;text-align:center" onclick="ruJump('team-${k}')">${T[k].s}${todayTeams.has(k)?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3FB08C;margin-left:6px;vertical-align:middle;animation:livePulse 1.5s ease-in-out infinite"></span>':''}</button>`;
   });
   h+=`</div>`;
 
@@ -2756,7 +2757,7 @@ function rT(){
     h+=`<div style="flex:1;min-width:0">`;
     h+=`<div style="font-family:var(--ff);font-size:20px;font-weight:900;color:${T[k].c};letter-spacing:1px">${T[k].n.toUpperCase()}</div>`;
     if(vibe)h+=`<div style="font-size:12px;color:var(--t3);margin-top:3px;font-style:italic">"${vibe}"</div>`;
-    if(playing)h+=`<span style="display:inline-block;margin-top:4px;font-size:10px;background:${T[k].c}22;color:${T[k].c};padding:2px 10px;border-radius:4px;font-weight:800">🟢 PLAYING TODAY</span>`;
+    if(playing)h+=`<span style="display:inline-block;margin-top:4px;font-size:10px;background:${T[k].c}22;color:${T[k].c};padding:2px 10px;border-radius:4px;font-weight:800"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3FB08C;margin-right:4px;vertical-align:middle;animation:livePulse 1.5s ease-in-out infinite"></span>PLAYING TODAY</span>`;
     h+=`</div></div>`;
 
     // Captain + Stats row
@@ -3195,11 +3196,39 @@ function rMG(){
 
   // Admin dropdown
   if(adm){
-    h+=`<div style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-    <span style="font-size:13px;color:var(--acc);font-weight:700">🔓 ADMIN VIEW:</span>
-    <select class="bf-i" style="flex:1;min-width:150px" onchange="mgPlayer=this.value;rMG()">
-    ${ns.map(p=>`<option value="${p}" ${p===n?'selected':''}>${p} (₹${bal(p).toLocaleString()})</option>`).join('')}
-    </select></div>`;
+    const sortedPlayers=[...ns].sort((a,b)=>bal(b)-bal(a));
+    h+=`<div style="background:linear-gradient(135deg,rgba(212,162,78,0.06),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-size:10px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">🔓 ADMIN VIEW</div>
+    <div style="position:relative">
+      <div id="adm-dd-trigger" onclick="var el=$('adm-dd-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='var(--bdr2)'">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="ca" style="width:28px;height:28px;font-size:12px">${n[0].toUpperCase()}</div>
+          <div>
+            <div style="font-weight:800;font-size:14px;color:var(--t1)">${n}</div>
+            <div style="font-size:11px;color:var(--t3)">₹${bal(n).toLocaleString()} · Rank #${LB().findIndex(x=>x.n===n)+1}</div>
+          </div>
+        </div>
+        <span style="font-size:14px;color:var(--acc)">▾</span>
+      </div>
+      <div id="adm-dd-list" style="display:none;position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-height:320px;overflow-y:auto;z-index:100">
+        <div style="padding:8px 12px;position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--bdr);z-index:1">
+          <input class="inp" placeholder="Search player..." style="width:100%;font-size:12px;padding:8px 12px;background:var(--inp);border:1px solid var(--bdr)" oninput="var q=this.value.toLowerCase();this.parentElement.parentElement.querySelectorAll('.adm-dd-row').forEach(function(r){r.style.display=r.dataset.name.includes(q)?'flex':'none'})">
+        </div>
+        ${sortedPlayers.map((p,i)=>{
+          const b=bal(p),pnl=b-ST,isActive=p===n;
+          return `<div class="adm-dd-row" data-name="${p.toLowerCase()}" onclick="mgPlayer='${p.replace(/'/g,"\\\\'")}';$('adm-dd-list').style.display='none';rMG()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.02);${isActive?'background:rgba(212,162,78,0.08)':''}" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background='${isActive?'rgba(212,162,78,0.08)':'transparent'}'">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="ca" style="width:26px;height:26px;font-size:11px;${isActive?'border-color:var(--acc)':''}">${p[0].toUpperCase()}</div>
+              <div>
+                <div style="font-weight:700;font-size:13px;color:${isActive?'var(--acc)':'var(--t1)'}">${p}</div>
+                <div style="font-size:10px;color:var(--t4)">#${i+1} · ${pnl>=0?'+':''}₹${pnl.toLocaleString()}</div>
+              </div>
+            </div>
+            <span style="font-weight:800;font-size:13px;font-family:var(--ff);color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div></div>`;
   }
 
   // ─── PERSONAL STORY HEADER (emotional hook) ───
@@ -3848,7 +3877,7 @@ function rA(){
   var mcbUrgent=mcbAll.filter(function(x){return x.st.s==='RESULT_PENDING'});
   var mcbOpen=mcbAll.filter(function(x){return x.st.s==='OPEN'});
   var mcbSetupAll=mcbAll.filter(function(x){return x.st.s==='NO_ODDS'});
-  var mcbSetup=mcbSetupAll.slice(0,5);
+  var mcbSetup=mcbSetupAll.slice(0,2);
   var mcbDone=mcbAll.filter(function(x){return x.st.s==='COMPLETED'||x.st.s==='VOIDED'});
   var mcbShow=[].concat(mcbUrgent,mcbOpen,mcbSetup);
 
@@ -3865,10 +3894,10 @@ function rA(){
       <div style="font-size:11px;color:var(--t4);margin-top:2px">${fd(m.d)} · ${ft(m.t)} · <span style="color:${st.color};font-weight:700">${st.badge}</span>${x.bets?' · '+x.bets+' bet'+(x.bets!==1?'s':'')+' · ₹'+x.exposure.toLocaleString():''}</div></div>
       <div style="flex-shrink:0;margin-left:10px">${cta}</div></div>`;
   });
-  if(mcbSetupAll.length>5){
-    h+=`<div style="cursor:pointer;padding:8px 0;text-align:center" onclick="var el=$('mcb-more-setup');if(el){var show=el.style.display==='none';el.style.display=show?'block':'none';localStorage.setItem('mcb-setup-exp',show?'1':'0');this.textContent=show?'▾ Hide':'▸ Show ${mcbSetupAll.length-5} more matches'}"><span style="font-size:11px;color:var(--acc);font-weight:700">${localStorage.getItem('mcb-setup-exp')==='1'?'▾ Hide':'▸ Show '+(mcbSetupAll.length-5)+' more matches'}</span></div>
+  if(mcbSetupAll.length>2){
+    h+=`<div style="cursor:pointer;padding:8px 0;text-align:center" onclick="var el=$('mcb-more-setup');if(el){var show=el.style.display==='none';el.style.display=show?'block':'none';localStorage.setItem('mcb-setup-exp',show?'1':'0');this.textContent=show?'▾ Hide':'▸ Show ${mcbSetupAll.length-5} more matches'}"><span style="font-size:11px;color:var(--acc);font-weight:700">${localStorage.getItem('mcb-setup-exp')==='1'?'▾ Hide':'▸ Show '+(mcbSetupAll.length-2)+' more matches'}</span></div>
     <div id="mcb-more-setup" style="display:${localStorage.getItem('mcb-setup-exp')==='1'?'block':'none'}">`;
-    mcbSetupAll.slice(5).forEach(function(x){
+    mcbSetupAll.slice(2).forEach(function(x){
       var m=x.m;
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
       <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--t1)">${m.playoff?m.v:'#'+m.id} <strong style="color:${T[m.h]?.c}">${T[m.h]?.s}</strong> vs <strong style="color:${T[m.a]?.c}">${T[m.a]?.s}</strong></div>
