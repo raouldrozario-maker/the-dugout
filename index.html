@@ -1143,13 +1143,15 @@ function rH(){
 function rM(){
   const el=$('v-matches');
   if(!me&&!adm){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
-  const b=bal(me);
-  const _rawB=_coreBal(me);
-  const safetyNet=_rawB<MINB;
-  const bAvail=betBal(me);
+  const b=me?bal(me):0;
+  const _rawB=me?_coreBal(me):0;
+  const safetyNet=me&&_rawB<MINB;
+  const bAvail=me?betBal(me):0;
   const allM=gms().filter(m=>!m.playoff||m.h!=='TBD'); // only show playoffs with assigned teams
-  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+me]):allM;
-  const risk=atRisk(me);
+  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lk(m)):mf==='locked'?allM.filter(m=>lk(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):allM;
+  // Auto-switch to most relevant filter if current shows nothing
+  if(!fm.length&&mf==='upcoming'){const locked=allM.filter(m=>lk(m)&&!S.r[m.id]);const results=allM.filter(m=>S.r[m.id]);if(locked.length){mf='locked';fm=locked}else if(results.length){mf='results';fm=results}}
+  const risk=me?atRisk(me):0;
   const myBetCount=Object.values(S.b).filter(x=>x.u===me).length;
   const onboardDismissed=localStorage.getItem('dg-onboard-done');
   let h='';
@@ -1172,11 +1174,12 @@ function rM(){
     </div>`;
   }
 
-  h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?'<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active</div>':''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk</div>`:''}</div></div>
-  <div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
+  if(me){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?'<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active</div>':''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk</div>`:''}</div></div>`}
+  else if(adm){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">⚙️</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Viewing as</div><div style="font-weight:800;font-size:15px;color:var(--acc)">Admin</div></div></div></div>`}
+  h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button></div>`;
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">Nothing here yet.</div>`;
   fm.forEach(m=>{
-    const l=lk(m),bk=m.id+'-'+me,my=S.b[bk],rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
+    const l=lk(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
     const hBets=ab.filter(x=>x.tm===m.h).length,aBets=ab.filter(x=>x.tm===m.a).length;
     const hMoney=ab.filter(x=>x.tm===m.h).reduce((s,x)=>s+x.am,0),aMoney=ab.filter(x=>x.tm===m.a).reduce((s,x)=>s+x.am,0);
     const totalAb=hBets+aBets||1;
