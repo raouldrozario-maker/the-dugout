@@ -2885,21 +2885,24 @@ function rAn(){
   const L=LB();const bigWinner=L.length?L[0]:null;const bigLoser=L.length>1?L[L.length-1]:null;
   const betCounts={};allBets.forEach(b=>{betCounts[b.u]=(betCounts[b.u]||0)+1});
   const mostActive=Object.entries(betCounts).sort((a,b)=>b[1]-a[1])[0];
+  // Cache per-player bets (avoids 5x filter loops over all bets)
+  const playerResolved={},playerAll={};
+  players.forEach(n=>{playerResolved[n]=resolvedBets.filter(x=>x.u===n);playerAll[n]=allBets.filter(x=>x.u===n)});
   let luckiest=null,luckyPct=0;
-  players.forEach(n=>{const ub=resolvedBets.filter(x=>x.u===n);if(ub.length>=2){const w=ub.filter(b=>b.tm===S.r[b.mid].w).length;const pct=Math.round(w/ub.length*100);if(pct>luckyPct){luckyPct=pct;luckiest={n,pct,w,total:ub.length}}}});
+  players.forEach(n=>{const ub=playerResolved[n];if(ub.length>=2){const w=ub.filter(b=>b.tm===S.r[b.mid].w).length;const pct=Math.round(w/ub.length*100);if(pct>luckyPct){luckyPct=pct;luckiest={n,pct,w,total:ub.length}}}});
   let oracle=null,oraclePct=0;
-  players.forEach(n=>{const ub=resolvedBets.filter(x=>x.u===n&&x.mom);if(ub.length>=1){const c=ub.filter(b=>momMatch(b.mom,S.r[b.mid].mom)).length;const pct=ub.length?Math.round(c/ub.length*100):0;if(c>0&&pct>oraclePct){oraclePct=pct;oracle={n,correct:c,total:ub.length,pct}}}});
+  players.forEach(n=>{const ub=playerResolved[n].filter(x=>x.mom);if(ub.length>=1){const c=ub.filter(b=>momMatch(b.mom,S.r[b.mid].mom)).length;const pct=ub.length?Math.round(c/ub.length*100):0;if(c>0&&pct>oraclePct){oraclePct=pct;oracle={n,correct:c,total:ub.length,pct}}}});
   let riskiest=null,riskAvg=0;
-  players.forEach(n=>{const ub=allBets.filter(x=>x.u===n);if(ub.length>=1){const avg=Math.round(ub.reduce((s,b)=>s+b.am,0)/ub.length);if(avg>riskAvg){riskAvg=avg;riskiest={n,avg}}}});
+  players.forEach(n=>{const ub=playerAll[n];if(ub.length>=1){const avg=Math.round(ub.reduce((s,b)=>s+b.am,0)/ub.length);if(avg>riskAvg){riskAvg=avg;riskiest={n,avg}}}});
   let bestStreak=null,streakLen=0;
-  players.forEach(n=>{const ub=resolvedBets.filter(x=>x.u===n).sort((a,b)=>a.mid-b.mid);let cur=0,max=0;ub.forEach(b=>{if(b.tm===S.r[b.mid].w){cur++;if(cur>max)max=cur}else cur=0});if(max>streakLen){streakLen=max;bestStreak={n,streak:max}}});
+  players.forEach(n=>{const ub=playerResolved[n].sort((a,b)=>a.mid-b.mid);let cur=0,max=0;ub.forEach(b=>{if(b.tm===S.r[b.mid].w){cur++;if(cur>max)max=cur}else cur=0});if(max>streakLen){streakLen=max;bestStreak={n,streak:max}}});
   let bigUpset=null;wins.forEach(b=>{if(b.od>=(bigUpset?.od||0))bigUpset=b});
   const allInCount=allBets.filter(b=>b.am>=ST*.8).length;
 
   // ─── HOTTEST PLAYER (biggest gain in last 7 days) ───
   let hottest=null,hottestGain=0;
   players.forEach(n=>{
-    const recent=resolvedBets.filter(x=>x.u===n&&S.r[x.mid]);
+    const recent=playerResolved[n];
     const recentMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(b)-parseInt(a)).slice(0,5);
     let gain=0;
     recentMids.forEach(mid=>{
@@ -2918,7 +2921,7 @@ function rAn(){
   }
 
   // ─── LEAGUE SNAPSHOT (the hook) ───
-  if(L.length>=2){
+  if(L.length>=2&&resolved.length>=2){
     h+=`<div style="background:linear-gradient(135deg,var(--card),var(--surf));border:1px solid var(--bdr-strong);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,0.25)">
       <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
         <div style="text-align:center;flex:1;min-width:100px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🏆 Leader</div><div style="font-size:22px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${bigWinner.b.toLocaleString()}</div><div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${bigWinner.n}</div></div>
@@ -3404,6 +3407,7 @@ function rMG(){
   }
 
   // ─── WALLET JOURNEY (balance over time) ───
+  if(resolved.length>=2){
   h+=`<div id="mg-wallet" class="card"><div class="ch"><span style="font-size:18px">📈</span><span class="ct">WALLET JOURNEY</span></div>`;
   if(!resolved.length){h+=`<div style="color:var(--t3);font-size:13px">No results yet — your journey starts after the first match!</div>`}
   else{
@@ -3454,7 +3458,9 @@ function rMG(){
   }
   h+=`</div>`;
 
+  } // end wallet journey gate
   // ─── MY STATS ───
+  if(resolved.length>=1){
   h+=`<div id="mg-stats" class="card"><div class="ch"><span style="font-size:18px">📊</span><span class="ct">STATS</span></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--t1);font-family:var(--ff)">${ub.length}</div><div style="font-size:11px;color:var(--t4)">Total Bets</div></div>
@@ -3471,9 +3477,10 @@ function rMG(){
     ${bigLoss?`<div style="flex:1;min-width:120px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;padding:10px;text-align:center"><div style="font-size:11px;color:var(--t4)">Biggest Loss</div><div style="font-weight:800;color:var(--red);margin-top:2px">-₹${bigLoss.toLocaleString()}</div><div style="font-size:10px;color:var(--t3)">${bigLossMatch}</div></div>`:''}
   </div></div>`;
 
+  } // end my stats gate
   // ─── BET HISTORY ───
   h+=`<div id="mg-bets" class="card"><div class="ch"><span style="font-size:18px">📜</span><span class="ct">BET HISTORY</span></div>`;
-  if(!ub.length){h+=`<div style="color:var(--t3);font-size:13px">No bets placed yet.</div>`}
+  if(!ub.length){h+=`<div style="color:var(--t3);font-size:13px">No bets yet — head to Matches and make your first move 🏏</div>`}
   else{
     const sorted=[...ub].sort((a,b)=>b.mid-a.mid);
     // Time grouping
@@ -3505,7 +3512,7 @@ function rMG(){
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-weight:800;font-size:14px;color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</span><span style="font-size:12px;color:var(--t4)">₹${bt.am.toLocaleString()} @ ×${od}${bt._fb?'<span style="color:var(--yel);margin-left:2px">⚠️</span>':''}</span></div>
             <div style="font-size:11px;color:var(--t4);margin-top:3px">${fd(m?.d)} · ${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'}${bt.mom?' · 🎯 '+bt.mom:''}</div>
-          </div>
+            ${rs?`<div style="font-size:11px;color:var(--t3);margin-top:4px;line-height:1.4">${narrateOutcome(bt)}</div>`:''}</div>
           <div style="text-align:right;flex-shrink:0">
             <div style="font-family:var(--ff);font-weight:900;font-size:16px;color:${statusClr}">${amount}</div>
             <div style="font-size:10px;color:${statusClr};font-weight:700">${status}</div>
@@ -3517,6 +3524,7 @@ function rMG(){
   h+=`</div>`;
 
   // ─── WEEKLY ACTIVITY ───
+  if(ub.length>=2){
   h+=`<div id="mg-weekly" class="card"><div class="ch"><span style="font-size:18px">📅</span><span class="ct">WEEKLY ACTIVITY</span></div>`;
   const pbr=getPenaltyBreakdown();
   if(!pbr.weeks.length){h+=`<div style="color:var(--t3);font-size:13px">No weeks to track yet.</div><div style="font-size:11px;color:var(--t4);margin-top:6px">ℹ️ Weekly penalties only start once match results are recorded. No results yet = no penalties.</div>`}
@@ -3545,7 +3553,9 @@ function rMG(){
   }
   h+=`</div>`;
 
+  } // end weekly activity gate
   // ─── ACHIEVEMENT BADGES ───
+  if(resolved.length>=3){
   h+=`<div id="mg-achieve" class="card"><div class="ch"><span style="font-size:18px">🏅</span><span class="ct">ACHIEVEMENTS</span></div>`;
   const badges=[];
   // Calculate badges for this player
@@ -3609,6 +3619,7 @@ function rMG(){
   }
   h+=`</div>`;
 
+  } // end achievement gate
   // ─── TEAM EXPOSURE (pending bets) ───
   const pendingBets=ub.filter(x=>!S.r[x.mid]);
   if(pendingBets.length){
@@ -3646,6 +3657,7 @@ function rMG(){
   }
 
   // ─── TEAM PERFORMANCE TRACKER ───
+  if(resolved.length>=2){
   h+=`<div id="mg-teams" class="card"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">TEAM PERFORMANCE</span></div>`;
   const teamStats={};
   ub.forEach(bt=>{
@@ -3660,7 +3672,7 @@ function rMG(){
     }
   });
   const sortedTeamStats=Object.entries(teamStats).sort((a,b)=>b[1].won-b[1].lost-(a[1].won-a[1].lost));
-  if(!sortedTeamStats.length){h+=`<div style="color:var(--t3);font-size:13px">No bets placed yet.</div>`}
+  if(!sortedTeamStats.length){h+=`<div style="color:var(--t3);font-size:13px">Bet on a few matches and your team stats will appear here.</div>`}
   else{
     h+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">`;
     sortedTeamStats.forEach(([tm,st])=>{
@@ -3683,6 +3695,7 @@ function rMG(){
   }
   h+=`</div>`;
 
+  } // end team performance gate
   // ─── UPCOMING MATCHES (not yet bet on) ───
   const upcoming=gms().filter(m=>!S.r[m.id]&&!lk(m)&&m.h!=='TBD'&&!S.b[m.id+'-'+n]);
   if(upcoming.length){
@@ -3706,6 +3719,7 @@ function rMG(){
   }
 
   // ─── HEAD-TO-HEAD ───
+  if(resolved.length>=3){
   h+=`<div id="mg-h2h" class="card"><div class="ch"><span style="font-size:18px">⚔️</span><span class="ct">HEAD-TO-HEAD</span></div>`;
   const h2h={};
   resolved.forEach(bt=>{
@@ -3744,7 +3758,9 @@ function rMG(){
   }
   h+=`</div>`;
 
+  } // end h2h gate
   // ─── CRYSTAL BALL ───
+  if(S.koOpen||S.koRevealed||S.ko[n]){
   const ko=S.ko?.[n];
   if(ko||S.koOpen||S.koRevealed){
     h+=`<div class="card"><div class="ch"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div>`;
@@ -3769,6 +3785,7 @@ function rMG(){
     }
     h+=`</div>`;
   }
+  } // end crystal ball gate
 
   el.innerHTML=h;
 }
