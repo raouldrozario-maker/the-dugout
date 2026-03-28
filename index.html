@@ -1142,7 +1142,7 @@ function rH(){
 // ══════════════════════════════════════════════════════════════
 function rM(){
   const el=$('v-matches');
-  if(!me){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
+  if(!me&&!adm){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
   const b=bal(me);
   const _rawB=_coreBal(me);
   const safetyNet=_rawB<MINB;
