@@ -731,7 +731,7 @@ function ld(){
         // Remote has data — use it (don't overwrite with empty local)
         S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];S.cancelNudges=d.cancelNudges||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
-        fixOrphanBets();
+        if(!window._orphanFixed){window._orphanFixed=true;fixOrphanBets()}
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
         db.ref('dugout').set(S);
@@ -956,11 +956,9 @@ function rH(){
       Object.keys(grouped).sort().forEach(letter=>{
         h+=`<div class="login-group" data-letter="${letter}"><div style="font-size:12px;font-weight:800;color:var(--acc);font-family:var(--ff);padding:6px 0;border-bottom:1px solid var(--bdr);margin-bottom:6px">${letter}</div>`;
         grouped[letter].forEach(n=>{
-          const b=bal(n);
           h+=`<div class="login-row" data-name="${n.toLowerCase()}" onclick="promptLogin('${n.replace(/'/g,"\\\\'")}')" style="display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background='transparent'">
             <div class="ca" style="width:32px;height:32px;font-size:14px;flex-shrink:0">${n[0].toUpperCase()}</div>
             <div style="flex:1;font-weight:700;font-size:14px;color:var(--t1)">${n}</div>
-            <div style="font-size:12px;font-weight:700;color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>
           </div>`;
         });
         h+=`</div>`;
