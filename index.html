@@ -982,13 +982,18 @@ function rH(){
       h+=`</div>`;
     }
     h+=`<div id="login-prompt" style="display:none;margin-bottom:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <span id="login-prompt-name"></span></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
-    h+=`<div style="margin-top:20px;background:linear-gradient(135deg,var(--card),var(--surf));border:1px solid var(--bdr-strong);border-radius:16px;padding:20px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-size:20px">🏏</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">NEW TO THE DUGOUT?</span></div>
-      <div style="font-size:13px;color:var(--t3);margin-bottom:14px">Enter your name and take your seat</div>
-      <div style="display:flex;border:1px solid var(--bdr2);border-radius:12px;overflow:hidden;background:var(--inp)">
-        <input class="inp" id="inp-n" placeholder="Your name..." style="flex:1;border:0;border-radius:12px 0 0 12px;background:transparent" onkeydown="if(event.key==='Enter')showRegister()">
-        <button style="background:var(--grad);border:0;padding:12px 22px;color:#000;font-weight:800;cursor:pointer;font-size:14px;white-space:nowrap" onclick="showRegister()">Join →</button>
-      </div>
+    h+=`<div style="margin-top:20px;border-top:1px solid var(--bdr);padding-top:16px">
+      <div style="text-align:center;font-size:12px;color:var(--t4);margin-bottom:10px">Can't find your name? New players need admin approval.</div>
+      <details style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:0">
+        <summary style="padding:12px 16px;cursor:pointer;font-size:13px;color:var(--t3);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center"><span>🏏 Request to join</span><span style="color:var(--t4);font-size:11px">▸</span></summary>
+        <div style="padding:0 16px 14px">
+          <div style="font-size:11px;color:var(--red);margin-bottom:10px;line-height:1.5">⚠️ Only use this if you're a <strong>new player</strong> invited by the commissioner. If you already have a profile, find your name above and log in with your PIN.</div>
+          <div style="display:flex;border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;background:var(--card)">
+            <input class="inp" id="inp-n" placeholder="Your name..." style="flex:1;border:0;border-radius:10px 0 0 10px;background:transparent;font-size:13px" onkeydown="if(event.key==='Enter')showRegister()">
+            <button style="background:var(--inp);border:0;border-left:1px solid var(--bdr);padding:10px 18px;color:var(--t2);font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap" onclick="showRegister()">Request →</button>
+          </div>
+        </div>
+      </details>
     </div>`;
     h+=`<div id="register-prompt" style="display:none;margin-top:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Set your PIN</div><div style="font-size:12px;color:var(--t4);margin-bottom:8px">You'll need this every time you log in. Don't forget it!</div><div class="ar"><input class="inp" type="password" id="reg-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')addP()"><button class="bp" onclick="addP()">Register</button></div><div id="reg-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`</div>`;
@@ -4481,6 +4486,25 @@ function rA(){
   if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN')}</span></div></div>`});h+=`</div>`}
   h+=`</div>`;
   // Participants
+
+  // ─── PENDING JOIN REQUESTS ───
+  const pending=S.pendingJoins||{};
+  const pendingNames=Object.keys(pending);
+  if(pendingNames.length){
+    h+=`<div class="card" style="margin-bottom:10px;border:1px solid rgba(212,162,78,0.2)"><div class="ch"><span style="font-size:20px">🔔</span><span class="ct">PENDING JOIN REQUESTS</span><span style="background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-left:8px">${pendingNames.length}</span></div>`;
+    pendingNames.forEach(n=>{
+      const req=pending[n];
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
+        <div><span style="font-weight:700;color:var(--t1)">${esc(n)}</span><span style="color:var(--t4);font-size:11px;margin-left:8px">${timeAgo(req.ts)}</span></div>
+        <div style="display:flex;gap:6px">
+          <button style="background:rgba(58,175,135,0.12);border:1px solid rgba(58,175,135,0.3);border-radius:8px;padding:5px 14px;color:var(--grn);font-size:12px;cursor:pointer;font-weight:700" onclick="approveJoin('${esc(n).replace(/'/g,"\\'")}')">✅ Approve</button>
+          <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:5px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:700" onclick="rejectJoin('${esc(n).replace(/'/g,"\\'")}')">✕ Reject</button>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
   h+=`<div id="adm-players" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.pl-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
   Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#4B8BE515;border:1px solid #4B8BE544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
   h+=`</div>`;
@@ -5445,12 +5469,44 @@ function addP(){
   const pin=$('reg-pin').value;
   if(!pin||pin.length<4){$('reg-err').textContent='PIN must be at least 4 digits';return}
   const n=pendingLogin;
+  // Check if admin approval is required
+  if(S.approvalRequired!==false){
+    // Store as pending — don't auto-login
+    hashPin(pin).then(h=>{
+      if(!S.pendingJoins)S.pendingJoins={};
+      S.pendingJoins[n]={pin:h,ts:new Date().toISOString()};
+      adminLog('player_request',n+' requested to join');
+      sv(['pendingJoins','logs']);
+      $('register-prompt').style.display='none';
+      $('inp-n').value='';pendingLogin='';
+      toast('Request sent! The commissioner will approve you shortly. 🏏');
+    });
+    return;
+  }
   hashPin(pin).then(h=>{
     S.p[n]={j:new Date().toISOString(),pin:h};adminLog('player_join',n);
     sv(['p']);$('inp-n').value='';
     me=n;localStorage.setItem('dg-me',me);pendingLogin='';
     uh();nav('matches');toast(n+' registered! 🏏');
   });
+}
+
+function approveJoin(n){
+  const pending=S.pendingJoins||{};
+  if(!pending[n]){toast('Not found','err');return}
+  S.p[n]={j:new Date().toISOString(),pin:pending[n].pin};
+  delete S.pendingJoins[n];
+  adminLog('player_approved',n+' approved to join');
+  sv(['p','pendingJoins','logs']);
+  toast('✅ '+n+' approved!');rA();
+}
+function rejectJoin(n){
+  if(!confirm('Reject '+n+'?'))return;
+  const pending=S.pendingJoins||{};
+  delete S.pendingJoins[n];
+  adminLog('player_rejected',n+' rejected');
+  sv(['pendingJoins','logs']);
+  toast('❌ '+n+' rejected');rA();
 }
 function logout(){me=null;localStorage.removeItem('dg-me');uh();nav('home');toast('Logged out')}
 function logn(n){me=n;localStorage.setItem('dg-me',n);uh();nav('matches')}
