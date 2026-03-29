@@ -794,7 +794,7 @@ function nav(v){
   }
   vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
-function ren(){if(_uiDDCount>0||_betFormOpen>0)return;({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
+function ren(){if(_uiDDCount>0||_betFormOpen>0)return;({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length+Object.keys(S.pendingJoins||{}).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
 // ══════════════════════════════════════════════════════════════
@@ -2544,7 +2544,7 @@ function rRu(){
 
     <div>
       <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px">🔮 Crystal Ball</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.7">Before the season, pick the team you think will win IPL 2026. This is a one-time prediction. Results are hidden until the commissioner reveals them. No balance impact — just bragging rights. Editable only while the commissioner keeps it open.</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7">Before the playoffs begin, pick the team you think will win IPL 2026. This is a one-time prediction. Results are hidden until the commissioner reveals them. No balance impact — just bragging rights. Editable only while the commissioner keeps it open.</div>
     </div>
   </div>`);
 
@@ -4003,6 +4003,24 @@ function rA(){
       h+=`</div>`;
     }
   }
+  // ─── PENDING JOIN REQUESTS ───
+  const pending=S.pendingJoins||{};
+  const pendingNames=Object.keys(pending);
+  if(pendingNames.length){
+    h+=`<div class="card" style="margin-bottom:10px;border:1px solid rgba(212,162,78,0.2)"><div class="ch"><span style="font-size:20px">🔔</span><span class="ct">PENDING JOIN REQUESTS</span><span style="background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-left:8px">${pendingNames.length}</span></div>`;
+    pendingNames.forEach(n=>{
+      const req=pending[n];
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
+        <div><span style="font-weight:700;color:var(--t1)">${esc(n)}</span><span style="color:var(--t4);font-size:11px;margin-left:8px">${timeAgo(req.ts)}</span></div>
+        <div style="display:flex;gap:6px">
+          <button style="background:rgba(58,175,135,0.12);border:1px solid rgba(58,175,135,0.3);border-radius:8px;padding:5px 14px;color:var(--grn);font-size:12px;cursor:pointer;font-weight:700" onclick="approveJoin('${esc(n).replace(/'/g,"\\'")}')">✅ Approve</button>
+          <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:5px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:700" onclick="rejectJoin('${esc(n).replace(/'/g,"\\'")}')">✕ Reject</button>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+
   // ─── CRYSTAL BALL REMINDER BANNER ───
   {
     const cbTeams=S.cbTeams||[];
@@ -4286,24 +4304,6 @@ function rA(){
   if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN')}</span></div></div>`});h+=`</div>`}
   h+=`</div>`;
   // Participants
-
-  // ─── PENDING JOIN REQUESTS ───
-  const pending=S.pendingJoins||{};
-  const pendingNames=Object.keys(pending);
-  if(pendingNames.length){
-    h+=`<div class="card" style="margin-bottom:10px;border:1px solid rgba(212,162,78,0.2)"><div class="ch"><span style="font-size:20px">🔔</span><span class="ct">PENDING JOIN REQUESTS</span><span style="background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;margin-left:8px">${pendingNames.length}</span></div>`;
-    pendingNames.forEach(n=>{
-      const req=pending[n];
-      h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
-        <div><span style="font-weight:700;color:var(--t1)">${esc(n)}</span><span style="color:var(--t4);font-size:11px;margin-left:8px">${timeAgo(req.ts)}</span></div>
-        <div style="display:flex;gap:6px">
-          <button style="background:rgba(58,175,135,0.12);border:1px solid rgba(58,175,135,0.3);border-radius:8px;padding:5px 14px;color:var(--grn);font-size:12px;cursor:pointer;font-weight:700" onclick="approveJoin('${esc(n).replace(/'/g,"\\'")}')">✅ Approve</button>
-          <button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:5px 14px;color:var(--red);font-size:12px;cursor:pointer;font-weight:700" onclick="rejectJoin('${esc(n).replace(/'/g,"\\'")}')">✕ Reject</button>
-        </div>
-      </div>`;
-    });
-    h+=`</div>`;
-  }
 
   h+=`<div id="adm-players" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.pl-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
   Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#4B8BE515;border:1px solid #4B8BE544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
@@ -5504,7 +5504,10 @@ db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
   else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
+  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
+      if(adm&&d2.pendingJoins){const pj=Object.keys(d2.pendingJoins||{});if(pj.length>0&&(!window._lastPendingCount||pj.length>window._lastPendingCount)){toast('🔔 '+pj.length+' pending join request'+(pj.length>1?'s':'')+'!');window._lastPendingCount=pj.length}}
+      S.pendingJoins=d2.pendingJoins||{};
+      localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
   if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}
 });
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
