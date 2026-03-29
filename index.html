@@ -431,8 +431,8 @@ function getPenaltyBreakdown(){
     const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(resultsThisWeek.length>=2){
       weekNum++;
-      const wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
-      const weLabel=new Date(weekEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+      const wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+      const weLabel=new Date(weekEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
       const defaulters=[];
       players.forEach(n=>{
         const userBets=Object.values(S.b).filter(x=>x.u===n);
@@ -845,7 +845,7 @@ function rH(){
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div style="width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:14px;flex-shrink:0">R</div>
       <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">FROM THE COMMISSIONER</div>
-      <div style="font-size:10px;color:var(--t4)">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>
+      <div style="font-size:10px;color:var(--t4)">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'})}</div></div>
     </div>
     <div style="font-size:14px;color:var(--t1);line-height:1.6;font-style:italic">"${S.announce.msg}"</div>
     <div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:right">— Raoul</div>
@@ -1206,15 +1206,16 @@ function rH(){
         const isMe=me===m.u;
         const tagged=me&&hasMention(m.msg,me);
         const d=new Date(m.ts);const now=new Date();
-        const isToday=d.toDateString()===now.toDateString();
-        const isYesterday=d.toDateString()===new Date(now-86400000).toDateString();
-        const grp=isToday?'TODAY':isYesterday?'YESTERDAY':d.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+        const istOpts={timeZone:'Asia/Kolkata'};
+        const isToday=d.toLocaleDateString('en-IN',istOpts)===now.toLocaleDateString('en-IN',istOpts);
+        const isYesterday=d.toLocaleDateString('en-IN',istOpts)===new Date(now-86400000).toLocaleDateString('en-IN',istOpts);
+        const grp=isToday?'TODAY':isYesterday?'YESTERDAY':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
         if(grp!==lastGroup){lastGroup=grp;lastUser='';lastIsMe=null;h+=`<div style="text-align:center;padding:14px 0 8px"><span style="font-size:9px;font-weight:500;color:var(--t4);letter-spacing:1.5px;background:var(--card);padding:0 12px;position:relative;z-index:1">${grp}</span></div>`}
         const sameUser=m.u===lastUser&&isMe===lastIsMe;
         const sideSwitch=lastIsMe!==null&&isMe!==lastIsMe;
         lastUser=m.u;lastIsMe=isMe;
         const mt=sameUser?'1px':sideSwitch?'14px':'10px';
-        const timeStr=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+        const timeStr=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
         if(isMe){
           h+=`<div style="display:flex;justify-content:flex-end;margin-top:${mt}">
             <div style="max-width:75%;display:flex;flex-direction:column;align-items:flex-end">
@@ -1248,7 +1249,7 @@ function rH(){
 
   el.innerHTML=h;
   // Update admin timestamp
-  var tsEl=$('adm-ts');if(tsEl)tsEl.textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  var tsEl=$('adm-ts');if(tsEl)tsEl.textContent='Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -2032,14 +2033,18 @@ function compareWithLeader(name){
 function predictPenalty(name){
   if(!name)return'';
   const now=new Date();
-  const day=now.getDay();// 0=Sun
+  // Use IST day, not local device day
+  const istNow=new Date(now.getTime()+(330-now.getTimezoneOffset())*60000);
+  const day=istNow.getUTCDay();// 0=Sun, in IST
   // Week runs Wed(3) to Tue(2). Find current week start
   const daysFromWed=(day+7-3)%7;
-  const weekStart=new Date(now);weekStart.setDate(now.getDate()-daysFromWed);weekStart.setHours(0,0,0,0);
+  const weekStart=new Date(istNow);weekStart.setUTCDate(istNow.getUTCDate()-daysFromWed);weekStart.setUTCHours(0,0,0,0);
+  // Convert back: weekStart is midnight IST expressed as UTC, adjust to real UTC
+  const weekStartUTC=new Date(weekStart.getTime()-330*60000);
   // Count matches with results this week
   const weekMatches=gms().filter(m=>{
     const md=new Date(m.d+'T00:00:00+05:30');
-    return md>=weekStart&&md<=now&&S.r[m.id]&&!S.r[m.id].voided;
+    return md>=weekStartUTC&&md<=now&&S.r[m.id]&&!S.r[m.id].voided;
   });
   if(weekMatches.length<2)return'';// Not enough matches to trigger penalty
   // Check if user bet on any match this week
@@ -2207,7 +2212,7 @@ function shareWA(id){
   if(url&&url!=='about:blank')msg+=`👉 ${url}`;
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
-function getDeadlineStr(m){const d=dl(m);return d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true})+' IST'}
+function getDeadlineStr(m){const d=dl(m);return d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'})+' IST'}
 
 function tBL(id){const e=$('bl-'+id);if(e){const open=e.style.display==='none';e.style.display=open?'block':'none';if(!window._blOpen)window._blOpen={};window._blOpen[id]=open}}
 
@@ -3333,7 +3338,7 @@ function rMG(){
     <div style="width:60px;height:60px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:26px;font-family:var(--ff);flex-shrink:0">${n[0].toUpperCase()}</div>
     <div style="flex:1">
       <div style="font-weight:800;font-size:20px;color:var(--t1)">${n}</div>
-      <div style="font-size:13px;color:var(--t4);margin-top:2px">Rank #${rank} of ${ns.length} · Joined ${new Date(S.p[n].j).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</div>
+      <div style="font-size:13px;color:var(--t4);margin-top:2px">Rank #${rank} of ${ns.length} · Joined ${new Date(S.p[n].j).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'})}</div>
     </div>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
@@ -3623,16 +3628,16 @@ function rMG(){
   if(!ub.length){h+=`<div style="color:var(--t3);font-size:13px">No bets yet — head to Matches and make your first move 🏏</div>`}
   else{
     const sorted=[...ub].sort((a,b)=>b.mid-a.mid);
-    // Time grouping
-    const now=new Date();const todayStr=now.toDateString();
-    const yesterday=new Date(now);yesterday.setDate(yesterday.getDate()-1);const yestStr=yesterday.toDateString();
+    // Time grouping — use IST dates for consistency
+    const now=new Date();const istOpts={timeZone:'Asia/Kolkata'};const todayStr=now.toLocaleDateString('en-IN',istOpts);
+    const yesterday=new Date(now-86400000);const yestStr=yesterday.toLocaleDateString('en-IN',istOpts);
     const weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-7);
     let lastGroup='';
     sorted.forEach(bt=>{
       const m=gm(bt.mid);
       const matchDate=m?new Date(m.d+'T00:00:00+05:30'):null;
       let group='Earlier';
-      if(matchDate){const ds=matchDate.toDateString();if(ds===todayStr)group='Today';else if(ds===yestStr)group='Yesterday';else if(matchDate>=weekAgo)group='This Week'}
+      if(matchDate){const ds=matchDate.toLocaleDateString('en-IN',istOpts);if(ds===todayStr)group='Today';else if(ds===yestStr)group='Yesterday';else if(matchDate>=weekAgo)group='This Week'}
       if(group!==lastGroup){lastGroup=group;h+=`<div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:${group==='Today'?'0':'12px'} 0 6px;margin-top:${group==='Today'?'0':'4px'}">${group}</div>`}
       const rs=S.r[bt.mid],od=safeOd(bt);
       let status='',statusClr='',amount='',barClr='var(--acc)';
@@ -3674,7 +3679,7 @@ function rMG(){
       const waived2=(S.adj||[]).some(a=>a.type==='waive'&&a.player===n);
       const betCount=ub.filter(bt=>bt.mid&&gms().some(m=>m.id===bt.mid&&new Date(m.d+'T00:00:00+05:30')>=new Date(wk.start)&&new Date(m.d+'T00:00:00+05:30')<=new Date(wk.end))).length;
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px">
-        <span style="color:var(--t2)">${new Date(wk.start).toLocaleDateString('en-IN',{day:'numeric',month:'short'})} → ${new Date(wk.end).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}</span>
+        <span style="color:var(--t2)">${new Date(wk.start).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'})} → ${new Date(wk.end).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'})}</span>
         <span>${missed?`<span style="color:var(--red);font-weight:700">❌ Missed${waived2?' (waived)':' (-₹2,000)'}</span>`:`<span style="color:var(--grn);font-weight:700">✅ Active</span>`}</span>
       </div>`;
     });
@@ -3686,7 +3691,7 @@ function rMG(){
     const cwBet=ub.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=cws&&d<cwEnd});
     if(cwMatches.length>0&&!cwBet){
       h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px">
-        <span style="color:var(--t2)">${cws.toLocaleDateString('en-IN',{day:'numeric',month:'short'})} → ${new Date(cwEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short'})} <span style="font-size:10px;color:var(--acc)">(this week)</span></span>
+        <span style="color:var(--t2)">${cws.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'})} → ${new Date(cwEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'})} <span style="font-size:10px;color:var(--acc)">(this week)</span></span>
         <span style="color:var(--acc);font-weight:700">⏳ No bet yet</span>
       </div>`;
     }
@@ -3993,7 +3998,7 @@ function rA(){
       cn.slice().reverse().forEach(function(n,ri){
         const i=cn.length-1-ri;
         const dt=new Date(n.ts);
-        const timeStr=dt.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
+        const timeStr=dt.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
         const tm=T[n.team]||{s:n.team,c:'var(--t1)'};
         h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;margin-bottom:6px;gap:10px">`;
         h+=`<div style="flex:1;min-width:0"><span style="font-weight:800;color:var(--t1)">${n.player}</span> <span style="color:var(--t3);font-size:12px">cancelled bet on</span> <span style="color:${tm.c};font-weight:700">${tm.s}</span> <span style="color:var(--t3);font-size:12px">— ₹${n.amt.toLocaleString()} @ ×${n.od}${n.mom?' · MoM: '+n.mom:''} · M#${n.mid}</span></div>`;
@@ -4278,7 +4283,7 @@ function rA(){
   const logs=(S.logs||[]).slice().reverse().slice(0,30);
   if(logs.length){
     logs.forEach(l=>{
-      const ts=new Date(l.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const ts=new Date(l.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'});
       h+=`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:11px">
         <span style="color:var(--t4);min-width:90px;flex-shrink:0">${ts}</span>
         <span style="color:var(--acc);font-weight:700;min-width:100px">${esc(l.action)}</span>
@@ -5328,7 +5333,7 @@ function timeAgo(ts){
   if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';
   if(s<86400)return Math.floor(s/3600)+'h ago';
   if(s<604800)return Math.floor(s/86400)+'d ago';
-  return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
 }
 
 function confetti(){
@@ -5642,7 +5647,7 @@ function runExport(){
       rows.forEach(function(r){
         var chStr=r.change==='—'?'—':(r.change>=0?'<span class="grn">+₹'+r.change.toLocaleString()+'</span>':'<span class="red">-₹'+Math.abs(r.change).toLocaleString()+'</span>');
         var balStr=r.balAfter==='⏳'?'⏳':'<span class="'+(r.balAfter>=ST?'grn':'red')+'">₹'+r.balAfter.toLocaleString()+'</span>';
-        var tsStr=r.ts?new Date(r.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+        var tsStr=r.ts?new Date(r.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'}):'—';
         h+='<tr data-date="'+r.date+'"><td>'+r.mid+'</td><td>'+r.match+'</td><td>'+r.team+'</td><td>₹'+r.amount.toLocaleString()+'</td><td>×'+r.odds+'</td><td>'+r.mom+'</td><td>'+r.status+'</td><td>'+chStr+'</td><td>'+balStr+'</td><td>'+tsStr+r.adm+'</td></tr>';
       });h+='</tbody></table></div>';
     });return h;
@@ -5717,7 +5722,7 @@ function runExport(){
     if(!logs.length)return h+'<div class="pc">No admin actions logged yet.</div>';
     h+='<table><thead><tr><th>Time</th><th>Action</th><th>Detail</th><th>By</th></tr></thead><tbody>';
     logs.slice().reverse().forEach(function(l){
-      h+='<tr><td>'+new Date(l.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</td><td>'+esc(l.action)+'</td><td>'+esc(l.detail||'—')+'</td><td>'+esc(l.by||'admin')+'</td></tr>';
+      h+='<tr><td>'+new Date(l.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'})+'</td><td>'+esc(l.action)+'</td><td>'+esc(l.detail||'—')+'</td><td>'+esc(l.by||'admin')+'</td></tr>';
     });
     h+='</tbody></table>';return h;
   };
@@ -5773,7 +5778,7 @@ function runExport(){
       h+='<table><thead><tr><th>Player</th><th>Team</th><th>Stake</th><th>Odds</th><th>MoM Pick</th><th>Placed At</th><th>Result</th><th>P&L</th></tr></thead><tbody>';
       mBets.forEach(function(bt){
         var od=safeOd(bt);
-        var tsStr=bt.ts?new Date(bt.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+        var tsStr=bt.ts?new Date(bt.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'}):'—';
         var admFlag=bt.adminBet?' 🔑':'';
         var result='⏳',pl='—';
         if(rs){
@@ -5855,7 +5860,7 @@ function runExport(){
   E.push('.fcount{font-size:10px;color:#64748B;margin-left:auto;white-space:nowrap;padding:4px 10px;background:#1A2E5A;border-radius:12px}');
   E.push('@media print{body{background:#fff;color:#1a1a1a}.sc,.pc{background:#f5f5f5;border-color:#ddd}th{background:#eee;color:#333}td{border-color:#ddd}.grn{color:#16a34a}.red{color:#dc2626}.acc{color:#d97706}.hdr{background:#f5f5f5}.tabs,.ptabs,.fbar{position:static}.pane,.ppane{display:block!important}h2{break-before:page}.fbar{display:none}}');
   E.push('</style></head><body>');
-  E.push('<div class="hdr"><h1>🏏 The Dugout — IPL 2026</h1><p>'+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})+'</p></div>');
+  E.push('<div class="hdr"><h1>🏏 The Dugout — IPL 2026</h1><p>'+new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'})+'</p></div>');
 
   var tb='<div class="tabs">';sel.forEach(function(k,i){var m=tabMeta[k];if(m)tb+='<button class="tab'+(i===0?' active':'')+'" onclick="swT(this,\'p-'+k+'\')">'+m.l+'</button>'});tb+='</div>';E.push(tb);
   E.push('<div class="fbar"><span style="font-size:11px;font-weight:800;color:#F5A623;letter-spacing:1px">FILTER</span><button class="fb active" onclick="setDF(this,\'all\')">All Matches</button><button class="fb" onclick="setDF(this,\'7\')">Last 7 Days</button><button class="fb" onclick="setDF(this,\'14\')">Last 14 Days</button><button class="fb" onclick="setDF(this,\'30\')">Last 30 Days</button><span style="color:#2A4480;font-size:14px">│</span><input type="date" id="df-from" class="fdate"><span style="color:#64748B;font-size:11px;font-weight:700">→</span><input type="date" id="df-to" class="fdate"><button onclick="clrP();applyDF()" style="padding:6px 16px;font-size:11px;font-weight:800;color:#000;background:linear-gradient(135deg,#F5A623,#FF6B00);border:0;border-radius:20px;cursor:pointer;margin-left:4px">Apply</button><button onclick="resetDF()" style="padding:6px 12px;font-size:11px;font-weight:700;color:#94A3B8;background:#1A2E5A;border:1px solid #2A4480;border-radius:20px;cursor:pointer">Reset</button><span id="fcount" class="fcount"></span></div>');
