@@ -278,6 +278,8 @@ function ruJump(id){const el=$(id);if(!el)return;
   // Auto-open any collapsed parent (adm sections etc)
   let p=el.parentElement;while(p){if(p.style&&p.style.display==='none'&&p.previousElementSibling){p.style.display='block';const ch=p.previousElementSibling.querySelector('.po-chev,.cb-chev,.dz-chev,.pl-chev');if(ch)ch.textContent='▾'}p=p.parentElement}
   setTimeout(()=>{const hdr=document.querySelector('header');const offset=hdr?hdr.offsetHeight+16:120;const y=el.getBoundingClientRect().top+window.pageYOffset-offset;window.scrollTo({top:y,behavior:'smooth'})},50)}
+// Login row click delegation — handles apostrophes and special chars in names
+document.addEventListener('click',function(e){var row=e.target.closest('[data-player]');if(row&&row.closest('#v-home')){var name=row.getAttribute('data-player');if(name)promptLogin(name)}});
 document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
@@ -963,7 +965,7 @@ function rH(){
       // Last logged-in shortcut
       const lastUser=localStorage.getItem('dg-last-user');
       if(lastUser&&S.p[lastUser]){
-        h+=`<div onclick="promptLogin('${lastUser.replace(/'/g,"\\\\'")}')" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
+        h+=`<div data-player="${esc(lastUser)}"" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
           <div class="ca" style="width:36px;height:36px;font-size:16px">${lastUser[0].toUpperCase()}</div>
           <div style="flex:1"><div style="font-size:11px;color:var(--t4);font-weight:700">⚡ CONTINUE AS</div><div style="font-weight:800;font-size:15px;color:var(--acc)">${lastUser}</div></div>
           <div style="font-size:18px;color:var(--acc);opacity:.5">→</div>
@@ -974,13 +976,15 @@ function rH(){
       // Compact grid — no alphabet headers, 2 columns
       h+=`<div id="login-list" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">`;
       ns.forEach(n=>{
-        h+=`<div class="login-row" data-name="${n.toLowerCase()}" onclick="promptLogin('${n.replace(/'/g,"\\\\\\\\'")}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:var(--inp);border:1px solid var(--bdr);transition:all .15s" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--bdr)'">
+        h+=`<div class="login-row" data-name="${n.toLowerCase()}" data-player="${esc(n)}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:var(--inp);border:1px solid var(--bdr);transition:all .15s" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--bdr)'">
           <div class="ca" style="width:28px;height:28px;font-size:12px;flex-shrink:0">${n[0].toUpperCase()}</div>
           <div style="flex:1;font-weight:700;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</div>
         </div>`;
       });
       h+=`</div>`;
     }
+
+
     h+=`<div id="login-prompt" style="display:none;margin-bottom:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <span id="login-prompt-name"></span></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`<div style="margin-top:20px;border-top:1px solid var(--bdr);padding-top:16px">
       <div style="text-align:center;font-size:12px;color:var(--t4);margin-bottom:10px">Can't find your name? New players need admin approval.</div>
@@ -5427,22 +5431,32 @@ function promptLogin(n){
   if(me===n)return;
   pendingLogin=n;
   const pdata=S.p[n];
-  // If player has no PIN (migrated from old data), let them set one
-  if(!pdata.pin){
-    const pin=prompt(n+' — no PIN set yet. Create a 4-digit PIN now:');
-    if(!pin||pin.length<4){toast('PIN must be 4+ digits','err');return}
-    hashPin(pin).then(h=>{S.p[n].pin=h;sv();toast('PIN set! Now login with it.');showLoginPrompt(n)});
+  // If player has no PIN, show inline PIN setup
+  if(!pdata||!pdata.pin){
+    const el=$('login-prompt');if(!el)return;
+    el.style.display='block';
+    el.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Create PIN for <strong>${n}</strong></div><div style="font-size:11px;color:var(--t4);margin-bottom:8px">First time? Set a 4-digit PIN. You'll need this every time you log in.</div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')setFirstPin()"><button class="bp" onclick="setFirstPin()">Set PIN</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div>`;
+    setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});$('login-pin')?.focus()},100);
     return;
   }
   showLoginPrompt(n);
 }
+function setFirstPin(){
+  const pin=$('login-pin')?.value;
+  if(!pin||pin.length<4){const e=$('login-err');if(e)e.textContent='PIN must be at least 4 digits';return}
+  const n=pendingLogin;
+  hashPin(pin).then(h=>{
+    S.p[n].pin=h;sv(['p']);
+    toast('PIN set! Now logging you in... 🔑');
+    me=n;localStorage.setItem('dg-me',n);localStorage.setItem('dg-last-user',n);pendingLogin='';
+    uh();nav('matches');
+  }).catch(e=>{toast('Error: '+e.message,'err')});
+}
 function showLoginPrompt(n){
   const el=$('login-prompt');if(!el)return;
   el.style.display='block';
-  $('login-prompt-name').textContent=n;
-  $('login-pin').value='';
-  $('login-err').textContent='';
-  setTimeout(()=>$('login-pin').focus(),100);
+  el.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <strong>${n}</strong></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div>`;
+  setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});$('login-pin')?.focus()},100);
 }
 function confirmLogin(){
   const pin=$('login-pin').value;
