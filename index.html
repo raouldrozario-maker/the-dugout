@@ -2397,15 +2397,27 @@ function rB(){
 // ══════════════════════════════════════════════════════════════
 function rRu(){
   const el=$('v-rules');
-  el.innerHTML=`<div class="card">
-  <div style="text-align:center;margin-bottom:24px">
-    <div style="font-size:48px;margin-bottom:8px">📋</div>
-    <div class="ct" style="font-size:24px;text-align:center">THE DUGOUT RULEBOOK</div>
-    <div style="color:var(--t4);font-size:13px;margin-top:4px">IPL 2026 Fun Betting League — No Real Money</div>
-  </div>
+  // Helper builders
+  const secH=(num,emoji,title)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-family:var(--ff);font-size:13px;font-weight:900;color:var(--t4);letter-spacing:1px">§${num}</span><span style="font-size:20px">${emoji}</span><span class="ct" style="font-size:15px">${title}</span></div>`;
+  const ex=(label,body)=>`<div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin:12px 0"><div style="font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📝 ${label}</div><div style="font-size:13px;color:var(--t2);line-height:1.8">${body}</div></div>`;
+  const tip=(text)=>`<div style="margin:12px 0;padding:10px 14px;background:rgba(212,162,78,0.05);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;font-size:12px;color:var(--t2);line-height:1.6">💡 <strong style="color:var(--acc)">Pro tip:</strong> ${text}</div>`;
+  const tryBtn=(amt,odds,mode)=>`<div style="text-align:right;margin-top:6px"><button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="openRuleCalc(${amt},${odds},'${mode}')">Try this → 🧮</button></div>`;
+  const card=(inner)=>`<div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:18px;margin-bottom:12px">${inner}</div>`;
+  const kp=(items)=>`<div style="margin-top:10px;font-size:12px;color:var(--t3);line-height:1.8">${items.map(i=>'• '+i).join('<br>')}</div>`;
 
-  <!-- LAYER 1: How to Play -->
-  <div id="ru-htp" style="background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:20px;margin-bottom:16px">
+  let h=`<div style="max-width:680px;margin:0 auto;padding:0 4px">`;
+
+  // ═══ HEADER ═══
+  h+=`<div style="text-align:center;margin-bottom:28px">
+    <div style="font-family:var(--ff);font-size:26px;font-weight:900;color:var(--acc);letter-spacing:3px">THE DUGOUT RULEBOOK</div>
+    <div style="font-size:13px;color:var(--t3);margin-top:4px">IPL 2026 Fun Betting League — No Real Money</div>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:11px;color:var(--t4)">
+      <span>10 rules</span><span>·</span><span>19 examples</span><span>·</span><span>Interactive calculator</span>
+    </div>
+  </div>`;
+
+  // ═══ HOW TO PLAY ═══
+  h+=`<div id="ru-htp" style="background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:20px;margin-bottom:20px">
     <div style="font-family:var(--ff);font-size:16px;font-weight:700;color:var(--t1);letter-spacing:1px;margin-bottom:14px">🎮 HOW TO PLAY</div>
     <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t1);line-height:1.6">
       <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:20px;flex-shrink:0">1️⃣</span><span><strong style="color:var(--t1)">Pick a winner</strong> — choose which team wins the match</span></div>
@@ -2413,375 +2425,153 @@ function rRu(){
       <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:20px;flex-shrink:0">3️⃣</span><span><strong style="color:var(--t1)">Pick Man of the Match</strong> (optional) — win + correct MoM = flat ₹2,000 bonus. Loss + correct MoM = stake saved</span></div>
       <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:20px;flex-shrink:0">4️⃣</span><span><strong style="color:var(--t1)">Lock it in</strong> — bets close 40 min before match. Win based on odds!</span></div>
     </div>
-  </div>
+  </div>`;
 
-  <!-- LAYER 2: Core Rules — Rule → Example → Outcome -->
-  <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
-
-    <div style="background:var(--inp);border:1px solid rgba(58,175,135,0.15);border-radius:14px;padding:18px">
-      <div style="font-weight:800;color:var(--grn);font-size:14px;margin-bottom:10px">💰 Winning a Bet</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px">If your team wins → you earn profit based on odds</div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(58,175,135,0.15);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8">
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Example</div>
-        You bet ₹5,000 on RCB at odds ×2.0<br><br>
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Outcome</div>
-        <span style="font-weight:800;font-size:14px;color:var(--grn)">You earn ₹5,000 profit</span><span style="color:var(--t4)"> (₹10,000 total return)</span>
-      </div>
-      <div style="text-align:right;margin-top:8px"><button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="openRuleCalc(5000,2,'none')">Try this → 🧮</button></div>
-    </div>
-
-    <div style="background:var(--inp);border:1px solid rgba(196,69,58,0.15);border-radius:14px;padding:18px">
-      <div style="font-weight:800;color:var(--red);font-size:14px;margin-bottom:10px">❌ Losing a Bet</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px">If your team loses → you lose your full stake</div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(196,69,58,0.15);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8">
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Example</div>
-        You bet ₹5,000 on MI and they lose<br><br>
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Outcome</div>
-        <span style="font-weight:800;font-size:14px;color:var(--red)">You lose ₹5,000</span>
-      </div>
-      <div style="text-align:right;margin-top:8px"><button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="openRuleCalc(5000,2,'none')">Try this → 🧮</button></div>
-    </div>
-
-    <div style="background:var(--inp);border:1px solid rgba(212,162,78,0.15);border-radius:14px;padding:18px">
-      <div style="font-weight:800;color:var(--yel);font-size:14px;margin-bottom:10px">🎯 Man of the Match Bonus</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px">Correct MoM pick + team wins → flat ₹2,000 bonus (20% of starting ₹10,000)</div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(212,162,78,0.15);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8">
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Example</div>
-        You bet ₹5,000 on RCB (×2.0) + pick Virat Kohli as MoM. RCB wins, Kohli IS MoM.<br><br>
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Outcome</div>
-        <span style="font-weight:800;font-size:14px;color:var(--grn)">₹5,000 profit + ₹2,000 flat MoM bonus = ₹7,000 total</span>
-      </div>
-      <div style="text-align:right;margin-top:8px"><button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="openRuleCalc(5000,2,'mom')">Try this → 🧮</button></div>
-    </div>
-
-    <div style="background:var(--inp);border:1px solid rgba(58,175,135,0.15);border-radius:14px;padding:18px">
-      <div style="font-weight:800;color:var(--grn);font-size:14px;margin-bottom:10px">🛡️ MoM Safety Net</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:12px">Your team loses — but if your MoM pick is correct, <strong style="color:var(--grn)">your entire stake is protected</strong>. You lose ₹0 instead of your full bet. No bonus is earned — just pure protection.</div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(58,175,135,0.15);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8;margin-bottom:8px">
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Example 1 — MoM from your team</div>
-        You bet <strong style="color:var(--t1)">₹5,000 on SRH (×2.2)</strong>. MoM pick: <strong style="color:var(--yel)">Travis Head (SRH)</strong>.<br>
-        SRH loses ❌ — but Head IS declared MoM ✅<br><br>
-        <span style="color:var(--t4)">Without MoM pick:</span> <strong style="color:var(--red)">−₹5,000</strong><br>
-        <span style="color:var(--t4)">With correct MoM:</span> <strong style="color:var(--grn)">₹0 loss — stake saved!</strong>
-      </div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(58,175,135,0.15);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8;margin-bottom:8px">
-        <div style="font-weight:700;color:var(--t4);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Example 2 — MoM from opponent (the hedge)</div>
-        You bet <strong style="color:var(--t1)">₹8,000 on KKR (×2.5)</strong>. MoM pick: <strong style="color:var(--yel)">Rohit Sharma (MI — the opponent)</strong>.<br>
-        KKR loses ❌ — but Rohit IS declared MoM ✅<br><br>
-        <span style="color:var(--t4)">Without MoM pick:</span> <strong style="color:var(--red)">−₹8,000</strong><br>
-        <span style="color:var(--t4)">With correct MoM:</span> <strong style="color:var(--grn)">₹0 loss — stake saved!</strong><br><br>
-        <span style="font-size:11px;color:var(--t4)">It doesn't matter which team your MoM is from. If the pick is right and your team lost — you're protected.</span>
-      </div>
-      <div style="background:linear-gradient(135deg,#0C1424,#0F1A2E);border:1px solid rgba(212,162,78,0.2);border-radius:10px;padding:14px;font-size:12px;color:var(--t3);line-height:1.8;margin-bottom:8px">
-        <div style="font-weight:700;color:var(--acc);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Example 3 — But what if your team WINS? (Jackpot!)</div>
-        Same bet: <strong style="color:var(--t1)">₹8,000 on KKR (×2.5)</strong>. MoM pick: <strong style="color:var(--yel)">Rohit Sharma (MI — the opponent)</strong>.<br>
-        KKR <strong style="color:var(--grn)">wins</strong> ✅ and Rohit IS MoM ✅<br><br>
-        <span style="color:var(--t4)">①</span> Normal profit: ₹8,000 × (2.5−1) = <strong style="color:var(--grn)">₹12,000</strong><br>
-        <span style="color:var(--t4)">②</span> Jackpot doubles profit: <strong style="color:var(--yel)">+₹12,000</strong><br>
-        <strong style="color:var(--acc)">Total: +₹24,000! ⭐</strong><br>
-        <span style="font-size:11px;color:var(--t4)">No separate MoM bonus on jackpots — the doubling is the reward.</span><br><br>
-        <span style="font-size:11px;color:var(--t4)">The opponent MoM pick is a <strong style="color:var(--acc)">win-win hedge</strong>: if you lose → stake saved. If you win → JACKPOT. The only risk is if the MoM is wrong — then it's a normal win or normal loss.</span>
-      </div>
-      <div style="font-size:11px;color:var(--t4);line-height:1.6;padding:8px 0">
-        <strong style="color:var(--t3)">Key points:</strong><br>
-        <span style="color:var(--grn)">•</span> <strong>Save = ₹0 loss.</strong> No bonus earned — just full stake protection.<br>
-        <span style="color:var(--yel)">•</span> <strong>Flat ₹2,000 bonus</strong> only kicks in when your team <strong>wins</strong> and MoM is correct.<br>
-        <span style="color:var(--t2)">•</span> Save works whether your MoM pick is from <strong>your team or the opponent</strong> — doesn't matter.
-      </div>
-      <div style="text-align:right;margin-top:4px"><button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="openRuleCalc(5000,2.1,'save')">Try this → 🧮</button></div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px">
-        <div style="font-weight:800;color:var(--acc);font-size:13px;margin-bottom:8px">⏱️ Bet Lock</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.7">Bets close <strong style="color:var(--hot)">40 min</strong> before match start. No edits after lock.</div>
-        <div style="font-size:11px;color:var(--t4);margin-top:6px">7:30 PM match → lock at 6:50 PM</div>
-      </div>
-      <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px">
-        <div style="font-weight:800;color:var(--acc);font-size:13px;margin-bottom:8px">⚠️ Weekly Penalty</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.7">No bets in a week → <strong style="color:var(--red)">₹2,000 deducted</strong>. Week = Wed–Tue.</div>
-        <div style="font-size:11px;color:var(--t4);margin-top:6px">Need 2+ resolved matches in the week</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- INTERACTIVE CALCULATOR -->
-  <div style="background:linear-gradient(135deg,rgba(212,162,78,0.06),rgba(212,162,78,0.01));border:1px solid rgba(212,162,78,0.15);border-radius:16px;padding:20px;margin-bottom:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="var c=$('rule-calc-body');var a=this.querySelector('.rc-chev');if(c.style.display==='block'){c.style.display='none';a.style.transform='rotate(0deg)'}else{c.style.display='block';a.style.transform='rotate(90deg)';initRuleCalc()}">
-      <div>
-        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">🧮 <span id="ru-calc">TRY IT YOURSELF</span></div>
-        <div style="font-size:12px;color:var(--t3);margin-top:3px">Tweak the numbers — see exactly what you'd win or lose</div>
-      </div>
-      <div class="rc-chev" style="font-size:20px;color:var(--acc);transition:transform .2s">›</div>
-    </div>
-    <div id="rule-calc-body" style="display:none;margin-top:16px;animation:fadeUp .25s">
+  // ═══ CALCULATOR ═══
+  h+=`<div id="ru-calc" style="background:linear-gradient(135deg,rgba(212,162,78,0.06),rgba(212,162,78,0.01));border:1px solid rgba(212,162,78,0.15);border-radius:16px;padding:20px;margin-bottom:24px">
+    <div style="margin-bottom:14px"><div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">🧮 TRY IT YOURSELF</div><div style="font-size:12px;color:var(--t3);margin-top:3px">Plug in any numbers — see exactly what you'd win or lose</div></div>
+    <div id="rule-calc-body" style="animation:fadeUp .25s">
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:100px">
-          <div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Stake (₹)</div>
-          <input class="inp" type="number" id="rc-amt" value="2000" step="500" min="500" style="width:100%" oninput="calcRule()">
-        </div>
-        <div style="flex:1;min-width:80px">
-          <div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Odds (×)</div>
-          <input class="inp" type="number" id="rc-odds" value="2.0" step="0.1" min="1.1" style="width:100%" oninput="calcRule()">
-        </div>
+        <div style="flex:1;min-width:100px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Stake (₹)</div><input class="inp" type="number" id="rc-amt" value="5000" step="500" min="500" style="width:100%" oninput="calcRule()"></div>
+        <div style="flex:1;min-width:80px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Odds (×)</div><input class="inp" type="number" id="rc-odds" value="2.0" step="0.1" min="1.1" style="width:100%" oninput="calcRule()"></div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="rc-mom-btn" style="padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp);color:var(--t3);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s" onclick="rcToggle('mom')">🎯 Win + MoM</button>
-        <button id="rc-save-btn" style="padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp);color:var(--t3);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s" onclick="rcToggle('save')">🛡️ MoM Save</button>
-        <button id="rc-jp-btn" style="padding:8px 12px;border-radius:8px;border:1px solid var(--bdr);background:var(--inp);color:var(--t3);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s" onclick="rcToggle('jackpot')">⭐ Jackpot</button>
+        <button id="rc-mom-btn" style="flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;padding:8px;font-size:11px;color:var(--t3);cursor:pointer;font-weight:700;transition:all .15s" onclick="rcToggle('mom')">🎯 + MoM Bonus</button>
+        <button id="rc-save-btn" style="flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;padding:8px;font-size:11px;color:var(--t3);cursor:pointer;font-weight:700;transition:all .15s" onclick="rcToggle('save')">🛡️ MoM Save</button>
+        <button id="rc-jp-btn" style="flex:1;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;padding:8px;font-size:11px;color:var(--t3);cursor:pointer;font-weight:700;transition:all .15s" onclick="rcToggle('jackpot')">⭐ Jackpot</button>
       </div>
       <div id="rc-output"></div>
     </div>
-  </div>
+  </div>`;
 
-  <!-- LAYER 3: Full Rulebook (collapsed) -->
-  <div style="margin-bottom:20px">
-    <button class="sq-btn" style="font-size:13px;color:var(--acc)" onclick="var w=$('ru-full');w.classList.toggle('open');if(w.classList.contains('open'))w.style.maxHeight='20000px';else w.style.maxHeight='0';this.querySelector('.sq-chev').classList.toggle('open')"><span class="sq-chev">▸</span> 📜 Full Rulebook — detailed rules, examples & edge cases</button>
-    <div id="ru-full" class="sq-wrap">
+  // ═══ DIVIDER ═══
+  h+=`<div style="display:flex;align-items:center;gap:10px;margin:8px 0 20px"><div style="flex:1;height:1px;background:var(--bdr)"></div><span style="font-size:11px;font-weight:700;color:var(--t4);letter-spacing:2px">COMPLETE RULES</span><div style="flex:1;height:1px;background:var(--bdr)"></div></div>`;
 
-  
-  <div style="background:var(--inp);border:1px solid var(--bdr2);border-radius:14px;padding:14px;margin-top:12px;margin-bottom:20px">
-    <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚡ Jump to section</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px">
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-1')">💰 Safety Net</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-2')">🔒 Betting Window</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-3')">📊 Bet Amounts</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-4')">🏏 Double Headers</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-5')">🌧️ Washout</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-6')">⚠️ Weekly Penalty</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-7')">🎯 Man of the Match</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-8')">⭐ Super Jackpot</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-9')">📈 Odds</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-10')">🔮 Crystal Ball</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-guide')">📱 Guide</button>
-      <button style="background:var(--card);border:1px solid var(--bdr);border-radius:8px;padding:5px 10px;color:var(--t1);font-size:11px;cursor:pointer;font-weight:600" onclick="ruJump('ru-glossary')">📖 Glossary</button>
-    </div>
-  </div>
+  // ═══ §1 STARTING BALANCE & SAFETY NET ═══
+  h+=card(`<div id="ru-1">${secH('1','💰','STARTING BALANCE & SAFETY NET')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Everyone starts with ₹10,000. Your balance can never drop below ₹2,000.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">This is your safety net. Even if you lose everything, you always have ₹2,000 to keep playing. Penalties, losses — nothing can take you below this floor.</div>
+    ${ex('Safety Net in Action','You have <strong style="color:var(--t1)">₹3,000</strong> left. You bet ₹3,000 and lose.<br>Raw balance: ₹0. But the floor kicks in → <strong style="color:var(--grn)">₹2,000</strong>.<br>You can still bet next match.')}
+    ${tip("Even at ₹2,000 you can bet ₹500 and start climbing back. One jackpot can change everything.")}
+  </div>`);
 
-  
-  <div id="ru-1" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">💰</span><span class="ct" style="font-size:15px">STARTING BALANCE & SAFETY NET</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div style="padding:10px 14px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">₹10,000</div><div style="font-size:11px;color:var(--t4);margin-top:2px">Starting balance</div></div>
-      <div style="padding:10px 14px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--yel);font-family:var(--ff)">₹2,000</div><div style="font-size:11px;color:var(--t4);margin-top:2px">Minimum floor</div></div>
-    </div>
-    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
-      The safety net is a <strong style="color:var(--acc)">floor, not a bonus</strong>. If your balance drops below ₹2,000 after any result, it gets <em>set to</em> ₹2,000 — not ₹2,000 added on top of what you have.
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <span style="color:var(--grn)">✅ You lose everything (balance = ₹0)</span> → set to <strong>₹2,000</strong><br>
-      <span style="color:var(--grn)">✅ Balance drops to ₹1,500</span> → set to <strong>₹2,000</strong> (only ₹500 added, not ₹2,000)<br>
-      <span style="color:var(--t3)">⭕ You win or stay above ₹2,000</span> → safety net never activates<br><br>
-      <span style="color:var(--red)">❌ "I went all-in so I get ₹2,000"</span> — <strong>Wrong.</strong> You only get the floor if you actually lose and drop below it.
-    </div>
-  </div>
+  // ═══ §2 WINNING A BET ═══
+  h+=card(`<div id="ru-2">${secH('2','✅','WINNING A BET')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Your team wins → you earn profit based on odds.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">Profit = Stake × (Odds − 1). Your original stake is returned plus the profit.</div>
+    ${ex('Example','You bet <strong style="color:var(--t1)">₹5,000 on RCB (×2.0)</strong>. RCB wins.<br>Profit: ₹5,000 × (2.0 − 1) = <strong style="color:var(--grn)">+₹5,000</strong><br>New balance: ₹10,000 + ₹5,000 = <strong style="color:var(--grn)">₹15,000</strong>')}
+    ${ex('Higher Odds','You bet <strong style="color:var(--t1)">₹3,000 on SRH (×2.8)</strong>. SRH wins.<br>Profit: ₹3,000 × 1.8 = <strong style="color:var(--grn)">+₹5,400</strong>')}
+    ${tryBtn(5000,2.0,'none')}
+  </div>`);
 
-  
-  <div id="ru-2" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔒</span><span class="ct" style="font-size:15px">BETTING WINDOW</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7">Bets lock <strong style="color:var(--hot)">40 minutes before match start</strong>. No bets accepted after that — no exceptions.</div>
-    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
-      <strong style="color:var(--yel)">Example:</strong> For a 7:30 PM match → bets lock at 6:50 PM IST<br>
-      For a 3:30 PM match → bets lock at 2:50 PM IST
-    </div>
-    <div style="margin-top:12px;padding:12px;background:var(--card);border:1px solid rgba(212,162,78,0.15);border-radius:8px;font-size:13px;color:var(--t2);line-height:1.8">
-      <strong style="color:var(--acc)">Already placed a bet?</strong> Before the lock window (40 mins before match), you can still:<br>
-      <span style="color:var(--grn)">✏️</span> <strong style="color:var(--t1)">Edit</strong> your bet — change team, amount, or MoM pick<br>
-      <span style="color:var(--red)">✕</span> <strong style="color:var(--t1)">Cancel</strong> your bet entirely — full stake returned to your balance<br>
-      <span style="font-size:12px;color:var(--t4);margin-top:4px;display:inline-block">Once locked, bets are final. No edits, no cancellations.</span>
-    </div>
-  </div>
+  // ═══ §3 LOSING A BET ═══
+  h+=card(`<div id="ru-3">${secH('3','❌','LOSING A BET')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Your team loses → you lose your full stake.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">No partial losses. The full amount you wagered is deducted. (Unless you picked MoM correctly — see §5.)</div>
+    ${ex('Example','You bet <strong style="color:var(--t1)">₹5,000 on MI (×2.3)</strong>. MI loses.<br>Result: <strong style="color:var(--red)">−₹5,000</strong><br>New balance: ₹10,000 − ₹5,000 = <strong style="color:var(--red)">₹5,000</strong>')}
+    ${tip("Never bet more than you can afford to lose in one match. A good rule: keep at least 30% of your balance as reserve.")}
+  </div>`);
 
-  
-  <div id="ru-3" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📊</span><span class="ct" style="font-size:15px">BET AMOUNTS</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7">Bets must be in <strong style="color:var(--acc)">multiples of ₹500</strong> (e.g. ₹500, ₹1000, ₹2500, ₹5000).</div>
-    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
-      <strong style="color:var(--yel)">Exception:</strong> Going <strong>ALL IN</strong> — you can bet your entire balance regardless of the amount (e.g. ₹7,350 all-in is valid).
-    </div>
-  </div>
+  // ═══ §4 MoM BONUS ═══
+  h+=card(`<div id="ru-4">${secH('4','🎯','MAN OF THE MATCH BONUS')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Win + correct MoM pick = flat ₹2,000 bonus on top of your profit.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">The bonus is always <strong style="color:var(--yel)">₹2,000</strong> (20% of starting ₹10,000) — regardless of your bet size. A ₹500 bet and a ₹10,000 bet both get the same ₹2,000 bonus. This levels the playing field.</div>
+    ${ex('Example','You bet <strong style="color:var(--t1)">₹5,000 on RCB (×2.0)</strong>. MoM pick: <strong style="color:var(--yel)">Virat Kohli (RCB)</strong>.<br>RCB wins ✅ and Kohli IS MoM ✅<br>Profit: ₹5,000 + <strong style="color:var(--yel)">₹2,000 bonus</strong> = <strong style="color:var(--grn)">+₹7,000</strong>')}
+    ${ex('Small Bet, Same Bonus','You bet <strong style="color:var(--t1)">₹1,000 on RR (×1.6)</strong>. MoM pick: Samson. RR wins, Samson IS MoM.<br>Profit: ₹600 + <strong style="color:var(--yel)">₹2,000 bonus</strong> = <strong style="color:var(--grn)">+₹2,600</strong><br>The bonus is bigger than the bet profit!')}
+    ${tip("Small bet + MoM pick is one of the highest-value plays in the game. Even a ₹500 bet earns +₹2,000 if your MoM is right.")}
+    ${tryBtn(5000,2.0,'mom')}
+  </div>`);
 
-  
-  <div id="ru-4" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🏏🏏</span><span class="ct" style="font-size:15px">DOUBLE HEADERS & "AT RISK"</span></div>
-    <div style="padding:10px 14px;background:#3FB08C0C;border-left:3px solid var(--grn);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
-      On double-header days, <strong style="color:var(--grn)">you can bet on both matches — even if you've gone all-in on the first one.</strong> Your visible balance doesn't deduct pending bets; the amount at stake is shown separately as <strong style="color:var(--acc)">"AT RISK"</strong>.
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--acc)">Example — Double header day:</strong> Your balance ₹10,000<br>
-      Match 1 (3:30 PM): You go <strong>₹10,000 all-in on DC</strong> (×1.8) — balance still shows ₹10,000, AT RISK: ₹10,000<br>
-      Match 2 (7:30 PM): You also bet <strong>₹5,000 on GT</strong> (×2.5) — AT RISK: ₹15,000<br><br>
-      <span style="color:var(--t1);font-weight:700">Results — all 4 scenarios:</span><br><br>
-      <span style="color:var(--grn)">✅ Both win:</span> +₹8,000 (DC) + ₹7,500 (GT) = <strong style="color:var(--grn)">₹25,500</strong><br>
-      <span style="color:var(--red)">❌ Both lose:</span> −₹10,000 − ₹5,000 = −₹5,000 → safety net → <strong style="color:var(--red)">₹2,000</strong><br>
-      <span style="color:var(--yel)">🔀 DC loses, GT wins:</span> −₹10,000 + ₹7,500 = <strong style="color:var(--yel)">₹7,500</strong><br>
-      <span style="color:var(--yel)">🔀 DC wins, GT loses:</span> +₹8,000 − ₹5,000 = <strong style="color:var(--yel)">₹13,000</strong>
-    </div>
-    <div style="margin-top:10px;padding:10px;background:#D4A24E08;border:1px solid #D4A24E18;border-radius:8px;font-size:12px;color:var(--t4)">
-      💡 Without this rule, going all-in on Match 1 would lock you out of Match 2 entirely — even if you win the first one. This keeps everyone in every match.
-    </div>
-  </div>
+  // ═══ §5 MoM SAFETY NET ═══
+  h+=card(`<div id="ru-5">${secH('5','🛡️','MOM SAFETY NET')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Loss + correct MoM = ₹0 loss. Your full stake is saved.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">If your team loses but you correctly predicted the Man of the Match, your stake is fully refunded. No bonus on a loss — just full protection. The MoM can be from <strong>either team</strong>.</div>
+    ${ex('Same Team Save','You bet <strong style="color:var(--t1)">₹8,000 on SRH (×2.2)</strong>. MoM pick: <strong style="color:var(--yel)">Travis Head (SRH)</strong>.<br>SRH loses ❌ but Head IS MoM ✅<br>Result: <strong style="color:var(--grn)">₹0 loss</strong> — full ₹8,000 saved')}
+    ${ex('Hedge Play — Opponent MoM','You bet <strong style="color:var(--t1)">₹8,000 on SRH (×2.2)</strong>. MoM pick: <strong style="color:var(--yel)">Virat Kohli (RCB — the opponent)</strong>.<br>SRH loses ❌ but Kohli IS MoM ✅<br>Result: <strong style="color:var(--grn)">₹0 loss</strong> — still saved!')}
+    ${tip("Picking an opponent's star player as MoM is a <strong>win-win hedge</strong>: if you lose → stake saved. If you win → JACKPOT (see §6). The only risk is if the MoM is someone else entirely.")}
+    <div style="margin-top:10px;font-size:12px;color:var(--t3);line-height:1.7">Key points:<br>• Save = ₹0 loss — no bonus earned, just protection<br>• Flat ₹2,000 bonus only kicks in when your team <strong style="color:var(--t1)">wins</strong> and MoM is correct<br>• Save works whether your MoM pick is from <strong style="color:var(--t1)">your team or the opponent</strong></div>
+  </div>`);
 
-  
-  <div id="ru-5" style="background:var(--inp);border:1px solid #64748B33;border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🌧️</span><span class="ct" style="font-size:15px">WASHOUT / NO RESULT</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">If a match is abandoned due to rain, technical issues, or any other reason and no result is declared, the admin will <strong style="color:var(--t1)">void the match</strong>. All bets on that match are <strong style="color:var(--grn)">fully refunded</strong> — deleted as if they were never placed.</div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">Example:</strong> You bet ₹5,000 on RCB in Match #7. The match gets rained out.<br><br>
-      Admin voids the match → your ₹5,000 bet is deleted<br>
-      Your balance is unaffected — it's as if you never placed the bet<br>
-      The match shows as "🌧️ Match Voided — No Result" on the dashboard<br><br>
-      <strong style="color:var(--t4)">Note:</strong> The voided match still counts as a match for the season, but it does NOT count towards the weekly penalty check — you won't be penalized for not betting on a voided match. If you had selected a Man of the Match, that prediction is also deleted along with the bet — no impact on your MoM accuracy stats.
-    </div>
-  </div>
+  // ═══ §6 SUPER JACKPOT ═══
+  h+=card(`<div id="ru-6">${secH('6','⭐','SUPER JACKPOT')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Win + correct MoM from the opponent team = profit DOUBLED.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">The jackpot triggers when you pick a MoM from the <strong style="color:var(--yel)">opposing team</strong> and your team still wins. Your entire profit is doubled. <strong>No additional ₹2,000 MoM bonus</strong> — the doubling IS the reward.</div>
+    ${ex('Example','You bet <strong style="color:var(--t1)">₹8,000 on KKR (×2.5)</strong>. MoM pick: <strong style="color:var(--yel)">Rohit Sharma (MI — the opponent)</strong>.<br>KKR wins ✅ and Rohit IS MoM ✅<br><br>① Normal profit: ₹8,000 × (2.5 − 1) = ₹12,000<br>② Jackpot doubles it: +₹12,000<br>Total: <strong style="color:var(--acc)">+₹24,000! ⭐</strong><br><br>No separate MoM bonus — the doubling is the reward.')}
+    ${tip("This is the highest-risk, highest-reward play. You're betting your team wins but picking the opponent's star as MoM. If you're right on both, massive payout. If the MoM is wrong, it's just a normal win.")}
+    ${tryBtn(8000,2.5,'jackpot')}
+  </div>`);
 
-  
-  <div id="ru-6" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⚠️</span><span class="ct" style="font-size:15px">WEEKLY MANDATORY BET</span></div>
-    <div style="padding:8px 12px;background:#C4453A10;border:1px solid #C4453A20;border-radius:8px;font-size:13px;font-weight:700;color:var(--hot);margin-bottom:10px">No bets in an active week (≥2 completed matches) → −₹2,000</div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7">You <strong style="color:var(--hot)">must place at least 1 bet per week</strong> (weeks run Wednesday to Tuesday). If you don't bet in a week where <strong>2 or more matches</strong> have been completed (not voided), you'll be penalized a <strong style="color:var(--hot)">flat ₹2,000</strong> — that's 20% of your starting ₹10,000. This is a fixed amount, not a percentage of your current balance.</div>
-    <div style="margin-top:12px;padding:12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;font-size:13px;color:var(--t2)">
-      <div style="font-weight:700;color:var(--acc);margin-bottom:6px">📖 Example</div>
-      <div style="line-height:1.8">
-        <strong>Week 2</strong> (Apr 3–9): 4 matches played, 3 completed, 1 voided.<br>
-        • <span style="color:var(--grn)">Raoul</span> bet on Match #7 → <strong style="color:var(--grn)">No penalty ✅</strong> (1 bet is enough)<br>
-        • <span style="color:var(--red)">Amit</span> didn't bet at all → <strong style="color:var(--red)">−₹2,000 ❌</strong> (3 completed matches ≥ 2 threshold)<br>
-        • <strong>Week 1</strong> had only 1 completed match → <strong style="color:var(--grn)">No penalties for anyone ✅</strong> (below 2-match threshold)
+  // ═══ §7 BET AMOUNTS & ODDS ═══
+  h+=card(`<div id="ru-7">${secH('7','📊','BET AMOUNTS & ODDS')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Min ₹500, multiples of ₹500. Max = your available balance. Odds are set by the commissioner.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">
+      <strong style="color:var(--t1)">How to read odds:</strong> Odds of ×2.0 mean the teams are evenly matched — you double your stake on a win. Higher odds (×2.8) = underdog = higher payout. Lower odds (×1.4) = favourite = lower payout.<br><br>
+      <strong style="color:var(--t1)">Implied probability:</strong> ×2.0 = 50% chance. ×2.5 = 40%. ×1.5 = 67%. The app shows this automatically.
+    </div>
+    ${ex('Favourite vs Underdog','MI (×1.6) vs SRH (×2.8)<br>₹5,000 on MI (favourite): win = <strong style="color:var(--grn)">+₹3,000</strong><br>₹5,000 on SRH (underdog): win = <strong style="color:var(--grn)">+₹9,000</strong><br>Higher odds = higher risk = higher reward')}
+    ${tip('Underdogs with strong MoM candidates are goldmines. If SRH loses but your MoM pick is right, you lose ₹0. If SRH wins, you get massive odds profit.')}
+  </div>`);
+
+  // ═══ §8 BETTING WINDOW & LOCK ═══
+  h+=card(`<div id="ru-8">${secH('8','🔒','BETTING WINDOW & LOCK')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Bets close 40 minutes before match start. No exceptions.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">Once locked, you cannot place, edit, or cancel bets. All bets become visible to other players after lock. The countdown timer on each match card shows exactly how much time you have left.</div>
+    ${ex('Example','Match at 7:30 PM → betting locks at <strong style="color:var(--red)">6:50 PM</strong>.<br>Match at 3:30 PM → betting locks at <strong style="color:var(--red)">2:50 PM</strong>.')}
+    ${tip("Don't wait until the last minute. Set your bet early and edit it later if odds change — you can always change your mind before lock.")}
+  </div>`);
+
+  // ═══ §9 WEEKLY PENALTY ═══
+  h+=card(`<div id="ru-9">${secH('9','⚠️','WEEKLY PENALTY')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">No bets in an active week = ₹2,000 penalty. Week = Wednesday to Tuesday.</div>
+    <div style="font-size:13px;color:var(--t2);line-height:1.7">You must place at least one bet in every active week (a week with 2+ resolved matches). If you miss a whole week, ₹2,000 is deducted. Multiple missed weeks = multiple penalties. The safety net floor of ₹2,000 still applies.</div>
+    ${ex('Example','Week of Mar 26 – Apr 1 has 5 matches. You placed 0 bets.<br>Penalty: <strong style="color:var(--red)">−₹2,000</strong><br>If you had ₹3,000, you drop to ₹2,000 (floor). If you already had ₹2,000, no further deduction.')}
+    ${tip('Just bet ₹500 on any match to avoid the penalty. Even a safe small bet on a favourite protects you from the ₹2,000 hit.')}
+  </div>`);
+
+  // ═══ §10 SPECIAL RULES ═══
+  h+=card(`<div id="ru-10">${secH('10','🏏','SPECIAL RULES')}
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:14px">Double headers, washouts, and Crystal Ball.</div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px">🏏 Double Headers</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7">Two matches on the same day. Each match is independent — you can bet on one, both, or neither. Your "at risk" amount is the total stake across all open bets.</div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px">🌧️ Washout / No Result</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7">If a match is washed out (rain, abandoned), all bets are voided and stakes are fully refunded. No winners, no losers, no MoM.</div>
+    </div>
+
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:6px">🔮 Crystal Ball</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.7">Before the season, pick the team you think will win IPL 2026. This is a one-time prediction. Results are hidden until the commissioner reveals them. No balance impact — just bragging rights. Editable only while the commissioner keeps it open.</div>
+    </div>
+  </div>`);
+
+  // ═══ QUICK REFERENCE TABLE ═══
+  h+=`<div style="margin:24px 0 20px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="flex:1;height:1px;background:var(--bdr)"></div><span style="font-size:11px;font-weight:700;color:var(--t4);letter-spacing:2px">QUICK REFERENCE</span><div style="flex:1;height:1px;background:var(--bdr)"></div></div>
+    <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;overflow:hidden">
+      <div style="display:grid;grid-template-columns:1fr 1fr;font-size:12px">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr)"><strong style="color:var(--grn)">✅ Win</strong><br><span style="color:var(--t3)">+Stake × (Odds−1)</span></div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bdr)"><strong style="color:var(--red)">❌ Loss</strong><br><span style="color:var(--t3)">−Full stake</span></div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bdr);border-right:1px solid var(--bdr)"><strong style="color:var(--yel)">🎯 Win + MoM</strong><br><span style="color:var(--t3)">Profit + flat ₹2,000</span></div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--bdr)"><strong style="color:var(--grn)">🛡️ Loss + MoM</strong><br><span style="color:var(--t3)">₹0 loss (saved)</span></div>
+        <div style="padding:12px 14px;border-right:1px solid var(--bdr)"><strong style="color:var(--acc)">⭐ Jackpot</strong><br><span style="color:var(--t3)">Profit × 2 (no bonus)</span></div>
+        <div style="padding:12px 14px"><strong style="color:var(--t4)">🌧️ Voided</strong><br><span style="color:var(--t3)">Full refund</span></div>
       </div>
     </div>
-    <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:13px;color:var(--t2)">
-      The penalty tracker in the Stats tab shows exactly who missed which week — full transparency.<br>
-      <span style="color:var(--t4);font-size:12px">ℹ️ Penalties only apply in active weeks (2+ completed, non-voided matches). Weeks with fewer matches or all-voided results are not counted.</span>
-    </div>
-  </div>
+    <div style="text-align:center;font-size:11px;color:var(--t4);margin-top:8px">Safety net: balance never below ₹2,000 · Penalty: ₹2,000/missed week</div>
+  </div>`;
 
-  
-  <div id="ru-7" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🎯</span><span class="ct" style="font-size:15px">MAN OF THE MATCH (OPTIONAL)</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div style="padding:10px 12px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:15px;font-weight:900;color:var(--yel);font-family:var(--ff)">+₹2,000</div><div style="font-size:11px;color:var(--t4);margin-top:2px">flat bonus on win + MoM correct</div></div>
-      <div style="padding:10px 12px;background:var(--card);border-radius:10px;text-align:center"><div style="font-size:15px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹0 lost</div><div style="font-size:11px;color:var(--t4);margin-top:2px">if team loses + MoM correct</div></div>
-    </div>
-    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--yel);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
-      Optionally pick the Man of the Match alongside your team. Two separate rewards: a <strong style="color:var(--yel)">flat ₹2,000 bonus</strong> (20% of your starting ₹10,000 — same regardless of bet size) if your team wins and MoM is correct, and a <strong style="color:var(--grn)">full stake save (no bonus on loss — just protection)</strong> if your team loses but your MoM is right.
-    </div>
-    <div style="background:#D4A24E08;border:1px solid #D4A24E18;border-radius:10px;padding:12px;margin-top:10px;margin-bottom:10px;font-size:12px;color:var(--t2);line-height:1.8">
-      <strong style="color:var(--acc)">Why flat ₹2,000?</strong> The MoM bonus is always 20% of your <strong>starting balance (₹10,000)</strong> — not your bet amount. This means:<br>
-      <span style="color:var(--t4)">•</span> Bet ₹500 + correct MoM → bonus = <strong style="color:var(--yel)">₹2,000</strong> (not ₹100)<br>
-      <span style="color:var(--t4)">•</span> Bet ₹3,000 + correct MoM → bonus = <strong style="color:var(--yel)">₹2,000</strong> (not ₹600)<br>
-      <span style="color:var(--t4)">•</span> Bet ₹10,000 + correct MoM → bonus = <strong style="color:var(--yel)">₹2,000</strong> (same)<br>
-      <span style="font-size:11px;color:var(--t4)">The bonus is a fixed reward for predicting the right player — it doesn't scale with your bet.</span>
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">Example:</strong> RCB vs SRH — You bet <strong>₹10,000 on SRH (×2.2)</strong>, MoM pick: <strong>Travis Head</strong><br><br>
-      <span style="color:var(--grn)">✅ SRH wins, Head NOT MoM:</span> ₹10,000 × (2.2−1) = <strong>+₹12,000</strong><br>
-      <span style="color:var(--grn)">🎯 SRH wins + Head IS MoM:</span> ₹12,000 + ₹2,000 bonus = <strong style="color:var(--yel)">+₹14,000</strong><br>
-      <span style="color:var(--red)">❌ SRH loses, Head NOT MoM:</span> <strong>−₹10,000</strong><br>
-      <span style="color:var(--yel)">🛡️ SRH loses + Head IS MoM:</span> Stake saved — <strong style="color:var(--yel)">lost ₹0!</strong>
-    </div>
-    <div style="margin-top:8px;font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">Second example:</strong> MI vs KKR — You bet <strong>₹5,000 on MI (×3)</strong>, MoM pick: <strong>Bumrah</strong><br><br>
-      <span style="color:var(--grn)">✅ MI wins, Bumrah not MoM:</span> <strong>+₹10,000</strong><br>
-      <span style="color:var(--grn)">🎯 MI wins + Bumrah IS MoM:</span> +₹10,000 + ₹2,000 flat bonus = <strong style="color:var(--yel)">+₹12,000</strong><br>
-      <span style="color:var(--red)">❌ MI loses, Bumrah not MoM:</span> <strong>−₹5,000</strong><br>
-      <span style="color:var(--yel)">🛡️ MI loses + Bumrah IS MoM:</span> <strong style="color:var(--yel)">₹0 lost — stake saved</strong>
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
-      <strong style="color:var(--t3)">Small bet example (shows flat bonus):</strong> RR vs CSK — You bet <strong>₹1,000 on RR (×2.4)</strong>, MoM pick: <strong>Sanju Samson</strong><br>
-      RR wins + Samson IS MoM 🎯<br><br>
-      Profit from odds: ₹1,000 × (2.4−1) = <strong style="color:var(--grn)">₹1,400</strong><br>
-      MoM bonus (flat): <strong style="color:var(--yel)">+₹2,000</strong> ← same bonus whether you bet ₹1,000 or ₹10,000<br>
-      <strong style="color:var(--grn)">Total: +₹3,400!</strong> The ₹2,000 bonus is bigger than the bet itself.
-    </div>
-    <div style="margin-top:10px;padding:10px;background:#3FB08C0C;border:1px solid #3FB08C25;border-radius:8px;font-size:12px;color:var(--grn)">
-      🛡️ <strong>The MoM safety net:</strong> If your team loses but your MoM pick is correct — you lose ₹0. Your full stake is saved. No bonus on a loss — just protection.
-    </div>
-    <div style="margin-top:10px;padding:12px;background:rgba(212,162,78,0.05);border:1px solid rgba(212,162,78,0.15);border-radius:8px;font-size:12px;color:var(--t1);line-height:1.8">
-      ⚡ <strong style="color:var(--acc)">Pro tip — the hedge play:</strong> KKR vs MI — You bet <strong>₹5,000 on KKR (×2.5)</strong>, MoM pick: <strong>Hardik Pandya (MI — the other team)</strong><br><br>
-      <span style="color:var(--grn)">✅ KKR wins + Hardik IS MoM:</span> <strong style="color:var(--yel)">⭐ SUPER JACKPOT!</strong> Profit doubled = <strong style="color:var(--grn)">+₹15,000</strong> (no separate MoM bonus)<br>
-      <span style="color:var(--grn)">✅ KKR wins + Hardik NOT MoM:</span> Normal win = <strong style="color:var(--grn)">+₹7,500</strong><br>
-      <span style="color:var(--red)">❌ KKR loses + Hardik NOT MoM:</span> <strong style="color:var(--red)">−₹5,000</strong><br>
-      <span style="color:var(--yel)">🛡️ KKR loses + Hardik IS MoM:</span> Stake saved — <strong style="color:var(--yel)">lost ₹0!</strong><br><br>
-      By picking MoM from the opposing team, you create a safety net if you lose AND a jackpot if you win. The only risk? The opposing player has to actually win MoM — which is rare from the losing side, but it happens.
-    <div style="margin-top:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.06),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:10px">
-      <div style="font-size:13px;font-weight:800;color:var(--acc);margin-bottom:8px">💡 PRO TIP — THE SMART HEDGE</div>
-      <div style="font-size:13px;color:var(--t1);line-height:1.8">
-        If you're placing a high-value bet, pick your MoM from the <strong style="color:var(--hot)">opponent team</strong>.<br><br>
-        <strong style="color:var(--t2)">Why?</strong> If your team loses, you still have a solid chance to recover your bet — if your MoM pick from the opponent wins, your <strong style="color:var(--grn)">full stake is saved</strong>.<br><br>
-        <strong style="color:var(--t2)">The Jackpot only hits if all three are true:</strong><br>
-        <span style="color:var(--grn)">1.</span> Your team <strong>wins</strong><br>
-        <span style="color:var(--grn)">2.</span> You picked MoM from the <strong>opponent team</strong><br>
-        <span style="color:var(--grn)">3.</span> That player is actually declared <strong>MoM</strong><br><br>
-        <span style="font-size:12px;color:var(--t4)">This is the only play that gives you insurance on a loss AND a multiplier on a win. The tradeoff: MoM from the losing side is rarer — but it happens regularly in IPL.</span>
-      </div>
-    </div>
-  </div>
 
-  
-  <div id="ru-8" style="background:var(--inp);border:1px solid #D4A24E25;border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">⭐</span><span class="ct" style="font-size:15px">SUPER JACKPOT</span></div>
-    <div style="padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px">
-      <strong style="color:var(--t3)">How to trigger:</strong> Bet on <strong style="color:var(--grn)">Team A to win</strong> + pick MoM from <strong style="color:var(--hot)">Team B (the losing side)</strong>. If Team A wins and your MoM is right → your entire profit is <strong style="color:var(--yel)">doubled</strong>. High risk, massive reward.
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">Example 1:</strong> RCB vs MI — You bet <strong>₹10,000 on MI (×3)</strong> | MoM: <strong>Kohli (RCB — the losers)</strong><br>
-      MI wins + Kohli is MoM 🔥<br><br>
-      <span style="color:var(--t4)">①</span> Normal profit: ₹10,000 × (3−1) = <strong style="color:var(--grn)">₹20,000</strong><br>
-      <span style="color:var(--t4)">②</span> Jackpot doubles the profit: <strong style="color:var(--yel)">+₹20,000</strong><br>
-      <strong style="color:var(--yel)">Total: ₹20,000 + ₹20,000 = +₹40,000! 🔥</strong><br>
-      <span style="font-size:11px;color:var(--t4)">No separate MoM bonus — the jackpot doubling IS the reward.</span>
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px;margin-top:8px">
-      <strong style="color:var(--t3)">Example 2:</strong> CSK vs PBKS — You bet <strong>₹8,000 on CSK (×1.5)</strong> | MoM: <strong>Arshdeep (PBKS — the losers)</strong><br>
-      CSK wins + Arshdeep is MoM 🔥<br><br>
-      <span style="color:var(--t4)">①</span> Normal profit: ₹8,000 × (1.5−1) = <strong style="color:var(--grn)">₹4,000</strong><br>
-      <span style="color:var(--t4)">②</span> Jackpot doubles the profit: <strong style="color:var(--yel)">+₹4,000</strong><br>
-      <strong style="color:var(--yel)">Total: ₹4,000 + ₹4,000 = +₹8,000! 🔥🔥</strong><br>
-      <span style="font-size:11px;color:var(--t4)">No separate MoM bonus — the jackpot doubling IS the reward.</span>
-    </div>
-    <div style="margin-top:10px;padding:10px;background:#C4453A10;border:1px solid #C4453A20;border-radius:8px;font-size:12px;color:var(--red)">
-      ⚠️ <strong>The catch:</strong> You're predicting the best player from the team that <em>loses</em>. You're going against the grain on both calls. Get it right — and your profit doubles.
-    </div>
-  </div>
-
-  
-  <div id="ru-9" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">📈</span><span class="ct" style="font-size:15px">HOW ODDS WORK</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Odds are set by the admin before each match. Your profit = bet amount × (odds − 1). Higher odds = underdog (risky, bigger profit). Lower odds = favourite (safer, smaller profit). You always get your stake back if you win. If odds are unavailable for a match due to a system issue, a default of ×2 is applied.</div>
-    <div style="padding:12px;background:var(--card);border-radius:8px;margin-bottom:12px">
-      <div style="font-size:13px;color:var(--t2);line-height:1.8"><strong style="color:var(--acc)">Why "odds − 1"?</strong> The odds number includes your original bet. ×1.8 means your total return is 1.8× your bet — but you already had the bet amount, so your <em>profit</em> is only the 0.8× part. Think of it this way: you bet ₹10,000 at ×1.8. If you win, you get back ₹18,000 total (₹10,000 original + ₹8,000 profit). The formula just calculates the profit portion: ₹10,000 × 0.8 = ₹8,000.</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">×1.5</div><div style="font-size:12px;color:var(--t4)">Strong Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Profit ₹5,000</div></div>
-      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">×2</div><div style="font-size:12px;color:var(--t4)">Slight Favourite</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Profit ₹10,000</div></div>
-      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">×3</div><div style="font-size:12px;color:var(--t4)">Slight Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Profit ₹20,000</div></div>
-      <div style="padding:12px;background:var(--card);border-radius:8px;text-align:center"><div style="color:var(--yel);font-weight:800;font-family:var(--ff);font-size:20px">×5</div><div style="font-size:12px;color:var(--t4)">Strong Underdog</div><div style="font-size:13px;color:var(--t2);margin-top:4px">Bet ₹10K → Profit ₹40,000</div></div>
-    </div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">How to read odds:</strong> The admin sets lower odds for favourites (lower payout since they're likely to win) and higher odds for underdogs (higher payout to reward the risk). Betting on an underdog pays more if they win, but they're less likely to. Betting on the favourite is safer but pays less. Either way, if you're wrong, you lose your full bet amount.
-    </div>
-  </div>
-
-  
-  <div id="ru-10" style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:24px">🔮</span><span class="ct" style="font-size:15px">CRYSTAL BALL</span></div>
-    <div style="font-size:14px;color:var(--t1);line-height:1.7;margin-bottom:12px">Once the top 4 teams qualify for the playoffs, the admin will define those teams and open the <strong style="color:var(--acc)">Crystal Ball</strong>. You'll see exactly those 4 teams — pick who you think will lift the IPL 2026 trophy, and wager any percentage of your current balance. Your prediction stays <strong style="color:var(--yel)">completely secret</strong> — only you and the admin can see it until the tournament ends.</div><div style="margin-top:-4px;margin-bottom:12px;padding:10px 14px;background:#D4A24E0C;border-left:3px solid var(--acc);border-radius:0 8px 8px 0;font-size:13px;color:var(--t2);line-height:1.6">🏏 <strong style="color:var(--acc)">You can only choose from the 4 teams that qualify for the playoffs</strong> (these will be shown once the Crystal Ball opens).</div>
-    <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
-      <strong style="color:var(--t3)">Example:</strong> You have ₹50,000 and bet 50% on RCB to win the IPL.<br>
-      That's ₹25,000 on the line. You continue betting normally.<br><br>
-      <span style="color:var(--grn)">If RCB wins the IPL:</span> Your final score + ₹25,000<br>
-      <span style="color:var(--red)">If RCB doesn't win:</span> Your final score − ₹25,000
-    </div>
-  </div>
-
-  
-  <div id="ru-guide" style="border-top:2px solid var(--bdr);margin-top:24px;padding-top:24px">
+  // ═══ GUIDE + GLOSSARY (preserved) ═══
+  h+=`<div id="ru-guide" style="border-top:2px solid var(--bdr);margin-top:24px;padding-top:24px">
     <div style="text-align:center;margin-bottom:20px"><div style="font-size:36px">📱</div><div class="ct" style="font-size:20px;margin-top:8px;text-align:center">YOUR DASHBOARD GUIDE</div><div style="color:var(--t4);font-size:13px;margin-top:4px">Here's what you can do on each tab</div></div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">🏠</span><span class="ct" style="font-size:15px">HOME</span></div>
-      <div style="font-size:14px;color:var(--t2);line-height:1.7">Your launchpad. Next match with countdown, your balance and P&L, live activity feed, trash talk wall, and league status strip. Log in or register here (new players need admin approval). Features include:<br><br>🎯 <strong>Smart Nudge Card</strong> — personalised action prompt: warns you about penalties, reminds you to bet before lock, flags losing streaks, and celebrates wins<br>📢 <strong>Commissioner\'s Bulletin</strong> — league announcements from the commissioner pinned at the top</div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">Your launchpad. Next match with countdown, your balance and P&L, live activity feed, trash talk wall, and league status strip. Log in or register here (new players need admin approval). Features include:<br><br>🎯 <strong>Smart Nudge Card</strong> — personalised action prompt: warns you about penalties, reminds you to bet before lock, flags losing streaks, and celebrates wins<br>📢 <strong>Commissioner's Bulletin</strong> — league announcements from the commissioner pinned at the top</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
@@ -2919,12 +2709,13 @@ function rRu(){
 
   </div></div><!-- close Full Rulebook collapsible -->
 
-  </div>`;
-}
+  `;
 
-// ══════════════════════════════════════════════════════════════
-// TEAMS
-// ══════════════════════════════════════════════════════════════
+  h+=`</div>`; // close max-width wrapper
+  el.innerHTML=h;
+  // Init calculator
+  setTimeout(()=>{initRuleCalc()},50);
+}
 function rT(){
   const el=$('v-teams');
   const allBets=Object.values(S.b);
@@ -6136,20 +5927,20 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="ruJump('ru-htp');$('ru-sheet').style.display='none'">🎮 How to Play</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="openRuleCalcFAB();ruJump('ru-calc');$('ru-sheet').style.display='none'">🧮 Calculator</button>
     <div style="border-top:1px solid var(--bdr);margin:4px 0"></div>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">🎮 Basics</div>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📖 CORE RULES</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-1');$('ru-sheet').style.display='none'">💰 Safety Net</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-2');$('ru-sheet').style.display='none'">🔒 Betting Window</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-3');$('ru-sheet').style.display='none'">📊 Bet Amounts</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-4');$('ru-sheet').style.display='none'">🏏 Double Headers</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-5');$('ru-sheet').style.display='none'">🌧️ Washout</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-6');$('ru-sheet').style.display='none'">⚠️ Weekly Penalty</button>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">🎯 MoM & Jackpot</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-7');$('ru-sheet').style.display='none'">🎯 Man of the Match</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-8');$('ru-sheet').style.display='none'">⭐ Super Jackpot</button>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📈 Advanced</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-9');$('ru-sheet').style.display='none'">📈 How Odds Work</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-10');$('ru-sheet').style.display='none'">🔮 Crystal Ball</button>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📖 Reference</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-2');$('ru-sheet').style.display='none'">✅ Winning a Bet</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-3');$('ru-sheet').style.display='none'">❌ Losing a Bet</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-4');$('ru-sheet').style.display='none'">🎯 MoM Bonus</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-5');$('ru-sheet').style.display='none'">🛡️ MoM Safety Net</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-6');$('ru-sheet').style.display='none'">⭐ Super Jackpot</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">🎯 MOM & JACKPOT</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-7');$('ru-sheet').style.display='none'">📊 Bet Amounts & Odds</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-8');$('ru-sheet').style.display='none'">🔒 Betting Window</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">⚙️ MECHANICS</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-9');$('ru-sheet').style.display='none'">⚠️ Weekly Penalty</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-10');$('ru-sheet').style.display='none'">🏏 Special Rules</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📖 REFERENCE</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-guide');$('ru-sheet').style.display='none'">📱 Your Dashboard Guide</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-glossary');$('ru-sheet').style.display='none'">📖 Glossary</button>
   </div>
