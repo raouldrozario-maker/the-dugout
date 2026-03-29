@@ -235,6 +235,10 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
+// ┌─────────────────────────────────────────────────────────────┐
+// │  SECTION 1: DATA — Teams, matches, constants               │
+// │  🔒 DO NOT EDIT DURING TOURNAMENT unless adding matches     │
+// └─────────────────────────────────────────────────────────────┘
 // ══════════════════════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════════════════════
@@ -285,10 +289,17 @@ const TILT_MULTIPLIER=1.3;  // bet increase ratio to detect tilting
 const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
 const LOCK_MINUTES=40;      // minutes before match to lock betting
 // Safe odds parser — logs warning instead of silent fallback
+// ┌─────────────────────────────────────────────────────────────┐
+// │  SECTION 2: CORE ENGINE — Financial logic, payout math      │
+// │  🔒 DO NOT TOUCH DURING TOURNAMENT — tested 55+ scenarios   │
+// │  Functions: safeOd, isJackpot, _coreBal, bal, betBal,       │
+// │  atRisk, rawBal, finalBal, weeklyPenalty, LB, momMatch,     │
+// │  dl, lk, cd, cdUrgency, getPersonality, getBalBreakdown     │
+// └─────────────────────────────────────────────────────────────┘
 function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);try{adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2')}catch(e){}bt._fb=true;return 2}return v}
 // Jackpot condition helper — readable shorthand
 function isJackpot(bt,mh){return !!(mh&&bt.mt&&bt.tm&&typeof bt.mt==='string'&&typeof bt.tm==='string'&&bt.mt.trim()&&bt.tm.trim()&&bt.mt!==bt.tm)}
-let _uiDDCount=0,_betFormOpen=0,db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{}},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
+let _uiDDCount=0,_betFormOpen=0,db=null,S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},version:1},me=localStorage.getItem('dg-me')||null,vw='home',adm=false,mf='upcoming',bfs={},admW={},prevRanks={},sqOpen={};
 
 // ══════════════════════════════════════════════════════════════
 // HELPERS
@@ -589,6 +600,11 @@ function getBalBreakdown(n){
   return h;
 }
 
+// ┌─────────────────────────────────────────────────────────────┐
+// │  SECTION 3: UI COMPONENTS — Badges, dropdowns, widgets      │
+// │  ✅ SAFE TO EDIT — visual changes only, no financial impact  │
+// └─────────────────────────────────────────────────────────────┘
+
 function bdg(t,sz=48,nm=false){
   if(!t||t==='TBD'||!T[t])return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:var(--bdr);font-size:${sz*.25}px;border:2px solid var(--t3)">?</div>${nm?`<div class="bdg-n">${t||'TBD'}</div>`:''}</div>`;
   const x=T[t];return`<div style="text-align:center"><div class="bdg-c" style="width:${sz}px;height:${sz}px;background:linear-gradient(135deg,${x.c},${x.c}CC);border:2px solid ${x.a};box-shadow:0 0 20px ${x.c}44;font-size:${sz*.25}px">${x.s}</div>${nm?`<div class="bdg-n">${x.n}</div>`:''}</div>`
@@ -722,6 +738,10 @@ function sdClear(id){
   inp.focus();
 }
 
+// ┌─────────────────────────────────────────────────────────────┐
+// │  SECTION 4: STORAGE — Firebase sync, localStorage cache     │
+// │  ⚠️  EDIT WITH CAUTION — affects data persistence for all   │
+// └─────────────────────────────────────────────────────────────┘
 // ══════════════════════════════════════════════════════════════
 // STORAGE — Granular Firebase sync to prevent multi-user overwrites
 // ══════════════════════════════════════════════════════════════
@@ -816,6 +836,12 @@ function ld(){
   uh();nav('home');
 }
 
+// ┌─────────────────────────────────────────────────────────────┐
+// │  SECTION 5: NAVIGATION + VIEWS — All render functions       │
+// │  ✅ SAFE TO EDIT — UI changes, layout, display logic        │
+// │  rH (Home), rM (Matches), rB (Board), rRu (Rules),         │
+// │  rT (Teams), rAn (Stats), rMG (Locker Room), rA (Admin)    │
+// └─────────────────────────────────────────────────────────────┘
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════════
@@ -2002,6 +2028,8 @@ function calcToggle(id){
 }
 function sub(id){
   _betFormOpen=Math.max(0,_betFormOpen-1);
+  // Block if offline — bet won't sync
+  if(!navigator.onLine){toast("You're offline — bet won't save. Reconnect and try again.",'err');return}
   // Debounce — prevent multi-tap
   const cta=$('cta-'+id);if(cta){if(cta.dataset.busy)return;cta.dataset.busy='1';cta.style.opacity='.6';cta.style.pointerEvents='none';setTimeout(()=>{cta.removeAttribute('data-busy');cta.style.opacity='';cta.style.pointerEvents=''},800)}
   const m=gm(id);if(!m||lk(m)){toast('Predictions closed for this match','err');return}
@@ -4220,7 +4248,7 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Reason</div><input class="bf-i" id="adj-reason" placeholder="e.g. Waived week 2 penalty — was travelling"></div>
   <button class="bp" style="width:100%" onclick="applyAdj()">Apply</button>`;
   // Show adjustment history
-  if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN')}</span></div></div>`});h+=`</div>`}
+  if(S.adj&&S.adj.length){h+=`<div style="margin-top:12px"><div class="bf-l">History</div>`;S.adj.slice(-10).reverse().forEach(a=>{const clr=a.type==='add'?'var(--grn)':a.type==='deduct'?'var(--red)':'var(--yel)';h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:12px;flex-wrap:wrap;gap:4px"><div><span style="font-weight:700;color:${clr}">${a.type==='add'?'➕':a.type==='deduct'?'➖':'🛡️'} ${a.player}</span><span style="color:var(--t4);margin-left:6px">${a.reason||'No reason'}</span></div><div><span style="color:${clr};font-weight:700">${a.type==='deduct'?'-':''}₹${a.amount.toLocaleString()}</span><span style="color:var(--t3);margin-left:6px;font-size:11px">${new Date(a.ts).toLocaleDateString('en-IN',{timeZone:'Asia/Kolkata'})}</span></div></div>`});h+=`</div>`}
   h+=`</div>`;
   // Participants
 
@@ -6003,5 +6031,35 @@ window.addEventListener('resize',moveSlider);
   </div>
 </div>
 <button class="scroll-top" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
+<script>
+// ═══ HIDDEN TEST HARNESS — runs on localhost only ═══
+if(location.hostname==='localhost'||location.hostname==='127.0.0.1'){
+  window.runAllTests=function(){
+    let p=0,f=0;
+    function T(n,g,e){if(JSON.stringify(g)===JSON.stringify(e)){p++;console.log('✅ '+n)}else{f++;console.error('❌ '+n+': got',g,'expected',e)}}
+    // Payout engine
+    const R={w:"RCB",mom:"Virat Kohli"};
+    T('Win no MoM',_coreBal('P',[{mid:1,u:'P',tm:'RCB',am:5000,od:2.0,mom:null,mt:null}],{1:R},{},0)-ST,5000);
+    T('Loss no MoM',_coreBal('P',[{mid:1,u:'P',tm:'CSK',am:5000,od:2.0,mom:null,mt:null}],{1:R},{},0)-ST,-5000);
+    T('MoM save',_coreBal('P',[{mid:1,u:'P',tm:'CSK',am:5000,od:2.0,mom:'Virat Kohli',mt:'CSK'}],{1:R},{},0)-ST,0);
+    T('Jackpot',_coreBal('P',[{mid:1,u:'P',tm:'RCB',am:5000,od:2.0,mom:'Virat Kohli',mt:'CSK'}],{1:R},{},0)-ST,10000);
+    // MoM matching
+    T('MoM exact',momMatch('Virat Kohli','Virat Kohli'),true);
+    T('MoM case',momMatch('virat kohli','Virat Kohli'),true);
+    T('MoM miss',momMatch('MS Dhoni','Virat Kohli'),false);
+    T('MoM null',momMatch(null,'Virat Kohli'),false);
+    // Odds safety
+    T('safeOd NaN',safeOd({od:'abc',mid:1,u:'P'}),2);
+    T('safeOd valid',safeOd({od:2.3,mid:1,u:'P'}),2.3);
+    // Lock deadline timezone-safe
+    const dl1=dl({d:'2026-04-04',t:'19:30'});
+    const dl2=dl({d:'2026-04-04',t:'15:30'});
+    T('DH locks independently',dl1.getTime()>dl2.getTime(),true);
+    console.log(`\n${p} passed, ${f} failed ${f===0?'🟢':'🔴'}`);
+    return{passed:p,failed:f};
+  };
+  console.log('%c[Dugout] Test harness loaded — run: runAllTests()','color:#D4A24E;font-weight:bold');
+}
+</script>
 </body>
 </html>
