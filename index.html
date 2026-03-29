@@ -186,6 +186,10 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .login-modal .lm-err{text-align:center;color:var(--red);font-size:12px;font-weight:700;margin-top:8px;min-height:18px}
 .login-modal .lm-close{position:absolute;top:14px;right:16px;background:0;border:0;color:var(--t4);font-size:20px;cursor:pointer;padding:4px;line-height:1;transition:color .15s}
 .login-modal .lm-close:hover{color:var(--t1)}
+.dg-tip{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.06);color:var(--t4);font-size:9px;cursor:pointer;vertical-align:middle;margin-left:4px;transition:all .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent;user-select:none;font-style:normal;font-weight:700;line-height:1;border:1px solid rgba(255,255,255,0.06)}
+.dg-tip:hover,.dg-tip.open{background:rgba(212,162,78,0.12);color:var(--acc);border-color:rgba(212,162,78,0.2)}
+.dg-tip-body{display:none;margin-top:6px;padding:8px 12px;background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.12);border-radius:8px;font-size:12px;color:var(--t2);line-height:1.5;font-weight:400;animation:fadeUp .2s ease}
+.dg-tip-body.open{display:block}
 .live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
@@ -288,6 +292,8 @@ function cd(m){const df=dl(m)-new Date();if(df<=0)return'LOCKED';const d=Math.fl
 function cdUrgency(m){const df=dl(m)-new Date();if(df<=0)return 0;if(df<=10*60000)return 3;if(df<=30*60000)return 2;if(df<=60*60000)return 1;return 0}
 function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function tipToggle(el){const body=el.parentElement.querySelector('.dg-tip-body');if(!body)return;const open=body.classList.toggle('open');el.classList.toggle('open',open)}
+function iTip(id,text){return `<i class="dg-tip" onclick="tipToggle(this)">i</i><div class="dg-tip-body" id="tip-${id}">${text}</div>`}
 // Fuzzy MoM matching — normalizes names to handle "Rohit Sharma" vs "R. Sharma" vs "rohit sharma"
 function momNorm(s){if(!s)return'';return s.trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ')}
 function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0]&&ap[ap.length-1]===bp[bp.length-1])return true}return false}
@@ -945,7 +951,7 @@ function rH(){
         </div>
         <div style="text-align:right">
           <div style="font-size:14px;font-weight:800;color:var(--acc);font-family:var(--ff)">₹${bt.am.toLocaleString()}</div>
-          <div style="font-size:10px;color:var(--grn)">Win: +₹${potWin.toLocaleString()} <span style="color:var(--t4)">(Locked ×${od}${bt._fb?' ⚠️ default':''})</span></div>
+          <div style="font-size:10px;color:var(--grn)">Win: +₹${potWin.toLocaleString()} <span style="color:var(--t4)">(Locked ×${od}${bt._fb?' ⚠️ default':''})</span> <span style="position:relative"><i class="dg-tip" onclick="tipToggle(this)" style="margin-left:2px">i</i><div class="dg-tip-body">Your payout uses the odds from when you placed your bet, not the current odds. Your locked rate is guaranteed.</div></span></div>
         </div>
       </div>`}).join('')}
     </div>`:''}
@@ -1309,7 +1315,7 @@ function rM(){
     </div>`;
   }
 
-  if(me){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?'<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active</div>':''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk</div>`:''}</div></div>`}
+  if(me){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?`<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active${iTip('safety','Your balance can never drop below ₹2,000. You can still bet with your available balance — one smart pick could start the comeback!')}</div>`:''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk${iTip('risk','This is the total you could lose if all your pending bets fail. Your bets are locked in — even on double headers, you can bet on both matches.')}</div>`:''}</div></div>`}
   else if(adm){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">⚙️</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Viewing as</div><div style="font-weight:800;font-size:15px;color:var(--acc)">Admin</div></div></div></div>`}
   h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">👁 Live</button>`:''}</div>`;
   if(mf==='livebets'&&adm){
@@ -1442,7 +1448,8 @@ function rM(){
         ${bdg(m.a,56)}
         ${mo?`<div style="font-size:22px;font-weight:900;color:var(--t2);font-family:var(--ff);margin-top:6px">×${mo[m.a]}</div><div style="font-size:11px;color:var(--t3)">${parseFloat(mo[m.a])<=parseFloat(mo[m.h])?"Fav":"Dog"} · ${Math.round(1/mo[m.a]*100)}%</div>`:''}
       </div>
-    </div>`;
+    </div>
+    ${mo?`<div style="text-align:center;margin-top:-8px;margin-bottom:8px"><span style="font-size:11px;color:var(--t4)">How do odds work?</span>${iTip('odds-'+m.id,'<strong>×'+mo[m.h]+'</strong> means a ₹1,000 bet on '+T[m.h]?.s+' earns <strong>₹'+(Math.round(1000*(mo[m.h]-1))).toLocaleString()+'</strong> profit if they win.<br><strong>×'+mo[m.a]+'</strong> on '+T[m.a]?.s+' earns <strong>₹'+(Math.round(1000*(mo[m.a]-1))).toLocaleString()+'</strong>.<br>Higher odds = bigger payout, but the team is less likely to win.')}</div>`:''}`;
 
     // Odds comparison bar (only when odds are set and bets exist) — collapsed by default
     if(mo&&ab.length>0){
@@ -1795,7 +1802,7 @@ function oBF(id,prefill){
       <div id="wc-storybody-${id}"></div>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">+ Boost with MoM <span style="font-weight:400;color:var(--t3)">(optional · +₹2,000 bonus or loss save)</span></div><div style="font-size:12px;color:var(--t2);margin-bottom:6px">💡 Correct pick → flat ₹2,000 bonus on win, or saves your stake on loss</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-s"><div class="bf-l">+ Boost with MoM <span style="font-weight:400;color:var(--t3)">(optional)</span>${iTip('mom-'+id,'<strong>Win + correct MoM</strong> → extra ₹2,000 bonus on top of your profit.<br><strong>Lose + correct MoM</strong> → your stake is saved! ₹0 loss.<br><strong>🔥 Jackpot:</strong> Pick a MoM from the OTHER team and get it right on a win → your profit is DOUBLED.<br>Wrong MoM pick has zero downside — a free bonus shot.')}</div>${momDropdown('mo-'+id,id)}</div>
   <div id="conf-hint-${id}" style="text-align:center;font-size:12px;color:var(--grn);font-weight:700;min-height:18px;margin-bottom:4px"></div><div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/\"/g,'&quot;'):''})">${isEdit?'Clear':'Clear'}</button><button class="bf-cf" id="cta-${id}" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'Lock Bet 🔒'}</button></div></div>`;
   // Post-render check — catch silent DOM failures
   requestAnimationFrame(function(){
