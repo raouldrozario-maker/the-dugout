@@ -830,7 +830,15 @@ function rH(){
   }
 
   // ─── BROADCAST ───
-  if(S.announce){h+=`<div style="background:#D4A24E0C;border:1px solid #D4A24E25;border-radius:14px;padding:14px 18px;margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:16px">📢</span><span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">ANNOUNCEMENT</span></div><div style="font-size:14px;color:var(--t1);line-height:1.5">${S.announce.msg}</div><div style="font-size:11px;color:var(--t3);margin-top:6px">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>`}
+  if(S.announce){h+=`<div style="background:linear-gradient(135deg,rgba(212,162,78,0.05),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.15);border-radius:14px;padding:16px 18px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:14px;flex-shrink:0">R</div>
+      <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">FROM THE COMMISSIONER</div>
+      <div style="font-size:10px;color:var(--t4)">${new Date(S.announce.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true})}</div></div>
+    </div>
+    <div style="font-size:14px;color:var(--t1);line-height:1.6;font-style:italic">"${S.announce.msg}"</div>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:right">— Raoul</div>
+  </div>`}
 
   // ─── PROFILE (logged in) ───
   if(me){
@@ -4135,6 +4143,7 @@ function rA(){
   const totalPlayers=Object.keys(S.p).length,totalBets=Object.keys(S.b).length;
   const activePlayers=new Set(Object.values(S.b).map(b=>b.u)).size;
   const dormant=totalPlayers-activePlayers;
+  const ns=Object.keys(S.p).sort();
   const totalWagered=Object.values(S.b).reduce((s,b)=>s+b.am,0);
   const nextOpen=allM.find(m=>!S.r[m.id]&&!lk(m)&&m.h!=='TBD');
   const nextLive=allM.find(m=>!S.r[m.id]&&lk(m)&&m.h!=='TBD');
@@ -4242,6 +4251,30 @@ function rA(){
     </div>`;
   }
 
+
+  // ─── R3: PENALTY PREVIEW BANNER ───
+  const pb2=getPenaltyBreakdown();
+  if(pb2&&pb2.weeks&&pb2.weeks.length){
+    const currentWeek=pb2.weeks[pb2.weeks.length-1];
+    if(currentWeek){
+      const atRisk=ns.filter(n=>{
+        const weekBets=Object.values(S.b).filter(x=>x.u===n);
+        const betsThisWeek=weekBets.filter(bt=>{
+          const m2=gm(bt.mid);if(!m2)return false;
+          return m2.d>=currentWeek.start&&m2.d<=currentWeek.end;
+        });
+        return betsThisWeek.length===0;
+      });
+      if(atRisk.length>0){
+        h+=`<div style="margin-bottom:16px;padding:14px 16px;background:rgba(196,69,58,0.06);border:2px solid rgba(196,69,58,0.2);border-radius:14px">
+          <div style="font-weight:900;color:var(--red);font-size:13px;letter-spacing:.5px;margin-bottom:6px">⚠️ PENALTY RISK — ${atRisk.length} player${atRisk.length!==1?'s':''}</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.6">Week closes ${fd(currentWeek.end)}. These players have 0 bets this week and will lose ₹2,000:</div>
+          <div style="font-size:13px;color:var(--red);font-weight:700;margin-top:6px">${atRisk.join(', ')}</div>
+        </div>`;
+      }
+    }
+  }
+
   // ─── MATCH CONTROL BOARD (compact, state-first) ───
   function mcbState(m){
     var hasOdds=S.odds[m.id]&&S.odds[m.id][m.h]&&S.odds[m.id][m.a];
@@ -4275,7 +4308,8 @@ function rA(){
     else if(st.s==='OPEN')cta='<button style="background:#3FB08C15;border:1px solid #3FB08C30;border-radius:8px;padding:6px 14px;color:var(--grn);font-size:11px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="openResultFlow('+m.id+')">Manage Match</button>';
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr)">
       <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;color:var(--t1)">${m.playoff?m.v:'#'+m.id} <strong style="color:${T[m.h]?.c}">${T[m.h]?.s}</strong> vs <strong style="color:${T[m.a]?.c}">${T[m.a]?.s}</strong></div>
-      <div style="font-size:11px;color:var(--t4);margin-top:2px">${fd(m.d)} · ${ft(m.t)} · <span style="color:${st.color};font-weight:700">${st.badge}</span>${x.bets?' · '+x.bets+' bet'+(x.bets!==1?'s':'')+' · ₹'+x.exposure.toLocaleString():''}</div></div>
+      <div style="font-size:11px;color:var(--t4);margin-top:2px">${fd(m.d)} · ${ft(m.t)} · <span style="color:${st.color};font-weight:700">${st.badge}</span>${x.bets?' · '+x.bets+'/'+ns.length+' bet':''}</div>
+      ${(()=>{const notBet=ns.filter(n=>!S.b[m.id+'-'+n]);return notBet.length>0&&notBet.length<=ns.length?'<div style="font-size:10px;color:var(--red);margin-top:3px;opacity:0.8">⚠️ Missing: '+notBet.slice(0,5).join(', ')+(notBet.length>5?' +'+( notBet.length-5)+' more':'')+'</div>':'';})()}</div>
       <div style="flex-shrink:0;margin-left:10px">${cta}</div></div>`;
   });
   if(mcbSetupAll.length>2){
@@ -4303,11 +4337,32 @@ function rA(){
   }
   h+=`</div>`;
 
+
+  // ─── R1: POST-MATCH WHATSAPP SUMMARY ───
+  const latestResolved=gms().filter(m=>S.r[m.id]&&!S.r[m.id].voided).sort((a,b)=>b.id-a.id)[0];
+  if(latestResolved){
+    const lrId=latestResolved.id;
+    const lrBets=Object.values(S.b).filter(x=>x.mid===lrId);
+    const lrR=S.r[lrId];
+    const lrWins=lrBets.filter(x=>x.tm===lrR.w).length;
+    const lrLosses=lrBets.filter(x=>x.tm!==lrR.w&&!momMatch(x.mom,lrR.mom)).length;
+    const lrSaves=lrBets.filter(x=>x.tm!==lrR.w&&momMatch(x.mom,lrR.mom)).length;
+    h+=`<div class="card" style="padding:14px 18px;margin-bottom:16px;border:1px solid rgba(58,175,135,0.15)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:800;color:var(--grn);letter-spacing:1px;font-family:var(--ff)">📲 POST-MATCH SUMMARY</div>
+        <div style="font-size:10px;color:var(--t4)">${latestResolved.playoff?latestResolved.v:'M#'+lrId} · ${T[lrR.w]?.s} won</div>
+      </div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">${lrBets.length} bets · ${lrWins} won · ${lrLosses} lost${lrSaves?' · '+lrSaves+' saved':''}</div>
+      <button style="width:100%;padding:10px;background:rgba(58,175,135,0.1);border:1px solid rgba(58,175,135,0.25);border-radius:10px;color:var(--grn);font-weight:800;font-size:13px;cursor:pointer" onclick="copyMatchSummary(${lrId})">📋 Copy WhatsApp Summary</button>
+    </div>`;
+  }
+
   // ─── QUICK JUMP STRIP ───
   h+=`<div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding:4px 0">`;
   h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-odds')">📊 Odds</button>`;
   h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-result')">🎮 Result</button>`;
   h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-broadcast')">📢 Broadcast</button>`;
+  h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="downloadBackup()">💾 Backup</button>`;
   h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="ruJump('adm-balance')">💰 Balance</button>`;
   h+=`<button style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:8px 14px;color:var(--t1);font-size:12px;cursor:pointer;font-weight:700;white-space:nowrap" onclick="openExportModal()">📤 Export</button>`;
   h+=`</div>`;
@@ -4378,6 +4433,23 @@ function rA(){
     </div></div>`;
   })}
   h+=`</div>`;
+  
+  // ─── R4: ADMIN ACTIVITY LOG ───
+  h+=`<div class="card" style="margin-bottom:10px"><div class="ch" style="cursor:pointer" onclick="var el=$('adm-log-body');if(el){el.style.display=el.style.display==='none'?'block':'none'}"><span style="font-size:20px">📋</span><span class="ct">ADMIN ACTIVITY LOG</span><span style="color:var(--t4);font-size:11px;margin-left:auto">${(S.logs||[]).length} actions</span></div>
+  <div id="adm-log-body" style="display:none;max-height:300px;overflow-y:auto">`;
+  const logs=(S.logs||[]).slice().reverse().slice(0,30);
+  if(logs.length){
+    logs.forEach(l=>{
+      const ts=new Date(l.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      h+=`<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);font-size:11px">
+        <span style="color:var(--t4);min-width:90px;flex-shrink:0">${ts}</span>
+        <span style="color:var(--acc);font-weight:700;min-width:100px">${esc(l.action)}</span>
+        <span style="color:var(--t2);flex:1">${esc(l.detail||'—')}</span>
+      </div>`;
+    });
+  }else{h+=`<div style="padding:12px;color:var(--t4);font-size:12px">No actions logged yet.</div>`}
+  h+=`</div></div>`;
+
   h+=`<div id="adm-playoff" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.po-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
@@ -4622,8 +4694,19 @@ function rA(){
 
 // Admin sub-functions
 // Simple hash for PIN (not cryptographic, but hides plain text from Firebase)
-async function hashPin(pin){const enc=new TextEncoder().encode(pin);const buf=await crypto.subtle.digest('SHA-256',enc);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
-function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA()})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}})}}
+async function hashPin(pin){
+  try{
+    if(crypto.subtle){
+      const enc=new TextEncoder().encode(pin);
+      const buf=await crypto.subtle.digest('SHA-256',enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')
+    }
+  }catch(e){}
+  // Fallback for HTTP/file:// — simple hash (not crypto-secure but functional)
+  let h=0;for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0}
+  return 'fb'+Math.abs(h).toString(16).padStart(8,'0')
+}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA()}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA()}else{toast('Wrong PIN','err')}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
 
 function admDDToggle(ddId){
   var dd=$(ddId);if(!dd)return;
@@ -5244,6 +5327,51 @@ function calcRule(){
   h+='</div>';
   out.innerHTML=h;
 }
+
+
+function downloadBackup(){
+  try{
+    const data=JSON.stringify(S,null,2);
+    const blob=new Blob([data],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='dugout-backup-'+new Date().toISOString().slice(0,16).replace(':','-')+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    adminLog('backup_download','Full state backup');sv(['logs']);
+    toast('💾 Backup downloaded!');
+  }catch(e){toast('Backup failed: '+e.message,'err')}
+}
+function genMatchSummary(mid){
+  const m=gm(mid);if(!m)return'';const rs=S.r[mid];if(!rs||rs.voided)return'';
+  const mBets=Object.values(S.b).filter(x=>x.mid===mid);
+  const hS=T[m.h]?.s||m.h,aS=T[m.a]?.s||m.a,wS=T[rs.w]?.s||rs.w;
+  let lines=['🏏 *M'+(m.playoff?m.v:'#'+mid)+' Result: '+wS+' beat '+(rs.w===m.h?aS:hS)+'*'];
+  if(rs.mom)lines.push('🏅 MoM: '+rs.mom);
+  lines.push('━━━━━━━━━━━━━━━━━━');
+  let totalWon=0,totalLost=0;
+  mBets.forEach(bt=>{
+    const od=safeOd(bt),w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom);
+    let change=0,tag='';
+    if(w){change=Math.round(bt.am*(od-1));if(isJackpot(bt,mh)){change+=Math.round(bt.am*(od-1));tag='⭐'}else if(mh){change+=Math.round(ST*MOM_BONUS);tag='🎯'}else{tag='✅'};totalWon+=change}
+    else{if(mh){tag='🛡️';change=0}else{tag='❌';change=-bt.am;totalLost+=bt.am}}
+    const sign=change>0?'+₹'+change.toLocaleString():change<0?'-₹'+Math.abs(change).toLocaleString():'₹0 (saved)';
+    lines.push(tag+' '+rpn(bt.u)+' '+sign+' ('+T[bt.tm]?.s+')');
+  });
+  lines.push('━━━━━━━━━━━━━━━━━━');
+  lines.push('💰 *Leaderboard:*');
+  const lb=LB();lb.slice(0,5).forEach((p,i)=>{lines.push((i+1)+'. '+p.n+' ₹'+p.b.toLocaleString())});
+  if(lb.length>5)lines.push('...'+(lb.length-5)+' more');
+  const nx=gms().find(x=>!S.r[x.id]&&x.h!=='TBD'&&x.id>mid);
+  if(nx)lines.push('\n📅 Next: '+T[nx.h]?.s+' vs '+T[nx.a]?.s+' · '+fd(nx.d)+' · '+ft(nx.t));
+  return lines.join('\n');
+}
+function copyMatchSummary(mid){
+  const txt=genMatchSummary(mid);if(!txt)return toast('No result to summarize','err');
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Summary copied! Paste in WhatsApp')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('📋 Copied!')
+  });
+}
 function filterLoginList(q){
   q=q.toLowerCase().trim();
   const rows=document.querySelectorAll('.login-row');
@@ -5508,7 +5636,7 @@ function openExportModal(){
 function runExport(){
   var ck=function(id){return document.getElementById(id)&&document.getElementById(id).checked};
   var sel=[];
-  var map={s_overview:'overview',s_board:'board',s_matches:'matches',s_odds:'odds',s_players:'players',s_teams:'teams',s_awards:'awards',s_penalties:'penalties',s_weekly:'weekly',s_crystal:'crystal',s_adjustments:'adjustments',s_narratives:'narratives',s_ledger:'ledger',s_audittrail:'audittrail'};
+  var map={s_overview:'overview',s_board:'board',s_matches:'matches',s_odds:'odds',s_players:'players',s_teams:'teams',s_awards:'awards',s_penalties:'penalties',s_weekly:'weekly',s_crystal:'crystal',s_adjustments:'adjustments',s_narratives:'narratives',s_signatures:'signatures',s_ledger:'ledger',s_audittrail:'audittrail'};
   Object.keys(map).forEach(function(k){if(ck(k))sel.push(map[k])});
   sel.push('guide');
   if(sel.length<=1){toast('Pick at least one section','err');return}
@@ -5540,7 +5668,9 @@ function runExport(){
       var change=0,status='';
       if(won){
         change=Math.round(bt.am*(od-1));
-        if(momH){change+=Math.round(ST*MOM_BONUS);if(bt.mt&&bt.mt!==bt.tm){change+=Math.round(bt.am*(od-1));status='⭐ Jackpot!'}else{status='🎯 Won+MoM'}}else{status='✅ Won'}
+        if(bt.mt&&bt.mt!==bt.tm&&momH){change+=Math.round(bt.am*(od-1));status='⭐ Jackpot!'}
+        else if(momH){change+=Math.round(ST*MOM_BONUS);status='🎯 Won+MoM'}
+        else{status='✅ Won'}
       }else{
         if(momH){change=0;status='🛡️ MoM Save'}else{change=-bt.am;status='❌ Lost'}
       }
@@ -5591,9 +5721,9 @@ function runExport(){
   };
 
   sections.odds=function(){
-    var h='<h2>📈 Odds History</h2><table><thead><tr><th>#</th><th>Match</th><th>Home</th><th>Away</th></tr></thead><tbody>';
+    var h='<h2>📈 Odds History</h2><table><thead><tr><th>#</th><th>Date</th><th>Match</th><th>Home</th><th>Away</th></tr></thead><tbody>';
     allM.forEach(function(m){var mo=S.odds[m.id];if(!mo)return;
-      h+='<tr data-date="'+m.d+'"><td>'+(m.playoff?m.v:'#'+m.id)+'</td><td>'+(T[m.h]?T[m.h].s:m.h)+' vs '+(T[m.a]?T[m.a].s:m.a)+'</td>';
+      h+='<tr data-date="'+m.d+'"><td>'+(m.playoff?m.v:'#'+m.id)+'</td><td>'+fd(m.d)+'</td><td>'+(T[m.h]?T[m.h].s:m.h)+' vs '+(T[m.a]?T[m.a].s:m.a)+'</td>';
       h+='<td>×'+(mo[m.h]||'—')+'</td><td>×'+(mo[m.a]||'—')+'</td></tr>';
     });h+='</tbody></table>';return h;
   };
@@ -5630,7 +5760,7 @@ function runExport(){
     var ts2={};
     allBets.forEach(function(b){if(!ts2[b.tm])ts2[b.tm]={count:0,staked:0,wins:0,pl:0};ts2[b.tm].count++;ts2[b.tm].staked+=b.am;
       var rs=S.r[b.mid];if(rs&&!rs.voided){var won=b.tm===rs.w;var od=safeOd(b);var momH=momMatch(b.mom,rs.mom);
-        if(won){ts2[b.tm].wins++;ts2[b.tm].pl+=Math.round(b.am*(od-1));if(momH)ts2[b.tm].pl+=Math.round(ST*MOM_BONUS)}else{if(!momH)ts2[b.tm].pl-=b.am}}});
+        if(won){ts2[b.tm].wins++;var rp2=b.am*(od-1);if(b.mt&&b.mt!==b.tm&&momH)rp2+=b.am*(od-1);else if(momH)rp2+=ST*MOM_BONUS;ts2[b.tm].pl+=Math.round(rp2)}else{if(!momH)ts2[b.tm].pl-=b.am}}});
     Object.keys(ts2).sort(function(a,b2){return ts2[b2].staked-ts2[a].staked}).forEach(function(tm){var t=ts2[tm];var res2=allBets.filter(function(x){return x.tm===tm&&S.r[x.mid]&&!S.r[x.mid].voided}).length;
       h+='<tr><td><strong>'+(T[tm]?T[tm].s:tm)+'</strong></td><td>'+t.count+'</td><td>₹'+t.staked.toLocaleString()+'</td><td>'+t.wins+'</td><td>'+(res2?Math.round(t.wins/res2*100):0)+'%</td><td class="'+(t.pl>=0?'grn':'red')+'">'+(t.pl>=0?'+':'')+t.pl.toLocaleString()+'</td></tr>';
     });h+='</tbody></table>';return h;
@@ -5683,8 +5813,8 @@ function runExport(){
   sections.adjustments=function(){
     var h='<h2>🔧 Admin Adjustments</h2>';var adj=S.adj||[];
     if(!adj.length)return h+'<div class="pc">None.</div>';
-    h+='<table><thead><tr><th>Player</th><th>Type</th><th>Amount</th><th>Reason</th></tr></thead><tbody>';
-    adj.forEach(function(a){h+='<tr><td>'+esc(a.player)+'</td><td>'+a.type+'</td><td>₹'+(a.amount||0).toLocaleString()+'</td><td>'+(a.reason||'—')+'</td></tr>'});
+    h+='<table><thead><tr><th>Player</th><th>Type</th><th>Amount</th><th>Reason</th><th>When</th></tr></thead><tbody>';
+    adj.forEach(function(a){h+='<tr><td>'+esc(a.player)+'</td><td>'+a.type+'</td><td>₹'+(a.amount||0).toLocaleString()+'</td><td>'+(a.reason||'—')+'</td><td>'+(a.ts?new Date(a.ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'—')+'</td></tr>'});
     h+='</tbody></table>';return h;
   };
 
@@ -5708,11 +5838,38 @@ function runExport(){
     if(topDay)stories.push('💰 <strong>'+fd(topDay[0])+'</strong> — biggest day with ₹'+topDay[1].toLocaleString()+' wagered');
     var tc={};allBets.forEach(function(b){tc[b.tm]=(tc[b.tm]||0)+1});var pop=Object.entries(tc).sort(function(a,b){return b[1]-a[1]})[0];
     if(pop)stories.push('🏏 <strong>'+(T[pop[0]]?T[pop[0]].n:pop[0])+'</strong> — most backed team ('+pop[1]+' bets)');
+    // H2H rivalries
+    var h2h={};
+    resolvedBets.forEach(function(b1){
+      resolvedBets.forEach(function(b2){
+        if(b1.u<b2.u&&b1.mid===b2.mid&&b1.tm!==b2.tm){
+          var key=b1.u+'|'+b2.u;if(!h2h[key])h2h[key]={a:b1.u,b:b2.u,aw:0,bw:0};
+          var rs=S.r[b1.mid];if(rs){if(b1.tm===rs.w)h2h[key].aw++;else h2h[key].bw++}
+        }
+      });
+    });
+    Object.values(h2h).filter(function(x){return x.aw+x.bw>=2}).sort(function(a,b){return(b.aw+b.bw)-(a.aw+a.bw)}).slice(0,3).forEach(function(r){
+      stories.push('⚔️ <strong>'+esc(r.a)+' vs '+esc(r.b)+'</strong> — '+r.aw+'-'+r.bw+' in '+( r.aw+r.bw)+' head-to-heads');
+    });
     if(!stories.length)stories.push('Season just started — stories will build!');
     stories.forEach(function(s){h+='<div class="pc" style="margin-bottom:8px">'+s+'</div>'});return h;
   };
 
   // ── Match Ledger — per-match bet breakdown for dispute resolution ──
+  sections.signatures=function(){
+    var h='<h2>🎭 Betting Signatures</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">';
+    L.forEach(function(p){
+      var sig=getBettingSignature(p.n);if(!sig)return;
+      h+='<div class="sc" style="text-align:center;padding:16px"><div style="font-size:30px;margin-bottom:6px">'+sig.emoji+'</div>';
+      h+='<div style="font-size:14px;font-weight:900;color:#F5A623;letter-spacing:1px;margin-bottom:6px">'+sig.title+'</div>';
+      h+='<div style="font-size:11px;color:#94A3B8;margin-bottom:8px">'+esc(p.n)+'</div>';
+      h+='<div style="font-size:12px;color:#CBD5E1;line-height:1.5;margin-bottom:10px">'+sig.desc+'</div>';
+      h+='<div style="display:flex;justify-content:center;gap:12px;font-size:11px"><span class="grn">'+sig.stat1+'</span><span class="acc">'+sig.stat2+'</span></div>';
+      h+='</div>';
+    });
+    h+='</div>';return h;
+  };
+
   sections.ledger=function(){
     var h='<h2>📋 Match Ledger</h2><div style="font-size:12px;color:#94A3B8;margin-bottom:16px">Every bet placed per match — use this to settle disputes. 🔑 = admin-placed bet.</div>';
     allM.filter(function(m){return S.r[m.id]||allBets.some(function(b){return b.mid===m.id})}).forEach(function(m){
@@ -5731,7 +5888,7 @@ function runExport(){
           else{
             var won=bt.tm===rs.w;
             var momH=momMatch(bt.mom,rs.mom);
-            if(won){var profit=Math.round(bt.am*(od-1));if(momH){profit+=Math.round(ST*MOM_BONUS);if(bt.mt&&bt.mt!==bt.tm){profit+=Math.round(bt.am*(od-1));result='⭐'}else{result='🎯'}}else{result='✅'}pl='<span class="grn">+₹'+profit.toLocaleString()+'</span>'}
+            if(won){var profit=Math.round(bt.am*(od-1));if(bt.mt&&bt.mt!==bt.tm&&momH){profit+=Math.round(bt.am*(od-1));result='⭐'}else if(momH){profit+=Math.round(ST*MOM_BONUS);result='🎯'}else{result='✅'}pl='<span class="grn">+₹'+profit.toLocaleString()+'</span>'}
             else{if(momH){result='🛡️';pl='₹0'}else{result='❌';pl='<span class="red">-₹'+bt.am.toLocaleString()+'</span>'}}
           }
         }
@@ -5778,7 +5935,7 @@ function runExport(){
     return h;
   };
 
-  var tabMeta={overview:{l:'📊 Overview'},board:{l:'🏆 Board'},matches:{l:'🏏 Matches'},odds:{l:'📈 Odds'},players:{l:'👤 Players'},teams:{l:'🏟️ Teams'},awards:{l:'🏅 Records'},penalties:{l:'⚠️ Penalties'},weekly:{l:'📅 Weekly'},crystal:{l:'🔮 Crystal'},adjustments:{l:'🔧 Adjust'},narratives:{l:'📝 Stories'},ledger:{l:'📋 Ledger'},audittrail:{l:'📋 Audit'},guide:{l:'📖 Guide'}};
+  var tabMeta={overview:{l:'📊 Overview'},board:{l:'🏆 Board'},matches:{l:'🏏 Matches'},odds:{l:'📈 Odds'},players:{l:'👤 Players'},teams:{l:'🏟️ Teams'},awards:{l:'🏅 Records'},penalties:{l:'⚠️ Penalties'},weekly:{l:'📅 Weekly'},crystal:{l:'🔮 Crystal'},adjustments:{l:'🔧 Adjust'},narratives:{l:'📝 Stories'},signatures:{l:'🎭 Sigs'},ledger:{l:'📋 Ledger'},audittrail:{l:'📋 Audit'},guide:{l:'📖 Guide'}};
 
   var E=[];
   E.push('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">');
@@ -5962,6 +6119,7 @@ window.addEventListener('resize',moveSlider);
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t1);cursor:pointer;padding:6px 0"><input type="checkbox" id="s_adjustments" checked> 🔧 Admin Adjustments</label>
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t1);cursor:pointer;padding:6px 0"><input type="checkbox" id="s_audittrail" checked> 📋 Audit Trail</label>
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t1);cursor:pointer;padding:6px 0"><input type="checkbox" id="s_narratives" checked> 📝 Key Narratives</label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t1);cursor:pointer;padding:6px 0"><input type="checkbox" id="s_signatures" checked> 🎭 Betting Signatures</label>
       <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t1);cursor:pointer;padding:6px 0"><input type="checkbox" id="s_ledger" checked> 📋 Match Ledger (dispute proof)</label>
     </div>
     <div style="display:flex;gap:8px">
