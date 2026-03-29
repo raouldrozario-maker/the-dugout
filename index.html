@@ -193,6 +193,15 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-wrap{background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:16px;position:relative}
+.ticker-label{position:absolute;left:0;top:0;bottom:0;z-index:2;display:flex;align-items:center;padding:0 12px;background:linear-gradient(90deg,#0C1220 70%,transparent);font-family:var(--ff);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:1.5px;white-space:nowrap;pointer-events:none}
+.ticker-track{display:flex;animation:tickerScroll var(--ticker-dur,30s) linear infinite;width:max-content;padding:12px 0}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 24px;white-space:nowrap;font-size:13px;color:var(--t2);border-right:1px solid var(--bdr);line-height:1}
+.ticker-item:last-child{border-right:0}
+.ticker-item strong{color:var(--t1)}
+.ticker-sep{color:var(--t4);opacity:.3;margin:0 4px}
 .confetti-piece{position:fixed;width:10px;height:10px;top:-10px;z-index:999;animation:confetti-fall 2.5s ease-out forwards;pointer-events:none}
 .mention{color:var(--acc);font-weight:700;background:#D4A24E12;padding:0 4px;border-radius:4px}
 </style>
@@ -831,6 +840,46 @@ function rH(){
   const totalBets=Object.keys(S.b).length,totalResolved=Object.keys(S.r).length;
   const tourneyStarted=totalResolved>0;
 
+  // ─── LIVE TICKER (top of page) ───
+  if(ns.length>1){
+    const feed=[];
+    const pStats={};
+    Object.keys(S.p).forEach(n=>{
+      const ub=Object.values(S.b).filter(x=>x.u===n);
+      const rb=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided).sort((a,b)=>b.mid-a.mid);
+      let streak=0,sType='';
+      for(const bt of rb){const w=bt.tm===S.r[bt.mid].w;if(!sType)sType=w?'W':'L';if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break}
+      pStats[n]={bets:ub.length,streak,sType,totalWagered:ub.reduce((s,x)=>s+x.am,0)};
+    });
+    Object.values(S.b).forEach(bt=>{
+      const m=gm(bt.mid);if(!m)return;
+      const l=lk(m),rs=S.r[bt.mid],ps=pStats[bt.u]||{};
+      if(rs&&!rs.voided){
+        const won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),isJP=won&&isJackpot(bt,mh);
+        if(isJP){const py=Math.round(bt.am*(od-1))*2;feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${rpn(bt.u)}</strong> hit <strong style="color:var(--yel)">JACKPOT</strong> — <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥`})}
+        else if(won&&mh){let py=Math.round(bt.am*(od-1))+Math.round(ST*MOM_BONUS);feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:8,type:'win',amount:py,streak:ps.streak,icon:'🎯',text:`<strong>${rpn(bt.u)}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + MoM${ps.streak>=3&&ps.sType==='W'?' 🔥'+ps.streak+' streak':''}`})}
+        else if(won){let py=Math.round(bt.am*(od-1));feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:py>=5000?7:5,type:'win',amount:py,streak:ps.streak,icon:py>=5000?'💰':'🏆',text:`<strong>${rpn(bt.u)}</strong> ${py>=5000?'cashed <strong style="color:var(--grn)">₹'+py.toLocaleString()+'</strong>':'won ₹'+py.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=2&&ps.sType==='W'?' — on a roll!':''}`})}
+        else if(mh){feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:6,type:'save',amount:bt.am,streak:ps.streak,icon:'🛡️',text:`<strong>${rpn(bt.u)}</strong> — <strong style="color:var(--yel)">MoM saved</strong> ₹${bt.am.toLocaleString()}`})}
+        else{feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:bt.am>=5000?6:3,type:'loss',amount:bt.am,streak:ps.streak,icon:'💀',text:`<strong>${rpn(bt.u)}</strong> lost ₹${bt.am.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=2&&ps.sType==='L'?' — '+ps.streak+' in a row 💀':''}`})}
+      }else if(!rs&&l){feed.push({ts:bt.ts,pri:bt.am>=5000?4:2,type:'bet',amount:bt.am,streak:0,icon:bt.am>=bal(bt.u)?'🔥':'💰',text:`<strong>${rpn(bt.u)}</strong> ${bt.am>=bal(bt.u)?'went <strong style="color:var(--hot)">ALL IN</strong>':'bet ₹'+bt.am.toLocaleString()} on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`})}
+    });
+    Object.entries(S.p).forEach(([n,p])=>{feed.push({ts:p.j,pri:0,type:'join',amount:0,streak:0,icon:'👤',text:`<strong>${n}</strong> entered The Dugout`})});
+    function getEventScore(e){let s=e.pri*100;if(e.amount>=5000)s+=30;else if(e.amount>=3000)s+=20;else if(e.amount>=2000)s+=10;if(e.type==='jackpot')s+=50;else if(e.type==='win')s+=25;else if(e.type==='loss')s+=15;else if(e.type==='save')s+=20;if(e.streak&&e.streak>=2)s+=e.streak*10;return s}
+    feed.sort((a,b)=>{const d=getEventScore(b)-getEventScore(a);return d!==0?d:new Date(b.ts)-new Date(a.ts)});
+    const resultsByMatch={},nonResults=[];
+    feed.forEach(f=>{if(f.mid&&(f.type==='win'||f.type==='loss'||f.type==='save'||f.type==='jackpot')){if(!resultsByMatch[f.mid])resultsByMatch[f.mid]={wins:[],losses:[],saves:[],jackpots:[],ts:f.ts,mid:f.mid};resultsByMatch[f.mid][f.type==='jackpot'?'jackpots':f.type==='win'?'wins':f.type==='save'?'saves':'losses'].push(f);if(new Date(f.ts)>new Date(resultsByMatch[f.mid].ts))resultsByMatch[f.mid].ts=f.ts}else{nonResults.push(f)}});
+    const smartFeed=[];
+    Object.values(resultsByMatch).forEach(mg=>{const all=[...mg.jackpots,...mg.wins,...mg.saves,...mg.losses].sort((a,b)=>getEventScore(b)-getEventScore(a));if(all[0])smartFeed.push(all[0]);if(all.length>1){const m=gm(mg.mid);const mLabel=m?`${T[m.h]?.s} vs ${T[m.a]?.s}`:'Match #'+mg.mid;const totalWon=mg.wins.reduce((s,f)=>s+f.amount,0)+mg.jackpots.reduce((s,f)=>s+f.amount,0);smartFeed.push({ts:mg.ts,pri:4,type:'summary',icon:'📊',text:`<strong>${mLabel}</strong> — ${mg.wins.length+mg.jackpots.length}W · ${mg.losses.length}L${totalWon?'<span style="color:var(--grn)"> · ₹'+totalWon.toLocaleString()+' paid</span>':''}`})}});
+    nonResults.forEach(f=>smartFeed.push(f));
+    smartFeed.sort((a,b)=>{const sd=getEventScore(b)-getEventScore(a);return sd!==0?sd:new Date(b.ts)-new Date(a.ts)});
+    const recentFeed=smartFeed.slice(0,8);
+    if(recentFeed.length){
+      const tickerItems=recentFeed.map(f=>`<span class="ticker-item"><span style="font-size:15px">${f.icon}</span> ${f.text} <span style="font-size:10px;color:var(--t4)">${timeAgo(f.ts)}</span></span>`).join('');
+      const dur=Math.max(20,recentFeed.length*7);
+      h+=`<div class="ticker-wrap"><div class="ticker-label">🔥 LIVE</div><div style="margin-left:70px;overflow:hidden"><div class="ticker-track" style="--ticker-dur:${dur}s">${tickerItems}${tickerItems}</div></div></div>`;
+    }
+  }
+
   // ─── HERO: Next Match or Countdown ───
   if(nx&&ns.length){
     const l=lk(nx);
@@ -985,6 +1034,21 @@ function rH(){
 
   // ─── LOGIN (not logged in) ───
   if(!me){
+    // New player join — show FIRST so newcomers don't scroll past 19 names
+    h+=`<div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:0;margin-bottom:16px">
+      <details>
+        <summary style="padding:12px 16px;cursor:pointer;font-size:13px;color:var(--t3);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center"><span>🏏 New here? Request to join the league</span><span style="color:var(--t4);font-size:11px">▸</span></summary>
+        <div style="padding:0 16px 14px">
+          <div style="font-size:11px;color:var(--red);margin-bottom:10px;line-height:1.5">⚠️ Only use this if you're a <strong>new player</strong> invited by the commissioner. If you already have an account, close this and find your name below.</div>
+          <div style="display:flex;border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;background:var(--card)">
+            <input class="inp" id="inp-n" placeholder="Your name..." style="flex:1;border:0;border-radius:10px 0 0 10px;background:transparent;font-size:13px" onkeydown="if(event.key==='Enter')showRegister()">
+            <button style="background:var(--inp);border:0;border-left:1px solid var(--bdr);padding:10px 18px;color:var(--t2);font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap" onclick="showRegister()">Request →</button>
+          </div>
+        </div>
+      </details>
+    </div>`;
+
+    // Existing players — select profile
     h+=`<div class="card"><div class="ch"><span style="font-size:18px">👤</span><span class="ct">SELECT YOUR PROFILE TO ENTER</span></div>`;
     if(ns.length){
       // Last logged-in shortcut
@@ -1008,161 +1072,9 @@ function rH(){
       });
       h+=`</div>`;
     }
-
-
-    h+=`<div style="margin-top:20px;border-top:1px solid var(--bdr);padding-top:16px">
-      <div style="text-align:center;font-size:12px;color:var(--t4);margin-bottom:10px">Can't find your name? New players need admin approval.</div>
-      <details style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:0">
-        <summary style="padding:12px 16px;cursor:pointer;font-size:13px;color:var(--t3);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center"><span>🏏 Request to join</span><span style="color:var(--t4);font-size:11px">▸</span></summary>
-        <div style="padding:0 16px 14px">
-          <div style="font-size:11px;color:var(--red);margin-bottom:10px;line-height:1.5">⚠️ Only use this if you're a <strong>new player</strong> invited by the commissioner. If you already have a profile, find your name above and log in with your PIN.</div>
-          <div style="display:flex;border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;background:var(--card)">
-            <input class="inp" id="inp-n" placeholder="Your name..." style="flex:1;border:0;border-radius:10px 0 0 10px;background:transparent;font-size:13px" onkeydown="if(event.key==='Enter')showRegister()">
-            <button style="background:var(--inp);border:0;border-left:1px solid var(--bdr);padding:10px 18px;color:var(--t2);font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap" onclick="showRegister()">Request →</button>
-          </div>
-        </div>
-      </details>
-    </div>`;
     h+=`</div>`;
   }
 
-  // ─── LIVE ACTIVITY FEED ───
-  if(ns.length>1){
-    const feed=[];
-    // Pre-compute streaks and stats per player for emotional phrasing
-    const pStats={};
-    Object.keys(S.p).forEach(n=>{
-      const ub=Object.values(S.b).filter(x=>x.u===n);
-      const rb=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided).sort((a,b)=>b.mid-a.mid);
-      let streak=0,sType='';
-      for(const bt of rb){
-        const w=bt.tm===S.r[bt.mid].w;
-        if(!sType)sType=w?'W':'L';
-        if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break;
-      }
-      pStats[n]={bets:ub.length,streak,sType,totalWagered:ub.reduce((s,x)=>s+x.am,0)};
-    });
-
-    // Build feed with metadata for scoring engine
-    Object.values(S.b).forEach(bt=>{
-      const m=gm(bt.mid);if(!m)return;
-      const l=lk(m),rs=S.r[bt.mid],ps=pStats[bt.u]||{};
-      if(rs&&!rs.voided){
-        const won=bt.tm===rs.w;
-        const mh=momMatch(bt.mom,rs.mom);
-        const od=safeOd(bt);
-        const isJP=won&&isJackpot(bt,mh);
-        if(isJP){
-          const py=Math.round(bt.am*(od-1))*2;
-          feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:10,type:'jackpot',amount:py,streak:ps.streak,icon:'⭐',text:`<strong>${rpn(bt.u)}</strong> hit the <strong style="color:var(--yel)">SUPER JACKPOT</strong>! Won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> 🔥🔥`,bg:'#D4A24E08',border:'#D4A24E1A'});
-        }else if(won&&mh){
-          let py=Math.round(bt.am*(od-1))+Math.round(ST*MOM_BONUS);
-          feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:8,type:'win',amount:py,streak:ps.streak,icon:'🎯',text:`<strong>${rpn(bt.u)}</strong> won <strong style="color:var(--grn)">₹${py.toLocaleString()}</strong> + nailed the MoM! ${ps.streak>=3&&ps.sType==='W'?'<strong style="color:var(--acc)">'+ps.streak+' wins in a row! 🔥</strong>':''}`});
-        }else if(won){
-          let py=Math.round(bt.am*(od-1));
-          const bigWin=py>=5000;
-          feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:bigWin?7:5,type:'win',amount:py,streak:ps.streak,icon:bigWin?'💰':'🏆',text:`<strong>${rpn(bt.u)}</strong> ${bigWin?'cashed <strong style="color:var(--grn)">₹'+py.toLocaleString()+'</strong>':'won ₹'+py.toLocaleString()} on ${T[bt.tm]?.s}${ps.streak>=3&&ps.sType==='W'?' — <strong style="color:var(--acc)">'+ps.streak+' in a row!</strong>':ps.streak>=2&&ps.sType==='W'?' — on a roll!':''}`});
-        }else if(mh){
-          feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:6,type:'save',amount:bt.am,streak:ps.streak,icon:'🛡️',text:`<strong>${rpn(bt.u)}</strong> lost the bet but <strong style="color:var(--yel)">MoM pick saved them</strong>! Lucky escape`});
-        }else{
-          const bigLoss=bt.am>=5000;
-          const loseStreak=ps.streak>=2&&ps.sType==='L';
-          feed.push({ts:rs.ts||bt.ts,mid:bt.mid,pri:bigLoss?6:loseStreak?5:3,type:'loss',amount:bt.am,streak:ps.streak,icon:loseStreak?'😵':'💀',text:`<strong>${rpn(bt.u)}</strong> ${bigLoss?'dropped <strong style="color:var(--red)">₹'+bt.am.toLocaleString()+'</strong>':'lost ₹'+bt.am.toLocaleString()} on ${T[bt.tm]?.s}${loseStreak?' — <strong style="color:var(--red)">'+ps.streak+' losses in a row 💀</strong>':''}`});
-        }
-      }else if(!rs&&l){
-        const bigBet=bt.am>=5000;
-        feed.push({ts:bt.ts,pri:bigBet?4:2,type:'bet',amount:bt.am,streak:0,icon:bigBet?'🔥':'💰',text:`<strong>${rpn(bt.u)}</strong> ${bt.am>=bal(bt.u)?'went <strong style="color:var(--hot)">ALL IN</strong> with ₹'+bt.am.toLocaleString():bigBet?'dropped a big one — <strong style="color:var(--acc)">₹'+bt.am.toLocaleString()+'</strong>':'bet ₹'+bt.am.toLocaleString()} on <strong style="color:${T[bt.tm]?.c||'var(--acc)'}">${T[bt.tm]?.s||bt.tm}</strong>`});
-      }else if(!rs&&!l){
-        feed.push({ts:bt.ts,pri:1,type:'bet',amount:bt.am,streak:0,icon:'👀',text:`<strong>${rpn(bt.u)}</strong> just made a move on ${T[m.h]?.s} vs ${T[m.a]?.s}... 👀`});
-      }
-    });
-    // Joins (low priority)
-    Object.entries(S.p).forEach(([n,p])=>{
-      feed.push({ts:p.j,pri:0,type:'join',amount:0,streak:0,icon:'👤',text:`<strong>${n}</strong> entered The Dugout`});
-    });
-    // Trash talk (medium priority)
-    (S.trash||[]).slice(-3).forEach(t=>{
-      feed.push({ts:t.ts,pri:2,type:'talk',amount:0,streak:0,icon:'🗣️',text:`<strong>${t.u}</strong>: "${t.msg.length>35?t.msg.slice(0,35)+'…':t.msg}"`});
-    });
-
-    // ── EVENT SCORING ENGINE ──
-    function getEventScore(e){
-      let score=e.pri*100;
-      if(e.amount>=5000)score+=30;
-      else if(e.amount>=3000)score+=20;
-      else if(e.amount>=2000)score+=10;
-      if(e.type==='jackpot')score+=50;
-      else if(e.type==='win')score+=25;
-      else if(e.type==='loss')score+=15;
-      else if(e.type==='save')score+=20;
-      if(e.streak&&e.streak>=2)score+=e.streak*10;
-      return score;
-    }
-
-    feed.sort((a,b)=>{
-      const scoreDiff=getEventScore(b)-getEventScore(a);
-      if(scoreDiff!==0)return scoreDiff;
-      return new Date(b.ts)-new Date(a.ts);
-    });
-    // Group same-match results into summaries, keep top individual moments
-    const resultsByMatch={};
-    const nonResults=[];
-    feed.forEach(f=>{
-      if(f.mid&&(f.type==='win'||f.type==='loss'||f.type==='save'||f.type==='jackpot')){
-        if(!resultsByMatch[f.mid])resultsByMatch[f.mid]={wins:[],losses:[],saves:[],jackpots:[],ts:f.ts,mid:f.mid};
-        resultsByMatch[f.mid][f.type==='jackpot'?'jackpots':f.type==='win'?'wins':f.type==='save'?'saves':'losses'].push(f);
-        if(new Date(f.ts)>new Date(resultsByMatch[f.mid].ts))resultsByMatch[f.mid].ts=f.ts;
-      }else{nonResults.push(f)}
-    });
-    const smartFeed=[];
-    // For each match: top moment + summary card
-    Object.values(resultsByMatch).forEach(mg=>{
-      const all=[...mg.jackpots,...mg.wins,...mg.saves,...mg.losses].sort((a,b)=>getEventScore(b)-getEventScore(a));
-      if(all[0])smartFeed.push(all[0]); // Top moment only
-      if(all.length>1){
-        const m=gm(mg.mid);
-        const mLabel=m?`${T[m.h]?.s} vs ${T[m.a]?.s}`:'Match #'+mg.mid;
-        const totalWon=mg.wins.reduce((s,f)=>s+f.amount,0)+mg.jackpots.reduce((s,f)=>s+f.amount,0);
-        smartFeed.push({ts:mg.ts,pri:4,type:'summary',icon:'📊',text:`<strong>${mLabel}</strong> — ${mg.wins.length+mg.jackpots.length} won${mg.saves.length?' · '+mg.saves.length+' saved':''} · ${mg.losses.length} lost${totalWon?'<span style="color:var(--grn)"> · ₹'+totalWon.toLocaleString()+' paid out</span>':''}`});
-      }
-    });
-    nonResults.forEach(f=>smartFeed.push(f));
-    smartFeed.sort((a,b)=>{const sd=getEventScore(b)-getEventScore(a);return sd!==0?sd:new Date(b.ts)-new Date(a.ts)});
-    const recentFeed=smartFeed.slice(0,5);
-
-    if(recentFeed.length){
-      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-size:16px">🔥</span>
-        <span style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:2px">WHAT'S HAPPENING</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">`;
-
-      recentFeed.forEach((f,i)=>{
-        if(i===0&&f.type!=='join'&&f.type!=='talk'){
-          h+=`<div style="position:relative;padding:16px 18px;background:linear-gradient(135deg,#152240,#0E1528);border:1px solid var(--acc);border-radius:14px;box-shadow:0 0 20px #D4A24E14;margin-bottom:4px;overflow:hidden">
-            <div style="position:absolute;top:0;right:0;padding:4px 12px;background:var(--acc);border-radius:0 14px 0 10px;font-size:10px;font-weight:900;color:#000;letter-spacing:1px;font-family:var(--ff)">🔥 MOMENT</div>
-            <div style="display:flex;align-items:flex-start;gap:12px;margin-top:4px">
-              <span style="font-size:28px;flex-shrink:0">${f.icon}</span>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:16px;color:var(--t1);line-height:1.5;font-weight:600">${f.text}</div>
-                <div style="font-size:11px;color:var(--t3);margin-top:5px">${timeAgo(f.ts)}</div>
-              </div>
-            </div>
-          </div>`;
-        }else{
-          h+=`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:${f.bg||'var(--inp)'};border:1px solid ${f.border||'transparent'};border-radius:10px">
-            <span style="font-size:18px;flex-shrink:0;margin-top:1px">${f.icon}</span>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;color:var(--t1);line-height:1.5">${f.text}</div>
-              <div style="font-size:10px;color:var(--t3);margin-top:3px">${timeAgo(f.ts)}</div>
-            </div>
-          </div>`;
-        }
-      });
-      h+=`</div></div>`;
-    }
-  }
 
 
   // ─── SMART NUDGE CARD ───
@@ -1206,64 +1118,41 @@ function rH(){
     }
   }
 
-  // ─── TRASH TALK WALL ───
-  if(ns.length>1){
-    const allMsgs=(S.trash||[]).slice().reverse();
-    const ttCollapsed=!window._ttExpanded;
-    const msgs=ttCollapsed?allMsgs.slice(0,5):allMsgs.slice(0,30);
-    h+=`<div class="card"><div class="ch"><span style="font-size:18px">🗣️</span><span class="ct">TRASH TALK</span>${allMsgs.length?`<span style="font-size:11px;color:var(--t4);margin-left:8px">${allMsgs.length}</span>`:''}</div>`;
-    // Input FIRST — post before you read
-    if(me||adm){
-      h+=`<div style="display:flex;gap:8px;margin-bottom:12px">
-        <div style="flex:1;position:relative">
-          <input class="inp" id="tt-msg" placeholder="Talk your smack... (type @ to tag)" style="width:100%;padding:10px 14px;font-size:13px" maxlength="150" onkeydown="if(event.key==='Enter'){closeMentionDD();postTrash()}" oninput="mentionAC(this)">
-          <div id="tt-dd" style="display:none;position:absolute;bottom:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-bottom:4px;max-height:280px;overflow-y:auto;z-index:100;box-shadow:0 -4px 20px #00000066"></div>
-        </div>
-        <button style="background:var(--grad);border:0;border-radius:10px;padding:8px 16px;color:#000;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0" onclick="postTrash()">Send</button>
-      </div>`;
-    }
-    if(!allMsgs.length){h+=`<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">No trash talk yet — drop the first message 🎤</div>`}
-    else{
-      let lastGroup='',lastUser='',lastIsMe=null;
-      msgs.forEach((m,i)=>{
-        const isMe=me===m.u;
-        const tagged=me&&hasMention(m.msg,me);
-        const d=new Date(m.ts);const now=new Date();
-        const istOpts={timeZone:'Asia/Kolkata'};
-        const isToday=d.toLocaleDateString('en-IN',istOpts)===now.toLocaleDateString('en-IN',istOpts);
-        const isYesterday=d.toLocaleDateString('en-IN',istOpts)===new Date(now-86400000).toLocaleDateString('en-IN',istOpts);
-        const grp=isToday?'TODAY':isYesterday?'YESTERDAY':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
-        if(grp!==lastGroup){lastGroup=grp;lastUser='';lastIsMe=null;h+=`<div style="text-align:center;padding:14px 0 8px"><span style="font-size:9px;font-weight:500;color:var(--t4);letter-spacing:1.5px;background:var(--card);padding:0 12px;position:relative;z-index:1">${grp}</span></div>`}
-        const sameUser=m.u===lastUser&&isMe===lastIsMe;
-        const sideSwitch=lastIsMe!==null&&isMe!==lastIsMe;
-        lastUser=m.u;lastIsMe=isMe;
-        const mt=sameUser?'1px':sideSwitch?'14px':'10px';
-        const timeStr=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true,timeZone:'Asia/Kolkata'});
-        if(isMe){
-          h+=`<div style="display:flex;justify-content:flex-end;margin-top:${mt}">
-            <div style="max-width:75%;display:flex;flex-direction:column;align-items:flex-end">
-              <div style="padding:8px 12px;background:rgba(212,162,78,0.1);border:0.5px solid rgba(212,162,78,0.18);border-radius:${sameUser?'12px 4px 4px 12px':'12px 12px 4px 12px'};font-size:13px;color:var(--t1);line-height:1.45;word-wrap:break-word;position:relative${tagged?';box-shadow:0 0 0 1.5px rgba(212,162,78,0.35)':''}">${renderMention(m.msg)}</div><div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:2px 2px 0"><span style="font-size:8px;color:rgba(212,162,78,0.4)">${timeStr}</span>${adm?`<button style="background:0;border:0;color:var(--red);font-size:8px;cursor:pointer;padding:0;line-height:1" onclick="delTrash(${allMsgs.length-1-i})">\u2715</button>`:''}</div>
+  // ─── UPCOMING MATCHES STRIP ───
+  if((me||adm)&&ns.length>1){
+    const upcoming=allMatches.filter(m=>!S.r[m.id]&&m.h!=='TBD').slice(0,4);
+    // Skip if only 0-1 matches (hero already covers the first one)
+    if(upcoming.length>1){
+      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">📅</span><span style="font-family:var(--ff);font-size:13px;font-weight:700;color:var(--t2);letter-spacing:1.5px">COMING UP</span></div>
+        <button style="background:0;border:0;color:var(--acc);font-size:11px;font-weight:700;cursor:pointer" onclick="nav('matches')">See all →</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">`;
+      upcoming.forEach(m=>{
+        const l=lk(m),myBet=me?S.b[m.id+'-'+me]:null,mo=S.odds[m.id];
+        const isNext=nx&&m.id===nx.id;
+        const dh=allMatches.filter(x=>x.d===m.d&&!S.r[x.id]).length>1;
+        h+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${isNext?'rgba(212,162,78,0.04)':'var(--inp)'};border:1px solid ${isNext?'rgba(212,162,78,0.12)':'var(--bdr)'};border-radius:10px;cursor:pointer" onclick="nav('matches')">
+          <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">
+            ${bdg(m.h,24)}<span style="font-size:11px;color:var(--t4);font-weight:600">v</span>${bdg(m.a,24)}
+            <div style="flex:1;min-width:0;margin-left:4px">
+              <div style="font-size:12px;font-weight:700;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${T[m.h]?.s} vs ${T[m.a]?.s}</div>
+              <div style="font-size:10px;color:var(--t4)">${fd(m.d)} · ${ft(m.t)}${dh?' · <span style="color:var(--hot);font-weight:700">DH</span>':''}</div>
             </div>
-          </div>`;
-        }else{
-          const showAvatar=!sameUser;
-          h+=`<div style="display:flex;align-items:flex-end;gap:6px;margin-top:${mt}">
-            <div style="width:28px;flex-shrink:0;padding-bottom:2px">${showAvatar?`<div style="width:28px;height:28px;border-radius:50%;background:var(--surf);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;color:var(--t3);font-weight:800;font-size:11px">${m.u[0].toUpperCase()}</div>`:''}</div>
-            <div style="max-width:75%">
-              ${!sameUser?`<div style="font-size:10px;font-weight:600;color:var(--t4);margin-bottom:2px;padding-left:2px">${m.u}</div>`:''}
-              <div style="padding:8px 12px;background:var(--surf);border:0.5px solid var(--bdr);border-radius:${sameUser?'4px 12px 12px 4px':'12px 12px 12px 4px'};font-size:13px;color:var(--t1);line-height:1.45;word-wrap:break-word;position:relative${tagged?';box-shadow:0 0 0 1.5px rgba(212,162,78,0.35)':''}">${renderMention(m.msg)}${tagged?'<span style="font-size:8px;color:var(--acc);margin-left:3px">📣</span>':''}</div><div style="display:flex;align-items:center;gap:6px;padding:2px 2px 0"><span style="font-size:8px;color:var(--t4);opacity:0.4">${timeStr}</span>${adm?`<button style="background:0;border:0;color:var(--red);font-size:8px;cursor:pointer;padding:0;line-height:1" onclick="delTrash(${allMsgs.length-1-i})">\u2715</button>`:''}</div>
-            </div>
-          </div>`;
-        }
+          </div>
+          <div style="flex-shrink:0;text-align:right">
+            ${myBet?`<span style="font-size:10px;font-weight:700;color:var(--grn);background:rgba(58,175,135,0.08);padding:2px 8px;border-radius:6px">✅ Bet</span>`
+            :l?`<span style="font-size:10px;font-weight:700;color:var(--red);background:rgba(196,69,58,0.08);padding:2px 8px;border-radius:6px">🔒</span>`
+            :mo?`<span style="font-size:10px;font-weight:700;color:var(--acc);background:rgba(212,162,78,0.08);padding:2px 8px;border-radius:6px">⏱ ${cd(m)}</span>`
+            :`<span style="font-size:10px;color:var(--t4)">—</span>`}
+          </div>
+        </div>`;
       });
-      if(ttCollapsed&&allMsgs.length>5){
-        h+=`<div style="text-align:center;padding:8px 0"><button style="background:0;border:1px solid var(--bdr);border-radius:8px;padding:6px 16px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="window._ttExpanded=true;rH()">View all ${allMsgs.length} messages →</button></div>`;
-      }else if(!ttCollapsed&&allMsgs.length>5){
-        h+=`<div style="text-align:center;padding:8px 0"><button style="background:0;border:1px solid var(--bdr);border-radius:8px;padding:6px 16px;color:var(--t3);font-size:11px;cursor:pointer;font-weight:700" onclick="window._ttExpanded=false;rH()">Show less</button></div>`;
-      }
+      h+=`</div></div>`;
     }
-    h+=`</div>`;
   }
+
 
 
   // ─── FIREBASE ───
@@ -1802,7 +1691,7 @@ function oBF(id,prefill){
       <div id="wc-storybody-${id}"></div>
     </div>
   </div></div>
-  <div class="bf-s"><div class="bf-l">+ Boost with MoM <span style="font-weight:400;color:var(--t3)">(optional)</span>${iTip('mom-'+id,'<strong>Win + correct MoM</strong> → extra ₹2,000 bonus on top of your profit.<br><strong>Lose + correct MoM</strong> → your stake is saved! ₹0 loss.<br><strong>🔥 Jackpot:</strong> Pick a MoM from the OTHER team and get it right on a win → your profit is DOUBLED.<br>Wrong MoM pick has zero downside — a free bonus shot.')}</div>${momDropdown('mo-'+id,id)}</div>
+  <div class="bf-s"><div class="bf-l">+ Boost with MoM <span style="font-weight:400;color:var(--t3)">(optional)</span>${iTip('mom-'+id,'<strong>Win + correct MoM</strong> → extra ₹2,000 bonus on top of your profit.<br><strong>Lose + correct MoM</strong> → your stake is saved! ₹0 loss.<br><strong>🔥 Jackpot:</strong> Pick a MoM from the OTHER team and nail it on a win → you earn your profit twice.<br>Wrong MoM pick = zero penalty. Always worth a shot.')}</div>${momDropdown('mo-'+id,id)}</div>
   <div id="conf-hint-${id}" style="text-align:center;font-size:12px;color:var(--grn);font-weight:700;min-height:18px;margin-bottom:4px"></div><div class="bf-a"><button class="bf-cn" onclick="cancelEdit(${id}${prefill?','+JSON.stringify(prefill).replace(/\"/g,'&quot;'):''})">${isEdit?'Clear':'Clear'}</button><button class="bf-cf" id="cta-${id}" onclick="sub(${id})">${isEdit?'✏️ Update Bet':'Lock Bet 🔒'}</button></div></div>`;
   // Post-render check — catch silent DOM failures
   requestAnimationFrame(function(){
@@ -2601,7 +2490,7 @@ function rRu(){
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><span style="font-size:20px">🏠</span><span class="ct" style="font-size:15px">HOME</span></div>
-      <div style="font-size:14px;color:var(--t2);line-height:1.7">Your launchpad. Next match with countdown, your balance and P&L, live activity feed, trash talk wall, and league status strip. Log in or register here (new players need admin approval). Features include:<br><br>🎯 <strong>Smart Nudge Card</strong> — personalised action prompt: warns you about penalties, reminds you to bet before lock, flags losing streaks, and celebrates wins<br>📢 <strong>Commissioner's Bulletin</strong> — league announcements from the commissioner pinned at the top</div>
+      <div style="font-size:14px;color:var(--t2);line-height:1.7">Your launchpad. Next match with countdown, your balance and P&L, live activity feed, upcoming matches strip, and league status. Log in or register here (new players need admin approval). Features include:<br><br>🎯 <strong>Smart Nudge Card</strong> — personalised action prompt: warns you about penalties, reminds you to bet before lock, flags losing streaks, and celebrates wins<br>📢 <strong>Commissioner's Bulletin</strong> — league announcements from the commissioner pinned at the top</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px">
