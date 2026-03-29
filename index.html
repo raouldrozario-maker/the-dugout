@@ -1017,7 +1017,6 @@ function rH(){
         </div>
       </details>
     </div>`;
-    h+=`<div id="register-prompt" style="display:none;margin-top:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Set your PIN</div><div style="font-size:12px;color:var(--t4);margin-bottom:8px">You'll need this every time you log in. Don't forget it!</div><div class="ar"><input class="inp" type="password" id="reg-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')addP()"><button class="bp" onclick="addP()">Register</button></div><div id="reg-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`</div>`;
   }
 
@@ -2051,14 +2050,15 @@ function compareWithLeader(name){
 function predictPenalty(name){
   if(!name)return'';
   const now=new Date();
-  // Use IST day, not local device day
-  const istNow=new Date(now.getTime()+(330-now.getTimezoneOffset())*60000);
-  const day=istNow.getUTCDay();// 0=Sun, in IST
+  // Get IST day of week using Intl (works in ALL timezones)
+  const dayName=new Intl.DateTimeFormat('en-US',{weekday:'short',timeZone:'Asia/Kolkata'}).format(now);
+  const dayMap={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
+  const day=dayMap[dayName];
   // Week runs Wed(3) to Tue(2). Find current week start
   const daysFromWed=(day+7-3)%7;
-  const weekStart=new Date(istNow);weekStart.setUTCDate(istNow.getUTCDate()-daysFromWed);weekStart.setUTCHours(0,0,0,0);
-  // Convert back: weekStart is midnight IST expressed as UTC, adjust to real UTC
-  const weekStartUTC=new Date(weekStart.getTime()-330*60000);
+  const istDateStr=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(now);
+  const istMidnight=new Date(istDateStr+'T00:00:00+05:30');
+  const weekStartUTC=new Date(istMidnight.getTime()-daysFromWed*86400000);
   // Count matches with results this week
   const weekMatches=gms().filter(m=>{
     const md=new Date(m.d+'T00:00:00+05:30');
@@ -2537,9 +2537,9 @@ function rRu(){
 
   // ═══ §8 BETTING WINDOW & LOCK ═══
   h+=card(`<div id="ru-8">${secH('8','🔒','BETTING WINDOW & LOCK')}
-    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Bets close 40 minutes before match start. No exceptions.</div>
+    <div style="font-size:14px;color:var(--t1);font-weight:700;margin-bottom:8px">Bets close 40 minutes before match start (all times are IST). No exceptions.</div>
     <div style="font-size:13px;color:var(--t2);line-height:1.7">Once locked, you cannot place, edit, or cancel bets. All bets become visible to other players after lock. The countdown timer on each match card shows exactly how much time you have left.</div>
-    ${ex('Example','Match at 7:30 PM → betting locks at <strong style="color:var(--red)">6:50 PM</strong>.<br>Match at 3:30 PM → betting locks at <strong style="color:var(--red)">2:50 PM</strong>.')}
+    ${ex('Example','Match at 7:30 PM IST → betting locks at <strong style="color:var(--red)">6:50 PM IST</strong>.<br>Match at 3:30 PM IST → betting locks at <strong style="color:var(--red)">2:50 PM IST</strong>.')}
     ${tip("Don't wait until the last minute. Set your bet early and edit it later if odds change — you can always change your mind before lock.")}
   </div>`);
 
@@ -2689,7 +2689,7 @@ function rRu(){
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
       <div style="font-weight:800;color:var(--acc);font-size:14px;margin-bottom:4px">Lock / Locked</div>
-      <div style="font-size:13px;color:var(--t2);line-height:1.6">40 minutes before a match starts, betting closes. No new bets or edits after this. All bets become visible to everyone.</div>
+      <div style="font-size:13px;color:var(--t2);line-height:1.6">40 minutes before a match starts (IST), betting closes. No new bets or edits after this. All bets become visible to everyone.</div>
     </div>
 
     <div style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:14px">
@@ -2772,7 +2772,7 @@ function rT(){
     return '';
   }
 
-  const today=(()=>{const n=new Date();n.setMinutes(n.getMinutes()+330-n.getTimezoneOffset());return n.toISOString().split('T')[0]})();
+  const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
   const todayMatches=gms().filter(m=>m.d===today&&!S.r[m.id]);
   const todayTeams=new Set();
   todayMatches.forEach(m=>{todayTeams.add(m.h);todayTeams.add(m.a)});
@@ -4210,7 +4210,7 @@ function rA(){
   h+=`<div id="adm-broadcast" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
   if(S.announce){h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
-  h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM"></textarea>
+  h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM IST"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // Set Odds
   // ─── R1: POST-MATCH WHATSAPP SUMMARY ───
@@ -5313,9 +5313,23 @@ function showRegister(){
   if(n.length>30){toast('Max 30 characters','err');return}
   if(S.p[n]){toast('Name taken! Tap your name above to login.','err');return}
   pendingLogin=n;
-  $('register-prompt').style.display='block';
-  $('reg-pin').value='';$('reg-err').textContent='';
-  $('reg-pin').focus();
+  const root=$('login-modal-root');if(!root)return;
+  document.body.style.overflow='hidden';
+  window._loginEscHandler=function(e){if(e.key==='Escape')closeLoginModal()};
+  document.addEventListener('keydown',window._loginEscHandler);
+  root.innerHTML=`<div class="login-modal-backdrop" onclick="if(event.target===this)closeLoginModal()">
+    <div class="login-modal" style="position:relative">
+      <button class="lm-close" onclick="closeLoginModal()">✕</button>
+      <div class="lm-avatar" style="background:linear-gradient(135deg,#3FB08C,#2D8A6A);box-shadow:0 4px 20px rgba(58,175,135,0.3)">🏏</div>
+      <div class="lm-name">${esc(n)}</div>
+      <div style="text-align:center;font-size:11px;color:var(--red);margin-bottom:6px;line-height:1.5;background:rgba(196,69,58,0.08);border:1px solid rgba(196,69,58,0.15);border-radius:8px;padding:8px 12px">⚠️ This is <strong>only</strong> for new players who have never registered. If you already have an account, close this and find your name in the list above.</div>
+      <div class="lm-sub">Create a PIN — you'll need it every time you log in.</div>
+      <input class="lm-input" type="password" id="reg-pin" placeholder="••••" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter')addP()">
+      <button class="lm-btn" onclick="addP()">Request to Join</button>
+      <div class="lm-err" id="reg-err"></div>
+    </div>
+  </div>`;
+  setTimeout(()=>{$('reg-pin')?.focus()},150);
 }
 function addP(){
   const pin=$('reg-pin').value;
@@ -5329,7 +5343,7 @@ function addP(){
       S.pendingJoins[n]={pin:h,ts:new Date().toISOString()};
       adminLog('player_request',n+' requested to join');
       sv(['pendingJoins','logs']);
-      $('register-prompt').style.display='none';
+      closeLoginModal();
       $('inp-n').value='';pendingLogin='';
       toast('Request sent! The commissioner will approve you shortly. 🏏');
     });
@@ -5338,6 +5352,7 @@ function addP(){
   hashPin(pin).then(h=>{
     S.p[n]={j:new Date().toISOString(),pin:h};adminLog('player_join',n);
     sv(['p']);$('inp-n').value='';
+    closeLoginModal();
     me=n;localStorage.setItem('dg-me',me);pendingLogin='';
     uh();nav('matches');toast(n+' registered! 🏏');
   });
@@ -5860,7 +5875,7 @@ function runExport(){
     h+='<tr><td><strong>What is the Super Jackpot?</strong></td><td>Bet on the winning team AND correctly predict MoM from the losing (opponent) team. Your entire profit is doubled. No separate MoM bonus — the doubling is the jackpot reward.</td><td>🏅 Records tab shows who hit it</td></tr>';
     h+='<tr><td><strong>How does MoM Save work?</strong></td><td>If you lose the match bet but correctly predicted MoM, you lose ₹0 instead of your stake. No bonus on a loss — just full stake protection.</td><td>👤 Players → look for 🛡️ MoM Save status</td></tr>';
     h+='<tr><td><strong>What triggers a penalty?</strong></td><td>Not placing at least 1 bet in any Wed–Tue week window. ₹2,000 deducted automatically.</td><td>⚠️ Penalties tab + 📅 Weekly tab</td></tr>';
-    h+='<tr><td><strong>When do bets lock?</strong></td><td>40 minutes before match start. After lock, no edits or new bets. All bets become visible to everyone.</td><td>🏏 Matches tab → check the match time</td></tr>';
+    h+='<tr><td><strong>When do bets lock?</strong></td><td>40 minutes before match start (IST). After lock, no edits or new bets. All bets become visible to everyone.</td><td>🏏 Matches tab → check the match time</td></tr>';
     h+='<tr><td><strong>What is Crystal Ball?</strong></td><td>A secret pre-playoff bet on who wins the IPL. Stake a % of your balance. Revealed after the Final — winner gets + stake, loser gets − stake.</td><td>🔮 Crystal tab (after reveal)</td></tr>';
     h+='<tr><td><strong>How are odds decided?</strong></td><td>Admin sets decimal odds before each match based on team form, venue, and conditions. Higher odds = underdog = bigger payout if they win.</td><td>📈 Odds tab</td></tr>';
     h+='<tr><td><strong>What is the safety net?</strong></td><td>If your balance drops to ₹0 or below, you get topped up to ₹2,000 so you can keep playing. This is the minimum floor.</td><td>👤 Players → check if balance ever hit ₹2,000</td></tr>';
