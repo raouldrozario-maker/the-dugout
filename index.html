@@ -12,6 +12,10 @@
 *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);background-image:radial-gradient(ellipse 60% 40% at 0% 0%,rgba(212,162,78,0.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 100% 0%,rgba(196,69,58,0.05) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 50% 100%,rgba(212,162,78,0.04) 0%,transparent 70%);background-attachment:fixed;color:var(--t1);font-family:var(--fb);min-height:100vh;-webkit-tap-highlight-color:transparent;font-size:15px;line-height:1.5}input,select,button,textarea{font-family:var(--fb)}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.scroll-top{position:fixed;bottom:24px;left:20px;z-index:199;width:40px;height:40px;border-radius:50%;background:var(--card);border:1px solid var(--bdr2);color:var(--t3);font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px #00000044;transition:all .2s;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.scroll-top:hover{background:var(--acc);color:#000;border-color:var(--acc)}
+.scroll-top.show{display:flex}
 @keyframes tickUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes tickDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}@keyframes livePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(58,175,135,0.4)}50%{opacity:.7;box-shadow:0 0 0 4px rgba(58,175,135,0)}}
 @keyframes betSuccess{0%{box-shadow:0 0 0 0 rgba(58,175,135,0)}10%{box-shadow:0 0 0 1px rgba(58,175,135,0.35)}20%{box-shadow:0 0 0 2px rgba(58,175,135,0.28),0 0 22px rgba(58,175,135,0.16)}60%{box-shadow:0 0 0 1px rgba(58,175,135,0.12),0 0 12px rgba(58,175,135,0.08)}100%{box-shadow:0 2px 16px rgba(0,0,0,0.25)}}
 @keyframes checkPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -1910,7 +1914,8 @@ function playRace(){
   const btn=$('race-play');if(btn)btn.style.display='none';
   const totalSteps=data[0].pts.length;
   let step=0;
-  const interval=setInterval(()=>{
+  const interval=
+setInterval(()=>{
     if(step>=totalSteps){clearInterval(interval);if(btn){btn.style.display='block';btn.textContent='▶ Replay'}return}
     data.forEach((d,i)=>{
       const bar=$('race-bar-'+i);const val=$('race-val-'+i);
@@ -2391,7 +2396,7 @@ function rRu(){
   </div>
 
   <!-- LAYER 1: How to Play -->
-  <div style="background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:20px;margin-bottom:16px">
+  <div id="ru-htp" style="background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:20px;margin-bottom:16px">
     <div style="font-family:var(--ff);font-size:16px;font-weight:700;color:var(--t1);letter-spacing:1px;margin-bottom:14px">🎮 HOW TO PLAY</div>
     <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--t1);line-height:1.6">
       <div style="display:flex;gap:12px;align-items:flex-start"><span style="font-size:20px;flex-shrink:0">1️⃣</span><span><strong style="color:var(--t1)">Pick a winner</strong> — choose which team wins the match</span></div>
@@ -2496,7 +2501,7 @@ function rRu(){
   <div style="background:linear-gradient(135deg,rgba(212,162,78,0.06),rgba(212,162,78,0.01));border:1px solid rgba(212,162,78,0.15);border-radius:16px;padding:20px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="var c=$('rule-calc-body');var a=this.querySelector('.rc-chev');if(c.style.display==='block'){c.style.display='none';a.style.transform='rotate(0deg)'}else{c.style.display='block';a.style.transform='rotate(90deg)';initRuleCalc()}">
       <div>
-        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">🧮 TRY IT YOURSELF</div>
+        <div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1px">🧮 <span id="ru-calc">TRY IT YOURSELF</span></div>
         <div style="font-size:12px;color:var(--t3);margin-top:3px">Tweak the numbers — see exactly what you'd win or lose</div>
       </div>
       <div class="rc-chev" style="font-size:20px;color:var(--acc);transition:transform .2s">›</div>
@@ -5270,6 +5275,11 @@ function delBet(k,player,team,amt){const msg=player&&team&&amt?`Delete ${player}
 
 // Player actions
 let pendingLogin='';
+
+function openRuleCalcFAB(){
+  var c=$('rule-calc-body');if(c){c.style.display='block';initRuleCalc()}
+  var chevs=document.querySelectorAll('.rc-chev');chevs.forEach(function(a){a.style.transform='rotate(90deg)'});
+}
 function openRuleCalc(amt,odds,mode){
   // Open the calculator if closed
   var body=$('rule-calc-body');
@@ -5635,6 +5645,8 @@ $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').st
 }catch(e){err.textContent='Invalid JSON'}}
 
 // Boot
+
+window.addEventListener('scroll',function(){var btn=document.getElementById('scroll-top-btn');if(!btn)return;if(window.scrollY>300){btn.classList.add('show')}else{btn.classList.remove('show')}},{passive:true});
 setInterval(()=>{
   // Don't refresh if a bet form is open (prevents flickering)
   if(_uiDDCount===0&&_betFormOpen===0&&(vw==='matches'||vw==='home'))ren();
@@ -6043,44 +6055,53 @@ window.addEventListener('resize',moveSlider);
 <div id="ru-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
   <button onclick="$('ru-sheet').style.display=$('ru-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">📋</button>
 </div>
-<div id="ru-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
-  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
-  <div style="display:flex;flex-direction:column;gap:4px">
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-1');$('ru-sheet').style.display='none'">💰 Safety Net</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-2');$('ru-sheet').style.display='none'">🔒 Betting Window</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-3');$('ru-sheet').style.display='none'">📊 Bet Amounts</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-4');$('ru-sheet').style.display='none'">🏏 Double Headers</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-5');$('ru-sheet').style.display='none'">🌧️ Washout</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-6');$('ru-sheet').style.display='none'">⚠️ Weekly Penalty</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-7');$('ru-sheet').style.display='none'">🎯 Man of the Match</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-8');$('ru-sheet').style.display='none'">⭐ Super Jackpot</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-9');$('ru-sheet').style.display='none'">📈 Odds</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-10');$('ru-sheet').style.display='none'">🔮 Crystal Ball</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-guide');$('ru-sheet').style.display='none'">📱 Guide</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-glossary');$('ru-sheet').style.display='none'">📖 Glossary</button>
+<div id="ru-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:210px">
+  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Rules & Playbook</div>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="ruJump('ru-htp');$('ru-sheet').style.display='none'">🎮 How to Play</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="openRuleCalcFAB();ruJump('ru-calc');$('ru-sheet').style.display='none'">🧮 Calculator</button>
+    <div style="border-top:1px solid var(--bdr);margin:4px 0"></div>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">🎮 Basics</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-1');$('ru-sheet').style.display='none'">💰 Safety Net</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-2');$('ru-sheet').style.display='none'">🔒 Betting Window</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-3');$('ru-sheet').style.display='none'">📊 Bet Amounts</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-4');$('ru-sheet').style.display='none'">🏏 Double Headers</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-5');$('ru-sheet').style.display='none'">🌧️ Washout</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-6');$('ru-sheet').style.display='none'">⚠️ Weekly Penalty</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">🎯 MoM & Jackpot</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-7');$('ru-sheet').style.display='none'">🎯 Man of the Match</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-8');$('ru-sheet').style.display='none'">⭐ Super Jackpot</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📈 Advanced</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-9');$('ru-sheet').style.display='none'">📈 How Odds Work</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-10');$('ru-sheet').style.display='none'">🔮 Crystal Ball</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:8px 10px 2px">📖 Reference</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-guide');$('ru-sheet').style.display='none'">📱 Your Dashboard Guide</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('ru-glossary');$('ru-sheet').style.display='none'">📖 Glossary</button>
   </div>
 </div>
 <div id="adm-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
   <button onclick="$('adm-sheet').style.display=$('adm-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">⚙️</button>
 </div>
-<div id="adm-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
-  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
+<div id="adm-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:210px">
+  <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Command Center</div>
   <div style="display:flex;flex-direction:column;gap:2px">
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:6px 10px 2px">⚡ Match Day</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 Dashboard</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">⚡ Match Control</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-mcb');$('adm-sheet').style.display='none'">⚡ Match Control Board</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Declare Result</button>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">🔧 Setup</div>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📢 Comms & Summaries</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-wa');$('adm-sheet').style.display='none'">📲 WhatsApp Reminders</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📊 League Overview</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 League Snapshot</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">👥 Player Management</div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance Adjustment</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Participants</button>
+    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">🏏 Season Setup</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-crystal');$('adm-sheet').style.display='none'">🔮 Crystal Ball</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-squads');$('adm-sheet').style.display='none'">🏏 Squads</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-addmatch');$('adm-sheet').style.display='none'">➕ Add Match</button>
-    <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📋 League Mgmt</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-bets');$('adm-sheet').style.display='none'">🎰 Manage Bets</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Players</button>
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-mcb');$('adm-sheet').style.display='none'">💾 Download Backup</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="$('adm-sheet').style.display='none';openExportModal()">📤 Export Report</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-danger');$('adm-sheet').style.display='none'">🗑️ Danger Zone</button>
   </div>
@@ -6159,5 +6180,6 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-h2h');$('mg-sheet').style.display='none'">⚔️ Head-to-Head</button>
   </div>
 </div>
+<button class="scroll-top" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 </body>
 </html>
