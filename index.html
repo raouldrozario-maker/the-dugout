@@ -168,6 +168,24 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .calc-trust{font-size:10.5px;color:var(--t4);margin-top:8px;text-align:center;opacity:.7;letter-spacing:.2px}
 @keyframes calcReveal{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes glowPulse{0%{transform:scale(1)}50%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes loginModalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes loginModalOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(20px) scale(.96)}}
+@keyframes loginBackdropIn{from{opacity:0}to{opacity:1}}
+.login-modal-backdrop{position:fixed;inset:0;z-index:9000;background:rgba(3,5,11,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:loginBackdropIn .2s ease;touch-action:none;overscroll-behavior:contain}
+.login-modal{width:100%;max-width:360px;background:linear-gradient(165deg,#0F1B30,#0C1424);border:1px solid rgba(212,162,78,0.15);border-radius:20px;padding:32px 28px 28px;box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03) inset;animation:loginModalIn .3s cubic-bezier(.2,.8,.2,1)}
+.login-modal.closing{animation:loginModalOut .2s ease forwards}
+.login-modal .lm-avatar{width:64px;height:64px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:28px;font-family:var(--ff);margin:0 auto 16px;box-shadow:0 4px 20px rgba(212,162,78,0.3)}
+.login-modal .lm-name{text-align:center;font-weight:800;font-size:18px;color:var(--t1);margin-bottom:4px}
+.login-modal .lm-sub{text-align:center;font-size:12px;color:var(--t4);margin-bottom:20px}
+.login-modal .lm-input{width:100%;background:var(--bg);border:1.5px solid var(--bdr2);border-radius:12px;padding:14px 16px;color:var(--t1);font-size:17px;outline:0;text-align:center;letter-spacing:8px;font-weight:700;transition:border-color .2s}
+.login-modal .lm-input:focus{border-color:rgba(212,162,78,0.4)}
+.login-modal .lm-input::placeholder{letter-spacing:2px;font-weight:400;opacity:.4}
+.login-modal .lm-btn{width:100%;margin-top:14px;padding:14px;background:var(--grad);border:0;border-radius:12px;color:#0C1220;font-weight:800;cursor:pointer;font-size:16px;transition:all .18s;box-shadow:0 4px 14px rgba(212,162,78,0.22)}
+.login-modal .lm-btn:hover{box-shadow:0 6px 20px rgba(212,162,78,0.34);transform:translateY(-1px)}
+.login-modal .lm-btn:active{transform:scale(.97)}
+.login-modal .lm-err{text-align:center;color:var(--red);font-size:12px;font-weight:700;margin-top:8px;min-height:18px}
+.login-modal .lm-close{position:absolute;top:14px;right:16px;background:0;border:0;color:var(--t4);font-size:20px;cursor:pointer;padding:4px;line-height:1;transition:color .15s}
+.login-modal .lm-close:hover{color:var(--t1)}
 .live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
@@ -177,6 +195,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 </head>
 <body>
 <div id="toast"></div>
+<div id="login-modal-root"></div>
 <div id="app">
 <header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#D4A24E18;color:var(--acc)">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
 <nav>
@@ -965,7 +984,7 @@ function rH(){
       // Last logged-in shortcut
       const lastUser=localStorage.getItem('dg-last-user');
       if(lastUser&&S.p[lastUser]){
-        h+=`<div data-player="${esc(lastUser)}"" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
+        h+=`<div data-player="${esc(lastUser)}" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
           <div class="ca" style="width:36px;height:36px;font-size:16px">${lastUser[0].toUpperCase()}</div>
           <div style="flex:1"><div style="font-size:11px;color:var(--t4);font-weight:700">⚡ CONTINUE AS</div><div style="font-weight:800;font-size:15px;color:var(--acc)">${lastUser}</div></div>
           <div style="font-size:18px;color:var(--acc);opacity:.5">→</div>
@@ -985,7 +1004,6 @@ function rH(){
     }
 
 
-    h+=`<div id="login-prompt" style="display:none;margin-bottom:12px;padding:14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px"><div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <span id="login-prompt-name"></span></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div></div>`;
     h+=`<div style="margin-top:20px;border-top:1px solid var(--bdr);padding-top:16px">
       <div style="text-align:center;font-size:12px;color:var(--t4);margin-bottom:10px">Can't find your name? New players need admin approval.</div>
       <details style="background:var(--inp);border:1px solid var(--bdr);border-radius:12px;padding:0">
@@ -5232,15 +5250,37 @@ function promptLogin(n){
   if(me===n)return;
   pendingLogin=n;
   const pdata=S.p[n];
-  // If player has no PIN, show inline PIN setup
-  if(!pdata||!pdata.pin){
-    const el=$('login-prompt');if(!el)return;
-    el.style.display='block';
-    el.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px">🔒 Create PIN for <strong>${n}</strong></div><div style="font-size:11px;color:var(--t4);margin-bottom:8px">First time? Set a 4-digit PIN. You'll need this every time you log in.</div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Create 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')setFirstPin()"><button class="bp" onclick="setFirstPin()">Set PIN</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div>`;
-    setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});$('login-pin')?.focus()},100);
-    return;
-  }
-  showLoginPrompt(n);
+  if(!pdata||!pdata.pin){showLoginModal(n,true)}
+  else{showLoginModal(n,false)}
+}
+function showLoginModal(n,isNew){
+  const root=$('login-modal-root');if(!root)return;
+  const initial=n[0].toUpperCase();
+  document.body.style.overflow='hidden';
+  window._loginEscHandler=function(e){if(e.key==='Escape')closeLoginModal()};
+  document.addEventListener('keydown',window._loginEscHandler);
+  root.innerHTML=`<div class="login-modal-backdrop" onclick="if(event.target===this)closeLoginModal()">
+    <div class="login-modal" style="position:relative">
+      <button class="lm-close" onclick="closeLoginModal()">✕</button>
+      <div class="lm-avatar">${initial}</div>
+      <div class="lm-name">${esc(n)}</div>
+      <div class="lm-sub">${isNew?'First time? Create a PIN to secure your account.':'Enter your PIN to continue'}</div>
+      <input class="lm-input" type="password" id="login-pin" placeholder="••••" maxlength="8" inputmode="numeric" onkeydown="if(event.key==='Enter')${isNew?'setFirstPin()':'confirmLogin()'}">
+      <button class="lm-btn" onclick="${isNew?'setFirstPin()':'confirmLogin()'}">
+        ${isNew?'Set PIN & Enter':'Login'}
+      </button>
+      <div class="lm-err" id="login-err"></div>
+    </div>
+  </div>`;
+  setTimeout(()=>{$('login-pin')?.focus()},150);
+}
+function closeLoginModal(){
+  const root=$('login-modal-root');
+  document.body.style.overflow='';
+  if(window._loginEscHandler){document.removeEventListener('keydown',window._loginEscHandler);window._loginEscHandler=null}
+  const modal=root?.querySelector('.login-modal');
+  if(modal){modal.classList.add('closing');setTimeout(()=>{root.innerHTML='';pendingLogin=''},200)}
+  else{root.innerHTML='';pendingLogin=''}
 }
 function setFirstPin(){
   const pin=$('login-pin')?.value;
@@ -5248,25 +5288,22 @@ function setFirstPin(){
   const n=pendingLogin;
   hashPin(pin).then(h=>{
     S.p[n].pin=h;sv(['p']);
-    toast('PIN set! Now logging you in... 🔑');
+    closeLoginModal();
+    toast('PIN set! Welcome, '+n+'! 🏏');
     me=n;localStorage.setItem('dg-me',n);localStorage.setItem('dg-last-user',n);pendingLogin='';
     uh();nav('matches');
   }).catch(e=>{toast('Error: '+e.message,'err')});
 }
-function showLoginPrompt(n){
-  const el=$('login-prompt');if(!el)return;
-  el.style.display='block';
-  el.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--acc);margin-bottom:8px">🔑 Enter PIN for <strong>${n}</strong></div><div class="ar"><input class="inp" type="password" id="login-pin" placeholder="Your 4-digit PIN" maxlength="8" onkeydown="if(event.key==='Enter')confirmLogin()"><button class="bp" onclick="confirmLogin()">Login</button></div><div id="login-err" style="color:var(--red);font-size:12px;margin-top:6px"></div>`;
-  setTimeout(()=>{el.scrollIntoView({behavior:'smooth',block:'center'});$('login-pin')?.focus()},100);
-}
+function showLoginPrompt(n){showLoginModal(n,false)}
 function confirmLogin(){
   const pin=$('login-pin').value;
   if(!pin||pin.length<4){$('login-err').textContent='Enter your 4-digit PIN';return}
-  const pdata=S.p[pendingLogin];
+  const n=pendingLogin;
+  const pdata=S.p[n];
   if(!pdata||!pdata.pin){$('login-err').textContent='Account error — contact admin';return}
   hashPin(pin).then(h=>{
-    if(h===pdata.pin){me=pendingLogin;localStorage.setItem('dg-me',me);localStorage.setItem('dg-last-user',me);pendingLogin='';uh();nav('matches');toast('Welcome back, '+me+'! 🏏')}
-    else{$('login-err').textContent='Wrong PIN!'}
+    if(h===pdata.pin){closeLoginModal();me=n;localStorage.setItem('dg-me',n);localStorage.setItem('dg-last-user',n);pendingLogin='';uh();nav('matches');toast('Welcome back, '+n+'! 🏏')}
+    else{$('login-err').textContent='Wrong PIN!';$('login-pin')?.select()}
   });
 }
 function showRegister(){
