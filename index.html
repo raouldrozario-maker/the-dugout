@@ -866,7 +866,7 @@ function nav(v){
   }
   vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'&&adm?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
-function ren(){if(_uiDDCount>0||_betFormOpen>0)return;({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.();const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length+Object.keys(S.pendingJoins||{}).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
+function ren(){if(_uiDDCount>0||_betFormOpen>0)return;try{({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.()}catch(e){const el=$('v-'+vw);if(el)el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Error loading '+vw+'</strong><br><br><code style="font-size:11px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('ren() crash on '+vw+':',e)}const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length+Object.keys(S.pendingJoins||{}).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
 // ══════════════════════════════════════════════════════════════
@@ -3590,6 +3590,89 @@ function rMG(){
     }
   }
 
+  // ─── P&L TRENDLINE (premium match-by-match chart) ───
+  if(resolved.length>=2){
+    const sortedR=[...resolved].sort((a,b)=>a.mid-b.mid);
+    // Build data points: date, match, delta, cumulative P&L
+    let cumPL=0;
+    const pts=sortedR.map(bt=>{
+      const rs=S.r[bt.mid],m=gm(bt.mid),w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
+      let delta=0;
+      if(w){delta=Math.round(bt.am*(od-1));if(isJackpot(bt,mh))delta+=Math.round(bt.am*(od-1));else if(mh)delta+=Math.round(ST*MOM_BONUS)}
+      else if(!mh){delta=-bt.am}
+      cumPL+=delta;
+      return{mid:bt.mid,m,tm:bt.tm,am:bt.am,w,mh,delta,cum:cumPL,d:m?.d||'',label:`${T[m?.h]?.s||'?'} v ${T[m?.a]?.s||'?'}`};
+    });
+    // Penalties as a point
+    const pen=weeklyPenalty(n);
+    const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+    const netPen=Math.max(pen-waived,0);
+    if(netPen>0){cumPL-=netPen;pts.push({mid:'P',delta:-netPen,cum:cumPL,label:'Penalties',isPenalty:true})}
+    // Adjustments
+    (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+      const adj=a.type==='add'?a.amount:-a.amount;cumPL+=adj;
+      pts.push({mid:'A',delta:adj,cum:cumPL,label:a.reason||'Adjustment',isAdj:true})});
+
+    const W=Math.min(600,typeof window!=='undefined'?window.innerWidth-56:600);
+    const H=200,PL=50,PR=16,PT=20,PB=36;
+    const cW=W-PL-PR,cH=H-PT-PB;
+    const maxAbs=Math.max(Math.abs(Math.min(...pts.map(p=>p.cum))),Math.abs(Math.max(...pts.map(p=>p.cum))),1000);
+    const yScale=v=>PT+cH/2-v/maxAbs*(cH/2);
+    const xScale=(i)=>PL+i/(pts.length-1||1)*cW;
+    const zeroY=yScale(0);
+
+    // Build SVG path
+    let pathD=pts.map((pt,i)=>`${i===0?'M':'L'}${xScale(i).toFixed(1)},${yScale(pt.cum).toFixed(1)}`).join(' ');
+    // Gradient fill under/over zero
+    const fillPath=pathD+` L${xScale(pts.length-1).toFixed(1)},${zeroY} L${xScale(0).toFixed(1)},${zeroY} Z`;
+
+    h+=`<div id="mg-pnl" class="card" style="padding-bottom:8px">
+      <div class="ch"><span style="font-size:18px">📊</span><span class="ct">P&L TRENDLINE</span></div>
+      <div style="font-size:11px;color:var(--t4);margin:-8px 0 12px">Match-by-match profit & loss</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block;font-family:var(--fb)">
+          <defs>
+            <linearGradient id="plGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3AAF87" stop-opacity="0.25"/>
+              <stop offset="50%" stop-color="#3AAF87" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#D45B5B" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#D45B5B" stop-opacity="0.25"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid -->
+          <line x1="${PL}" y1="${zeroY}" x2="${W-PR}" y2="${zeroY}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="${PL-6}" y="${zeroY+4}" text-anchor="end" fill="var(--t4)" font-size="10">₹0</text>
+          <text x="${PL-6}" y="${yScale(maxAbs)+4}" text-anchor="end" fill="var(--grn)" font-size="9">+₹${(maxAbs/1000).toFixed(0)}K</text>
+          <text x="${PL-6}" y="${yScale(-maxAbs)+4}" text-anchor="end" fill="var(--red)" font-size="9">-₹${(maxAbs/1000).toFixed(0)}K</text>
+          <!-- Fill area -->
+          <path d="${fillPath}" fill="url(#plGrad)" opacity="0.6"/>
+          <!-- Line -->
+          <path d="${pathD}" fill="none" stroke="${cumPL>=0?'var(--grn)':'var(--red)'}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Data points -->
+          ${pts.map((pt,i)=>{
+            const x=xScale(i),y=yScale(pt.cum);
+            const clr=pt.cum>0?'var(--grn)':pt.cum<0?'var(--red)':'var(--t4)';
+            const dClr=pt.delta>0?'#3AAF87':pt.delta<0?'#D45B5B':'#D4A24E';
+            const dateStr=pt.d?new Date(pt.d+'T12:00:00+05:30').toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'}):'';
+            return `<g>
+              <circle cx="${x}" cy="${y}" r="${pt.isPenalty||pt.isAdj?3:5}" fill="${clr}" stroke="var(--bg)" stroke-width="2"/>
+              ${pt.delta!==0&&!pt.isPenalty&&!pt.isAdj?`<text x="${x}" y="${y-10}" text-anchor="middle" fill="${dClr}" font-size="9" font-weight="700">${pt.delta>0?'+':''}₹${(Math.abs(pt.delta)/1000).toFixed(1)}K</text>`:''}
+              <text x="${x}" y="${H-4}" text-anchor="middle" fill="var(--t4)" font-size="8">${pt.isPenalty?'⚠️':pt.isAdj?'💰':dateStr}</text>
+            </g>`}).join('')}
+        </svg>
+      </div>
+      <!-- Match legend below chart -->
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;padding:0 4px">
+        ${pts.filter(pt=>!pt.isPenalty&&!pt.isAdj).map(pt=>{
+          const dClr=pt.delta>0?'var(--grn)':pt.delta<0?'var(--red)':'var(--yel)';
+          return `<div style="display:flex;align-items:center;gap:4px;padding:3px 8px;background:var(--inp);border-radius:6px;font-size:10px;border:1px solid ${pt.delta>0?'rgba(58,175,135,0.15)':pt.delta<0?'rgba(196,69,58,0.15)':'var(--bdr)'}">
+            <span style="font-weight:700;color:${T[pt.tm]?.c||'var(--t1)'}">${T[pt.tm]?.s||'?'}</span>
+            <span style="color:${dClr};font-weight:800">${pt.delta>0?'+':''}₹${Math.abs(pt.delta).toLocaleString()}</span>
+          </div>`}).join('')}
+      </div>
+    </div>`;
+  }
+
   // ─── WALLET JOURNEY (balance over time) ───
   if(resolved.length>=2){
   h+=`<div id="mg-wallet" class="card"><div class="ch"><span style="font-size:18px">📈</span><span class="ct">WALLET JOURNEY</span></div>`;
@@ -6130,6 +6213,7 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
   <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
   <div style="display:flex;flex-direction:column;gap:4px">
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-style');$('mg-sheet').style.display='none'">🏷️ Play Style</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-pnl');$('mg-sheet').style.display='none'">📊 P&L Trendline</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-wallet');$('mg-sheet').style.display='none'">📈 Wallet Journey</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-stats');$('mg-sheet').style.display='none'">📊 Stats</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-bets');$('mg-sheet').style.display='none'">📜 Bet History</button>
