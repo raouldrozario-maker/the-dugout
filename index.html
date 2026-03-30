@@ -3993,7 +3993,7 @@ function admSectionHdr(id,icon,title,open){
 
 function rA(){
   const el=$('v-admin');
-  if(!adm){const isSetup=!S.pin;el.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:50vh;padding:20px"><div style="width:100%;max-width:380px;background:linear-gradient(165deg,#0F1B30,#0C1424);border:1px solid rgba(212,162,78,0.15);border-radius:20px;padding:36px 28px 28px;box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03) inset">
+  if(!adm){const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='none';if(as)as.style.display='none';const isSetup=!S.pin;el.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;min-height:50vh;padding:20px"><div style="width:100%;max-width:380px;background:linear-gradient(165deg,#0F1B30,#0C1424);border:1px solid rgba(212,162,78,0.15);border-radius:20px;padding:36px 28px 28px;box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.03) inset">
     <div style="width:64px;height:64px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 20px rgba(212,162,78,0.3)"><span style="font-size:28px">${isSetup?'⚙️':'🔑'}</span></div>
     <div style="text-align:center;font-family:var(--ff);font-size:20px;font-weight:700;color:var(--t1);letter-spacing:1px;margin-bottom:4px">${isSetup?'SETUP ADMIN':'COMMAND CENTER'}</div>
     <div style="text-align:center;font-size:12px;color:var(--t4);margin-bottom:24px">${isSetup?'Create a PIN — only you need this.':'Enter your PIN to access admin controls'}</div>
