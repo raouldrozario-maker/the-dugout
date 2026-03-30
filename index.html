@@ -4599,7 +4599,7 @@ async function hashPin(pin){
   let h=0;for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0}
   return 'fb'+Math.abs(h).toString(16).padStart(8,'0')
 }
-function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA();const af=$('adm-fab');if(af)af.style.display='block'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA();const af=$('adm-fab');if(af)af.style.display='block'}else{toast('Wrong PIN','err')}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}else{toast('Wrong PIN','err')}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
 
 function admDDToggle(ddId){
   var dd=$(ddId);if(!dd)return;
@@ -6035,32 +6035,36 @@ window.addEventListener('resize',moveSlider);
   </div>
 </div>
 <div id="adm-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
-  <button onclick="var s=$('adm-sheet');s.style.display=s.style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">⚙️</button>
+  <button onclick="toggleAdmSheet()" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">⚙️</button>
 </div>
 <div id="adm-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:210px">
   <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Command Center</div>
   <div style="display:flex;flex-direction:column;gap:2px">
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">⚡ Match Control</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-mcb');$('adm-sheet').style.display='none'">⚡ Match Control Board</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-odds');$('adm-sheet').style.display='none'">📊 Set Odds</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-result');$('adm-sheet').style.display='none'">🎮 Declare Result</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-mcb')">⚡ Match Control Board</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-odds')">📊 Set Odds</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-result')">🎮 Declare Result</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📢 Comms & Summaries</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-broadcast');$('adm-sheet').style.display='none'">📢 Broadcast</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-wa');$('adm-sheet').style.display='none'">📲 WhatsApp Reminders</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-broadcast')">📢 Broadcast</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-wa')">📲 WhatsApp Reminders</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📊 League Overview</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-dash');$('adm-sheet').style.display='none'">📋 League Snapshot</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-dash')">📋 League Snapshot</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">👥 Player Management</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-balance');$('adm-sheet').style.display='none'">💰 Balance Adjustment</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-players');$('adm-sheet').style.display='none'">👥 Participants</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-balance')">💰 Balance Adjustment</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-players')">👥 Participants</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">🏏 Season Setup</div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-playoff');$('adm-sheet').style.display='none'">🏟️ Playoffs</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-crystal');$('adm-sheet').style.display='none'">🔮 Crystal Ball</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-playoff')">🏟️ Playoffs</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-crystal')">🔮 Crystal Ball</button>
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-mcb');$('adm-sheet').style.display='none'">💾 Download Backup</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="$('adm-sheet').style.display='none';openExportModal()">📤 Export Report</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('adm-danger');$('adm-sheet').style.display='none'">🗑️ Danger Zone</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-mcb')">💾 Download Backup</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="toggleAdmSheet();openExportModal()">📤 Export Report</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-danger')">🗑️ Danger Zone</button>
   </div>
 </div>
+<script>
+function toggleAdmSheet(){var s=$('adm-sheet');if(!s)return;s.style.display=s.style.display==='block'?'none':'block'}
+function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTimeout(function(){ruJump(id)},50)}
+</script>
 <div id="tm-fab" style="position:fixed;bottom:24px;right:20px;z-index:200;display:none">
   <button onclick="$('tm-sheet').style.display=$('tm-sheet').style.display==='block'?'none':'block'" style="width:48px;height:48px;border-radius:50%;background:var(--grad);border:0;color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 20px #00000055;display:flex;align-items:center;justify-content:center">🏏</button>
 </div>
