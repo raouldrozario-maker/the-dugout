@@ -142,7 +142,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-clear{position:absolute;right:30px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t4);font-size:16px;cursor:pointer;padding:4px;display:none}
 .sd-wrap.has-val .sd-clear{display:block}
 #ru-nav div::-webkit-scrollbar{display:none}
-@media(max-width:768px){.card{padding:22px}.nb span:last-child{font-size:10px}}@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:16px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:10px 0 0}.nb{padding:8px 2px;min-height:48px;min-width:0}.nb span:last-child{font-size:8px;letter-spacing:0}.nb svg{width:18px;height:18px}}@media(max-width:380px){.nb span:last-child{font-size:7px}}
+@media(max-width:768px){.card{padding:22px}.nb span:last-child{font-size:10px}}@media(max-width:480px){.rg{grid-template-columns:repeat(2,1fr)}.bb-a{font-size:20px}.stat-val{font-size:22px}.card{padding:16px}.lb-r{padding:12px 10px}.mc{padding:18px}.bf{padding:10px 0 0}.nb{padding:8px 2px;min-height:48px;min-width:0}.nb span:last-child{font-size:8px;letter-spacing:0}.nb svg{width:18px;height:18px}#v-analytics .st-hero-grid{grid-template-columns:1fr !important}#v-analytics .st-team-grid{grid-template-columns:1fr !important}}@media(max-width:380px){.nb span:last-child{font-size:7px}}
 @keyframes pulse-live{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes pulse-red{0%,100%{opacity:1;box-shadow:0 0 4px #C4453A}50%{opacity:.6;box-shadow:0 0 8px #C4453A}}
 @keyframes allin-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
@@ -2642,15 +2642,13 @@ function rRu(){
       <div style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:12px">League-wide analytics and social fuel. Everything here is public — designed to spark banter and rivalry.</div>
       <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
         <strong style="color:var(--acc)">What you'll find here:</strong><br>
-        🏆 <strong>League Snapshot</strong> — who's leading, who's last, who's hottest right now<br>
-        💰 <strong>Hero Stats</strong> — biggest balance, most active, best win rate, biggest bet — with player names<br>
-        📈 <strong>Balance Over Time</strong> — line chart tracking top players' balances across matches. Hover dots for details<br>
-        🏷️ <strong>Player Personalities</strong> — live labels (Gambler, Safe Player, Comeback King, etc.) based on betting patterns<br>
-        🏏 <strong>Team Popularity</strong> — donut chart showing which teams the league backs most<br>
-        📊 <strong>Profit by Team</strong> — bar chart of league-wide P&L per team. See which teams print money<br>
-        🏆 <strong>Awards</strong> — Richest Player, MoM Oracle, Riskiest Bettor, Best Streak, and more<br>
-        📋 <strong>Most Backed Teams</strong> — visual bars showing team popularity<br>
-        🎬 <strong>Story of the Season</strong> — animated bar chart race showing how player rankings evolved match by match. Hit replay to watch the whole season unfold
+        🏆 <strong>League Stats Hero</strong> — leader, bottom player, hottest streak, match/bet/player counts at a glance<br>
+        🏅 <strong>Awards</strong> — Richest, Best Win Rate, MoM Oracle, High Roller, Win Streak, Most Active, Biggest Bet<br>
+        📈 <strong>Balance Over Time</strong> — line chart tracking top players' balances across matches with your line highlighted<br>
+        🏏 <strong>Team Split & Profit</strong> — donut chart of team popularity + bar chart of league-wide P&L per team side by side<br>
+        🏷️ <strong>Player DNA</strong> — live personality labels (Gambler, Safe Player, Comeback King, etc.) based on betting patterns<br>
+        🔥 <strong>Most Backed</strong> — visual bars showing which teams the league bets on most<br>
+        🎬 <strong>Story of the Season</strong> — animated bar chart race showing how rankings evolved match by match. Hit Replay to watch it unfold
       </div>
     </div>
 
@@ -2960,7 +2958,7 @@ function rAn(){
 
   // Top row — Leader, Bottom, Hottest
   if(L.length>=2&&resolved.length>=1){
-    h+=`<div style="display:grid;grid-template-columns:${hottest?'1fr 1fr 1fr':'1fr 1fr'};gap:12px;margin-bottom:16px">
+    h+=`<div class="st-hero-grid" style="display:grid;grid-template-columns:${hottest?'1fr 1fr 1fr':'1fr 1fr'};gap:12px;margin-bottom:16px">
       <div style="background:rgba(58,175,135,0.06);border:1px solid rgba(58,175,135,0.12);border-radius:14px;padding:14px;text-align:center">
         <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">🏆 LEADER</div>
         <div style="font-family:var(--ff);font-size:24px;font-weight:900;color:var(--grn)">₹${bigWinner.b.toLocaleString()}</div>
@@ -3002,14 +3000,14 @@ function rAn(){
     if(bigUpset&&bigUpset.od>=2.5)awards.push({icon:'🎯',title:'Upset King',name:bigUpset.u,val:'×'+bigUpset.od+' odds',clr:'var(--grn)',bg:'rgba(58,175,135,0.05)',bdr:'rgba(58,175,135,0.12)'});
   }
   if(awards.length){
-    h+=`<div style="margin-bottom:20px">
+    h+=`<div id="st-awards" style="margin-bottom:20px">
       <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding:0 2px">🏆 Awards</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px">
-      ${awards.map(a=>`<div style="background:${a.bg};border:1px solid ${a.bdr};border-radius:14px;padding:14px 12px;text-align:center">
-        <div style="font-size:24px;margin-bottom:4px">${a.icon}</div>
-        <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">${a.title}</div>
-        <div style="font-weight:800;font-size:14px;color:${a.clr};font-family:var(--ff)">${a.name}</div>
-        <div style="font-size:11px;color:var(--t3);margin-top:2px">${a.val}</div>
+      ${awards.map(a=>`<div style="background:${a.bg};border:1px solid ${a.bdr};border-radius:12px;padding:12px 10px;text-align:center">
+        <div style="font-size:20px;margin-bottom:2px">${a.icon}</div>
+        <div style="font-size:8px;color:var(--t4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">${a.title}</div>
+        <div style="font-weight:800;font-size:13px;color:${a.clr};font-family:var(--ff)">${a.name}</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:1px">${a.val}</div>
       </div>`).join('')}
       </div>
     </div>`;
@@ -3063,7 +3061,7 @@ function rAn(){
   if(sortedTeams.length>=2){
     const totalTeamBets=sortedTeams.reduce((s,t)=>s+t[1],0);
     // Team Popularity
-    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">`;
+    h+=`<div id="st-teams" class="st-team-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">`;
 
     // Left — Donut
     const R=60,r=38,cx=70,cy=70;
@@ -3108,7 +3106,7 @@ function rAn(){
   if(resolvedBets.length>=1){
     const personalities=players.map(n=>{const p=getPersonality(n);return p?{name:n,p}:null}).filter(Boolean);
     if(personalities.length){
-      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+      h+=`<div id="st-dna" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
         <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🏷️ Player DNA</div>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px">
         ${personalities.map(({name,p})=>{const isMe=name===me;return`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isMe?'rgba(212,162,78,0.04)':'var(--inp)'};border:1px solid ${isMe?'rgba(212,162,78,0.12)':'var(--bdr)'};border-radius:10px">
@@ -3123,7 +3121,7 @@ function rAn(){
   // ═══ MOST BACKED TEAMS — Compact bars ═══
   if(sortedTeams.length){
     const maxBets=sortedTeams[0]?sortedTeams[0][1]:1;
-    h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+    h+=`<div id="st-backed" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
       <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🔥 Most Backed</div>
       ${sortedTeams.map(([tm,cnt])=>{const pct=Math.round(cnt/allBets.length*100);return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <div style="width:36px;text-align:center">${bdg(tm,30)}</div>
@@ -6060,12 +6058,12 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
 <div id="st-sheet" style="display:none;position:fixed;bottom:80px;right:20px;z-index:200;background:var(--card);border:1px solid var(--bdr2);border-radius:16px;padding:14px;box-shadow:0 8px 40px #00000066;max-height:60vh;overflow-y:auto;min-width:200px">
   <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
   <div style="display:flex;flex-direction:column;gap:4px">
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-pers');$('st-sheet').style.display='none'">🏷️ Personalities</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-balance');$('st-sheet').style.display='none'">📈 Balance Chart</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-team');$('st-sheet').style.display='none'">🏏 Team Popularity</button>
-    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-profit');$('st-sheet').style.display='none'">📊 Profit by Team</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-awards');$('st-sheet').style.display='none'">🏆 Awards</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-balance');$('st-sheet').style.display='none'">📈 Balance Chart</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-teams');$('st-sheet').style.display='none'">🏏 Team Split & Profit</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-dna');$('st-sheet').style.display='none'">🏷️ Player DNA</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-backed');$('st-sheet').style.display='none'">🔥 Most Backed</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('st-race');$('st-sheet').style.display='none'">🎬 Story of the Season</button>
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="$('st-sheet').style.display='none';openExportModal()">📤 Export Report</button>
   </div>
