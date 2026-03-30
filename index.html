@@ -2900,6 +2900,7 @@ function isIndian(name){
 // ANALYTICS
 // ══════════════════════════════════════════════════════════════
 function rAn(){
+  try{
   const el=$('v-analytics');
   const allBets=Object.values(S.b),resolved=Object.keys(S.r),players=Object.keys(S.p);
   const totalBet=allBets.reduce((s,b)=>s+b.am,0);
@@ -2990,11 +2991,10 @@ function rAn(){
   } // end Hero Stats guard
 
   // Section buffers for reordering
-  
+  const resolvedMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
 
   if(resolved.length>=1){
     // Build balance history per player across resolved matches
-    const resolvedMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
     const topPlayers=L.slice(0,5);
     const meInTop=topPlayers.some(p=>p.n===me);
     const chartPlayers=meInTop?topPlayers:[...topPlayers.slice(0,4),...(me?[L.find(p=>p.n===me)].filter(Boolean):[])];
@@ -3259,6 +3259,7 @@ function rAn(){
   }
 
   el.innerHTML=h;
+  }catch(e){const _el=$('v-analytics');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Stats Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('rAn crash:',e)}
 }
 
 // ══════════════════════════════════════════════════════════════
