@@ -1196,6 +1196,8 @@ function rH(){
 function rM(){
   const el=$('v-matches');
   if(!me&&!adm){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
+  // Guard: admin-only filters reset for non-admin
+  if(!adm&&(mf==='livebets'||mf==='missing'))mf='upcoming';
   const b=me?bal(me):0;
   const _rawB=me?_coreBal(me):0;
   const safetyNet=me&&_rawB<MINB;
@@ -1232,11 +1234,91 @@ function rM(){
 
   if(me){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?`<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active${iTip('safety','Your balance can never drop below ₹2,000. You can still bet with your available balance — one smart pick could start the comeback!')}</div>`:''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk${iTip('risk','This is the total you could lose if all your pending bets fail. Your bets are locked in — even on double headers, you can bet on both matches.')}</div>`:''}</div></div>`}
   else if(adm){h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">⚙️</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Viewing as</div><div style="font-weight:800;font-size:15px;color:var(--acc)">Admin</div></div></div></div>`}
-  h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">👁 Live</button>`:''}</div>`;
+  h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">🎯 Placed</button><button class="fb ${mf==='missing'?'on':''}" onclick="mf='missing';rM()" style="color:${mf==='missing'?'var(--hot)':'var(--t3)'}">🔔 No Bets</button>`:''}</div>`;
+
+  // ─── ADMIN: MISSING BETS PANEL ───
+  if(mf==='missing'&&adm){
+    const players=Object.keys(S.p).sort();
+    const openMatches=allM.filter(m=>!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');
+    const totalMissing=openMatches.reduce((s,m)=>s+players.filter(n=>!S.b[m.id+'-'+n]).length,0);
+    h+=`<div style="margin-bottom:14px;padding:14px 18px;background:rgba(196,69,58,0.04);border:1px solid rgba(196,69,58,0.15);border-radius:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">📋</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;color:var(--hot);letter-spacing:1px">NO BETS TRACKER</div>
+          <div style="font-size:11px;color:var(--t4)">Players who haven't bet yet per match · Admin only</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:900;font-family:var(--ff);color:${totalMissing>0?'var(--hot)':'var(--grn)'}">${totalMissing}</div>
+          <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.5px">missing</div>
+        </div>
+      </div>
+    </div>`;
+    if(!openMatches.length){
+      h+=`<div class="card" style="text-align:center;padding:32px"><div style="font-size:32px;margin-bottom:8px">✅</div><div style="font-size:14px;font-weight:700;color:var(--grn)">No open matches with odds</div><div style="font-size:12px;color:var(--t4);margin-top:4px">Set odds on upcoming matches to track missing bets</div></div>`;
+    } else {
+      openMatches.forEach(m=>{
+        const l=lkC(m);
+        const betsOnMatch=Object.values(S.b).filter(x=>x.mid===m.id);
+        const bettors=new Set(betsOnMatch.map(x=>x.u));
+        const missing=players.filter(n=>!bettors.has(n));
+        const pct=players.length?Math.round((players.length-missing.length)/players.length*100):0;
+        const barColor=pct>=80?'var(--grn)':pct>=50?'var(--acc)':'var(--hot)';
+        const statusLabel=l?'🔒 LOCKED':'⏱ '+cd(m);
+        const isOpen=!l&&!S.r[m.id];
+        h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden;border-left:3px solid ${missing.length===0?'var(--grn)':'var(--hot)'}">
+          <div style="padding:16px 18px;cursor:pointer" onclick="var el=this.nextElementSibling;var o=el.style.display==='none';el.style.display=o?'block':'none';this.querySelector('.ms-chev').textContent=o?'▾':'▸';if(!window._msOpen)window._msOpen={};window._msOpen[${m.id}]=o">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="ms-chev" style="color:var(--acc);font-size:14px;font-weight:700">${window._msOpen&&window._msOpen[m.id]?'▾':'▸'}</span>
+                <div>
+                  <div style="font-weight:800;font-size:14px;color:var(--t1)"><span style="color:var(--t4);font-weight:600;font-size:12px">#${m.id}</span> ${T[m.h]?.s} vs ${T[m.a]?.s}</div>
+                  <div style="font-size:11px;color:var(--t4)">${fd(m.d)} · ${ft(m.t)} IST · <span style="color:${l?'var(--red)':'var(--acc)'}"> ${statusLabel}</span></div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                ${missing.length===0
+                  ?'<div style="font-size:12px;font-weight:800;color:var(--grn)">✅ All in</div>'
+                  :`<div style="font-size:18px;font-weight:900;font-family:var(--ff);color:var(--hot)">${missing.length}</div>
+                   <div style="font-size:9px;color:var(--t4)">missing</div>`}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex:1;height:6px;border-radius:3px;background:var(--bdr);overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${barColor};border-radius:3px;transition:width .3s"></div>
+              </div>
+              <span style="font-size:11px;font-weight:700;color:${barColor};min-width:36px;text-align:right">${pct}%</span>
+            </div>
+          </div>
+          <div style="display:${window._msOpen&&window._msOpen[m.id]?'block':'none'};padding:0 18px 16px;border-top:1px solid var(--bdr)">
+            ${missing.length===0
+              ?`<div style="padding:14px 0;text-align:center;font-size:13px;color:var(--grn);font-weight:700">🎉 Everyone has placed their bet!</div>`
+              :`<div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:12px 0 8px;font-weight:700">Haven't bet yet (${missing.length})</div>
+               <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${missing.map(n=>{
+                  const playerBal=bal(n);
+                  const atFloor=playerBal<=MINB;
+                  return `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--inp);border:1px solid ${atFloor?'rgba(196,69,58,0.2)':'var(--bdr)'};border-radius:8px;font-size:12px">
+                    <div style="width:22px;height:22px;border-radius:50%;background:${atFloor?'var(--hot)':'var(--grad)'};display:flex;align-items:center;justify-content:center;color:${atFloor?'#fff':'#000'};font-weight:800;font-size:9px;flex-shrink:0">${n[0].toUpperCase()}</div>
+                    <span style="font-weight:700;color:var(--t1)">${n}</span>
+                    <span style="font-size:10px;color:${playerBal>=ST?'var(--grn)':'var(--red)'}">₹${playerBal.toLocaleString()}</span>
+                    ${atFloor?'<span style="font-size:9px;color:var(--hot)">🛡️</span>':''}
+                  </div>`}).join('')}
+               </div>
+               ${isOpen?`<div style="margin-top:12px;padding:10px 14px;background:rgba(212,162,78,0.04);border:1px solid rgba(212,162,78,0.1);border-radius:8px">
+                 <div style="font-size:11px;color:var(--acc);font-weight:700;margin-bottom:6px">💡 Quick nudge</div>
+                 <button style="background:var(--grad);border:0;border-radius:8px;padding:8px 16px;color:#000;font-weight:800;font-size:12px;cursor:pointer" onclick="var names='${missing.join(', ')}';var msg='🏏 '+names.split(', ').map(x=>x.split(' ')[0]).join(', ')+' — ${T[m.h]?.s} vs ${T[m.a]?.s} locks in ${cd(m)}! Place your bets 🔥';window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')">WhatsApp nudge ${missing.length} player${missing.length>1?'s':''} →</button>
+               </div>`:''}`}
+          </div>
+        </div>`;
+      });
+    }
+    el.innerHTML=h;return;
+  }
   if(mf==='livebets'&&adm){
     h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 16px;background:rgba(212,162,78,0.04);border:1px solid rgba(212,162,78,0.12);border-radius:12px">
       <span style="font-size:18px">👁</span>
-      <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">ADMIN — LIVE BET MONITOR</div><div style="font-size:11px;color:var(--t4)">Real-time view of all bets across matches · Only you can see this</div></div>
+      <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">ADMIN — PLACED BETS</div><div style="font-size:11px;color:var(--t4)">All bets across matches · Only you can see this</div></div>
     </div>`;
   }
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">${mf==='livebets'?'No bets placed yet.':'Nothing here yet.'}</div>`;
@@ -1641,6 +1723,7 @@ function placeKO(){
 }
 
 function cancelBet(id){
+  var m=gm(id);if(m&&lk(m)){toast('Match locked — can\u0027t cancel','err');return}
   var bk=id+'-'+me,old=S.b[bk];if(!old)return;
   var ch='<div style="text-align:center;margin-bottom:14px"><div style="font-size:40px;margin-bottom:8px">⚠️</div><div style="font-size:18px;font-weight:900;color:var(--red);font-family:var(--ff)">CANCEL BET?</div></div>';
   ch+='<div style="background:var(--inp);border-radius:12px;padding:14px;margin-bottom:12px;font-size:13px;color:var(--t2);line-height:1.7">';
@@ -1663,6 +1746,7 @@ function cancelBet(id){
   });
 }
 function editBet(id){
+  const m=gm(id);if(m&&lk(m)){toast('Match locked — can\u0027t edit','err');return}
   const bk=id+'-'+me;
   const old=S.b[bk];
   if(!old)return;
