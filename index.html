@@ -2917,7 +2917,6 @@ function rAn(){
   const L=LB();const bigWinner=L.length?L[0]:null;const bigLoser=L.length>1?L[L.length-1]:null;
   const betCounts={};allBets.forEach(b=>{betCounts[b.u]=(betCounts[b.u]||0)+1});
   const mostActive=Object.entries(betCounts).sort((a,b)=>b[1]-a[1])[0];
-  // Cache per-player bets (avoids 5x filter loops over all bets)
   const playerResolved={},playerAll={};
   players.forEach(n=>{playerResolved[n]=resolvedBets.filter(x=>x.u===n);playerAll[n]=allBets.filter(x=>x.u===n)});
   let luckiest=null,luckyPct=0;
@@ -2930,8 +2929,6 @@ function rAn(){
   players.forEach(n=>{const ub=playerResolved[n].sort((a,b)=>a.mid-b.mid);let cur=0,max=0;ub.forEach(b=>{if(b.tm===S.r[b.mid].w){cur++;if(cur>max)max=cur}else cur=0});if(max>streakLen){streakLen=max;bestStreak={n,streak:max}}});
   let bigUpset=null;wins.forEach(b=>{if(b.od>=(bigUpset?.od||0))bigUpset=b});
   const allInCount=allBets.filter(b=>b.am>=ST*.8).length;
-
-  // ─── HOTTEST PLAYER (biggest gain in last 7 days) ───
   let hottest=null,hottestGain=0;
   players.forEach(n=>{
     const recent=playerResolved[n];
@@ -2944,318 +2941,219 @@ function rAn(){
     });
     if(gain>hottestGain){hottestGain=gain;hottest={n,gain}}
   });
+  const resolvedMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
 
-  let h=`<div style="margin-bottom:24px;padding-top:4px">
-    <div style="font-family:var(--ff);font-size:24px;font-weight:700;color:var(--acc);letter-spacing:2px;margin-bottom:16px">LEAGUE STATS</div>
-  </div>`;
+  let h='';
+
+  // ═══ EMPTY STATE ═══
   if(allBets.length===0){
-    h+=`<div style="text-align:center;padding:20px;margin-bottom:16px;background:var(--card);border:1px solid #D4A24E25;border-radius:14px"><div style="font-size:28px;margin-bottom:6px">🏏</div><div style="font-size:14px;font-weight:700;color:var(--acc)">Season hasn't kicked off yet!</div><div style="font-size:12px;color:var(--t3);margin-top:4px">Once bets and results roll in, this page lights up</div></div>`;
+    h+=`<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">🏏</div>
+      <div style="font-family:var(--ff);font-size:22px;font-weight:700;color:var(--acc);letter-spacing:2px;margin-bottom:8px">LEAGUE STATS</div>
+      <div style="font-size:14px;color:var(--t3);max-width:280px;margin:0 auto">Once bets and results roll in, this page lights up with charts, awards, and bragging rights.</div></div>`;
+    el.innerHTML=h;return;
   }
 
-  // ─── LEAGUE SNAPSHOT (the hook) ───
-  if(L.length>=2&&resolved.length>=2){
-    h+=`<div style="background:linear-gradient(135deg,var(--card),var(--surf));border:1px solid var(--bdr-strong);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 2px 16px rgba(0,0,0,0.25)">
-      <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center">
-        <div style="text-align:center;flex:1;min-width:100px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🏆 Leader</div><div style="font-size:22px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${bigWinner.b.toLocaleString()}</div><div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${bigWinner.n}</div></div>
-        <div style="text-align:center;flex:1;min-width:100px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">📉 Bottom</div><div style="font-size:22px;font-weight:900;color:var(--red);font-family:var(--ff)">₹${bigLoser.b.toLocaleString()}</div><div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${bigLoser.n}</div></div>
-        ${hottest?`<div style="text-align:center;flex:1;min-width:100px"><div style="font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🔥 Hottest</div><div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff)">+₹${hottest.gain.toLocaleString()}</div><div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${hottest.n}</div></div>`:''}
+  // ═══ HERO BANNER — League at a glance ═══
+  h+=`<div style="background:linear-gradient(165deg,#0D1B36,#111D2F,#0A1220);border:1px solid rgba(212,162,78,0.1);border-radius:20px;padding:28px 24px 24px;margin-bottom:20px;position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle at top right,rgba(212,162,78,0.06),transparent 70%);pointer-events:none"></div>
+    <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--acc);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px">League Stats</div>`;
+
+  // Top row — Leader, Bottom, Hottest
+  if(L.length>=2&&resolved.length>=1){
+    h+=`<div style="display:grid;grid-template-columns:${hottest?'1fr 1fr 1fr':'1fr 1fr'};gap:12px;margin-bottom:16px">
+      <div style="background:rgba(58,175,135,0.06);border:1px solid rgba(58,175,135,0.12);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">🏆 LEADER</div>
+        <div style="font-family:var(--ff);font-size:24px;font-weight:900;color:var(--grn)">₹${bigWinner.b.toLocaleString()}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);margin-top:4px">${bigWinner.n}</div>
       </div>
-      <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--t4)">${resolved.length} matches · ${allBets.length} bets · ${players.length} players</div>
+      <div style="background:rgba(196,69,58,0.06);border:1px solid rgba(196,69,58,0.12);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">📉 BOTTOM</div>
+        <div style="font-family:var(--ff);font-size:24px;font-weight:900;color:var(--red)">₹${bigLoser.b.toLocaleString()}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);margin-top:4px">${bigLoser.n}</div>
+      </div>
+      ${hottest?`<div style="background:rgba(212,162,78,0.06);border:1px solid rgba(212,162,78,0.12);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">🔥 ON FIRE</div>
+        <div style="font-family:var(--ff);font-size:24px;font-weight:900;color:var(--acc)">+₹${hottest.gain.toLocaleString()}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--t1);margin-top:4px">${hottest.n}</div>
+      </div>`:''}
     </div>`;
   }
 
-  // ─── HERO STATS (socially meaningful) ───
-  if(resolved.length>=3){
-  h+=`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">
-    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:22px;font-weight:900;color:var(--grn);font-family:var(--ff)">₹${bigWinner?bigWinner.b.toLocaleString():'—'}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">💰 Biggest Balance</div>
-      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${bigWinner?bigWinner.n:''}</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:22px;font-weight:900;color:var(--acc);font-family:var(--ff)">${mostActive?mostActive[1]:'0'}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">🔥 Most Active</div>
-      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${mostActive?mostActive[0]:''}</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:22px;font-weight:900;color:var(--yel);font-family:var(--ff)">${luckiest?luckiest.pct+'%':'—'}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">🎯 Best Win Rate</div>
-      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${luckiest?luckiest.n:''}</div>
-    </div>
-    <div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
-      <div style="font-size:22px;font-weight:900;color:var(--hot);font-family:var(--ff)">${bigBet?'₹'+bigBet.am.toLocaleString():'—'}</div>
-      <div style="font-size:10px;color:var(--t4);margin-top:2px;text-transform:uppercase;letter-spacing:.8px">💥 Biggest Bet</div>
-      <div style="font-size:12px;color:var(--t2);font-weight:700;margin-top:2px">${bigBet?bigBet.u:''}</div>
-    </div>
+  // Ticker strip — key numbers
+  h+=`<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--t3)">
+    <span>${resolved.length} <span style="color:var(--t4)">matches</span></span>
+    <span>${allBets.length} <span style="color:var(--t4)">bets</span></span>
+    <span>${players.length} <span style="color:var(--t4)">players</span></span>
+    <span>₹${totalBet.toLocaleString()} <span style="color:var(--t4)">wagered</span></span>
+    ${momTotal?`<span>${momCorrect}/${momTotal} <span style="color:var(--t4)">MoM hits</span></span>`:''}
+  </div>
   </div>`;
-  } // end Hero Stats guard
 
-  // Section buffers for reordering
-  const resolvedMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
+  // ═══ AWARDS — Premium cards ═══
+  const awards=[];
+  if(resolved.length>=2){
+    if(bigWinner&&bigWinner.b!==ST)awards.push({icon:'💰',title:'Richest',name:bigWinner.n,val:'₹'+bigWinner.b.toLocaleString(),clr:'var(--grn)',bg:'rgba(58,175,135,0.05)',bdr:'rgba(58,175,135,0.12)'});
+    if(luckiest)awards.push({icon:'🍀',title:'Best Win Rate',name:luckiest.n,val:luckiest.pct+'% ('+luckiest.w+'/'+luckiest.total+')',clr:'var(--grn)',bg:'rgba(58,175,135,0.05)',bdr:'rgba(58,175,135,0.12)'});
+    if(oracle)awards.push({icon:'🔮',title:'MoM Oracle',name:oracle.n,val:oracle.correct+'/'+oracle.total+' correct',clr:'var(--yel)',bg:'rgba(212,162,78,0.05)',bdr:'rgba(212,162,78,0.12)'});
+    if(riskiest)awards.push({icon:'🎲',title:'High Roller',name:riskiest.n,val:'₹'+riskiest.avg.toLocaleString()+'/bet avg',clr:'var(--hot)',bg:'rgba(196,69,58,0.05)',bdr:'rgba(196,69,58,0.12)'});
+    if(bestStreak&&bestStreak.streak>=2)awards.push({icon:'🔥',title:'Win Streak',name:bestStreak.n,val:bestStreak.streak+' in a row',clr:'var(--acc)',bg:'rgba(212,162,78,0.05)',bdr:'rgba(212,162,78,0.12)'});
+    if(mostActive)awards.push({icon:'📱',title:'Most Active',name:mostActive[0],val:mostActive[1]+' bets',clr:'var(--t1)',bg:'var(--inp)',bdr:'var(--bdr)'});
+    if(bigBet)awards.push({icon:'💎',title:'Biggest Bet',name:bigBet.u,val:'₹'+bigBet.am.toLocaleString(),clr:'var(--acc)',bg:'rgba(212,162,78,0.05)',bdr:'rgba(212,162,78,0.12)'});
+    if(bigUpset&&bigUpset.od>=2.5)awards.push({icon:'🎯',title:'Upset King',name:bigUpset.u,val:'×'+bigUpset.od+' odds',clr:'var(--grn)',bg:'rgba(58,175,135,0.05)',bdr:'rgba(58,175,135,0.12)'});
+  }
+  if(awards.length){
+    h+=`<div style="margin-bottom:20px">
+      <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding:0 2px">🏆 Awards</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px">
+      ${awards.map(a=>`<div style="background:${a.bg};border:1px solid ${a.bdr};border-radius:14px;padding:14px 12px;text-align:center">
+        <div style="font-size:24px;margin-bottom:4px">${a.icon}</div>
+        <div style="font-size:9px;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">${a.title}</div>
+        <div style="font-weight:800;font-size:14px;color:${a.clr};font-family:var(--ff)">${a.name}</div>
+        <div style="font-size:11px;color:var(--t3);margin-top:2px">${a.val}</div>
+      </div>`).join('')}
+      </div>
+    </div>`;
+  }
 
+  // ═══ BALANCE OVER TIME — Line chart ═══
   if(resolved.length>=1){
-    // Build balance history per player across resolved matches
     const topPlayers=L.slice(0,5);
     const meInTop=topPlayers.some(p=>p.n===me);
     const chartPlayers=meInTop?topPlayers:[...topPlayers.slice(0,4),...(me?[L.find(p=>p.n===me)].filter(Boolean):[])];
-
-    // Calculate running balance for each player at each match
-    const chartPalette=['#F5A623','#3FB08C','#E84155','#5B8DEF','#C77DFF','#FF6B6B','#4ECDC4','#FFE66D','#95E1D3','#F38181','#AA96DA','#45B7D1','#96CEB4','#DDA0DD','#87CEEB','#F0E68C'];
+    const chartPalette=['#F5A623','#3FB08C','#E84155','#5B8DEF','#C77DFF'];
     const series=chartPlayers.map((p,idx)=>{
-      const pts=[{x:0,y:ST}];
-      let b=ST;
+      const pts=[{x:0,y:ST}];let b=ST;
       resolvedMids.forEach((mid,i)=>{
         const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));
         const rs=S.r[mid];
-        if(bt&&rs){
-          const w=bt.tm===rs.w,od=safeOd(bt);
-          const mh=momMatch(bt.mom,rs.mom);
-          if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;b+=Math.round(rp)}
-          else{if(!mh)b-=bt.am}
-        }
-        if(b<MINB)b=MINB;
-        pts.push({x:i+1,y:b});
+        if(bt&&rs){const w=bt.tm===rs.w,od=safeOd(bt),mh=momMatch(bt.mom,rs.mom);if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;b+=Math.round(rp)}else{if(!mh)b-=bt.am}}
+        if(b<MINB)b=MINB;pts.push({x:i+1,y:b});
       });
-      return {name:p.n,pts,color:p.n===me?'var(--acc)':chartPalette[idx%chartPalette.length]};
+      return{name:p.n,pts,color:p.n===me?'var(--acc)':chartPalette[idx%chartPalette.length]};
     });
-
     const allYs=series.flatMap(s=>s.pts.map(p=>p.y));
-    const maxY=Math.max(...allYs,ST+1000);
-    const minY=Math.min(...allYs,ST-1000);
-    const W=600,H=200,PL=50,PR=20,PT=20,PB=30;
-    const cW=W-PL-PR,cH=H-PT-PB;
-    const xScale=(x)=>PL+x/(resolvedMids.length)*cW;
-    const yScale=(y)=>PT+cH-(y-minY)/(maxY-minY)*cH;
-
-    let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">`;
-    // Grid lines
-    const gridSteps=4;
-    for(let i=0;i<=gridSteps;i++){
-      const y=PT+i*(cH/gridSteps);
-      const val=Math.round(maxY-(i/gridSteps)*(maxY-minY));
-      svg+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>`;
-      svg+=`<text x="${PL-6}" y="${y+4}" fill="#7C8DA5" font-size="10" text-anchor="end" font-family="var(--fb)" font-weight="600">₹${(val/1000).toFixed(0)}K</text>`;
-    }
-    // Starting balance line (stronger)
+    const maxY=Math.max(...allYs,ST+1000),minY=Math.min(...allYs,ST-1000);
+    const W=600,H=220,PL=50,PR=20,PT=20,PB=30,cW=W-PL-PR,cH=H-PT-PB;
+    const xScale=x=>PL+x/(resolvedMids.length||1)*cW;
+    const yScale=y=>PT+cH-(y-minY)/(maxY-minY||1)*cH;
     const stY=yScale(ST);
-    svg+=`<line x1="${PL}" y1="${stY}" x2="${W-PR}" y2="${stY}" stroke="rgba(212,162,78,0.2)" stroke-width="1" stroke-dasharray="6,4"/>`;
-    svg+=`<text x="${W-PR+4}" y="${stY+3}" fill="rgba(212,162,78,0.5)" font-size="8" font-family="var(--fb)">Start</text>`;
-    // Lines + data point dots with tooltips
+    let svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+    for(let i=0;i<=4;i++){const y=PT+i*(cH/4);const val=Math.round(maxY-(i/4)*(maxY-minY));svg+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/><text x="${PL-6}" y="${y+4}" fill="#5A6A80" font-size="9" text-anchor="end">₹${(val/1000).toFixed(0)}K</text>`}
+    svg+=`<line x1="${PL}" y1="${stY}" x2="${W-PR}" y2="${stY}" stroke="rgba(212,162,78,0.15)" stroke-width="1" stroke-dasharray="6,4"/>`;
     series.forEach(s=>{
       const path=s.pts.map((p,i)=>`${i===0?'M':'L'}${xScale(p.x).toFixed(1)},${yScale(p.y).toFixed(1)}`).join(' ');
-      svg+=`<path d="${path}" fill="none" stroke="${s.color}" stroke-width="${s.name===me?'3':'1.8'}" stroke-linecap="round" stroke-linejoin="round" opacity="${s.name===me?'1':'0.6'}"/>`;
-      // Dots at each data point
-      s.pts.forEach((p,i)=>{
-        if(i===0)return;
-        const prev=s.pts[i-1];
-        const change=p.y-prev.y;
-        const changeStr=change!==0?(change>0?'+':'')+change.toLocaleString():'—';
-        const clr=change>0?'var(--grn)':change<0?'var(--red)':'var(--t4)';
-        svg+=`<circle cx="${xScale(p.x).toFixed(1)}" cy="${yScale(p.y).toFixed(1)}" r="${s.name===me?'5':'3.5'}" fill="${s.color}" opacity="${s.name===me?'1':'0.5'}" style="cursor:pointer" onmouseover="this.setAttribute('r','${s.name===me?'7':'5'}');const t=$('chart-tip');t.style.display='block';t.innerHTML='<div style=\\'font-weight:800;color:var(--t1)\\'>${s.name}</div><div style=\\'font-size:15px;font-weight:900;font-family:var(--ff);color:${clr}\\'>₹${p.y.toLocaleString()}</div><div style=\\'font-size:11px;color:var(--t4)\\'>${changeStr}</div>'" onmouseout="this.setAttribute('r','${s.name===me?'5':'3.5'}');$('chart-tip').style.display='none'" ontouchstart="const t=$('chart-tip');t.style.display='block';t.innerHTML='<div style=\\'font-weight:800;color:var(--t1)\\'>${s.name}</div><div style=\\'font-size:15px;font-weight:900;font-family:var(--ff);color:${clr}\\'>₹${p.y.toLocaleString()}</div><div style=\\'font-size:11px;color:var(--t4)\\'>${changeStr}</div>'"/>`;
-      });
+      // Glow for "me"
+      if(s.name===me)svg+=`<path d="${path}" fill="none" stroke="${s.color}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>`;
+      svg+=`<path d="${path}" fill="none" stroke="${s.color}" stroke-width="${s.name===me?'2.5':'1.5'}" stroke-linecap="round" stroke-linejoin="round" opacity="${s.name===me?'1':'0.5'}"/>`;
+      // End dot
+      const last=s.pts[s.pts.length-1];
+      svg+=`<circle cx="${xScale(last.x).toFixed(1)}" cy="${yScale(last.y).toFixed(1)}" r="${s.name===me?'5':'3'}" fill="${s.color}" stroke="var(--bg)" stroke-width="2"/>`;
     });
     svg+=`</svg>`;
+    const legend=series.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:${s.name===me?'var(--acc)':'var(--t3)'};font-weight:${s.name===me?'700':'400'}"><span style="width:10px;height:2.5px;border-radius:2px;background:${s.color}"></span>${s.name}</span>`).join('<span style="color:var(--bdr);margin:0 4px">·</span>');
 
-    // Legend
-    let legend=`<div style="display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center">`+series.map(s=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:${s.name===me?'var(--acc)':'var(--t2)'};font-weight:${s.name===me?'700':'400'}"><span style="width:10px;height:3px;border-radius:2px;background:${s.color};opacity:${s.name===me?'1':'0.7'}"></span>${s.name}</span>`).join('')+`</div>`;
-
-    h+=`<div id="st-balance" class="card" style="position:relative">
-      <div class="ct" style="font-size:14px;margin-bottom:14px">📈 BALANCE OVER TIME</div>
-      <div style="margin-bottom:10px;position:relative">
-        ${svg}
-        <div id="chart-tip" style="display:none;position:absolute;top:8px;right:8px;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px;box-shadow:0 4px 20px #00000066;font-size:12px;z-index:10;pointer-events:none"></div>
-      </div>
-      <div style="text-align:center">${legend}</div>
+    h+=`<div id="st-balance" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:20px;margin-bottom:16px">
+      <div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px">📈 Balance Over Time</div>
+      <div style="position:relative">${svg}<div id="chart-tip" style="display:none;position:absolute;top:8px;right:8px;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px;box-shadow:0 4px 20px #00000066;font-size:12px;z-index:10;pointer-events:none"></div></div>
+      <div style="text-align:center;margin-top:10px">${legend}</div>
     </div>`;
   }
-  // ─── PLAYER PERSONALITIES ───
+
+  // ═══ TEAM INSIGHTS — Two columns ═══
+  if(sortedTeams.length>=2){
+    const totalTeamBets=sortedTeams.reduce((s,t)=>s+t[1],0);
+    // Team Popularity
+    h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">`;
+
+    // Left — Donut
+    const R=60,r=38,cx=70,cy=70;
+    let donut=`<svg viewBox="0 0 140 140" style="width:140px;height:140px">`;
+    let angle=0;
+    sortedTeams.forEach(([tm,count])=>{
+      const pct=count/totalTeamBets;const a1=angle*Math.PI/180;const a2=(angle+pct*360)*Math.PI/180;
+      const la=pct>0.5?1:0;const x1o=cx+R*Math.cos(a1),y1o=cy+R*Math.sin(a1);const x2o=cx+R*Math.cos(a2),y2o=cy+R*Math.sin(a2);
+      const x1i=cx+r*Math.cos(a2),y1i=cy+r*Math.sin(a2);const x2i=cx+r*Math.cos(a1),y2i=cy+r*Math.sin(a1);
+      donut+=`<path d="M${x1o},${y1o} A${R},${R} 0 ${la} 1 ${x2o},${y2o} L${x1i},${y1i} A${r},${r} 0 ${la} 0 ${x2i},${y2i}Z" fill="${T[tm]?.c||'#6B7A90'}" opacity="0.7"/>`;
+      angle+=pct*360;
+    });
+    donut+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" fill="var(--t1)" font-size="18" font-weight="900" font-family="var(--ff)">${totalTeamBets}</text>`;
+    donut+=`<text x="${cx}" y="${cy+12}" text-anchor="middle" fill="var(--t4)" font-size="8">bets</text></svg>`;
+
+    h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">🏏 Team Split</div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div>${donut}</div>
+        <div style="flex:1;min-width:80px">${sortedTeams.slice(0,5).map(([tm,cnt])=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px"><span style="width:8px;height:8px;border-radius:2px;background:${T[tm]?.c||'#888'};flex-shrink:0"></span><span style="color:var(--t2);flex:1">${T[tm]?.s||tm}</span><span style="font-weight:700;color:var(--t1)">${Math.round(cnt/totalTeamBets*100)}%</span></div>`).join('')}</div>
+      </div>
+    </div>`;
+
+    // Right — Profit by Team
+    const teamPL={};
+    resolvedBets.forEach(bt=>{const rs=S.r[bt.mid];if(!rs)return;const w=bt.tm===rs.w,od=safeOd(bt),mh=momMatch(bt.mom,rs.mom);let ch=0;if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;ch=Math.round(rp)}else ch=mh?0:-bt.am;teamPL[bt.tm]=(teamPL[bt.tm]||0)+ch});
+    const tpArr=Object.entries(teamPL).sort((a,b)=>b[1]-a[1]);
+    const tpMax=Math.max(...tpArr.map(t=>Math.abs(t[1])),1);
+
+    h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px">📊 Profit by Team</div>
+      ${tpArr.map(([tm,pl])=>{const isPos=pl>=0;return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="width:28px;font-size:10px;font-weight:800;color:${T[tm]?.c||'var(--t2)'};text-align:right">${T[tm]?.s||tm}</span>
+        <div style="flex:1;height:14px;background:var(--inp);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.round(Math.abs(pl)/tpMax*100)}%;background:${isPos?'var(--grn)':'var(--red)'};opacity:0.5;border-radius:3px"></div></div>
+        <span style="width:60px;font-size:10px;font-weight:800;color:${isPos?'var(--grn)':'var(--red)'};text-align:right;font-family:var(--ff)">${isPos?'+':''}₹${Math.abs(pl)>=1000?(pl/1000).toFixed(1)+'K':pl.toLocaleString()}</span>
+      </div>`}).join('')}
+    </div>`;
+    h+=`</div>`; // close grid
+  }
+
+  // ═══ PLAYER PERSONALITIES ═══
   if(resolvedBets.length>=1){
     const personalities=players.map(n=>{const p=getPersonality(n);return p?{name:n,p}:null}).filter(Boolean);
     if(personalities.length){
-      h+=`<div id="st-pers" class="card">
-        <div class="ct" style="font-size:14px;margin-bottom:14px">🏷️ PLAYER PERSONALITIES</div>
-        <div style="font-size:11px;color:var(--t4);margin-bottom:14px">Based on betting patterns — updates live</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
-      personalities.forEach(({name,p})=>{
-        const isMe=name===me;
-        h+=`<div style="display:flex;align-items:center;gap:12px;padding:12px;background:${isMe?'rgba(212,162,78,0.04)':'var(--inp)'};border:1px solid ${isMe?'rgba(212,162,78,0.12)':'var(--bdr)'};border-radius:12px">
-          <span style="font-size:22px">${p.emoji}</span>
-          <div>
-            <div style="font-weight:700;font-size:13px;color:${isMe?'var(--acc)':'var(--t1)'}">${name}</div>
-            <div style="font-size:12px;color:var(--t2);font-weight:600">${p.label}</div>
-          </div>
-        </div>`;
-      });
-      h+=`</div></div>`;
+      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🏷️ Player DNA</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px">
+        ${personalities.map(({name,p})=>{const isMe=name===me;return`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:${isMe?'rgba(212,162,78,0.04)':'var(--inp)'};border:1px solid ${isMe?'rgba(212,162,78,0.12)':'var(--bdr)'};border-radius:10px">
+          <span style="font-size:20px">${p.emoji}</span>
+          <div><div style="font-weight:700;font-size:12px;color:${isMe?'var(--acc)':'var(--t1)'}">${name}</div><div style="font-size:10px;color:var(--t3)">${p.label}</div></div>
+        </div>`}).join('')}
+        </div>
+      </div>`;
     }
   }
 
-  // ─── INSIGHTS (Team Pop + Profit by Team) ───
-
-  // ─── TEAM POPULARITY (Donut Chart) ───
-  if(sortedTeams.length>=1){
-    const totalTeamBets=sortedTeams.reduce((s,t)=>s+t[1],0);
-    const R=70,r=45,cx=90,cy=90;
-    let donutSvg=`<svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:180px">`;
-    let angle=0;
-    sortedTeams.forEach(([tm,count])=>{
-      const pct=count/totalTeamBets;
-      const a1=angle*Math.PI/180;
-      const a2=(angle+pct*360)*Math.PI/180;
-      const la=pct>0.5?1:0;
-      const x1o=cx+R*Math.cos(a1),y1o=cy+R*Math.sin(a1);
-      const x2o=cx+R*Math.cos(a2),y2o=cy+R*Math.sin(a2);
-      const x1i=cx+r*Math.cos(a2),y1i=cy+r*Math.sin(a2);
-      const x2i=cx+r*Math.cos(a1),y2i=cy+r*Math.sin(a1);
-      const color=T[tm]?.c||'#6B7A90';
-      donutSvg+=`<path d="M${x1o},${y1o} A${R},${R} 0 ${la} 1 ${x2o},${y2o} L${x1i},${y1i} A${r},${r} 0 ${la} 0 ${x2i},${y2i}Z" fill="${color}" opacity="0.75"/>`;
-      angle+=pct*360;
-    });
-    donutSvg+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="var(--t1)" font-size="16" font-weight="900" font-family="var(--ff)">${totalTeamBets}</text>`;
-    donutSvg+=`<text x="${cx}" y="${cy+10}" text-anchor="middle" fill="var(--t4)" font-size="9">bets</text>`;
-    donutSvg+=`</svg>`;
-
-    const teamLegend=sortedTeams.slice(0,6).map(([tm,count])=>{
-      const pct=Math.round(count/totalTeamBets*100);
-      return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0">
-        <span style="width:10px;height:10px;border-radius:2px;background:${T[tm]?.c||'#6B7A90'};opacity:0.75;flex-shrink:0"></span>
-        <span style="flex:1;font-size:12px;color:var(--t2)">${T[tm]?.s||tm}</span>
-        <span style="font-size:12px;font-weight:700;color:var(--t1);font-family:var(--ff)">${pct}%</span>
-      </div>`;
-    }).join('');
-
-    h+=`<div id="st-team" class="card">
-      <div class="ct" style="font-size:14px;margin-bottom:4px">🏏 TEAM POPULARITY</div>
-      <div style="font-size:12px;color:var(--t3);margin-bottom:14px">${sortedTeams[0]?T[sortedTeams[0][0]]?.s+' is the most backed team — '+Math.round(sortedTeams[0][1]/totalTeamBets*100)+'% of all bets':'Where the money is going'}</div>
-      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div style="flex-shrink:0">${donutSvg}</div>
-        <div style="flex:1;min-width:140px">${teamLegend}</div>
-      </div>
+  // ═══ MOST BACKED TEAMS — Compact bars ═══
+  if(sortedTeams.length){
+    const maxBets=sortedTeams[0]?sortedTeams[0][1]:1;
+    h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🔥 Most Backed</div>
+      ${sortedTeams.map(([tm,cnt])=>{const pct=Math.round(cnt/allBets.length*100);return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:36px;text-align:center">${bdg(tm,30)}</div>
+        <div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="font-weight:700;color:${T[tm]?.c||'var(--t2)'}">${T[tm]?.s||tm}</span><span style="color:var(--t4)">${cnt} · ${pct}%</span></div>
+        <div style="height:6px;background:var(--inp);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.round(cnt/maxBets*100)}%;background:${T[tm]?.c||'var(--acc)'};border-radius:3px;opacity:0.6"></div></div></div>
+      </div>`}).join('')}
     </div>`;
   }
 
-
-  // ─── STORY OF THE SEASON (animated leaderboard race) ───
+  // ═══ STORY OF THE SEASON ═══
   if(resolved.length>=3&&resolvedMids.length>=3){
     const racePlayers=L.slice(0,8);
     const raceData=racePlayers.map(p=>{
-      let bal2=ST;
-      const pts=[{mid:0,bal:bal2}];
-      resolvedMids.forEach(mid=>{
-        const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));
-        if(bt){
-          const rs=S.r[mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
-          if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;bal2+=Math.round(rp)}
-          else if(!mh)bal2-=bt.am;
-        }
-        pts.push({mid:parseInt(mid),bal:bal2});
-      });
+      let bal2=ST;const pts=[{mid:0,bal:bal2}];
+      resolvedMids.forEach(mid=>{const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));if(bt){const rs=S.r[mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;bal2+=Math.round(rp)}else if(!mh)bal2-=bt.am}pts.push({mid:parseInt(mid),bal:bal2})});
       return{name:p.n,pts,final:bal2,color:p.n===me?'var(--acc)':T[Object.values(S.b).find(x=>x.u===p.n)?.tm]?.c||'var(--t2)'};
     }).sort((a,b)=>b.final-a.final);
     const maxBal2=Math.max(...raceData.map(d=>Math.max(...d.pts.map(p=>p.bal))));
-    h+=`<div id="st-race" class="card">
-      <div class="ch"><span style="font-size:18px">🎬</span><span class="ct">STORY OF THE SEASON</span></div>
-      <div style="font-size:12px;color:var(--t3);margin-bottom:16px">Watch the leaderboard race unfold match by match</div>
+    h+=`<div id="st-race" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🎬 Story of the Season</div>
       <div id="race-bars" style="display:flex;flex-direction:column;gap:4px">
         ${raceData.map((d,i)=>`<div style="display:flex;align-items:center;gap:8px">
-          <span style="width:70px;font-size:11px;font-weight:700;color:${d.name===me?'var(--acc)':'var(--t2)'};text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name}</span>
-          <div style="flex:1;height:22px;background:var(--inp);border-radius:4px;overflow:hidden;position:relative">
-            <div id="race-bar-${i}" style="height:100%;width:${Math.round(d.final/maxBal2*100)}%;background:${d.color};border-radius:4px;opacity:0.6;transition:width 0.8s ease-out"></div>
-          </div>
+          <span style="width:90px;font-size:11px;font-weight:700;color:${d.name===me?'var(--acc)':'var(--t2)'};text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name.split(' ')[0]}</span>
+          <div style="flex:1;height:20px;background:var(--inp);border-radius:4px;overflow:hidden"><div id="race-bar-${i}" style="height:100%;width:${Math.round(d.final/maxBal2*100)}%;background:${d.color};border-radius:4px;opacity:0.5;transition:width 0.8s ease-out"></div></div>
           <span id="race-val-${i}" style="width:55px;font-size:11px;font-weight:800;color:var(--t1);font-family:var(--ff);text-align:right">₹${d.final.toLocaleString()}</span>
         </div>`).join('')}
       </div>
-      <button id="race-play" style="width:100%;margin-top:14px;padding:10px;background:var(--inp);border:1px solid rgba(212,162,78,0.2);border-radius:10px;color:var(--acc);font-weight:800;font-size:13px;cursor:pointer" onclick="playRace()">▶ Play the season</button>
+      <button id="race-play" style="width:100%;margin-top:12px;padding:10px;background:var(--inp);border:1px solid rgba(212,162,78,0.15);border-radius:10px;color:var(--acc);font-weight:800;font-size:12px;cursor:pointer" onclick="playRace()">▶ Play the season</button>
     </div>`;
-
-    window._raceData=raceData;
-    window._raceMax=maxBal2;
-  }
-
-  // ─── PROFIT BY TEAM (Bar Chart) ───
-  if(resolvedBets.length>=1){
-    const teamPL={};
-    resolvedBets.forEach(bt=>{
-      const rs=S.r[bt.mid];if(!rs)return;
-      const w=bt.tm===rs.w,od=safeOd(bt);
-      const mh=momMatch(bt.mom,rs.mom);
-      let change=0;
-      if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;change=Math.round(rp)}
-      else{change=mh?0:-bt.am}
-      if(!teamPL[bt.tm])teamPL[bt.tm]=0;
-      teamPL[bt.tm]+=change;
-    });
-    const teamPLArr=Object.entries(teamPL).sort((a,b)=>b[1]-a[1]);
-    if(teamPLArr.length>=2){
-      const maxAbs=Math.max(...teamPLArr.map(t=>Math.abs(t[1])),1);
-      let bars=teamPLArr.map(([tm,pl])=>{
-        const pct=Math.round(Math.abs(pl)/maxAbs*100);
-        const isPos=pl>=0;
-        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-          <span style="width:36px;font-size:12px;font-weight:800;color:${T[tm]?.c||'var(--t2)'};text-align:right">${T[tm]?.s||tm}</span>
-          <div style="flex:1;height:20px;background:var(--inp);border-radius:4px;overflow:hidden;position:relative">
-            <div style="height:100%;width:${pct}%;background:${isPos?'var(--grn)':'var(--red)'};opacity:0.5;border-radius:4px"></div>
-          </div>
-          <span style="width:70px;font-size:12px;font-weight:800;color:${isPos?'var(--grn)':'var(--red)'};font-family:var(--ff);text-align:right">${isPos?'+':''}₹${pl.toLocaleString()}</span>
-        </div>`;
-      }).join('');
-
-      h+=`<div id="st-profit" class="card">
-        <div class="ct" style="font-size:14px;margin-bottom:4px">📊 PROFIT BY TEAM</div>
-        <div style="font-size:12px;color:var(--t3);margin-bottom:12px">${teamPLArr[0][1]>0?T[teamPLArr[0][0]]?.s+' bets are paying out — +₹'+teamPLArr[0][1].toLocaleString()+' league-wide':teamPLArr[teamPLArr.length-1][1]<0?T[teamPLArr[teamPLArr.length-1][0]]?.s+' bets are losing money — ₹'+Math.abs(teamPLArr[teamPLArr.length-1][1]).toLocaleString()+' lost':'League-wide P&L from betting on each team'}</div>
-        ${bars}
-      </div>`;
-    }
-  }
-
-  const awards=[];
-  if(resolved.length>=3){
-  if(bigWinner&&bigWinner.b!==ST)awards.push({icon:'💰',title:'Richest Player',name:bigWinner.n,val:'₹'+bigWinner.b.toLocaleString(),clr:'var(--grn)'});
-  if(bigLoser&&bigLoser.b<ST)awards.push({icon:'😅',title:'Needs a Comeback',name:bigLoser.n,val:'₹'+bigLoser.b.toLocaleString(),clr:'var(--red)'});
-  if(luckiest)awards.push({icon:'🍀',title:'Luckiest',name:luckiest.n,val:luckiest.pct+'% win rate',clr:'var(--grn)'});
-  if(oracle)awards.push({icon:'🔮',title:'MoM Oracle',name:oracle.n,val:oracle.correct+'/'+oracle.total+' correct',clr:'var(--yel)'});
-  if(riskiest)awards.push({icon:'🎲',title:'Riskiest Bettor',name:riskiest.n,val:'avg ₹'+riskiest.avg.toLocaleString()+'/bet',clr:'var(--hot)'});
-  if(bestStreak&&bestStreak.streak>=2)awards.push({icon:'🔥',title:'Best Win Streak',name:bestStreak.n,val:bestStreak.streak+' in a row',clr:'var(--acc)'});
-  if(mostActive)awards.push({icon:'📱',title:'Most Active',name:mostActive[0],val:mostActive[1]+' bets',clr:'var(--t1)'});
-  if(bigBet)awards.push({icon:'💎',title:'Biggest Single Bet',name:bigBet.u,val:'₹'+bigBet.am.toLocaleString(),clr:'var(--acc)'});
-  if(bigUpset&&bigUpset.od>=3)awards.push({icon:'🎯',title:'Biggest Upset Win',name:bigUpset.u,val:'×'+bigUpset.od+' odds',clr:'var(--grn)'});
-  } // end resolved.length guard
-
-  if(awards.length){
-    h+=`<div id="st-awards" class="ct" style="font-size:16px;margin-bottom:14px;text-align:center">🏆 AWARDS</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">`;
-    awards.forEach(a=>{
-      h+=`<div style="background:var(--card);border:1px solid var(--bdr);border-radius:14px;padding:16px;text-align:center">
-        <div style="font-size:28px;margin-bottom:6px">${a.icon}</div>
-        <div style="font-size:11px;color:var(--t4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${a.title}</div>
-        <div style="font-weight:800;font-size:15px;color:${a.clr}">${a.name}</div>
-        <div style="font-size:12px;color:var(--t3);margin-top:2px">${a.val}</div>
-      </div>`;
-    });
-    h+=`</div>`;
-  }
-
-  // ─── MOST BACKED TEAMS ───
-  if(sortedTeams.length){
-    h+=`<div id="st-backed" class="card"><div class="ch"><span style="font-size:18px">🔥</span><span class="ct">MOST BACKED TEAMS</span></div>`;
-    const maxTeamBets=sortedTeams[0]?sortedTeams[0][1]:1;
-    sortedTeams.forEach(([tm,cnt])=>{
-      const pct=Math.round(cnt/allBets.length*100);
-      const barW=Math.round(cnt/maxTeamBets*100);
-      h+=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div style="width:44px;text-align:center">${bdg(tm,36)}</div>
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
-            <span style="font-weight:700;color:${T[tm]?.c||'var(--t2)'}">${T[tm]?.s||tm}</span>
-            <span style="color:var(--t4)">${cnt} bet${cnt!==1?'s':''} · ${pct}%</span>
-          </div>
-          <div style="height:8px;background:var(--inp);border-radius:4px;overflow:hidden">
-            <div style="height:100%;width:${barW}%;background:${T[tm]?.c||'var(--acc)'};border-radius:4px"></div>
-          </div>
-        </div>
-      </div>`;
-    });
-    h+=`</div>`;
+    window._raceData=raceData;window._raceMax=maxBal2;
   }
 
   el.innerHTML=h;
