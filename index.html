@@ -3864,6 +3864,104 @@ function rMG(){
   <div style="font-size:11px;color:var(--t4);margin-top:6px;text-align:center">Started ₹${ST.toLocaleString()} · ${diff>=0?'Up':'Down'} ${Math.abs(diff).toLocaleString()}</div>
   </div>`;
 
+  // ─── BALANCE AUDIT TRAIL (collapsible) ───
+  if(resolved.length>=1||S.adj.filter(a=>a.player===n).length>0){
+    // Build deterministic match-by-match audit
+    const auditBets=[...resolved].sort((a,b2)=>a.mid-b2.mid);
+    let auditBal=ST;
+    const auditRows=[];
+    auditBets.forEach(bt=>{
+      const rs2=S.r[bt.mid],m2=gm(bt.mid);
+      const w2=bt.tm===rs2.w,mh2=momMatch(bt.mom,rs2.mom),od2=safeOd(bt),jp2=isJackpot(bt,mh2);
+      let delta2=0,desc='';
+      if(w2){
+        delta2=Math.round(bt.am*(od2-1));desc='Won';
+        if(jp2){delta2+=Math.round(bt.am*(od2-1));desc='JACKPOT'}
+        else if(mh2){delta2+=Math.round(ST*MOM_BONUS);desc='Won + MoM'}
+      } else {
+        if(mh2){delta2=0;desc='MoM Save'}
+        else{delta2=-bt.am;desc='Lost'}
+      }
+      auditBal+=delta2;
+      const recharged=auditBal<MINB;
+      if(recharged)auditBal=MINB;
+      auditRows.push({mid:bt.mid,team:bt.tm,opp:bt.tm===m2.h?m2.a:m2.h,am:bt.am,od:od2,
+        mom:bt.mom,delta:delta2,desc:desc,bal:auditBal,recharged:recharged,
+        label:safeT(m2.h).s+' vs '+safeT(m2.a).s,date:m2.d});
+    });
+    // Penalties
+    const auditPen=weeklyPenalty(n);
+    const auditWaived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s2,a)=>s2+a.amount,0);
+    const auditNetPen=Math.max(auditPen-auditWaived,0);
+    if(auditNetPen>0){
+      auditBal-=auditNetPen;
+      const rechPen=auditBal<MINB;if(rechPen)auditBal=MINB;
+      auditRows.push({mid:'PEN',delta:-auditNetPen,desc:'Weekly Penalties'+(auditWaived?' (₹'+auditWaived.toLocaleString()+' waived)':''),bal:auditBal,recharged:rechPen,label:'Penalties',special:true});
+    }
+    // Adjustments
+    (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
+      const adj2=a.type==='add'?a.amount:-a.amount;
+      auditBal+=adj2;
+      const rechAdj=auditBal<MINB;if(rechAdj)auditBal=MINB;
+      auditRows.push({mid:'ADJ',delta:adj2,desc:(a.type==='add'?'Bonus':'Deduction')+': '+(a.reason||'Admin'),bal:auditBal,recharged:rechAdj,label:a.reason||'Adjustment',special:true});
+    });
+
+    h+=`<div style="margin-bottom:16px">
+      <div onclick="var el=$('audit-${n.replace(/\\s/g,'')}');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.aud-chev').textContent=v?'▾':'▸'}"
+        style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(135deg,rgba(212,162,78,0.04),transparent);border:1px solid rgba(212,162,78,0.1);border-radius:14px;cursor:pointer;transition:background .15s">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">🔍</span>
+          <div>
+            <div style="font-family:var(--ff);font-size:12px;font-weight:700;color:var(--acc);letter-spacing:1.5px">HOW YOUR BALANCE WAS CALCULATED</div>
+            <div style="font-size:10px;color:var(--t4);margin-top:2px">${auditRows.length} transactions · Tap to ${auditRows.length>10?'expand':'view'}</div>
+          </div>
+        </div>
+        <span class="aud-chev" style="color:var(--acc);font-size:14px;flex-shrink:0">▸</span>
+      </div>
+      <div id="audit-${n.replace(/\\s/g,'')}" style="display:none;margin-top:8px;background:var(--card);border:1px solid var(--bdr);border-radius:14px;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;color:var(--t4);font-weight:700;letter-spacing:.5px">STARTING BALANCE</div>
+          <div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--t1)">₹${ST.toLocaleString()}</div>
+        </div>
+        ${auditRows.map(function(r,ri){
+          var clr=r.delta>0?'var(--grn)':r.delta<0?'var(--red)':'var(--yel)';
+          var icon=r.desc==='JACKPOT'?'🎰':r.desc==='Won + MoM'?'🎯':r.desc==='Won'?'✅':r.desc==='MoM Save'?'🛡️':r.desc==='Lost'?'❌':r.delta>0?'💰':'⚠️';
+          var tagBg=r.desc==='JACKPOT'?'rgba(212,162,78,0.1)':r.desc.includes('MoM')?'rgba(212,162,78,0.08)':r.delta>0?'rgba(58,175,135,0.08)':r.delta<0?'rgba(196,69,58,0.08)':'rgba(100,119,137,0.08)';
+          return '<div style="padding:12px 16px;border-bottom:1px solid var(--bdr);'+(ri%2===0?'':'background:rgba(255,255,255,0.01)')+'">'+
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+              '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'+
+                '<span style="font-size:14px;flex-shrink:0">'+icon+'</span>'+
+                '<div style="min-width:0">'+
+                  (r.special?
+                    '<div style="font-weight:700;font-size:12px;color:var(--t2)">'+r.desc+'</div>':
+                    '<div style="font-weight:700;font-size:12px;color:var(--t1)">M#'+r.mid+' '+r.label+'</div>'+
+                    '<div style="font-size:10px;color:var(--t4);margin-top:1px">'+
+                      '<span style="color:'+(safeT(r.team).c||'var(--t3)')+'">'+safeT(r.team).s+'</span>'+
+                      ' ₹'+r.am.toLocaleString()+' × '+r.od+
+                      (r.mom?' · MoM: '+r.mom.split(' ').pop():'')+
+                    '</div>'
+                  )+
+                '</div>'+
+              '</div>'+
+              '<div style="text-align:right;flex-shrink:0">'+
+                '<div style="font-family:var(--ff);font-size:15px;font-weight:900;color:'+clr+'">'+(r.delta>=0?'+':'')+'₹'+Math.abs(r.delta).toLocaleString()+'</div>'+
+                '<div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:2px">'+
+                  '<span style="font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;background:'+tagBg+';color:'+clr+'">'+r.desc+'</span>'+
+                  '<span style="font-size:10px;color:var(--t3)">→ ₹'+r.bal.toLocaleString()+'</span>'+
+                '</div>'+
+                (r.recharged?'<div style="font-size:9px;color:var(--yel);font-weight:700;margin-top:2px">⚡ Recharged to ₹'+MINB.toLocaleString()+'</div>':'')+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join('')}
+        <div style="padding:14px 16px;background:linear-gradient(135deg,rgba(212,162,78,0.04),transparent);display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:.5px">CURRENT BALANCE</div>
+          <div style="font-family:var(--ff);font-size:20px;font-weight:900;color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
   // ─── PENALTY WARNING (predictive) ───
   {
     const penWarning=predictPenalty(n);
@@ -4967,6 +5065,19 @@ function rA(){
       <div style="font-size:10px;color:var(--t4)">In Play</div>
     </div>
   </div>`;
+  // ─── BACKUP NUDGE ───
+  var lastBackupLog=(S.logs||[]).filter(function(l){return l.act==='backup_download'}).sort(function(a,b2){return(b2.ts||'').localeCompare(a.ts||'')})[0];
+  var daysSinceBackup=lastBackupLog?Math.round((Date.now()-new Date(lastBackupLog.ts).getTime())/(1000*60*60*24)):999;
+  if(daysSinceBackup>=3){
+    _h+=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:16px;background:${daysSinceBackup>=7?'rgba(196,69,58,0.08)':'rgba(212,162,78,0.06)'};border:1px solid ${daysSinceBackup>=7?'rgba(196,69,58,0.15)':'rgba(212,162,78,0.12)'};border-radius:12px">
+      <span style="font-size:18px">${daysSinceBackup>=7?'🚨':'⏰'}</span>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:800;color:${daysSinceBackup>=7?'var(--red)':'var(--yel)'}">${daysSinceBackup>=7?'BACKUP OVERDUE':'BACKUP REMINDER'}</div>
+        <div style="font-size:11px;color:var(--t4)">${lastBackupLog?'Last backup: '+timeAgo(lastBackupLog.ts):'No backup taken yet'}</div>
+      </div>
+      <button style="background:var(--grad);border:0;border-radius:10px;padding:8px 16px;color:#000;font-weight:800;font-size:12px;cursor:pointer;flex-shrink:0" onclick="downloadBackup()">Backup Now</button>
+    </div>`;
+  }
   // State counters removed — MCB shows this
   // ─── LAST RESULT (quick undo) ───
   var lastResId=Object.keys(S.r).filter(function(k){return !S.r[k].voided}).sort(function(a,b){return (S.r[b].ts||'').localeCompare(S.r[a].ts||'')})[0];
@@ -7001,6 +7112,7 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
   <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Jump to section</div>
   <div style="display:flex;flex-direction:column;gap:4px">
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-exposure');$('mg-sheet').style.display='none'">⚡ Team Exposure</button>
+    <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="var el=document.querySelector('[id^=audit-]');if(el){el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'start'})};$('mg-sheet').style.display='none'">🔍 Balance Audit</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-pnl');$('mg-sheet').style.display='none'">📊 P&L Trendline</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-style');$('mg-sheet').style.display='none'">🏷️ Play Style</button>
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="ruJump('mg-percentile');$('mg-sheet').style.display='none'">📐 League Percentile</button>
