@@ -7133,7 +7133,7 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
 <button class="scroll-top" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 <script>
 // ═══ HIDDEN TEST HARNESS — runs on localhost only ═══
-if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname===''||location.protocol==='file:'){
+if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:'){
   window.runAllTests=function(){
     let p=0,f=0;
     function T(n,g,e){if(JSON.stringify(g)===JSON.stringify(e)){p++;console.log('✅ '+n)}else{f++;console.error('❌ '+n+': got',g,'expected',e)}}
