@@ -73,8 +73,9 @@ body::after{right:0;background:linear-gradient(to left,rgba(196,69,58,0.025) 0%,
 .bb{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,var(--card),var(--surf));border:1px solid var(--bdr-strong);border-radius:16px;padding:18px 20px;margin-bottom:20px;box-shadow:0 2px 12px rgba(0,0,0,0.2)}
 .bb-d{width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:18px}
 .bb-a{font-size:24px;font-weight:900;font-family:var(--ff)}
-.fr{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;background:var(--inp);border-radius:12px;padding:4px}
-.fb{flex:1;padding:9px 6px;border-radius:8px;border:0;background:transparent;color:var(--t3);font-weight:700;font-size:13px;cursor:pointer;transition:all .18s ease;min-width:60px}
+.fr{display:flex;gap:6px;margin-bottom:20px;background:var(--inp);border-radius:12px;padding:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fr::-webkit-scrollbar{display:none}
+.fb{flex:1;padding:9px 6px;border-radius:8px;border:0;background:transparent;color:var(--t3);font-weight:700;font-size:13px;cursor:pointer;transition:all .18s ease;white-space:nowrap;text-align:center}
 .fb:hover{color:var(--t2)}
 .fb.on{background:var(--card);color:var(--acc);box-shadow:0 1px 6px rgba(0,0,0,0.35);font-weight:800}
 .mc{background:var(--card);border:1px solid var(--bdr);border-left:3px solid var(--acc);border-radius:16px;padding:22px 20px 18px;margin-bottom:20px;animation:fadeUp .3s;box-shadow:0 2px 16px rgba(0,0,0,0.25)}
@@ -1262,7 +1263,7 @@ function rM(){
   // ─── SUB: rM_filterBar ─── ⚠️ GUARDRAIL: Returns HTML.
   function rM_filterBar(){
     var _h='';
-  _h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">🎯 Placed</button><button class="fb ${mf==='missing'?'on':''}" onclick="mf='missing';rM()" style="color:${mf==='missing'?'var(--hot)':'var(--t3)'}">🔔 No Bets</button>`:''}</div>`;
+  _h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">Placed</button><button class="fb ${mf==='missing'?'on':''}" onclick="mf='missing';rM()" style="color:${mf==='missing'?'var(--hot)':'var(--t3)'}">No Bets</button>`:''}</div>`;
     return _h;
   }
 
