@@ -339,7 +339,13 @@ function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window
 function _coreBal(n){
   let b=ST;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
-  userBets.forEach(bt=>{
+  // Sort by match ID (chronological) so recharge applies between matches
+  const sortedBets=[...userBets].sort((a,b2)=>a.mid-b2.mid);
+  // Group by match (a player has one bet per match)
+  const matchIds=[...new Set(sortedBets.map(bt=>bt.mid))];
+  matchIds.forEach(mid=>{
+    const bt=sortedBets.find(x=>x.mid===mid);
+    if(!bt)return;
     const rs=S.r[bt.mid];
     if(rs&&!rs.voided){
       const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
@@ -350,23 +356,29 @@ function _coreBal(n){
         b+=Math.round(rawPay);
       }
       else{if(!mh)b-=bt.am}
+      // ═══ RECHARGE: After each match result, floor at MINB ═══
+      // If balance dropped below ₹2,000, top up to ₹2,000.
+      // This is REAL money — no invisible debt.
+      if(b<MINB)b=MINB;
     }
   });
   let pen=weeklyPenalty(n);
   const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
   pen=Math.max(pen-waived,0);
   b-=pen;
+  if(b<MINB)b=MINB; // recharge after penalties too
   (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
     if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
   });
+  if(b<MINB)b=MINB; // recharge after adjustments too
   return Math.round(b);
 }
 
-// Player-facing balance (floored at MINB safety net)
-function bal(n){return Math.max(_coreBal(n),MINB)}
+// Player-facing balance (always equals _coreBal now — recharge is built in)
+function bal(n){return _coreBal(n)}
 
-// Bettable balance (no floor — prevents infinite money exploit at ₹2K)
-function betBal(n){return Math.max(_coreBal(n),0)}
+// Bettable balance (same as bal — recharge means ₹2K is always real and bettable)
+function betBal(n){return _coreBal(n)}
 
 // Resolve current player name from a bet's stored name (handles renames)
 function rpn(storedName){
