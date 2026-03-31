@@ -331,7 +331,7 @@ function ruJump(id){const el=$(id);if(!el)return;
 document.addEventListener('click',function(e){var row=e.target.closest('[data-player]');if(row&&row.closest('#v-home')){var name=row.getAttribute('data-player');if(name)promptLogin(name)}});
 document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
-function gm(id){const m=MM.find(x=>x.id===id);if(!m)return null;if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
+function gm(id){const m=MM.find(x=>x.id===id);if(!m)return{id:id,h:'TBD',a:'TBD',d:'2026-01-01',t:'00:00',v:''};if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
 function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length>=5){const okIdx=window._tq.findIndex(x=>x[1]!=='err');if(okIdx>=0)window._tq.splice(okIdx,1);else window._tq.shift()}window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);const dur=t==='err'?4000:2000;window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},dur)}
 
@@ -1837,6 +1837,53 @@ function rM(){
     return _h;
   }
 
+  // ─── SUB: rM_myBetLive ─── Compact card for pending/locked bets in My Bets tab
+  function rM_myBetLive(m,my,ab,mo){
+    var _h='';
+    const od=safeOd(my);
+    const potProfit=Math.round(my.am*(od-1));
+    const mh=my.mom?momMatch(my.mom,null):false;
+    const jp=isJackpot(my,true);
+    const teamClr=T[my.tm]?.c||'var(--acc)';
+    const oppTm=my.tm===m.h?m.a:m.h;
+    const cdStr=cd(m);
+    const isInPlay=new Date()>=dl(m);
+    const dateStr=fd(m.d);
+    const totalBets=ab.length;
+    const myTeamBets=ab.filter(x=>x.tm===my.tm).length;
+    const oppTeamBets=ab.filter(x=>x.tm===oppTm).length;
+
+    _h+=`<div style="margin-bottom:10px;background:var(--card);border:1px solid rgba(212,162,78,0.15);border-radius:16px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(135deg,rgba(212,162,78,0.04),transparent)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:800;font-size:13px;color:var(--t1)">#${m.id}</span>
+          <span style="font-size:12px;color:var(--t3)">${T[m.h]?.s} vs ${T[m.a]?.s}</span>
+          <span style="font-size:10px;color:var(--t4)">${dateStr}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${isInPlay?`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3FB08C;animation:livePulse 1.5s ease-in-out infinite"></span><span style="font-size:10px;font-weight:800;color:#3FB08C;letter-spacing:.5px">IN PLAY</span>`:`<span style="font-size:10px;font-weight:700;color:var(--yel)">🔒 ${cdStr}</span>`}
+        </div>
+      </div>
+      <div style="padding:12px 16px;display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:50%;background:${teamClr};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;font-family:var(--ff);flex-shrink:0">${T[my.tm]?.s||'?'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:14px;color:${teamClr}">${T[my.tm]?.n||my.tm}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:11px;color:var(--t3)">
+            <span>₹${my.am.toLocaleString()} · ×${od}</span>
+            ${my.mom?`<span style="color:var(--t4)">MoM: ${my.mom.split(' ').pop()}</span>`:''}
+          </div>
+          <div style="font-size:10px;color:var(--t4);margin-top:3px">${myTeamBets} on ${T[my.tm]?.s} · ${oppTeamBets} on ${T[oppTm]?.s} · ${totalBets} total</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:9px;color:var(--t4);letter-spacing:.5px">POTENTIAL</div>
+          <div style="font-family:var(--ff);font-size:20px;font-weight:900;color:var(--grn)">+₹${potProfit.toLocaleString()}</div>
+          ${jp?`<div style="font-size:9px;color:var(--yel);font-weight:700;margin-top:2px">🎰 JP eligible</div>`:''}
+        </div>
+      </div>
+    </div>`;
+    return _h;
+  }
+
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">${mf==='livebets'?'No bets placed yet.':'Nothing here yet.'}</div>`;
   fm.forEach(m=>{
     const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
@@ -1846,6 +1893,8 @@ function rM(){
     if(mf==='results'&&rs){h+=rM_resultCard(m,ab,rs);return}
     // ── My Bets: completed matches get collapsed summary ──
     if(mf==='mybets'&&rs&&my&&!rs.voided){h+=rM_myBetCollapsed(m,rs,my);return}
+    // ── My Bets: pending/live matches get compact card ──
+    if(mf==='mybets'&&!rs&&my&&l){h+=rM_myBetLive(m,my,ab,mo);return}
     h+=rM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk);
   });
   h+=rM_crystalBall();
