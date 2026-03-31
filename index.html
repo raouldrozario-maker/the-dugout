@@ -332,6 +332,11 @@ document.addEventListener('click',function(e){var row=e.target.closest('[data-pl
 document.addEventListener('click',e=>{const rs=$('ru-sheet'),rf=$('ru-fab'),as=$('adm-sheet'),af=$('adm-fab'),ts=$('tm-sheet'),tf=$('tm-fab'),ss=$('st-sheet'),sf=$('st-fab'),ms=$('mg-sheet'),mmf=$('mg-fab');if(rs&&rs.style.display==='block'&&!rs.contains(e.target)&&!rf?.contains(e.target))rs.style.display='none';if(as&&as.style.display==='block'&&!as.contains(e.target)&&!af?.contains(e.target))as.style.display='none';if(ts&&ts.style.display==='block'&&!ts.contains(e.target)&&!tf?.contains(e.target))ts.style.display='none';if(ss&&ss.style.display==='block'&&!ss.contains(e.target)&&!sf?.contains(e.target))ss.style.display='none';if(ms&&ms.style.display==='block'&&!ms.contains(e.target)&&!mmf?.contains(e.target))ms.style.display='none'})
 // Get match with playoff team overrides
 function gm(id){const m=MM.find(x=>x.id===id);if(!m)return{id:id,h:'TBD',a:'TBD',d:'2026-01-01',t:'00:00',v:''};if(m.playoff&&S.po&&S.po[id]){return{...m,h:S.po[id].h,a:S.po[id].a}}return m}
+// Safe team lookup — never crashes on unknown keys
+const _stubTeam={s:'?',n:'Unknown',c:'var(--t3)',squad:[],cap:''};
+function safeT(k){return T[k]||_stubTeam}
+// Safe section renderer — wraps a sub-function so one crash doesn't kill the page
+function safeRender(fn,label){try{return fn()}catch(e){console.error('⚠️ Section crash ['+label+']:',e.message);return'<div style="padding:12px;margin-bottom:8px;background:rgba(196,69,58,0.06);border:1px solid rgba(196,69,58,0.12);border-radius:12px;font-size:12px;color:var(--red)">⚠️ <strong>'+label+'</strong> failed to load</div>'}}
 function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h,a:S.po[m.id].a}:m)}
 function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length>=5){const okIdx=window._tq.findIndex(x=>x[1]!=='err');if(okIdx>=0)window._tq.splice(okIdx,1);else window._tq.shift()}window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);const dur=t==='err'?4000:2000;window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},dur)}
 
@@ -3590,6 +3595,7 @@ function rMG(){
   // Admin can view any player via dropdown
   const viewPlayer=adm&&mgPlayer?mgPlayer:(me||ns[0]);
   if(!viewPlayer||!S.p[viewPlayer]){el.innerHTML=`<div class="card" style="text-align:center;padding:48px;color:var(--t3)">No player selected.</div>`;return}
+  try{
   const n=viewPlayer;
   const L=LB();
   const b=bal(n),risk=atRisk(n),diff=rawBal(n)-ST,rank=L.findIndex(x=>x.n===n)+1;
@@ -4652,6 +4658,7 @@ function rMG(){
   } // end crystal ball gate
 
   el.innerHTML=h;
+}catch(e){const _el=$('v-mygame');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Locker Room Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('rMG crash:',e)}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -6871,37 +6878,92 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
 <button class="scroll-top" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 <script>
 // ═══ HIDDEN TEST HARNESS — runs on localhost only ═══
-if(location.hostname==='localhost'||location.hostname==='127.0.0.1'){
+if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname===''||location.protocol==='file:'){
   window.runAllTests=function(){
     let p=0,f=0;
     function T(n,g,e){if(JSON.stringify(g)===JSON.stringify(e)){p++;console.log('✅ '+n)}else{f++;console.error('❌ '+n+': got',g,'expected',e)}}
-    // Snapshot real state
-    const _sb=S.b,_sr=S.r,_sadj=S.adj;
-    // Payout engine — mock S.b/S.r for each test
+    function OK(n,cond){if(cond){p++;console.log('✅ '+n)}else{f++;console.error('❌ '+n)}}
+    // ── Snapshot ──
+    const _sb=S.b,_sr=S.r,_sadj=S.adj,_sko=S.ko,_skoO=S.koOpen,_skoR=S.koRevealed,_skoW=S.koWinner,_skoP=S.koPublished,_scb=S.cbTeams,_slo=S.lockOverride,_me=me,_adm=adm,_mf=mf;
+    function restore(){S.b=_sb;S.r=_sr;S.adj=_sadj;S.ko=_sko;S.koOpen=_skoO;S.koRevealed=_skoR;S.koWinner=_skoW;S.koPublished=_skoP;S.cbTeams=_scb;S.lockOverride=_slo;me=_me;adm=_adm;mf=_mf}
+
+    console.log('%c── PAYOUT ENGINE ──','font-weight:bold');
     const R={w:"RCB",mom:"Virat Kohli"};
-    function payTest(label,bets,results,expected){
-      S.b={};S.r=results;S.adj=[];
-      bets.forEach(function(bt,i){S.b[(bt.mid||1)+'-P']=bt});
-      T(label,_coreBal('P')-ST,expected);
-    }
+    function payTest(label,bets,results,expected){S.b={};S.r=results;S.adj=[];bets.forEach(function(bt){S.b[(bt.mid||1)+'-P']=bt});T(label,_coreBal('P')-ST,expected)}
     payTest('Win no MoM',[{mid:1,u:'P',tm:'RCB',am:5000,od:2.0,mom:null,mt:null}],{1:R},5000);
     payTest('Loss no MoM',[{mid:1,u:'P',tm:'CSK',am:5000,od:2.0,mom:null,mt:null}],{1:R},-5000);
     payTest('MoM save',[{mid:1,u:'P',tm:'CSK',am:5000,od:2.0,mom:'Virat Kohli',mt:'CSK'}],{1:R},0);
     payTest('Jackpot',[{mid:1,u:'P',tm:'RCB',am:5000,od:2.0,mom:'Virat Kohli',mt:'CSK'}],{1:R},10000);
-    // Restore state
-    S.b=_sb;S.r=_sr;S.adj=_sadj;
-    // MoM matching
+    payTest('Voided = no effect',[{mid:1,u:'P',tm:'RCB',am:5000,od:2.0,mom:null,mt:null}],{1:{voided:true}},0);
+
+    console.log('%c── RECHARGE MODEL ──','font-weight:bold');
+    // Loss below floor → recharge
+    S.b={};S.r={};S.adj=[];S.p['_T']={j:''};
+    S.b['1-_T']={mid:1,u:'_T',tm:'RCB',am:9000,od:2.0,mom:null,mt:null};S.r[1]={w:'CSK',mom:null};
+    T('Recharge: 10K-9K=1K→2K',bal('_T'),2000);
+    T('betBal matches bal',betBal('_T'),bal('_T'));
+    T('rawBal shows truth',rawBal('_T'),1000);
+    // Win from floor
+    S.b['2-_T']={mid:2,u:'_T',tm:'RCB',am:1000,od:2.0,mom:null,mt:null};S.r[2]={w:'RCB',mom:null};
+    T('Win from floor: 2K+1K=3K',bal('_T'),3000);
+    // Consecutive losses stay at floor
+    S.b['3-_T']={mid:3,u:'_T',tm:'RCB',am:2000,od:2.0,mom:null,mt:null};S.r[3]={w:'CSK',mom:null};
+    S.b['4-_T']={mid:4,u:'_T',tm:'RCB',am:2000,od:2.0,mom:null,mt:null};S.r[4]={w:'CSK',mom:null};
+    T('2 losses from floor=2K',bal('_T'),2000);
+    // Win after losses → no debt
+    S.b['5-_T']={mid:5,u:'_T',tm:'RCB',am:2000,od:2.5,mom:null,mt:null};S.r[5]={w:'RCB',mom:null};
+    T('Win after losses: 2K+3K=5K',bal('_T'),5000);
+    delete S.p['_T'];
+
+    console.log('%c── MOM MATCHING ──','font-weight:bold');
     T('MoM exact',momMatch('Virat Kohli','Virat Kohli'),true);
     T('MoM case',momMatch('virat kohli','Virat Kohli'),true);
+    T('MoM initial',momMatch('V Kohli','Virat Kohli'),true);
+    T('MoM dot',momMatch('V. Kohli','Virat Kohli'),true);
     T('MoM miss',momMatch('MS Dhoni','Virat Kohli'),false);
-    T('MoM null',momMatch(null,'Virat Kohli'),false);
-    // Odds safety
-    T('safeOd NaN',safeOd({od:'abc',mid:1,u:'P'}),2);
+    T('MoM null pick',momMatch(null,'Virat Kohli'),false);
+    T('MoM null official',momMatch('Virat Kohli',null),false);
+    T('MoM empty',momMatch('','Virat Kohli'),false);
+    T('MoM R Ashwin',momMatch('R Ashwin','Ravichandran Ashwin'),true);
+
+    console.log('%c── ODDS SAFETY ──','font-weight:bold');
     T('safeOd valid',safeOd({od:2.3,mid:1,u:'P'}),2.3);
-    // Lock deadline timezone-safe
-    const dl1=dl({d:'2026-04-04',t:'19:30'});
-    const dl2=dl({d:'2026-04-04',t:'15:30'});
-    T('DH locks independently',dl1.getTime()>dl2.getTime(),true);
+    T('safeOd NaN→2',safeOd({od:'abc',mid:1,u:'P'}),2);
+    T('safeOd 0→2',safeOd({od:0,mid:1,u:'P'}),2);
+    T('safeOd neg→2',safeOd({od:-1,mid:1,u:'P'}),2);
+    T('safeOd <1→2',safeOd({od:0.5,mid:1,u:'P'}),2);
+    T('safeOd high',safeOd({od:10.5,mid:1,u:'P'}),10.5);
+
+    console.log('%c── LOCK & TIMEZONE ──','font-weight:bold');
+    const dl1=dl({d:'2026-04-04',t:'19:30'}),dl2=dl({d:'2026-04-04',t:'15:30'});
+    T('DH locks independent',dl1.getTime()>dl2.getTime(),true);
+    const mt=new Date('2026-04-04T19:30:00+05:30');
+    T('40-min pre-lock',dl1.getTime(),mt.getTime()-40*60000);
+    OK('dl returns Date',dl1 instanceof Date&&!isNaN(dl1.getTime()));
+
+    console.log('%c── SAFE HELPERS ──','font-weight:bold');
+    const stub=gm(99999);
+    OK('gm(unknown) returns stub',stub&&stub.h==='TBD'&&stub.d==='2026-01-01');
+    OK('safeT(unknown) returns stub',safeT('ZZZZZ').s==='?');
+    OK('safeT(RCB) returns real',safeT('RCB').s==='RCB');
+
+    console.log('%c── RENDERS ──','font-weight:bold');
+    restore();
+    var rFails=[];
+    try{rH()}catch(e){rFails.push('rH:'+e.message)}
+    try{me=me||Object.keys(S.p)[0];mf='upcoming';rM()}catch(e){rFails.push('rM:upcoming:'+e.message)}
+    try{mf='locked';rM()}catch(e){rFails.push('rM:locked:'+e.message)}
+    try{mf='results';rM()}catch(e){rFails.push('rM:results:'+e.message)}
+    try{mf='mybets';rM()}catch(e){rFails.push('rM:mybets:'+e.message)}
+    try{rB()}catch(e){rFails.push('rB:'+e.message)}
+    try{rRu()}catch(e){rFails.push('rRu:'+e.message)}
+    try{rT()}catch(e){rFails.push('rT:'+e.message)}
+    try{rAn()}catch(e){rFails.push('rAn:'+e.message)}
+    try{me=me||Object.keys(S.p)[0];mgPlayer=null;rMG()}catch(e){rFails.push('rMG:'+e.message)}
+    try{adm=true;rA();adm=false}catch(e){rFails.push('rA:'+e.message);adm=false}
+    if(rFails.length){rFails.forEach(function(e){f++;console.error('❌ Render: '+e)})}else{p++;console.log('✅ All 11 renders clean')}
+
+    restore();
     console.log(`\n${p} passed, ${f} failed ${f===0?'🟢':'🔴'}`);
     return{passed:p,failed:f};
   };
