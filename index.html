@@ -308,7 +308,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 //   rB()               L2443  Leaderboard / Board
 //   rRu()              L2624  Rules (10 sections)
 //   rT()               L2943  Teams page
-//   rAn()              L3083  Stats / God Mode (14 sections)
+//   rAn()              L3083  Stats / God Mode (11 sections)
 //   rMG()              L3591  Locker Room (26 sections, 6 God Mode)
 //   rA()               L4682  Admin Command Center (5 sub-functions)
 //
@@ -2911,12 +2911,15 @@ function rRu(){
       <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
         <strong style="color:var(--acc)">What you'll find here:</strong><br>
         🏆 <strong>League Stats Hero</strong> — leader, bottom player, hottest streak, match/bet/player counts at a glance<br>
+        ⚡ <strong>Power Rankings</strong> — composite score ranking every player (balance + win rate + efficiency + MoM accuracy)<br>
+        🔥 <strong>Momentum Tracker</strong> — last 5 match form for every player (W/L tiles)<br>
         🏅 <strong>Awards</strong> — Richest, Best Win Rate, MoM Oracle, High Roller, Win Streak, Most Active, Biggest Bet<br>
-        📈 <strong>Balance Over Time</strong> — line chart tracking top players' balances across matches with your line highlighted<br>
-        🏏 <strong>Team Split & Profit</strong> — donut chart of team popularity + bar chart of league-wide P&L per team side by side<br>
-        🏷️ <strong>Player DNA</strong> — live personality labels (Gambler, Safe Player, Comeback King, etc.) based on betting patterns<br>
-        🔥 <strong>Most Backed</strong> — visual bars showing which teams the league bets on most<br>
-        🎬 <strong>Story of the Season</strong> — animated bar chart race showing how rankings evolved match by match. Hit Replay to watch it unfold
+        🎬 <strong>Story of the Season</strong> — animated bar chart race showing how rankings evolved match by match<br>
+        📈 <strong>Balance Over Time</strong> — line chart tracking all players' balances across matches<br>
+        ⚔️ <strong>Head-to-Head Matrix</strong> — W-L grid showing every player matchup<br>
+        🔮 <strong>MoM Leaderboard</strong> — who's the best at predicting Man of the Match<br>
+        🏏 <strong>Team Insights</strong> — team popularity donut + league-wide P&L per team<br>
+        💥 <strong>Match Impact Rankings</strong> — which matches caused the biggest balance swings
       </div>
     </div>
 
@@ -2926,23 +2929,24 @@ function rRu(){
       <div style="font-size:13px;color:var(--t2);line-height:2;padding:12px;background:var(--card);border-radius:8px">
         <strong style="color:var(--acc)">What you'll find here:</strong><br>
         🔥 <strong>Personal Story</strong> — your current status at a glance (streak, P&L, comeback mode)<br>
-        💰 <strong>Profile & Balance</strong> — your rank, balance, P&L, safety net status, and amount on the line<br>
-        📊 <strong>Last Result</strong> — your most recent bet outcome with full breakdown<br>
-        🏷️ <strong>Play Style</strong> — your personality label (Gambler, Safe Player, Sniper, etc.) with explanation<br>
-        🧠 <strong>Risk Insight</strong> — one smart observation about your betting pattern (tilt warning, underdog affinity, MoM accuracy)<br>
-        📈 <strong>Wallet Journey</strong> — step-by-step timeline of how your balance changed after each match, including penalties and adjustments<br>
-        📊 <strong>Stats</strong> — total bets, win rate, total wagered/won/lost, MoM accuracy, favourite team, current streak, biggest win and loss<br>
-        📜 <strong>Bet History</strong> — every bet grouped by time (Today, Yesterday, This Week, Earlier) with color-coded outcomes<br>
-        🏏 <strong>Team Performance</strong> — how each team has performed for you<br>
+        💰 <strong>Profile & Balance</strong> — your rank, balance, P&L, safety net status, and amount at risk<br>
+        🔍 <strong>Balance Audit Trail</strong> — match-by-match breakdown of how your balance was calculated (collapsible)<br>
         ⚡ <strong>Team Exposure</strong> — your open positions across pending bets<br>
-        📅 <strong>Upcoming Matches</strong> — matches you haven't bet on yet with countdown<br>
-        ⚔️ <strong>Head-to-Head</strong> — your record against every other player<br>
-        📅 <strong>Weekly Activity</strong> — which weeks you were active and which you missed<br>
-        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status<br>
-        🧮 <strong>What If Calculator</strong> — see 3 scenarios (safe, bold, jackpot) with projected rank movement before you bet (unlocked after rank 3+)<br>
-        🎭 <strong>Betting Signature</strong> — your unique betting personality label (Sniper, Whale, Oracle, etc.) based on your actual bet patterns (unlocked after 3+ resolved bets)<br>
-        📊 <strong>Season Report Card</strong> — visual ring chart of your win/loss/save split, key stats, best bet, and favourite team (unlocked after 3+ resolved bets)<br>
-        💰 <strong>Balance Ticker</strong> — animated balance display that ticks up (green) or down (red) when your balance changes
+        📊 <strong>Last Result</strong> — your most recent bet outcome with full breakdown<br>
+        📋 <strong>Season Report Card</strong> — visual ring chart of your win rate, key stats, best bet, and favourite team<br>
+        📊 <strong>P&L Trendline</strong> — match-by-match profit chart with per-bet breakdown<br>
+        🏷️ <strong>Play Style</strong> — your personality label (Gambler, Safe Player, Sniper, etc.) with betting signature<br>
+        🧠 <strong>Risk Insight</strong> — smart observation about your betting pattern (tilt warning, underdog affinity)<br>
+        🧮 <strong>What If Calculator</strong> — see 3 scenarios (safe, bold, jackpot) with projected rank movement<br>
+        🏅 <strong>Achievements</strong> — unlockable badges for milestones (First Win, On Fire, Jackpot, etc.)<br>
+        📐 <strong>League Percentile</strong> — how you rank vs the league across 5 metrics<br>
+        📉 <strong>Rank Trajectory</strong> — sparkline showing your rank position after each match<br>
+        🏏 <strong>Team Performance</strong> — how each team has performed for you (W/L, net P&L)<br>
+        🔮 <strong>MoM Deep Dive</strong> — your MoM picking patterns and accuracy (collapsible)<br>
+        🥊 <strong>Rival Card</strong> — your #1 rival and head-to-head record<br>
+        ⚔️ <strong>Head-to-Head</strong> — your record against every other player (collapsible)<br>
+        📜 <strong>Bet History</strong> — every bet grouped by time with color-coded outcomes (collapsible)<br>
+        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status
       </div>
     </div>
   </div>
