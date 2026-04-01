@@ -4818,7 +4818,7 @@ function rA(){
     <div><div style="font-family:var(--ff);font-size:26px;font-weight:800;color:var(--acc);letter-spacing:3px">COMMAND CENTER</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${ns.length} players · ${Object.keys(S.b).length} bets · ${Object.keys(S.r).length} results · <span style="font-size:10px;color:var(--t4)" id="adm-ts"></span></div></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button style="background:#F5A62315;border:1px solid #F5A62330;border-radius:10px;padding:8px 18px;color:var(--acc);font-size:13px;cursor:pointer;font-weight:700" onclick="openExportModal()">📤 Export</button>
-      <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;localStorage.removeItem('dg-adm-vis');var ab=document.getElementById('nav-admin');if(ab)ab.style.display='none';adminLog('admin_logout','Logout');sv(['logs']);toast('Logged out as Admin');nav('home')">🔓 Logout</button>
+      <button style="background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;padding:8px 18px;color:var(--red);font-size:13px;cursor:pointer;font-weight:700" onclick="adm=false;sessionStorage.removeItem('dg-adm-vis');var ab=document.getElementById('nav-admin');if(ab)ab.style.display='none';adminLog('admin_logout','Logout');sv(['logs']);toast('Logged out as Admin');nav('home')">🔓 Logout</button>
     </div>
   </div>`;
 
@@ -5446,7 +5446,7 @@ async function hashPin(pin){
   let h=0;for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0}
   return 'fb'+Math.abs(h).toString(16).padStart(8,'0')
 }
-function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;localStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}else{toast('Wrong PIN','err')}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}else{toast('Wrong PIN','err')}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
 
 function admDDToggle(ddId){
   var dd=$(ddId);if(!dd)return;
@@ -6834,12 +6834,12 @@ window.addEventListener('resize',moveSlider);
       if(btn){
         if(btn.style.display==='none'){
           btn.style.display='';
-          localStorage.setItem('dg-adm-vis','1');
+          sessionStorage.setItem('dg-adm-vis','1');
           moveSlider();
           toast('🔓 Admin unlocked');
         }else{
           btn.style.display='none';
-          localStorage.removeItem('dg-adm-vis');
+          sessionStorage.removeItem('dg-adm-vis');
           if(document.querySelector('.nb.on')&&document.querySelector('.nb.on').dataset.v==='admin')nav('home');
           moveSlider();
           toast('🔒 Admin hidden');
@@ -6848,9 +6848,11 @@ window.addEventListener('resize',moveSlider);
     }
   });
   // Also restore admin tab if already logged in as admin (session persistence)
-  if(localStorage.getItem('dg-adm-vis')==='1'){
+  if(sessionStorage.getItem('dg-adm-vis')==='1'){
     var btn=document.getElementById('nav-admin');
     if(btn)btn.style.display='';
+    // Auto-restore admin session — skip PIN if previously authenticated
+    if(typeof S!=='undefined'&&S.pin){adm=true}
   }
 })();
 </script>
