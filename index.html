@@ -132,6 +132,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .sd-input::placeholder{color:var(--t4)}
 .sd-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--t4);font-size:11px}
 .sd-dd{display:none;position:absolute;left:0;right:0;top:100%;margin-top:4px;background:var(--card);border:1px solid var(--bdr2);border-radius:12px;max-height:280px;overflow-y:auto;z-index:200;box-shadow:0 8px 30px #00000066;-webkit-overflow-scrolling:touch}
+[id$="-dd"] div[onclick]:hover{background:var(--inp)}
 .sd-dd.open{display:block}
 .sd-grp{padding:6px 14px 4px;font-size:11px;color:var(--t4);font-weight:800;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0;background:var(--card);z-index:1}
 .sd-opt{padding:11px 14px;font-size:15px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr)}
@@ -813,7 +814,7 @@ function momDropdown(id,matchId,both=false){
     <input class="bf-i" id="${id}" placeholder="Search or select player…" autocomplete="off" data-groups='${data}' data-selectedtm='${selectedTm||""}' style="font-size:14px;padding:12px 40px 12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;box-sizing:border-box"
       onfocus="momDDOpen('${id}')" oninput="momDDFilter('${id}')">
     <button id="${id}-clear" onclick="momDDClear('${id}')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:0;border:0;color:var(--t3);font-size:18px;cursor:pointer;padding:4px 8px;display:none">✕</button>
-    <div id="${id}-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px #000c"></div>
+    <div id="${id}-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 10px 10px;max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;z-index:9999;box-shadow:0 8px 24px #000c"></div>
   </div>`;
 }
 function momDDOpen(id){
@@ -839,7 +840,7 @@ function momDDFilter(id){
     var selTm=inp.dataset.selectedtm||'';var isOpp=selTm&&g.team!==selTm;var isMine=selTm&&g.team===selTm;
     html+='<div style="padding:6px 14px;font-size:11px;font-weight:700;color:'+(isOpp?'var(--t4)':'var(--t2)')+';background:var(--inp);border-bottom:1px solid var(--bdr)">'+g.name+' ('+g.short+')'+(isOpp?' <span style="color:var(--yel);font-weight:600"> · Jackpot eligible ⭐</span>':(isMine?' <span style="color:var(--t4);font-weight:400"> · Your team</span>':''))+'</div>';
     filtered.forEach(function(p){
-      html+='<div style="padding:10px 14px;font-size:14px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background=\'var(--inp)\'" onmouseout="this.style.background=\'\'" onclick="momDDPick(\''+id+'\',\''+p.replace(/'/g,"\\'")+'\')">'+p+'<span style="font-size:11px;color:var(--t3)">'+g.short+'</span></div>';
+      html+='<div style="padding:10px 14px;font-size:14px;color:var(--t1);cursor:pointer;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center" onclick="momDDPick(\''+id+'\',\''+p.replace(/'/g,"\\'")+'\')">'+p+'<span style="font-size:11px;color:var(--t3)">'+g.short+'</span></div>';
     });
   });
   if(!html)html='<div style="padding:12px 14px;color:var(--t4);font-size:13px">No players found</div>';
@@ -3679,7 +3680,7 @@ function rMG(){
         </div>
         ${sortedPlayers.map((p,i)=>{
           const b=bal(p),pnl=b-ST,isActive=p===n;
-          return `<div class="adm-dd-row" data-name="${p.toLowerCase()}" onclick="mgPlayer='${p.replace(/'/g,"\\\\'")}';$('adm-dd-list').style.display='none';rMG()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.02);${isActive?'background:rgba(212,162,78,0.08)':''}" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background='${isActive?'rgba(212,162,78,0.08)':'transparent'}'">
+          return `<div class="adm-dd-row" data-name="${p.toLowerCase()}" onclick="mgPlayer='${p.replace(/'/g,"\\\\'")}';$('adm-dd-list').style.display='none';rMG()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.02);${isActive?'background:rgba(212,162,78,0.08)':''}">
             <div style="display:flex;align-items:center;gap:10px">
               <div class="ca" style="width:28px;height:28px;font-size:11px;${isActive?'border-color:var(--acc)':''}">${p[0].toUpperCase()}</div>
               <div>
@@ -5944,7 +5945,7 @@ function revealKO(){if(!adm)return;adminLog('crystal_reveal','Predictions reveal
 const IPL_VENUES=['M. Chinnaswamy Stadium, Bengaluru','Wankhede Stadium, Mumbai','MA Chidambaram Stadium, Chennai','Eden Gardens, Kolkata','Arun Jaitley Stadium, Delhi','Rajiv Gandhi Intl Stadium, Hyderabad','Narendra Modi Stadium, Ahmedabad','IS Bindra Stadium, Mohali','Sawai Mansingh Stadium, Jaipur','Bharat Ratna Shri Atal Bihari Vajpayee Ekana Stadium, Lucknow','Himachal Pradesh Cricket Association Stadium, Dharamsala','Dr. DY Patil Sports Academy, Navi Mumbai','Maharashtra Cricket Association Stadium, Pune','Barsapara Cricket Stadium, Guwahati','Holkar Cricket Stadium, Indore','JSCA International Stadium Complex, Ranchi','Greenfield International Stadium, Thiruvananthapuram','ACA-VDCA Cricket Stadium, Visakhapatnam'];
 function nmTeamSync(){const h=$('nm-home').value,aSel=$('nm-away');const cur=aSel.value;aSel.innerHTML='<option value="">--</option>';Object.keys(T).forEach(k=>{if(k!==h)aSel.innerHTML+=`<option value="${k}" ${k===cur?'selected':''}>${T[k].s}</option>`})}
 function nmVenueOpen(){const dd=$('nm-venue-dd');dd.style.display='block';nmVenueFilter();setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&e.target.id!=='nm-venue'){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}
-function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr)" onmouseover="this.style.background='var(--inp)'" onmouseout="this.style.background=''" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">${v}</div>`).join(''):'<div style="padding:10px 14px;color:var(--t4);font-size:12px">No venues found</div>'}
+function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr)" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">${v}</div>`).join(''):'<div style="padding:10px 14px;color:var(--t4);font-size:12px">No venues found</div>'}
 function addMatch(){if(!adm)return;
   const id=parseInt($('nm-id').value)||MM.length+1;
   const day=parseInt($('nm-day').value);
