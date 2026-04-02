@@ -7599,6 +7599,28 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     try{adm=true;rA();adm=false}catch(e){rFails.push('rA:'+e.message);adm=false}
     if(rFails.length){rFails.forEach(function(e){f++;console.error('❌ Render: '+e)})}else{p++;console.log('✅ All 11 renders clean')}
 
+    console.log('%c── RENDER QUALITY ──','font-weight:bold');
+    var garbage=['[object Object]','undefined','NaN','null'];
+    var garbageFails=[];
+    var views={home:'v-home',matches:'v-matches',board:'v-board',rules:'v-rules',teams:'v-teams',analytics:'v-analytics',mygame:'v-mygame',admin:'v-admin'};
+    Object.keys(views).forEach(function(vName){
+      var el2=$(views[vName]);
+      if(!el2||!el2.innerHTML)return;
+      var html2=el2.innerHTML;
+      garbage.forEach(function(g){
+        // Skip if inside a script, attribute value, or JSON — only catch visible text
+        // Simple heuristic: check if it appears outside of tags
+        var stripped=html2.replace(/<[^>]*>/g,' ');
+        if(stripped.indexOf(g)>=0&&g==='[object Object]')garbageFails.push(vName+': has '+g);
+        // For undefined/NaN/null, only flag if it appears as standalone word (not inside a variable name)
+        if(g!=='[object Object]'){
+          var re=new RegExp('(^|[\\s>:;,])'+g+'([\\s<:;,]|$)');
+          if(re.test(stripped))garbageFails.push(vName+': has visible "'+g+'"');
+        }
+      });
+    });
+    if(garbageFails.length){garbageFails.forEach(function(e){f++;console.error('❌ Garbage: '+e)})}else{p++;console.log('✅ No [object Object], undefined, NaN in renders')}
+
     console.log('%c── PENALTY SYSTEM (v3.5) ──','font-weight:bold');
     restore();
     // Late joiner test
