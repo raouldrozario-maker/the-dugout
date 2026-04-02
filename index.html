@@ -6431,24 +6431,164 @@ function savePlayerCardPNG(playerName){
   var el=document.getElementById('player-card-capture');
   if(!el){toast('No card to save','err');return}
   var fname='dugout-'+playerName.replace(/[^a-zA-Z0-9]/g,'-').toLowerCase()+'.png';
-  function doCapture(){
-    html2canvas(el,{backgroundColor:'#06091A',scale:2,useCORS:true,logging:false}).then(function(canvas){
-      var link=document.createElement('a');
-      link.download=fname;
-      link.href=canvas.toDataURL('image/png');
-      link.click();
-      toast('\uD83C\uDFB4 Card saved!');
-    }).catch(function(e){
-      console.error('html2canvas error:',e);
-      toast('Screenshot the card manually \uD83D\uDCF1','err');
-    });
+
+  // Try html2canvas first (if already loaded), then CDN, then manual canvas fallback
+  function tryCDN(){
+    var script=document.createElement('script');
+    script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload=function(){
+      if(typeof html2canvas==='function'){
+        html2canvas(el,{backgroundColor:'#06091A',scale:2,useCORS:true,logging:false}).then(function(canvas){
+          downloadCanvas(canvas);
+        }).catch(function(){manualCanvas()});
+      }else{manualCanvas()}
+    };
+    script.onerror=function(){manualCanvas()};
+    document.head.appendChild(script);
   }
-  if(typeof html2canvas==='function'){doCapture();return}
-  var script=document.createElement('script');
-  script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-  script.onload=function(){doCapture()};
-  script.onerror=function(){toast('Could not load image library. Screenshot the card manually \uD83D\uDCF1','err')};
-  document.head.appendChild(script);
+
+  function downloadCanvas(canvas){
+    var link=document.createElement('a');
+    link.download=fname;
+    link.href=canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast('\uD83C\uDFB4 Card saved!');
+  }
+
+  // Fallback: draw card manually on canvas using the same data
+  function manualCanvas(){
+    var n=playerName;if(!S.p[n])return;
+    var b=bal(n),lb=LB(),rank=lb.findIndex(function(x){return x.n===n})+1,total=lb.length;
+    var ub=Object.values(S.b).filter(function(x){return x.u===n});
+    var resolved=ub.filter(function(x){return S.r[x.mid]&&!S.r[x.mid].voided});
+    var wins=resolved.filter(function(x){return x.tm===S.r[x.mid].w});
+    var wr=resolved.length?Math.round(wins.length/resolved.length*100):0;
+    var diff=b-ST;
+    var sorted2=[].concat(resolved).sort(function(a,b2){return b2.mid-a.mid});
+    var streak=0,sType='';
+    for(var i=0;i<sorted2.length;i++){var w=sorted2[i].tm===S.r[sorted2[i].mid].w;if(!sType)sType=w?'W':'L';if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break}
+    var momP=ub.filter(function(x){return x.mom});
+    var momH=momP.filter(function(x){return S.r[x.mid]&&momMatch(x.mom,S.r[x.mid].mom)});
+    var momAcc=momP.length?Math.round(momH.length/momP.length*100):0;
+    var bestBet=null,bestPay=0;
+    resolved.forEach(function(bt){
+      var rs=S.r[bt.mid],won2=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),m=gm(bt.mid);
+      if(won2){var py=Math.round(bt.am*(od-1));if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));else if(mh)py+=Math.round(ST*MOM_BONUS);if(py>bestPay){bestPay=py;bestBet={vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:py}}}
+    });
+    var ps=getPersonality(n);var style=ps?ps.label:'Rookie';
+    var tc2={};ub.forEach(function(bt){tc2[bt.tm]=(tc2[bt.tm]||0)+1});
+    var fav=Object.keys(tc2).sort(function(a,b2){return tc2[b2]-tc2[a]})[0]||'';
+    var C=T[fav]?T[fav].c:'#D4A24E';
+    var W=720,H=1280;
+    var cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    var ctx=cv.getContext('2d');
+
+    // Background
+    var bg=ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#06091A');bg.addColorStop(0.3,'#0D1B3E');bg.addColorStop(1,'#06091A');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+    // Top accent
+    var ag=ctx.createLinearGradient(0,0,W,0);
+    ag.addColorStop(0,'transparent');ag.addColorStop(0.3,C);ag.addColorStop(0.5,'#D4A24E');ag.addColorStop(0.7,C);ag.addColorStop(1,'transparent');
+    ctx.fillStyle=ag;ctx.fillRect(0,0,W,4);
+
+    // Border
+    ctx.strokeStyle='rgba(212,162,78,0.15)';ctx.lineWidth=2;
+    ctx.roundRect(8,8,W-16,H-16,24);ctx.stroke();
+
+    // Avatar
+    ctx.beginPath();
+    ctx.roundRect(48,56,96,96,20);ctx.closePath();
+    var avG=ctx.createLinearGradient(48,56,144,152);
+    avG.addColorStop(0,C);avG.addColorStop(1,C+'88');
+    ctx.fillStyle=avG;ctx.fill();
+    ctx.fillStyle='#000';ctx.font='bold 48px Oswald,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(n[0].toUpperCase(),96,104);
+
+    // Name
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillStyle='#fff';ctx.font='bold 40px Oswald,sans-serif';
+    ctx.fillText(n,168,60);
+
+    // Rank
+    ctx.textAlign='right';ctx.fillStyle=C;ctx.font='bold 48px Oswald,sans-serif';
+    ctx.fillText('#'+rank,W-48,50);
+
+    // Style tag
+    ctx.textAlign='left';ctx.font='bold 18px sans-serif';ctx.fillStyle=C;
+    ctx.fillText(style.toUpperCase(),168,112);
+
+    // Fav team
+    if(fav){ctx.fillStyle='#888';ctx.font='16px sans-serif';
+    ctx.fillText((T[fav]?T[fav].s:fav)+' fan',168+ctx.measureText(style.toUpperCase()).width+20,114)}
+
+    // Balance hero
+    ctx.textAlign='center';ctx.fillStyle='#fff';ctx.font='bold 80px Oswald,sans-serif';
+    ctx.fillText('\u20B9'+b.toLocaleString(),W/2,230);
+
+    // P&L
+    ctx.fillStyle=diff>=0?'#3FB08C':'#E05252';ctx.font='bold 24px Oswald,sans-serif';
+    ctx.fillText((diff>=0?'+':'-')+'\u20B9'+Math.abs(diff).toLocaleString(),W/2-40,330);
+    ctx.fillStyle='#888';ctx.font='16px sans-serif';
+    ctx.fillText('from \u20B910,000',W/2+60,334);
+
+    // Divider
+    var dg=ctx.createLinearGradient(60,0,W-60,0);
+    dg.addColorStop(0,'transparent');dg.addColorStop(0.5,C+'44');dg.addColorStop(1,'transparent');
+    ctx.fillStyle=dg;ctx.fillRect(60,380,W-120,2);
+
+    // Stats row
+    var sy=420,statW=W/4;
+    var stats=[{v:wr+'%',l:'WIN',c:wr>=60?'#3FB08C':wr>=40?'#D4A24E':'#E05252'},{v:wins.length+'W '+(resolved.length-wins.length)+'L',l:'RECORD',c:'#fff'},{v:momAcc+'%',l:'MOM',c:momAcc>0?'#D4A24E':'#888'},{v:streak>0?(streak+sType):'\u2014',l:'STREAK',c:sType==='W'?'#3FB08C':sType==='L'?'#E05252':'#888'}];
+    stats.forEach(function(s,i){
+      var cx2=statW*i+statW/2;
+      ctx.textAlign='center';
+      ctx.fillStyle=s.c;ctx.font='bold 28px Oswald,sans-serif';ctx.fillText(s.v,cx2,sy);
+      ctx.fillStyle='#888';ctx.font='12px sans-serif';ctx.fillText(s.l,cx2,sy+28);
+      if(i<3){ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(statW*(i+1),sy-20,1,60)}
+    });
+
+    // Best bet
+    if(bestBet){
+      ctx.fillStyle='rgba(212,162,78,0.06)';ctx.roundRect(48,500,W-96,90,14);ctx.fill();
+      ctx.strokeStyle='rgba(212,162,78,0.12)';ctx.lineWidth=1;ctx.roundRect(48,500,W-96,90,14);ctx.stroke();
+      ctx.textAlign='left';ctx.fillStyle='#D4A24E';ctx.font='bold 14px sans-serif';ctx.fillText('BEST BET',72,530);
+      ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='18px sans-serif';ctx.fillText(bestBet.vs,72,560);
+      ctx.textAlign='right';ctx.fillStyle='#3FB08C';ctx.font='bold 30px Oswald,sans-serif';ctx.fillText('+\u20B9'+bestBet.pay.toLocaleString(),W-72,558);
+    }
+
+    // Rank bar
+    var ry=bestBet?620:520;
+    ctx.fillStyle='#888';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText('RANK 1',48,ry);
+    ctx.textAlign='right';ctx.fillText('RANK '+total,W-48,ry);
+    ctx.fillStyle='rgba(255,255,255,0.04)';ctx.roundRect(48,ry+10,W-96,10,5);ctx.fill();
+    var pct=Math.max(4,Math.round((1-((rank-1)/(total-1||1)))*100));
+    var rg=ctx.createLinearGradient(48,0,48+(W-96)*pct/100,0);
+    rg.addColorStop(0,C);rg.addColorStop(1,'#D4A24E');
+    ctx.fillStyle=rg;ctx.roundRect(48,ry+10,Math.round((W-96)*pct/100),10,5);ctx.fill();
+    ctx.textAlign='center';ctx.fillStyle=C;ctx.font='bold 16px sans-serif';
+    ctx.fillText('#'+rank+' of '+total+' players',W/2,ry+42);
+
+    // Footer
+    var fy=H-80;
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,fy-10,W,90);
+    ctx.textAlign='left';ctx.fillStyle='#D4A24E';ctx.font='bold 20px Oswald,sans-serif';
+    ctx.fillText('\uD83C\uDFCF  THE DUGOUT',48,fy+20);
+    ctx.textAlign='right';ctx.fillStyle='#777';ctx.font='14px sans-serif';
+    ctx.fillText('IPL 2026',W-48,fy+20);
+
+    // Bottom accent
+    ctx.fillStyle=ag;ctx.fillRect(0,H-4,W,4);
+
+    downloadCanvas(cv);
+  }
+
+  if(typeof html2canvas==='function'){
+    html2canvas(el,{backgroundColor:'#06091A',scale:2,useCORS:true,logging:false}).then(function(canvas){downloadCanvas(canvas)}).catch(function(){tryCDN()});
+  }else{tryCDN()}
 }
 
 function generatePlayerCard(playerName){
