@@ -3818,7 +3818,7 @@ function rMG(){
 
   
 // ─── BALANCE AUDIT TRAIL (collapsible) ───
-  if(resolved.length>=1||S.adj.filter(a=>a.player===n).length>0){
+  if(resolved.length>=1||S.adj.filter(a=>a.player===n).length>0||weeklyPenalty(n)>0){
     // Build deterministic match-by-match audit
     const auditBets=[...resolved].sort((a,b2)=>a.mid-b2.mid);
     let auditBal=ST;
