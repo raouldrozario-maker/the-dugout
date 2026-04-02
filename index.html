@@ -6427,6 +6427,30 @@ function hasMention(msg,player){
 }
 
 // ═══ PLAYER CARD GENERATOR ═══
+function savePlayerCardPNG(playerName){
+  var el=document.getElementById('player-card-capture');
+  if(!el){toast('No card to save','err');return}
+  var fname='dugout-'+playerName.replace(/[^a-zA-Z0-9]/g,'-').toLowerCase()+'.png';
+  function doCapture(){
+    html2canvas(el,{backgroundColor:'#06091A',scale:2,useCORS:true,logging:false}).then(function(canvas){
+      var link=document.createElement('a');
+      link.download=fname;
+      link.href=canvas.toDataURL('image/png');
+      link.click();
+      toast('\uD83C\uDFB4 Card saved!');
+    }).catch(function(e){
+      console.error('html2canvas error:',e);
+      toast('Screenshot the card manually \uD83D\uDCF1','err');
+    });
+  }
+  if(typeof html2canvas==='function'){doCapture();return}
+  var script=document.createElement('script');
+  script.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+  script.onload=function(){doCapture()};
+  script.onerror=function(){toast('Could not load image library. Screenshot the card manually \uD83D\uDCF1','err')};
+  document.head.appendChild(script);
+}
+
 function generatePlayerCard(playerName){
   var n=playerName;if(!S.p[n])return;
   var b=bal(n),lb=LB(),rank=lb.findIndex(function(x){return x.n===n})+1,total=lb.length;
@@ -6481,7 +6505,7 @@ function generatePlayerCard(playerName){
   h+='<div style="font-family:Oswald,sans-serif;font-size:24px;font-weight:900;color:#fff;letter-spacing:0.5px;line-height:1.1">'+n+'</div>';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px">';
   h+='<span style="font-size:11px;font-weight:700;color:'+C+';background:'+C+'18;padding:2px 10px;border-radius:4px;letter-spacing:0.5px">'+style.toUpperCase()+'</span>';
-  if(fav)h+='<span style="font-size:10px;color:#555">'+(T[fav]?T[fav].s:fav)+' fan</span>';
+  if(fav)h+='<span style="font-size:10px;color:#888">'+(T[fav]?T[fav].s:fav)+' fan</span>';
   h+='</div></div></div></div>';
 
   // Main balance — the hero number
@@ -6489,7 +6513,7 @@ function generatePlayerCard(playerName){
   h+='<div style="font-family:Oswald,sans-serif;font-size:48px;font-weight:900;color:#fff;letter-spacing:1px;line-height:1">\u20B9'+b.toLocaleString()+'</div>';
   h+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px">';
   h+='<span style="font-size:14px;font-weight:800;color:'+diffC+';font-family:Oswald,sans-serif">'+(diff>=0?'+\u20B9':'-\u20B9')+Math.abs(diff).toLocaleString()+'</span>';
-  h+='<span style="font-size:10px;color:#555">from \u20B910,000</span>';
+  h+='<span style="font-size:10px;color:#888">from \u20B910,000</span>';
   h+='</div></div>';
 
   // Divider with team color
@@ -6506,7 +6530,7 @@ function generatePlayerCard(playerName){
   stats.forEach(function(s,i){
     h+='<div style="flex:1;text-align:center;'+(i<3?'border-right:1px solid rgba(255,255,255,0.06);':'')+'">';
     h+='<div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:900;color:'+s.c+'">'+s.v+'</div>';
-    h+='<div style="font-size:8px;color:#555;letter-spacing:1.5px;margin-top:3px">'+s.l+'</div>';
+    h+='<div style="font-size:8px;color:#888;letter-spacing:1.5px;margin-top:3px">'+s.l+'</div>';
     h+='</div>';
   });
   h+='</div>';
@@ -6521,7 +6545,7 @@ function generatePlayerCard(playerName){
 
   // League position bar
   h+='<div style="padding:0 24px 16px">';
-  h+='<div style="display:flex;justify-content:space-between;font-size:8px;color:#333;margin-bottom:4px"><span>RANK 1</span><span>RANK '+total+'</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;font-size:8px;color:#777;margin-bottom:4px"><span>RANK 1</span><span>RANK '+total+'</span></div>';
   h+='<div style="height:6px;background:rgba(255,255,255,0.04);border-radius:3px;position:relative;overflow:hidden">';
   var pct=Math.max(4,Math.round((1-((rank-1)/(total-1||1)))*100));
   h+='<div style="position:absolute;left:0;top:0;height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+C+',#D4A24E);border-radius:3px;box-shadow:0 0 8px '+C+'44"></div>';
@@ -6532,7 +6556,7 @@ function generatePlayerCard(playerName){
   // Footer
   h+='<div style="padding:10px 24px 14px;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between">';
   h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px">\uD83C\uDFCF</span><span style="font-family:Oswald,sans-serif;font-size:12px;font-weight:700;color:#D4A24E;letter-spacing:2px">THE DUGOUT</span></div>';
-  h+='<span style="font-size:9px;color:#333">IPL 2026 \u00b7 Week '+(Math.ceil((new Date()-new Date('2026-03-26'))/(7*864e5)))+'</span>';
+  h+='<span style="font-size:9px;color:#777">IPL 2026 \u00b7 Week '+(Math.ceil((new Date()-new Date('2026-03-26'))/(7*864e5)))+'</span>';
   h+='</div>';
 
   // Bottom holographic edge
@@ -6542,12 +6566,103 @@ function generatePlayerCard(playerName){
 
   // Buttons
   h+='<div style="display:flex;gap:8px;margin-top:14px;width:360px;max-width:100%">';
-  h+='<button onclick="var el=document.getElementById(\'player-card-capture\');if(!el)return;import(\'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js\').then(function(){html2canvas(el,{backgroundColor:null,scale:2}).then(function(c){var a=document.createElement(\'a\');a.download=\'dugout-'+n.replace(/[^a-zA-Z0-9]/g,'-').toLowerCase()+'.png\';a.href=c.toDataURL(\'image/png\');a.click();toast(\'\uD83C\uDFB4 Card saved!\')})}).catch(function(){toast(\'Screenshot it manually \uD83D\uDCF1\',\'err\')})" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#B8860B);border:0;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(212,162,78,0.3)">\u2B07\uFE0F Save PNG</button>';
+  h+='<button onclick="savePlayerCardPNG(\''+n.replace(/'/g,"\\'")+'\')" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#B8860B);border:0;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(212,162,78,0.3)">\u2B07\uFE0F Save PNG</button>';
   h+='<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="flex:0 0 auto;padding:12px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#666;font-weight:700;font-size:13px;cursor:pointer">\u2715</button>';
   h+='</div></div>'; // end wrapper
 
   o.innerHTML=h;
   document.body.appendChild(o);
+}
+
+// ═══ WEEKLY WRAP GENERATOR ═══
+function generateWeeklyWrap(){
+  var now=new Date();
+  var weekEnd=new Date(now);
+  var dayOfWeek=weekEnd.getDay();
+  var daysSinceTue=(dayOfWeek+5)%7;
+  if(daysSinceTue===0&&weekEnd.getHours()<23)daysSinceTue=7;
+  weekEnd.setDate(weekEnd.getDate()-daysSinceTue);
+  weekEnd.setHours(23,59,59,999);
+  var weekStart=new Date(weekEnd);
+  weekStart.setDate(weekStart.getDate()-6);
+  weekStart.setHours(0,0,0,0);
+  if(now>weekEnd){weekStart=new Date(weekEnd);weekStart.setDate(weekStart.getDate()+1);weekStart.setHours(0,0,0,0);weekEnd=new Date(now)}
+  var wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+  var weLabel=weekEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+  var firstWeek=new Date('2026-03-26T00:00:00+05:30');
+  var weekNum=Math.ceil((weekStart-firstWeek)/(7*86400000))+1;
+  var weekMatches=gms().filter(function(m){
+    if(!S.r[m.id]||S.r[m.id].voided)return false;
+    var md=new Date(m.d+'T00:00:00+05:30');
+    return md>=weekStart&&md<=weekEnd;
+  }).sort(function(a,b){return a.id-b.id});
+  if(weekMatches.length===0){toast('No resolved matches this week','err');return}
+  var players=Object.keys(S.p);var lb=LB();
+  var weekPnL={};
+  players.forEach(function(n){weekPnL[n]={wins:0,losses:0,saves:0,jackpots:0,pnl:0,bets:0,momHits:0,momPicks:0,wagered:0}});
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];
+    Object.values(S.b).filter(function(bt){return bt.mid===m.id}).forEach(function(bt){
+      var n=bt.u;if(!weekPnL[n])return;
+      weekPnL[n].bets++;weekPnL[n].wagered+=bt.am;
+      var won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
+      if(bt.mom)weekPnL[n].momPicks++;
+      if(mh)weekPnL[n].momHits++;
+      if(won){var pay=Math.round(bt.am*(od-1));if(jp){pay+=Math.round(bt.am*(od-1));weekPnL[n].jackpots++}else if(mh){pay+=Math.round(ST*MOM_BONUS)}weekPnL[n].pnl+=pay;weekPnL[n].wins++}
+      else{if(mh){weekPnL[n].saves++}else{weekPnL[n].pnl-=bt.am;weekPnL[n].losses++}}
+    });
+  });
+  var sorted=players.map(function(n){return{n:n,d:weekPnL[n]}}).filter(function(x){return x.d.bets>0}).sort(function(a,b){return b.d.pnl-a.d.pnl});
+  var hero=sorted.length?sorted[0]:null;
+  var villain=sorted.length?sorted[sorted.length-1]:null;
+  var bigWin=null;
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];
+    Object.values(S.b).filter(function(bt){return bt.mid===m.id}).forEach(function(bt){
+      var won=bt.tm===rs.w;if(!won)return;
+      var mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
+      var pay=Math.round(bt.am*(od-1));if(jp)pay+=Math.round(bt.am*(od-1));else if(mh)pay+=Math.round(ST*MOM_BONUS);
+      if(!bigWin||pay>bigWin.pay){bigWin={n:bt.u,team:T[bt.tm]?T[bt.tm].s:bt.tm,vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:pay,am:bt.am,jp:jp}}
+    });
+  });
+  var momOracle=players.map(function(n){return{n:n,hits:weekPnL[n].momHits,picks:weekPnL[n].momPicks}}).filter(function(x){return x.picks>=2}).sort(function(a,b){return b.hits-a.hits})[0];
+  var noBets=players.filter(function(n){return weekPnL[n].bets===0});
+  var totalWagered=0;sorted.forEach(function(x){totalWagered+=x.d.wagered});
+  var msg='';
+  msg+='\uD83C\uDFCF *THE DUGOUT \u2014 Week '+weekNum+' Wrap*\n';
+  msg+='\uD83D\uDCC5 '+wsLabel+' \u2013 '+weLabel+'\n';
+  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n';
+  msg+='\uD83C\uDFC6 *LEADERBOARD*\n';
+  lb.slice(0,5).forEach(function(p,i){
+    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4\uFE0F\u20E3','5\uFE0F\u20E3'];
+    var wd=weekPnL[p.n];var wkDelta=wd?wd.pnl:0;
+    msg+=medals[i]+' *'+p.n+'* \u2014 \u20B9'+p.b.toLocaleString()+(wkDelta!==0?' ('+(wkDelta>0?'+':'')+'\u20B9'+wkDelta.toLocaleString()+' this week)':'')+'\n';
+  });
+  msg+='\n';
+  if(hero&&hero.d.pnl>0){msg+='\uD83D\uDD25 *PLAYER OF THE WEEK*\n\uD83C\uDF1F '+hero.n+' \u2014 '+hero.d.wins+'W/'+hero.d.losses+'L'+(hero.d.jackpots?' (+'+hero.d.jackpots+' Jackpot\uD83D\uDD25)':'')+(hero.d.saves?' (+'+hero.d.saves+' Save\uD83D\uDEE1\uFE0F)':'')+', +\u20B9'+hero.d.pnl.toLocaleString()+'\n\n'}
+  if(villain&&villain.d.pnl<0){msg+='\uD83D\uDCC9 *TOUGH WEEK*\n\uD83D\uDE2C '+villain.n+' \u2014 '+villain.d.wins+'W/'+villain.d.losses+'L, \u20B9'+Math.abs(villain.d.pnl).toLocaleString()+' down\n\n'}
+  if(bigWin){msg+='\uD83D\uDCB0 *BIGGEST WIN*\n\uD83C\uDFAF '+bigWin.n+' put \u20B9'+bigWin.am.toLocaleString()+' on '+bigWin.team+(bigWin.jp?' (JACKPOT \uD83D\uDD25)':'')+' \u2192 +\u20B9'+bigWin.pay.toLocaleString()+'\n   _'+bigWin.vs+'_\n\n'}
+  if(momOracle&&momOracle.hits>0){msg+='\uD83D\uDD2E *MOM ORACLE*\n\uD83E\uDDD9 '+momOracle.n+' \u2014 '+momOracle.hits+'/'+momOracle.picks+' correct MoM picks\n\n'}
+  msg+='\uD83C\uDFCF *RESULTS*\n';
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];var bets=Object.values(S.b).filter(function(bt){return bt.mid===m.id});
+    var winners=bets.filter(function(bt){return bt.tm===rs.w}).length;
+    msg+='M'+m.id+' '+(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?')+' \u2192 '+(T[rs.w]?T[rs.w].s:rs.w)+' \u2714\uFE0F ('+winners+'W/'+Math.max(bets.length-winners,0)+'L)\n';
+  });
+  msg+='\n';
+  if(noBets.length){msg+='\u26A0\uFE0F *PENALTY WATCH*\n\uD83D\uDEA8 '+noBets.join(', ')+' \u2014 0 bets this week\n\u20B92,000 penalty if no bet before Tuesday\n\n'}
+  msg+='\uD83D\uDCCA *WEEK STATS*\n\u20B9'+totalWagered.toLocaleString()+' wagered \u00b7 '+weekMatches.length+' matches \u00b7 '+sorted.length+' active players\n\n';
+  var nextM=gms().filter(function(m){return!S.r[m.id]&&m.h!=='TBD'&&S.odds[m.id]}).sort(function(a,b){return a.id-b.id})[0];
+  if(nextM){msg+='\uD83D\uDC49 *NEXT UP*\n'+(T[nextM.h]?T[nextM.h].s:'?')+' vs '+(T[nextM.a]?T[nextM.a].s:'?')+' \u2014 '+fd(nextM.d)+' '+ft(nextM.t)+' IST\n'+(S.odds[nextM.id]?'\u00D7'+S.odds[nextM.id][nextM.h]+' / \u00D7'+S.odds[nextM.id][nextM.a]+'\n':'')+'\n'}
+  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\uD83C\uDFCF _The Dugout \u2014 IPL 2026_';
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(msg).then(function(){toast('Weekly wrap copied! Paste in WhatsApp \uD83D\uDCCB')}).catch(function(){fallbackCopy(msg)})}else{fallbackCopy(msg)}
+  function fallbackCopy(text){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copied to clipboard! \uD83D\uDCCB')}catch(e){toast('Could not copy','err')}ta.remove()}
+  var preview=document.createElement('div');
+  preview.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);padding:20px';
+  preview.onclick=function(e){if(e.target===preview)preview.remove()};
+  preview.innerHTML='<div style="background:#0D1B3E;border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#D4A24E;letter-spacing:2px">WEEKLY WRAP PREVIEW</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:20px;cursor:pointer">\u2715</button></div><pre style="white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.7;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0">'+msg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><div style="display:flex;gap:8px;margin-top:16px"><button onclick="navigator.clipboard.writeText(document.querySelector(\'pre\').textContent);toast(\'Copied!\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#F5A623);border:0;border-radius:10px;color:#000;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCCB Copy & Close</button><button onclick="var text=document.querySelector(\'pre\').textContent;window.open(\'https://wa.me/?text=\'+encodeURIComponent(text),\'_blank\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCF2 Share on WhatsApp</button></div></div>';
+  document.body.appendChild(preview);
+  adminLog('weekly_wrap','Week '+weekNum);
 }
 
 function postTrash(){
