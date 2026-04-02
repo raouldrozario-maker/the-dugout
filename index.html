@@ -812,7 +812,7 @@ function momDropdown(id,matchId,both=false){
       <button id="${id}-clear-btn" onclick="event.stopPropagation();momDDClear('${id}')" style="display:none;background:0;border:0;color:var(--t3);font-size:16px;cursor:pointer;padding:2px 4px 2px 10px;flex-shrink:0">\u2715</button>
     </div>
     <input type="hidden" id="${id}" value="">
-    <div id="${id}-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow:hidden;z-index:9999;box-shadow:0 8px 24px #000c;display:flex;flex-direction:column">
+    <div id="${id}-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow:hidden;z-index:9999;box-shadow:0 8px 24px #000c;flex-direction:column">
       <div style="padding:8px 10px;background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0">
         <input id="${id}-search" class="inp" placeholder="\uD83D\uDD0D Search player\u2026" autocomplete="off" style="width:100%;font-size:13px;padding:8px 12px;background:var(--inp);border:1px solid var(--bdr);border-radius:8px;box-sizing:border-box" oninput="momDDFilter('${id}')">
       </div>
