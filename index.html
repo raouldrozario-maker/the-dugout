@@ -3012,7 +3012,8 @@ function rRu(){
         🥊 <strong>Rival Card</strong> — your #1 rival and head-to-head record<br>
         ⚔️ <strong>Head-to-Head</strong> — your record against every other player (collapsible)<br>
         📜 <strong>Bet History</strong> — every bet grouped by time with color-coded outcomes (collapsible)<br>
-        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status
+        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status<br>
+        🎴 <strong>Player Card</strong> — download a shareable trading card with your rank, stats, streak, and play style (PNG, Instagram story format)
       </div>
     </div>
   </div>
@@ -5109,6 +5110,10 @@ function rA(){
   if(S.announce){_h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   _h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM IST"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
+  // ─── WEEKLY WRAP ───
+  _h+=`<div id="adm-wrap" class="card" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(212,162,78,0.04),transparent);border:1px solid rgba(212,162,78,0.12)"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">WEEKLY WRAP</span></div>
+  <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Auto-generate a WhatsApp-ready weekly summary — leaderboard, hero, villain, biggest bet, MoM oracle, match results, penalty watch.</div>
+  <button class="bp" style="width:100%;background:linear-gradient(135deg,#D4A24E,#F5A623)" onclick="generateWeeklyWrap()">📋 Generate Weekly Wrap</button></div>`;
   // Set Odds
   // ─── R1: POST-MATCH WHATSAPP SUMMARY ───
   const latestResolved=gms().filter(m=>S.r[m.id]&&!S.r[m.id].voided).sort((a,b)=>b.id-a.id)[0];
@@ -6554,6 +6559,199 @@ function generatePlayerCard(playerName){
   }catch(e){toast('Could not generate card','err')}
 }
 
+// ═══ WEEKLY WRAP GENERATOR ═══
+function generateWeeklyWrap(){
+  var now=new Date();
+  var weekEnd=new Date(now);
+  // Find the most recent Tuesday (week boundary: Wed-Tue)
+  var dayOfWeek=weekEnd.getDay();
+  var daysSinceTue=(dayOfWeek+5)%7;
+  if(daysSinceTue===0&&weekEnd.getHours()<23)daysSinceTue=7;
+  weekEnd.setDate(weekEnd.getDate()-daysSinceTue);
+  weekEnd.setHours(23,59,59,999);
+  var weekStart=new Date(weekEnd);
+  weekStart.setDate(weekStart.getDate()-6);
+  weekStart.setHours(0,0,0,0);
+
+  // Allow generating for current partial week too
+  if(now>weekEnd){weekStart=new Date(weekEnd);weekStart.setDate(weekStart.getDate()+1);weekStart.setHours(0,0,0,0);weekEnd=new Date(now)}
+
+  var wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+  var weLabel=weekEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
+
+  // Calculate week number
+  var firstWeek=new Date('2026-03-26T00:00:00+05:30');
+  var weekNum=Math.ceil((weekStart-firstWeek)/(7*86400000))+1;
+
+  // Matches resolved this week
+  var weekMatches=gms().filter(function(m){
+    if(!S.r[m.id]||S.r[m.id].voided)return false;
+    var md=new Date(m.d+'T00:00:00+05:30');
+    return md>=weekStart&&md<=weekEnd;
+  }).sort(function(a,b){return a.id-b.id});
+
+  if(weekMatches.length===0){toast('No resolved matches this week','err');return}
+
+  var players=Object.keys(S.p);
+  var lb=LB();
+
+  // Per-player week P&L
+  var weekPnL={};
+  players.forEach(function(n){weekPnL[n]={wins:0,losses:0,saves:0,jackpots:0,pnl:0,bets:0,momHits:0,momPicks:0,wagered:0}});
+
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];
+    var bets=Object.values(S.b).filter(function(bt){return bt.mid===m.id});
+    bets.forEach(function(bt){
+      var n=bt.u;if(!weekPnL[n])return;
+      weekPnL[n].bets++;
+      weekPnL[n].wagered+=bt.am;
+      var won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
+      if(bt.mom)weekPnL[n].momPicks++;
+      if(mh)weekPnL[n].momHits++;
+      if(won){
+        var pay=Math.round(bt.am*(od-1));
+        if(jp){pay+=Math.round(bt.am*(od-1));weekPnL[n].jackpots++}
+        else if(mh){pay+=Math.round(ST*MOM_BONUS)}
+        weekPnL[n].pnl+=pay;weekPnL[n].wins++;
+      }else{
+        if(mh){weekPnL[n].saves++}
+        else{weekPnL[n].pnl-=bt.am;weekPnL[n].losses++}
+      }
+    });
+  });
+
+  // Sort by P&L
+  var sorted=players.map(function(n){return{n:n,d:weekPnL[n]}}).filter(function(x){return x.d.bets>0}).sort(function(a,b){return b.d.pnl-a.d.pnl});
+
+  // Hero & Villain
+  var hero=sorted.length?sorted[0]:null;
+  var villain=sorted.length?sorted[sorted.length-1]:null;
+
+  // Biggest single bet win
+  var bigWin=null;
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];
+    Object.values(S.b).filter(function(bt){return bt.mid===m.id}).forEach(function(bt){
+      var won=bt.tm===rs.w;if(!won)return;
+      var mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
+      var pay=Math.round(bt.am*(od-1));
+      if(jp)pay+=Math.round(bt.am*(od-1));else if(mh)pay+=Math.round(ST*MOM_BONUS);
+      if(!bigWin||pay>bigWin.pay){bigWin={n:bt.u,team:T[bt.tm]?T[bt.tm].s:bt.tm,vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:pay,am:bt.am,jp:jp}}
+    });
+  });
+
+  // MoM Oracle
+  var momOracle=players.map(function(n){return{n:n,hits:weekPnL[n].momHits,picks:weekPnL[n].momPicks}}).filter(function(x){return x.picks>=2}).sort(function(a,b){return b.hits-a.hits})[0];
+
+  // Penalty watch — players with 0 bets this week
+  var noBets=players.filter(function(n){return weekPnL[n].bets===0});
+
+  // Total wagered this week
+  var totalWagered=0;
+  sorted.forEach(function(x){totalWagered+=x.d.wagered});
+
+  // Build message
+  var msg='';
+  msg+='\uD83C\uDFCF *THE DUGOUT \u2014 Week '+weekNum+' Wrap*\n';
+  msg+='\uD83D\uDCC5 '+wsLabel+' \u2013 '+weLabel+'\n';
+  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n';
+
+  // Leaderboard top 5
+  msg+='\uD83C\uDFC6 *LEADERBOARD*\n';
+  lb.slice(0,5).forEach(function(p,i){
+    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4\uFE0F\u20E3','5\uFE0F\u20E3'];
+    var wd=weekPnL[p.n];
+    var wkDelta=wd?wd.pnl:0;
+    msg+=medals[i]+' *'+p.n+'* \u2014 \u20B9'+p.b.toLocaleString()+(wkDelta!==0?' ('+(wkDelta>0?'+':'')+'\u20B9'+wkDelta.toLocaleString()+' this week)':'')+'\n';
+  });
+  msg+='\n';
+
+  // Hero
+  if(hero&&hero.d.pnl>0){
+    msg+='\uD83D\uDD25 *PLAYER OF THE WEEK*\n';
+    msg+='\uD83C\uDF1F '+hero.n+' \u2014 '+hero.d.wins+'W/'+hero.d.losses+'L';
+    if(hero.d.jackpots)msg+=' (+'+hero.d.jackpots+' Jackpot\uD83D\uDD25)';
+    if(hero.d.saves)msg+=' (+'+hero.d.saves+' Save\uD83D\uDEE1\uFE0F)';
+    msg+=', +\u20B9'+hero.d.pnl.toLocaleString()+'\n\n';
+  }
+
+  // Villain
+  if(villain&&villain.d.pnl<0){
+    msg+='\uD83D\uDCC9 *TOUGH WEEK*\n';
+    msg+='\uD83D\uDE2C '+villain.n+' \u2014 '+villain.d.wins+'W/'+villain.d.losses+'L, \u20B9'+Math.abs(villain.d.pnl).toLocaleString()+' down\n\n';
+  }
+
+  // Biggest bet
+  if(bigWin){
+    msg+='\uD83D\uDCB0 *BIGGEST WIN*\n';
+    msg+='\uD83C\uDFAF '+bigWin.n+' put \u20B9'+bigWin.am.toLocaleString()+' on '+bigWin.team+(bigWin.jp?' (JACKPOT \uD83D\uDD25)':'')+' \u2192 +\u20B9'+bigWin.pay.toLocaleString()+'\n';
+    msg+='   _'+bigWin.vs+'_\n\n';
+  }
+
+  // MoM Oracle
+  if(momOracle&&momOracle.hits>0){
+    msg+='\uD83D\uDD2E *MOM ORACLE*\n';
+    msg+='\uD83E\uDDD9 '+momOracle.n+' \u2014 '+momOracle.hits+'/'+momOracle.picks+' correct MoM picks\n\n';
+  }
+
+  // Match results
+  msg+='\uD83C\uDFCF *RESULTS*\n';
+  weekMatches.forEach(function(m){
+    var rs=S.r[m.id];
+    var bets=Object.values(S.b).filter(function(bt){return bt.mid===m.id});
+    var winners=bets.filter(function(bt){return bt.tm===rs.w}).length;
+    var wTeam=T[rs.w]?T[rs.w].s:rs.w;
+    msg+='M'+m.id+' '+(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?')+' \u2192 '+wTeam+' \u2714\uFE0F ('+winners+'W/'+Math.max(bets.length-winners,0)+'L)\n';
+  });
+  msg+='\n';
+
+  // Penalty watch
+  if(noBets.length){
+    msg+='\u26A0\uFE0F *PENALTY WATCH*\n';
+    msg+='\uD83D\uDEA8 '+noBets.join(', ')+' \u2014 0 bets this week\n';
+    msg+='\u20B92,000 penalty if no bet before Tuesday\n\n';
+  }
+
+  // Stats
+  msg+='\uD83D\uDCCA *WEEK STATS*\n';
+  msg+='\u20B9'+totalWagered.toLocaleString()+' wagered \u00b7 '+weekMatches.length+' matches \u00b7 '+sorted.length+' active players\n\n';
+
+  // Teaser — next match
+  var nextM=gms().filter(function(m){return!S.r[m.id]&&m.h!=='TBD'&&S.odds[m.id]}).sort(function(a,b){return a.id-b.id})[0];
+  if(nextM){
+    msg+='\uD83D\uDC49 *NEXT UP*\n';
+    msg+=(T[nextM.h]?T[nextM.h].s:'?')+' vs '+(T[nextM.a]?T[nextM.a].s:'?')+' \u2014 '+fd(nextM.d)+' '+ft(nextM.t)+' IST\n';
+    if(S.odds[nextM.id]){
+      msg+='\u00D7'+S.odds[nextM.id][nextM.h]+' / \u00D7'+S.odds[nextM.id][nextM.a]+'\n';
+    }
+    msg+='\n';
+  }
+
+  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
+  msg+='\uD83C\uDFCF _The Dugout \u2014 IPL 2026_';
+
+  // Copy to clipboard
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(msg).then(function(){toast('Weekly wrap copied! Paste in WhatsApp \uD83D\uDCCB')}).catch(function(){fallbackCopy(msg)});
+  }else{fallbackCopy(msg)}
+
+  function fallbackCopy(text){
+    var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('Copied to clipboard! \uD83D\uDCCB')}catch(e){toast('Could not copy','err')}
+    ta.remove();
+  }
+
+  // Also show preview
+  var preview=document.createElement('div');
+  preview.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);padding:20px';
+  preview.onclick=function(e){if(e.target===preview)preview.remove()};
+  preview.innerHTML='<div style="background:#0D1B3E;border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#D4A24E;letter-spacing:2px">WEEKLY WRAP PREVIEW</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:20px;cursor:pointer">\u2715</button></div><pre style="white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.7;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0">'+msg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><div style="display:flex;gap:8px;margin-top:16px"><button onclick="navigator.clipboard.writeText(document.querySelector(\'pre\').textContent.replace(/&lt;/g,\'<\').replace(/&gt;/g,\'>\'));toast(\'Copied!\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#F5A623);border:0;border-radius:10px;color:#000;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCCB Copy & Close</button><button onclick="var text=document.querySelector(\'pre\').textContent;window.open(\'https://wa.me/?text=\'+encodeURIComponent(text),\'_blank\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCF2 Share on WhatsApp</button></div></div>';
+  document.body.appendChild(preview);
+  adminLog('weekly_wrap','Week '+weekNum);
+}
+
 function postTrash(){
   const poster=me||(adm?'Admin':null);
   if(!poster){toast('Login first','err');return}
@@ -7155,6 +7353,7 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-result')">🎮 Declare Result</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📢 Comms & Summaries</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-broadcast')">📢 Broadcast</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="toggleAdmSheet();generateWeeklyWrap()">📋 Weekly Wrap</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-wa')">📲 WhatsApp Reminders</button>
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">📊 League Overview</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-dash')">📋 League Snapshot</button>
