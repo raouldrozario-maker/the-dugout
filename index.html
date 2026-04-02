@@ -195,6 +195,14 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 .live-dot{width:6px;height:6px;border-radius:50%;background:#10B981;position:absolute;top:6px;right:calc(50% - 16px);animation:pulse-live 1.5s ease-in-out infinite;display:none}
 .nb.has-live .live-dot{display:block}
 @keyframes confetti-fall{0%{transform:translateY(-100vh) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.7)}to{opacity:1;transform:scale(1)}}
+@keyframes revealWin{0%{box-shadow:0 0 0 0 rgba(58,175,135,0)}15%{box-shadow:0 0 20px rgba(58,175,135,0.4),inset 0 0 20px rgba(58,175,135,0.05)}50%{box-shadow:0 0 12px rgba(58,175,135,0.2)}100%{box-shadow:none}}
+@keyframes revealLoss{0%{box-shadow:0 0 0 0 rgba(196,69,58,0)}15%{box-shadow:0 0 16px rgba(196,69,58,0.35),inset 0 0 16px rgba(196,69,58,0.05)}50%{box-shadow:0 0 8px rgba(196,69,58,0.15)}100%{box-shadow:none}}
+@keyframes revealJackpot{0%{box-shadow:0 0 0 0 rgba(212,162,78,0)}10%{box-shadow:0 0 24px rgba(212,162,78,0.5),inset 0 0 24px rgba(212,162,78,0.06)}30%{box-shadow:0 0 32px rgba(212,162,78,0.3)}60%{box-shadow:0 0 16px rgba(212,162,78,0.15)}100%{box-shadow:none}}
+@keyframes revealSave{0%{box-shadow:0 0 0 0 rgba(212,162,78,0)}15%{box-shadow:0 0 14px rgba(212,162,78,0.3),inset 0 0 14px rgba(212,162,78,0.04)}50%{box-shadow:0 0 6px rgba(212,162,78,0.12)}100%{box-shadow:none}}
+.reveal-win{animation:revealWin 1.8s ease-out}.reveal-loss{animation:revealLoss 1.2s ease-out}.reveal-jackpot{animation:revealJackpot 2.2s ease-out}.reveal-save{animation:revealSave 1.5s ease-out}
 @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-wrap{background:linear-gradient(135deg,#0C1220,#111B2E);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:16px;position:relative}
 .ticker-label{position:absolute;left:0;top:0;bottom:0;z-index:2;display:flex;align-items:center;padding:0 12px;background:linear-gradient(90deg,#0C1220 70%,transparent);font-family:var(--ff);font-size:11px;font-weight:700;color:var(--acc);letter-spacing:1.5px;white-space:nowrap;pointer-events:none}
@@ -1989,8 +1997,15 @@ function rM(){
     const teamClr=T[my.tm]?.c||'var(--t1)';
     const uid='mb-'+m.id;
 
+    // Check if this result is "new" (unseen) — flash animation
+    const resTs=rs.ts?new Date(rs.ts).getTime():0;
+    const seenKey='seen-'+m.id;
+    const isFresh=resTs&&(Date.now()-resTs<1800000)&&typeof sessionStorage!=='undefined'&&!sessionStorage.getItem(seenKey);
+    if(isFresh)try{sessionStorage.setItem(seenKey,'1')}catch(e){}
+    const flashClass=isFresh?(delta>0?(jp?'reveal-jackpot':'reveal-win'):delta<0?'reveal-loss':'reveal-save'):'';
+
     // Slim row (always visible)
-    _h+=`<div style="margin-bottom:6px">
+    _h+=`<div style="margin-bottom:6px" ${flashClass?'class="'+flashClass+'"':''}>
       <div onclick="var el=$('${uid}');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.mb-chev').textContent=v?'▾':'▸'}" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--card);border:1px solid ${delta>0?'rgba(58,175,135,0.12)':delta<0?'rgba(196,69,58,0.12)':'var(--bdr)'};border-radius:14px;cursor:pointer;transition:background .15s">
         <div style="font-size:16px;flex-shrink:0">${icon}</div>
         <div style="flex:1;min-width:0">
@@ -2576,13 +2591,30 @@ function _continueSub(id,f,m,od,am,mom,bk,isEditing,b,ai){
     if(am>betBal(me)){toast('Balance changed — not enough!','err');return}
     S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
     sv(['b']);delete bfs[id];
-    // Delight moment: flash the card green before re-render
+    // Delight moment: premium confirmation overlay
     (function(){
-      var card=document.querySelector('.mc[data-mid="'+id+'"]');
-      if(card){card.style.animation='betSuccess .9s cubic-bezier(.2,.8,.2,1) forwards';card.style.borderLeftColor='var(--grn)'}
-      setTimeout(function(){confetti();},100);
+      var teamColor=T[f.tm]?.c||'var(--grn)';
+      var teamShort=T[f.tm]?.s||f.tm;
+      var potWin2=Math.round(am*(od-1));
+      var overlay=document.createElement('div');
+      overlay.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);animation:fadeIn .2s ease-out';
+      var inner='<div style="text-align:center;animation:scaleIn .3s cubic-bezier(.2,1,.3,1)">';
+      inner+='<div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,'+teamColor+','+teamColor+'CC);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 0 40px '+teamColor+'44;font-size:32px">✓</div>';
+      inner+='<div style="font-family:var(--ff);font-size:24px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:8px">BET LOCKED</div>';
+      inner+='<div style="font-size:16px;color:var(--t2);margin-bottom:16px">₹'+am.toLocaleString()+' on <span style="color:'+teamColor+';font-weight:800">'+teamShort+'</span> @ ×'+od+'</div>';
+      inner+='<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">';
+      inner+='<div style="background:rgba(58,175,135,0.1);border:1px solid rgba(58,175,135,0.2);border-radius:12px;padding:10px 18px"><div style="font-size:11px;color:var(--t4)">Potential Win</div><div style="font-size:20px;font-weight:900;color:var(--grn);font-family:var(--ff)">+₹'+potWin2.toLocaleString()+'</div></div>';
+      inner+='<div style="background:rgba(196,69,58,0.1);border:1px solid rgba(196,69,58,0.2);border-radius:12px;padding:10px 18px"><div style="font-size:11px;color:var(--t4)">At Risk</div><div style="font-size:20px;font-weight:900;color:var(--red);font-family:var(--ff)">₹'+am.toLocaleString()+'</div></div>';
+      inner+='</div>';
+      if(mom)inner+='<div style="margin-top:12px;font-size:13px;color:var(--yel)">🔮 MoM: '+mom+'</div>';
+      if(ai)inner+='<div style="margin-top:8px;font-size:18px;font-weight:900;color:var(--acc)">🔥 ALL IN!</div>';
+      inner+='</div>';
+      overlay.innerHTML=inner;
+      document.body.appendChild(overlay);
+      setTimeout(function(){confetti()},200);
+      setTimeout(function(){overlay.style.animation='fadeOut .3s ease-in forwards';setTimeout(function(){overlay.remove()},300)},2200);
     })();
-    setTimeout(function(){toast('Locked in! ₹'+am.toLocaleString()+' on '+(T[f.tm]?.s||f.tm)+' 🔒');rM();},220);
+    setTimeout(function(){toast('Locked in! ₹'+am.toLocaleString()+' on '+(T[f.tm]?.s||f.tm)+' 🔒');rM();},2400);
   });
 }
 
@@ -5416,6 +5448,91 @@ function rA(){
 
   // Broadcast Announcement
   // Manual Balance Adjustment
+  // ── HOUSE P&L (Sportsbook View) ──
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">🏦</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--acc);letter-spacing:3px;text-transform:uppercase">HOUSE P&L</span><div style="flex:1;height:1px;background:rgba(212,162,78,0.2);margin-left:8px"></div></div>`;
+  (function(){
+    var resolvedBets=Object.values(S.b).filter(function(bt){return S.r[bt.mid]&&!S.r[bt.mid].voided});
+    var allBets=Object.values(S.b);
+    var totalWagered=allBets.reduce(function(s,bt){return s+bt.am},0);
+    var resolvedWagered=resolvedBets.reduce(function(s,bt){return s+bt.am},0);
+    var houseIn=0,houseOut=0,jpCount=0,momBonusCount=0,momSaveCount=0,rechargeCount=0;
+    // Match-by-match house P&L
+    var matchPnL={};
+    resolvedBets.forEach(function(bt){
+      var rs=S.r[bt.mid],won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
+      var mid=bt.mid;if(!matchPnL[mid])matchPnL[mid]={in:0,out:0,bets:0};
+      matchPnL[mid].bets++;
+      if(won){
+        var payout=Math.round(bt.am*(od-1));
+        if(jp){payout+=Math.round(bt.am*(od-1));jpCount++}
+        else if(mh){payout+=Math.round(ST*MOM_BONUS);momBonusCount++}
+        houseOut+=payout;matchPnL[mid].out+=payout;
+      }else{
+        if(mh){momSaveCount++}
+        else{houseIn+=bt.am;matchPnL[mid].in+=bt.am}
+      }
+    });
+    // Recharges — count how many players got topped up
+    Object.keys(S.p).forEach(function(n){var r=rawBal(n);if(r<MINB){rechargeCount++;houseOut+=(MINB-r)}});
+    // Penalties are house income
+    var totalPenalties=0;
+    Object.keys(S.p).forEach(function(n){totalPenalties+=weeklyPenalty(n)});
+    houseIn+=totalPenalties;
+    var net=houseIn-houseOut;
+    var netClr=net>=0?'var(--grn)':'var(--red)';
+    // Sort matches by P&L impact
+    var matchList=Object.keys(matchPnL).map(function(mid){var m=gm(parseInt(mid));return{mid:parseInt(mid),label:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),net:matchPnL[mid].in-matchPnL[mid].out,bets:matchPnL[mid].bets,houseIn:matchPnL[mid].in,houseOut:matchPnL[mid].out}}).sort(function(a,b){return b.net-a.net});
+
+    _h+=`<div id="adm-housepnl" style="background:linear-gradient(165deg,#0D1B36,#0F1D30);border:1px solid rgba(212,162,78,0.15);border-radius:18px;padding:20px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">🏦</span>
+        <div><div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:2px">HOUSE P&L</div>
+        <div style="font-size:10px;color:var(--t4)">If this were a real sportsbook</div></div></div>
+        <div style="text-align:center;background:${net>=0?'rgba(58,175,135,0.08)':'rgba(196,69,58,0.08)'};border:1px solid ${net>=0?'rgba(58,175,135,0.2)':'rgba(196,69,58,0.2)'};border-radius:12px;padding:10px 18px">
+          <div style="font-size:9px;color:var(--t4);letter-spacing:1px;margin-bottom:2px">NET POSITION</div>
+          <div style="font-family:var(--ff);font-size:24px;font-weight:900;color:${netClr}">${net>=0?'+':''}₹${Math.abs(net).toLocaleString()}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
+        <div style="background:rgba(58,175,135,0.06);border:1px solid rgba(58,175,135,0.12);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--t4);letter-spacing:.5px;margin-bottom:4px">HOUSE COLLECTS</div>
+          <div style="font-family:var(--ff);font-size:18px;font-weight:900;color:var(--grn)">₹${houseIn.toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--t4);margin-top:2px">Player losses + penalties</div>
+        </div>
+        <div style="background:rgba(196,69,58,0.06);border:1px solid rgba(196,69,58,0.12);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--t4);letter-spacing:.5px;margin-bottom:4px">HOUSE PAYS OUT</div>
+          <div style="font-family:var(--ff);font-size:18px;font-weight:900;color:var(--red)">₹${houseOut.toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--t4);margin-top:2px">Wins + bonuses + recharges</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-bottom:16px">
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--t1)">₹${totalWagered.toLocaleString()}</div><div style="font-size:9px;color:var(--t4)">Total Wagered</div></div>
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--t1)">${resolvedBets.length}</div><div style="font-size:9px;color:var(--t4)">Resolved Bets</div></div>
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--yel)">${jpCount}</div><div style="font-size:9px;color:var(--t4)">Jackpots</div></div>
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--grn)">${momSaveCount}</div><div style="font-size:9px;color:var(--t4)">MoM Saves</div></div>
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--acc)">${rechargeCount}</div><div style="font-size:9px;color:var(--t4)">Recharges</div></div>
+        <div style="background:var(--inp);border-radius:8px;padding:8px;text-align:center"><div style="font-family:var(--ff);font-size:16px;font-weight:900;color:var(--t2)">₹${totalPenalties.toLocaleString()}</div><div style="font-size:9px;color:var(--t4)">Penalties</div></div>
+      </div>`;
+    // Match breakdown — collapsible
+    if(matchList.length>0){
+      _h+=`<div onclick="var el=$('house-matches');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.hm-chev').textContent=v?'\\u25be':'\\u25b8'}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:700;color:var(--t3)">Match-by-Match Breakdown (${matchList.length})</span>
+        <span class="hm-chev" style="color:var(--acc);font-size:12px">\\u25b8</span>
+      </div>
+      <div id="house-matches" style="display:none">`;
+      matchList.forEach(function(mm){
+        var mClr=mm.net>=0?'var(--grn)':'var(--red)';
+        _h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--bdr)">
+          <div><div style="font-weight:700;font-size:12px;color:var(--t1)">#${mm.mid} ${mm.label}</div>
+          <div style="font-size:10px;color:var(--t4)">${mm.bets} bets · In ₹${mm.houseIn.toLocaleString()} · Out ₹${mm.houseOut.toLocaleString()}</div></div>
+          <div style="font-family:var(--ff);font-size:14px;font-weight:900;color:${mClr}">${mm.net>=0?'+':''}₹${Math.abs(mm.net).toLocaleString()}</div>
+        </div>`;
+      });
+      _h+=`</div>`;
+    }
+    _h+=`</div>`;
+  })();
+
   // ── DANGER ZONE ──
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚠️</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--red);letter-spacing:3px;text-transform:uppercase">DANGER ZONE</span><div style="flex:1;height:1px;background:rgba(196,69,58,0.2);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25;padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.dz-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><span class="dz-chev" style="color:var(--red);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="display:flex;flex-direction:column;gap:10px">
@@ -6917,6 +7034,7 @@ window.addEventListener('resize',moveSlider);
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="toggleAdmSheet();downloadBackup()">💾 Download Backup</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="toggleAdmSheet();openExportModal()">📤 Export Report</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="admSheetJump('adm-housepnl')">🏦 House P&L</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-danger')">🗑️ Danger Zone</button>
   </div>
 </div>
