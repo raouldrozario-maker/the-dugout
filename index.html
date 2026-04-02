@@ -6429,327 +6429,125 @@ function hasMention(msg,player){
 // ═══ PLAYER CARD GENERATOR ═══
 function generatePlayerCard(playerName){
   var n=playerName;if(!S.p[n])return;
-  var b=bal(n),lb=LB(),rank=lb.findIndex(function(x){return x.n===n})+1;
+  var b=bal(n),lb=LB(),rank=lb.findIndex(function(x){return x.n===n})+1,total=lb.length;
   var ub=Object.values(S.b).filter(function(x){return x.u===n});
   var resolved=ub.filter(function(x){return S.r[x.mid]&&!S.r[x.mid].voided});
   var wins=resolved.filter(function(x){return x.tm===S.r[x.mid].w});
   var wr=resolved.length?Math.round(wins.length/resolved.length*100):0;
   var diff=b-ST;
-  // Streak
   var sorted=[].concat(resolved).sort(function(a,b2){return b2.mid-a.mid});
   var streak=0,sType='';
   for(var i=0;i<sorted.length;i++){var w=sorted[i].tm===S.r[sorted[i].mid].w;if(!sType)sType=w?'W':'L';if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break}
-  // MoM accuracy
   var momP=ub.filter(function(x){return x.mom});
   var momH=momP.filter(function(x){return S.r[x.mid]&&momMatch(x.mom,S.r[x.mid].mom)});
   var momAcc=momP.length?Math.round(momH.length/momP.length*100):0;
-  // Best bet
   var bestBet=null,bestPay=0;
   resolved.forEach(function(bt){
     var rs=S.r[bt.mid],won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),m=gm(bt.mid);
     if(won){var py=Math.round(bt.am*(od-1));if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));else if(mh)py+=Math.round(ST*MOM_BONUS);if(py>bestPay){bestPay=py;bestBet={team:T[bt.tm]?T[bt.tm].s:bt.tm,vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:py}}}
   });
-  // Play style
-  var ps=getPersonality(n);
-  var style=ps?ps.label:'Rookie';
-  // Rank medal
-  var medal=rank===1?'\uD83D\uDC51':rank===2?'\uD83E\uDD48':rank===3?'\uD83E\uDD49':'#'+rank;
-  // Team color — most backed team
-  var teamCounts={};ub.forEach(function(bt){teamCounts[bt.tm]=(teamCounts[bt.tm]||0)+1});
-  var favTeam=Object.keys(teamCounts).sort(function(a,b2){return teamCounts[b2]-teamCounts[a]})[0]||'';
-  var teamClr=T[favTeam]?T[favTeam].c:'#D4A24E';
+  var ps=getPersonality(n);var style=ps?ps.label:'Rookie';
+  var medal=rank===1?'\uD83D\uDC51':rank===2?'\uD83E\uDD48':rank===3?'\uD83E\uDD49':'';
+  var tc={};ub.forEach(function(bt){tc[bt.tm]=(tc[bt.tm]||0)+1});
+  var fav=Object.keys(tc).sort(function(a,b2){return tc[b2]-tc[a]})[0]||'';
+  var C=T[fav]?T[fav].c:'#D4A24E';var Ca=T[fav]?T[fav].a||T[fav].c:'#D4A24E';
+  var jpCount=resolved.filter(function(bt){var rs=S.r[bt.mid];return bt.tm===rs.w&&momMatch(bt.mom,rs.mom)&&bt.mt&&bt.mt!==bt.tm}).length;
+  var diffC=diff>=0?'#3FB08C':'#E05252';
+  var wrC=wr>=60?'#3FB08C':wr>=40?'#D4A24E':'#E05252';
+  var skC=sType==='W'?'#3FB08C':sType==='L'?'#E05252':'#555';
+  var skT=streak>0?(sType==='W'?'\uD83D\uDD25 ':'')+streak+sType:'\u2014';
+  var rk=medal||('#'+rank);
 
-  var card=document.createElement('canvas');
-  card.width=540;card.height=960;
-  var ctx=card.getContext('2d');
+  var o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);padding:16px';
+  o.onclick=function(e){if(e.target===o)o.remove()};
 
-  // Background — dark gradient
-  var grad=ctx.createLinearGradient(0,0,540,960);
-  grad.addColorStop(0,'#0A1628');grad.addColorStop(0.5,'#0D1B3E');grad.addColorStop(1,'#0A1222');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,540,960);
+  var h='<div style="display:flex;flex-direction:column;align-items:center">';
+  h+='<div id="player-card-capture" style="width:360px;max-width:100%;border-radius:20px;overflow:hidden;position:relative;background:#06091A;box-shadow:0 0 60px '+C+'22,0 30px 60px rgba(0,0,0,0.8)">';
 
-  // Border glow
-  ctx.strokeStyle='rgba(212,162,78,0.3)';ctx.lineWidth=2;
-  ctx.roundRect(12,12,516,936,20);ctx.stroke();
+  // Holographic top edge
+  h+='<div style="height:2px;background:linear-gradient(90deg,'+C+'00,'+C+',#D4A24E,'+C+','+C+'00)"></div>';
 
-  // Inner border
-  ctx.strokeStyle='rgba(212,162,78,0.08)';ctx.lineWidth=1;
-  ctx.roundRect(20,20,500,920,16);ctx.stroke();
+  // Hero section — large name focus
+  h+='<div style="position:relative;padding:28px 24px 20px;background:linear-gradient(180deg,'+C+'12 0%,transparent 100%)">';
 
-  // Top accent line
-  var acGrad=ctx.createLinearGradient(40,0,500,0);
-  acGrad.addColorStop(0,'transparent');acGrad.addColorStop(0.3,teamClr);acGrad.addColorStop(0.7,teamClr);acGrad.addColorStop(1,'transparent');
-  ctx.fillStyle=acGrad;ctx.fillRect(40,30,460,2);
+  // Rank badge — top right
+  h+='<div style="position:absolute;top:16px;right:20px;font-family:Oswald,sans-serif;font-size:28px;font-weight:900;color:'+C+';text-shadow:0 0 20px '+C+'44">'+rk+'</div>';
 
-  // Avatar circle
-  var cx=270,ay=140;
-  ctx.beginPath();ctx.arc(cx,ay,52,0,Math.PI*2);
-  var avGrad=ctx.createRadialGradient(cx,ay,20,cx,ay,52);
-  avGrad.addColorStop(0,teamClr);avGrad.addColorStop(1,teamClr+'88');
-  ctx.fillStyle=avGrad;ctx.fill();
-  ctx.strokeStyle=teamClr;ctx.lineWidth=3;ctx.stroke();
-  // Initial
-  ctx.fillStyle='#000';ctx.font='bold 36px Oswald,sans-serif';ctx.textAlign='center';
-  ctx.fillText(n[0].toUpperCase(),cx,ay+12);
+  // Avatar + name left-aligned for asymmetry
+  h+='<div style="display:flex;align-items:center;gap:16px">';
+  h+='<div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,'+C+','+C+'88);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:#000;font-family:Oswald,sans-serif;box-shadow:0 4px 20px '+C+'44;flex-shrink:0">'+n[0].toUpperCase()+'</div>';
+  h+='<div>';
+  h+='<div style="font-family:Oswald,sans-serif;font-size:24px;font-weight:900;color:#fff;letter-spacing:0.5px;line-height:1.1">'+n+'</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-top:6px">';
+  h+='<span style="font-size:11px;font-weight:700;color:'+C+';background:'+C+'18;padding:2px 10px;border-radius:4px;letter-spacing:0.5px">'+style.toUpperCase()+'</span>';
+  if(fav)h+='<span style="font-size:10px;color:#555">'+(T[fav]?T[fav].s:fav)+' fan</span>';
+  h+='</div></div></div></div>';
 
-  // Rank badge
-  ctx.font='28px sans-serif';ctx.fillText(medal,cx,ay+68);
+  // Main balance — the hero number
+  h+='<div style="padding:0 24px 20px;text-align:center">';
+  h+='<div style="font-family:Oswald,sans-serif;font-size:48px;font-weight:900;color:#fff;letter-spacing:1px;line-height:1">\u20B9'+b.toLocaleString()+'</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px">';
+  h+='<span style="font-size:14px;font-weight:800;color:'+diffC+';font-family:Oswald,sans-serif">'+(diff>=0?'+\u20B9':'-\u20B9')+Math.abs(diff).toLocaleString()+'</span>';
+  h+='<span style="font-size:10px;color:#555">from \u20B910,000</span>';
+  h+='</div></div>';
 
-  // Player name
-  ctx.fillStyle='#FFFFFF';ctx.font='bold 28px Oswald,sans-serif';
-  ctx.fillText(n,cx,ay+110);
+  // Divider with team color
+  h+='<div style="margin:0 24px;height:1px;background:linear-gradient(90deg,transparent,'+C+'33,transparent)"></div>';
 
-  // Play style tag
-  ctx.font='13px sans-serif';
-  var tagW=ctx.measureText(style).width+24;
-  ctx.fillStyle=teamClr+'22';
-  ctx.roundRect(cx-tagW/2,ay+120,tagW,26,8);ctx.fill();
-  ctx.fillStyle=teamClr;ctx.font='bold 12px sans-serif';
-  ctx.fillText(style,cx,ay+137);
+  // Stats strip — horizontal, compact, premium
+  h+='<div style="display:flex;padding:16px 24px;gap:0">';
+  var stats=[
+    {v:wr+'%',l:'WIN',c:wrC},
+    {v:wins.length+'W '+( resolved.length-wins.length)+'L',l:'RECORD',c:'#fff'},
+    {v:momAcc+'%',l:'MOM',c:momAcc>0?'#D4A24E':'#444'},
+    {v:skT,l:'STREAK',c:skC}
+  ];
+  stats.forEach(function(s,i){
+    h+='<div style="flex:1;text-align:center;'+(i<3?'border-right:1px solid rgba(255,255,255,0.06);':'')+'">';
+    h+='<div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:900;color:'+s.c+'">'+s.v+'</div>';
+    h+='<div style="font-size:8px;color:#555;letter-spacing:1.5px;margin-top:3px">'+s.l+'</div>';
+    h+='</div>';
+  });
+  h+='</div>';
 
-  // Stats grid — 2 columns
-  var sy=330;
-  function statBox(x,y,val,label,clr){
-    ctx.fillStyle='rgba(255,255,255,0.03)';
-    ctx.roundRect(x,y,220,72,12);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
-    ctx.roundRect(x,y,220,72,12);ctx.stroke();
-    ctx.fillStyle=clr||'#FFFFFF';ctx.font='bold 26px Oswald,sans-serif';ctx.textAlign='center';
-    ctx.fillText(val,x+110,y+32);
-    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px sans-serif';
-    ctx.fillText(label,x+110,y+54);
-  }
-  statBox(40,sy,'\u20B9'+b.toLocaleString(),'BALANCE',b>=ST?'#3AB087':'#C4453A');
-  statBox(280,sy,(diff>=0?'+':'')+'\u20B9'+Math.abs(diff).toLocaleString(),'P&L',diff>=0?'#3AB087':'#C4453A');
-  statBox(40,sy+88,wr+'%','WIN RATE',wr>=60?'#3AB087':wr>=40?'#D4A24E':'#C4453A');
-  statBox(280,sy+88,wins.length+'W / '+(resolved.length-wins.length)+'L','RECORD','#FFFFFF');
-  statBox(40,sy+176,momAcc+'%','MOM ACCURACY',momAcc>=30?'#D4A24E':'rgba(255,255,255,0.5)');
-  statBox(280,sy+176,(streak>0?(sType==='W'?'\uD83D\uDD25 ':'\uD83D\uDCC9 ')+streak+sType:'—'),'STREAK',sType==='W'?'#3AB087':'#C4453A');
-
-  // Best bet
+  // Best bet — gold accent bar
   if(bestBet){
-    var by=sy+280;
-    ctx.fillStyle='rgba(212,162,78,0.06)';ctx.roundRect(40,by,460,60,10);ctx.fill();
-    ctx.strokeStyle='rgba(212,162,78,0.15)';ctx.lineWidth=1;ctx.roundRect(40,by,460,60,10);ctx.stroke();
-    ctx.fillStyle='#D4A24E';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
-    ctx.fillText('BEST BET',270,by+20);
-    ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='14px sans-serif';
-    ctx.fillText(bestBet.vs+' \u00b7 +\u20B9'+bestBet.pay.toLocaleString(),270,by+44);
+    h+='<div style="margin:0 24px 16px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.12);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">';
+    h+='<div><div style="font-size:8px;color:#D4A24E;font-weight:800;letter-spacing:1.5px">BEST BET</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">'+bestBet.vs+'</div></div>';
+    h+='<div style="font-family:Oswald,sans-serif;font-size:18px;font-weight:900;color:#3FB08C">+\u20B9'+bestBet.pay.toLocaleString()+'</div>';
+    h+='</div>';
   }
 
-  // Bottom branding
-  ctx.fillStyle='rgba(212,162,78,0.12)';ctx.fillRect(40,880,460,1);
-  var brandGrad=ctx.createLinearGradient(0,0,540,0);
-  brandGrad.addColorStop(0,'#D4A24E');brandGrad.addColorStop(1,'#F5A623');
-  ctx.fillStyle=brandGrad;ctx.font='bold 16px Oswald,sans-serif';ctx.textAlign='center';
-  ctx.fillText('THE DUGOUT',270,910);
-  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px sans-serif';
-  ctx.fillText('IPL 2026 \u00b7 Betting League',270,930);
+  // League position bar
+  h+='<div style="padding:0 24px 16px">';
+  h+='<div style="display:flex;justify-content:space-between;font-size:8px;color:#333;margin-bottom:4px"><span>RANK 1</span><span>RANK '+total+'</span></div>';
+  h+='<div style="height:6px;background:rgba(255,255,255,0.04);border-radius:3px;position:relative;overflow:hidden">';
+  var pct=Math.max(4,Math.round((1-((rank-1)/(total-1||1)))*100));
+  h+='<div style="position:absolute;left:0;top:0;height:100%;width:'+pct+'%;background:linear-gradient(90deg,'+C+',#D4A24E);border-radius:3px;box-shadow:0 0 8px '+C+'44"></div>';
+  h+='</div>';
+  h+='<div style="text-align:center;margin-top:4px;font-size:10px;color:'+C+';font-weight:700">#'+rank+' of '+total+' players</div>';
+  h+='</div>';
 
-  // Bottom accent line
-  ctx.fillStyle=acGrad;ctx.fillRect(40,942,460,2);
+  // Footer
+  h+='<div style="padding:10px 24px 14px;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:space-between">';
+  h+='<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px">\uD83C\uDFCF</span><span style="font-family:Oswald,sans-serif;font-size:12px;font-weight:700;color:#D4A24E;letter-spacing:2px">THE DUGOUT</span></div>';
+  h+='<span style="font-size:9px;color:#333">IPL 2026 \u00b7 Week '+(Math.ceil((new Date()-new Date('2026-03-26'))/(7*864e5)))+'</span>';
+  h+='</div>';
 
-  // Download
-  try{
-    var link=document.createElement('a');
-    link.download='dugout-'+n.replace(/\\s+/g,'-').toLowerCase()+'.png';
-    link.href=card.toDataURL('image/png');
-    link.click();
-    toast('Card downloaded! \uD83C\uDFB4');
-  }catch(e){toast('Could not generate card','err')}
-}
+  // Bottom holographic edge
+  h+='<div style="height:2px;background:linear-gradient(90deg,'+C+'00,'+C+',#D4A24E,'+C+','+C+'00)"></div>';
 
-// ═══ WEEKLY WRAP GENERATOR ═══
-function generateWeeklyWrap(){
-  var now=new Date();
-  var weekEnd=new Date(now);
-  // Find the most recent Tuesday (week boundary: Wed-Tue)
-  var dayOfWeek=weekEnd.getDay();
-  var daysSinceTue=(dayOfWeek+5)%7;
-  if(daysSinceTue===0&&weekEnd.getHours()<23)daysSinceTue=7;
-  weekEnd.setDate(weekEnd.getDate()-daysSinceTue);
-  weekEnd.setHours(23,59,59,999);
-  var weekStart=new Date(weekEnd);
-  weekStart.setDate(weekStart.getDate()-6);
-  weekStart.setHours(0,0,0,0);
+  h+='</div>'; // end card
 
-  // Allow generating for current partial week too
-  if(now>weekEnd){weekStart=new Date(weekEnd);weekStart.setDate(weekStart.getDate()+1);weekStart.setHours(0,0,0,0);weekEnd=new Date(now)}
+  // Buttons
+  h+='<div style="display:flex;gap:8px;margin-top:14px;width:360px;max-width:100%">';
+  h+='<button onclick="var el=document.getElementById(\'player-card-capture\');if(!el)return;import(\'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js\').then(function(){html2canvas(el,{backgroundColor:null,scale:2}).then(function(c){var a=document.createElement(\'a\');a.download=\'dugout-'+n.replace(/[^a-zA-Z0-9]/g,'-').toLowerCase()+'.png\';a.href=c.toDataURL(\'image/png\');a.click();toast(\'\uD83C\uDFB4 Card saved!\')})}).catch(function(){toast(\'Screenshot it manually \uD83D\uDCF1\',\'err\')})" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#B8860B);border:0;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(212,162,78,0.3)">\u2B07\uFE0F Save PNG</button>';
+  h+='<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="flex:0 0 auto;padding:12px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#666;font-weight:700;font-size:13px;cursor:pointer">\u2715</button>';
+  h+='</div></div>'; // end wrapper
 
-  var wsLabel=weekStart.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
-  var weLabel=weekEnd.toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
-
-  // Calculate week number
-  var firstWeek=new Date('2026-03-26T00:00:00+05:30');
-  var weekNum=Math.ceil((weekStart-firstWeek)/(7*86400000))+1;
-
-  // Matches resolved this week
-  var weekMatches=gms().filter(function(m){
-    if(!S.r[m.id]||S.r[m.id].voided)return false;
-    var md=new Date(m.d+'T00:00:00+05:30');
-    return md>=weekStart&&md<=weekEnd;
-  }).sort(function(a,b){return a.id-b.id});
-
-  if(weekMatches.length===0){toast('No resolved matches this week','err');return}
-
-  var players=Object.keys(S.p);
-  var lb=LB();
-
-  // Per-player week P&L
-  var weekPnL={};
-  players.forEach(function(n){weekPnL[n]={wins:0,losses:0,saves:0,jackpots:0,pnl:0,bets:0,momHits:0,momPicks:0,wagered:0}});
-
-  weekMatches.forEach(function(m){
-    var rs=S.r[m.id];
-    var bets=Object.values(S.b).filter(function(bt){return bt.mid===m.id});
-    bets.forEach(function(bt){
-      var n=bt.u;if(!weekPnL[n])return;
-      weekPnL[n].bets++;
-      weekPnL[n].wagered+=bt.am;
-      var won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
-      if(bt.mom)weekPnL[n].momPicks++;
-      if(mh)weekPnL[n].momHits++;
-      if(won){
-        var pay=Math.round(bt.am*(od-1));
-        if(jp){pay+=Math.round(bt.am*(od-1));weekPnL[n].jackpots++}
-        else if(mh){pay+=Math.round(ST*MOM_BONUS)}
-        weekPnL[n].pnl+=pay;weekPnL[n].wins++;
-      }else{
-        if(mh){weekPnL[n].saves++}
-        else{weekPnL[n].pnl-=bt.am;weekPnL[n].losses++}
-      }
-    });
-  });
-
-  // Sort by P&L
-  var sorted=players.map(function(n){return{n:n,d:weekPnL[n]}}).filter(function(x){return x.d.bets>0}).sort(function(a,b){return b.d.pnl-a.d.pnl});
-
-  // Hero & Villain
-  var hero=sorted.length?sorted[0]:null;
-  var villain=sorted.length?sorted[sorted.length-1]:null;
-
-  // Biggest single bet win
-  var bigWin=null;
-  weekMatches.forEach(function(m){
-    var rs=S.r[m.id];
-    Object.values(S.b).filter(function(bt){return bt.mid===m.id}).forEach(function(bt){
-      var won=bt.tm===rs.w;if(!won)return;
-      var mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),jp=isJackpot(bt,mh);
-      var pay=Math.round(bt.am*(od-1));
-      if(jp)pay+=Math.round(bt.am*(od-1));else if(mh)pay+=Math.round(ST*MOM_BONUS);
-      if(!bigWin||pay>bigWin.pay){bigWin={n:bt.u,team:T[bt.tm]?T[bt.tm].s:bt.tm,vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:pay,am:bt.am,jp:jp}}
-    });
-  });
-
-  // MoM Oracle
-  var momOracle=players.map(function(n){return{n:n,hits:weekPnL[n].momHits,picks:weekPnL[n].momPicks}}).filter(function(x){return x.picks>=2}).sort(function(a,b){return b.hits-a.hits})[0];
-
-  // Penalty watch — players with 0 bets this week
-  var noBets=players.filter(function(n){return weekPnL[n].bets===0});
-
-  // Total wagered this week
-  var totalWagered=0;
-  sorted.forEach(function(x){totalWagered+=x.d.wagered});
-
-  // Build message
-  var msg='';
-  msg+='\uD83C\uDFCF *THE DUGOUT \u2014 Week '+weekNum+' Wrap*\n';
-  msg+='\uD83D\uDCC5 '+wsLabel+' \u2013 '+weLabel+'\n';
-  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n';
-
-  // Leaderboard top 5
-  msg+='\uD83C\uDFC6 *LEADERBOARD*\n';
-  lb.slice(0,5).forEach(function(p,i){
-    var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4\uFE0F\u20E3','5\uFE0F\u20E3'];
-    var wd=weekPnL[p.n];
-    var wkDelta=wd?wd.pnl:0;
-    msg+=medals[i]+' *'+p.n+'* \u2014 \u20B9'+p.b.toLocaleString()+(wkDelta!==0?' ('+(wkDelta>0?'+':'')+'\u20B9'+wkDelta.toLocaleString()+' this week)':'')+'\n';
-  });
-  msg+='\n';
-
-  // Hero
-  if(hero&&hero.d.pnl>0){
-    msg+='\uD83D\uDD25 *PLAYER OF THE WEEK*\n';
-    msg+='\uD83C\uDF1F '+hero.n+' \u2014 '+hero.d.wins+'W/'+hero.d.losses+'L';
-    if(hero.d.jackpots)msg+=' (+'+hero.d.jackpots+' Jackpot\uD83D\uDD25)';
-    if(hero.d.saves)msg+=' (+'+hero.d.saves+' Save\uD83D\uDEE1\uFE0F)';
-    msg+=', +\u20B9'+hero.d.pnl.toLocaleString()+'\n\n';
-  }
-
-  // Villain
-  if(villain&&villain.d.pnl<0){
-    msg+='\uD83D\uDCC9 *TOUGH WEEK*\n';
-    msg+='\uD83D\uDE2C '+villain.n+' \u2014 '+villain.d.wins+'W/'+villain.d.losses+'L, \u20B9'+Math.abs(villain.d.pnl).toLocaleString()+' down\n\n';
-  }
-
-  // Biggest bet
-  if(bigWin){
-    msg+='\uD83D\uDCB0 *BIGGEST WIN*\n';
-    msg+='\uD83C\uDFAF '+bigWin.n+' put \u20B9'+bigWin.am.toLocaleString()+' on '+bigWin.team+(bigWin.jp?' (JACKPOT \uD83D\uDD25)':'')+' \u2192 +\u20B9'+bigWin.pay.toLocaleString()+'\n';
-    msg+='   _'+bigWin.vs+'_\n\n';
-  }
-
-  // MoM Oracle
-  if(momOracle&&momOracle.hits>0){
-    msg+='\uD83D\uDD2E *MOM ORACLE*\n';
-    msg+='\uD83E\uDDD9 '+momOracle.n+' \u2014 '+momOracle.hits+'/'+momOracle.picks+' correct MoM picks\n\n';
-  }
-
-  // Match results
-  msg+='\uD83C\uDFCF *RESULTS*\n';
-  weekMatches.forEach(function(m){
-    var rs=S.r[m.id];
-    var bets=Object.values(S.b).filter(function(bt){return bt.mid===m.id});
-    var winners=bets.filter(function(bt){return bt.tm===rs.w}).length;
-    var wTeam=T[rs.w]?T[rs.w].s:rs.w;
-    msg+='M'+m.id+' '+(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?')+' \u2192 '+wTeam+' \u2714\uFE0F ('+winners+'W/'+Math.max(bets.length-winners,0)+'L)\n';
-  });
-  msg+='\n';
-
-  // Penalty watch
-  if(noBets.length){
-    msg+='\u26A0\uFE0F *PENALTY WATCH*\n';
-    msg+='\uD83D\uDEA8 '+noBets.join(', ')+' \u2014 0 bets this week\n';
-    msg+='\u20B92,000 penalty if no bet before Tuesday\n\n';
-  }
-
-  // Stats
-  msg+='\uD83D\uDCCA *WEEK STATS*\n';
-  msg+='\u20B9'+totalWagered.toLocaleString()+' wagered \u00b7 '+weekMatches.length+' matches \u00b7 '+sorted.length+' active players\n\n';
-
-  // Teaser — next match
-  var nextM=gms().filter(function(m){return!S.r[m.id]&&m.h!=='TBD'&&S.odds[m.id]}).sort(function(a,b){return a.id-b.id})[0];
-  if(nextM){
-    msg+='\uD83D\uDC49 *NEXT UP*\n';
-    msg+=(T[nextM.h]?T[nextM.h].s:'?')+' vs '+(T[nextM.a]?T[nextM.a].s:'?')+' \u2014 '+fd(nextM.d)+' '+ft(nextM.t)+' IST\n';
-    if(S.odds[nextM.id]){
-      msg+='\u00D7'+S.odds[nextM.id][nextM.h]+' / \u00D7'+S.odds[nextM.id][nextM.a]+'\n';
-    }
-    msg+='\n';
-  }
-
-  msg+='\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
-  msg+='\uD83C\uDFCF _The Dugout \u2014 IPL 2026_';
-
-  // Copy to clipboard
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(msg).then(function(){toast('Weekly wrap copied! Paste in WhatsApp \uD83D\uDCCB')}).catch(function(){fallbackCopy(msg)});
-  }else{fallbackCopy(msg)}
-
-  function fallbackCopy(text){
-    var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';
-    document.body.appendChild(ta);ta.select();
-    try{document.execCommand('copy');toast('Copied to clipboard! \uD83D\uDCCB')}catch(e){toast('Could not copy','err')}
-    ta.remove();
-  }
-
-  // Also show preview
-  var preview=document.createElement('div');
-  preview.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);padding:20px';
-  preview.onclick=function(e){if(e.target===preview)preview.remove()};
-  preview.innerHTML='<div style="background:#0D1B3E;border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#D4A24E;letter-spacing:2px">WEEKLY WRAP PREVIEW</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:20px;cursor:pointer">\u2715</button></div><pre style="white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.7;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0">'+msg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><div style="display:flex;gap:8px;margin-top:16px"><button onclick="navigator.clipboard.writeText(document.querySelector(\'pre\').textContent.replace(/&lt;/g,\'<\').replace(/&gt;/g,\'>\'));toast(\'Copied!\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#F5A623);border:0;border-radius:10px;color:#000;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCCB Copy & Close</button><button onclick="var text=document.querySelector(\'pre\').textContent;window.open(\'https://wa.me/?text=\'+encodeURIComponent(text),\'_blank\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCF2 Share on WhatsApp</button></div></div>';
-  document.body.appendChild(preview);
-  adminLog('weekly_wrap','Week '+weekNum);
+  o.innerHTML=h;
+  document.body.appendChild(o);
 }
 
 function postTrash(){
