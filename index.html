@@ -112,8 +112,8 @@ body::after{right:0;background:linear-gradient(to left,rgba(196,69,58,0.025) 0%,
 .bf-qb.ai{background:rgba(212,162,78,0.12);color:var(--acc);font-weight:700}
 .bf-a{display:flex;gap:8px;margin-top:14px}
 .bf-cn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--bdr);background:0;color:var(--t4);font-weight:700;cursor:pointer;font-size:14px}
-.bf-cf{flex:2;padding:12px;border-radius:10px;border:0;background:var(--grad);color:#0C1220;font-weight:800;cursor:pointer;font-size:15px;transition:all .2s;box-shadow:0 4px 12px rgba(212,162,78,0.2)}
-.bf-cf.cta-ready{animation:ctaReady .6s ease}@keyframes ctaReady{0%{box-shadow:0 4px 12px rgba(212,162,78,0.2)}40%{box-shadow:0 0 24px rgba(212,162,78,0.5);transform:scale(1.03)}100%{box-shadow:0 4px 12px rgba(212,162,78,0.2);transform:scale(1)}}
+.bf-cf{flex:2;padding:16px;border-radius:12px;border:0;background:var(--grad);color:#0C1220;font-weight:900;cursor:pointer;font-size:16px;transition:all .2s;box-shadow:0 4px 16px rgba(212,162,78,0.25);letter-spacing:0.5px;text-transform:uppercase}
+.bf-cf.cta-ready{animation:ctaPulse 1.8s ease-in-out infinite}@keyframes ctaPulse{0%,100%{box-shadow:0 4px 16px rgba(212,162,78,0.25);transform:scale(1)}50%{box-shadow:0 0 28px rgba(212,162,78,0.5),0 4px 20px rgba(212,162,78,0.3);transform:scale(1.02)}}
 .tb{background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;font-weight:700;padding:4px 0;margin-top:10px}
 .bi{display:flex;gap:10px;align-items:center;font-size:13px;padding:9px 12px;background:var(--surf);border-radius:10px;margin-bottom:5px;flex-wrap:wrap}
 .bi-u{font-weight:800;color:var(--t2);min-width:70px}
@@ -1425,6 +1425,34 @@ function rM(){
   const onboardDismissed=localStorage.getItem('dg-onboard-done');
   let h='';
 
+  // ─── URGENCY BAR — sticky banner when a match locks soon ───
+  (function(){
+    var urgentMs=allM.filter(function(m){
+      if(S.r[m.id]||lkC(m))return false;
+      var df=dl(m)-new Date();
+      return df>0&&df<=3600000;
+    }).sort(function(a,b2){return dl(a)-dl(b2)});
+    if(urgentMs.length&&me&&mf==='upcoming'){
+      var um=urgentMs[0];
+      var df2=dl(um)-new Date();
+      var mins=Math.floor(df2/60000);
+      var myBet=S.b[um.id+'-'+me];
+      var isHigh=mins<=10;
+      if(!myBet){
+        h+='<div style="position:sticky;top:0;z-index:50;margin:-12px -16px 12px;padding:12px 16px;background:linear-gradient(135deg,'+(isHigh?'rgba(196,69,58,0.15)':'rgba(212,162,78,0.1)')+','+(isHigh?'rgba(196,69,58,0.05)':'rgba(212,162,78,0.03)')+');border-bottom:1px solid '+(isHigh?'rgba(196,69,58,0.25)':'rgba(212,162,78,0.15)')+';backdrop-filter:blur(8px);cursor:pointer" onclick="var el=document.getElementById(\'mc-'+um.id+'\');if(el)el.scrollIntoView({behavior:\'smooth\',block:\'center\'})">';
+        h+='<div style="display:flex;align-items:center;justify-content:space-between">';
+        h+='<div style="display:flex;align-items:center;gap:10px">';
+        h+='<span style="font-size:18px">'+(isHigh?'\uD83D\uDEA8':'\u23F0')+'</span>';
+        h+='<div>';
+        h+='<div style="font-size:13px;font-weight:800;color:'+(isHigh?'var(--red)':'var(--acc)')+'">'+(T[um.h]?T[um.h].s:'?')+' vs '+(T[um.a]?T[um.a].s:'?')+' LOCKS IN '+mins+'m</div>';
+        h+='<div style="font-size:11px;color:var(--t4)">You haven\'t bet yet \u2014 tap to place</div>';
+        h+='</div></div>';
+        h+='<div style="background:'+(isHigh?'var(--red)':'var(--grad)')+';color:'+(isHigh?'#fff':'#000')+';padding:6px 14px;border-radius:8px;font-weight:800;font-size:12px;white-space:nowrap'+(isHigh?';animation:ctaPulse 1.5s infinite':'')+'">'+(isHigh?'BET NOW':'BET \u2192')+'</div>';
+        h+='</div></div>';
+      }
+    }
+  })();
+
 
   // ─── SUB: rM_onboarding ─── ⚠️ GUARDRAIL: Returns HTML. Do NOT edit without regression.
   function rM_onboarding(){
@@ -2273,7 +2301,8 @@ function calcWin(id){
   // CTA button
   const cta=$('cta-'+id);
   if(cta){
-    cta.textContent='Lock ₹'+am.toLocaleString()+' on '+tmName+' 🔒';
+    cta.textContent='LOCK ₹'+am.toLocaleString()+' ON '+tmName+' 🔒';
+    cta.classList.add('cta-ready');
     var hint=$('conf-hint-'+id);if(hint){hint.textContent=hasMom?'🔥 Strong combo — MoM locked in':''}
   }
 }
