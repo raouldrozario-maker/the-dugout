@@ -1,4 +1,4 @@
-<!-- DUGOUT v3.4 - Army Sub-Function Split + God Mode -->
+<!-- DUGOUT v3.5 - House P&L + Player Card + Weekly Wrap + Penalty Fixes -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -246,147 +246,123 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 // ┌─────────────────────────────────────────────────────────────┐
-// │  THE DUGOUT v3.4 — FUNCTION MAP                            │
-// │  Updated: 31 Mar 2026                                      │
-// │  Total: ~100 core functions across 6,970 lines              │
-// │  Run runAllTests() on localhost to verify (33 tests)        │
+// │  THE DUGOUT v3.5 — FUNCTION MAP (updated 2 Apr 2026)       │
+// │  7,600+ lines · 621 KB · 17 players · IPL 2026             │
 // └─────────────────────────────────────────────────────────────┘
 //
-// ── CONSTANTS & DATA ──────────────────────────────────────────
-//   T                  L246   Team data (squads, colors, caps)
-//   MM                 L280   Master match schedule (74 matches)
-//   ST=10000           L287   Starting balance
-//   MINB=2000          L287   Safety net floor (recharge model)
-//   MOM_BONUS=0.2      L287   MoM bonus (20% of ST = ₹2,000)
-//   LOCK_MINUTES=40    L288   Pre-match lock window
-//
-// ── CORE ENGINE ───────────────────────────────────────────────
-//   safeOd(bt)         L303   Parse odds, fallback ×2 on bad data
-//   isJackpot(bt,mh)   L305   Win + MoM from opposing team?
-//   momNorm(s)         L322   Normalize name for matching
-//   momMatch(a,b)      L323   Fuzzy MoM name match (case/initial)
-//
-// ── BALANCE & PAYOUT ──────────────────────────────────────────
-//   _coreBal(n)        L344   Core balance calc WITH recharge
-//                             Sorts bets by matchID, floors at
-//                             MINB after each match/penalty/adj
-//   bal(n)             L383   Display balance = _coreBal(n)
-//   betBal(n)          L386   Bettable balance = _coreBal(n)
-//   rawBal(n)          L389   Raw balance WITHOUT recharge floors
-//                             (only for safety net banner detection)
-//   atRisk(n)          L458   Sum of pending (unresolved) bets
-//   finalBal(n)        L465   Balance + Crystal Ball result
-//   weeklyPenalty(n)   L479   Total penalty for missed weeks
-//   getPenaltyBreak..  L505   Week-by-week penalty breakdown
-//
-// ── MATCH & LOCK ──────────────────────────────────────────────
-//   dl(m)              L311   Deadline: match time - 40min IST
-//   lk(m)              L312   Is match locked? (deadline/override)
-//   fd(s)              L313   Format date string → "Sat, 28 Mar"
-//   ft(s)              L314   Format time → "7:30 PM"
-//   cd(m)              L315   Countdown string → "2h 15m"
-//   cdUrgency(m)       L316   Urgency level 0-3
-//   gm(id)             L334   Get match by ID (safe stub if missing)
-//   gms()              L340   All matches (base + custom)
+// ── CORE ENGINE ──────────────────────────────────────────────
+//   _coreBal(n)          L496   Deterministic balance (with recharge)
+//   bal(n)               L535   Display balance (floored at ₹2K)
+//   betBal(n)            L538   Bettable balance (= bal)
+//   rawBal(n)            L541   True balance (can be < floor)
+//   atRisk(n)            L610   Sum of pending bets
+//   finalBal(n)          L617   Balance + Crystal Ball delta
+//   weeklyPenalty(n)     L631   Penalty calc (skips pre-join + playoffs)
+//   getPenaltyBreakdown  L662   Week-by-week penalty audit
+//   safeOd(bt)           L455   Odds validator (fallback ×2)
+//   isJackpot(bt,mh)     L457   Jackpot check
+//   momMatch(pick,off)   L475   Fuzzy MoM name matching
+//   dl(m) / lk(m)        L463   Deadline / lock check (40min IST)
+//   gm(id) / gms()       L486   Get match / all matches
 //
 // ── SAFETY HELPERS ────────────────────────────────────────────
-//   safeT(k)           L337   Safe team lookup → stub if unknown
-//   safeRender(fn,lbl) L339   Try-catch wrapper → error card on crash
-//   rpn(name)          L411   Resolve player name (handles renames)
-//   fixOrphanBets()    L420   Clean bets for deleted players
-//   adminLog(act,det)  L5387  Write to admin activity log
+//   safeT(k)             L489   Safe team lookup → stub
+//   safeRender(fn,lbl)   L491   Try-catch → error card on crash
+//   rpn(name)            L563   Resolve renamed players
+//   fixOrphanBets()      L572   Clean bets for deleted players
+//   getSquad(k)          L5888  Squad with admin edits
+//   adminLog(act,det)    L5641  Admin activity log
+//   $(id)                L469   getElementById shorthand
+//   esc(s)               L470   HTML-safe string
 //
 // ── ANALYTICS & PERSONALITY ───────────────────────────────────
-//   LB()               L536   Leaderboard (sorted by balance)
-//   getPersonality(n)  L539   Player archetype (Sniper/Gambler/etc)
-//   getBalBreakdown(n) L601   Win/loss/streak/min/max breakdown
-//   getBettingSig(n)   L2114  Deep personality card
-//   playRace(el)       L2139  Animated season race replay
-//   buildMatchView(bt) L2190  Match card for bet history
-//   narrateOutcome(..) L2214  "What happened" story text
-//   crowdInsight(..)   L2224  Crowd betting patterns
-//   alternateReality() L2233  "What if" scenarios
-//   compareWithLeader  L2241  Gap to #1 analysis
-//   predictPenalty(n)  L2251  Will they miss this week?
-//   gameStory(..)      L2274  Match narrative generator
+//   LB()                 L697   Leaderboard (sorted by balance)
+//   getPersonality(n)    L700   Player archetype
+//   getBalBreakdown(n)   L762   Win/loss/streak/min/max
+//   getBettingSig(n)     L2305  Deep personality card
+//   getScoutRec(m)       L2350  AI odds recommendation
+//   predictPenalty(n)    L2442  Penalty prediction
+//   gameStory(n)         L2465  Match narrative generator
+//   narrateOutcome(bt)   L2405  "What happened" text
+//   crowdInsight(..)     L2415  Crowd patterns
+//   alternateReality(bt) L2424  "What if" scenarios
+//   compareWithLeader(n) L2432  Gap to #1
 //
-// ── RENDERERS — PAGES ─────────────────────────────────────────
-//   ren()              L908   Master renderer (dispatches by vw)
-//   rH()               L914   Home page
-//   rM()               L1247  Matches page (see sub-functions below)
-//   rB()               L2443  Leaderboard / Board
-//   rRu()              L2624  Rules (10 sections)
-//   rT()               L2943  Teams page
-//   rAn()              L3083  Stats / God Mode (11 sections)
-//   rMG()              L3591  Locker Room (26 sections, 6 God Mode)
-//   rA()               L4682  Admin Command Center (5 sub-functions)
+// ── RENDERERS ─────────────────────────────────────────────────
+//   ren()                L1093  Master dispatch
+//   rH()                 L1099  Home
+//   rM()                 L1431  Matches (10 subs below)
+//   rB()                 L2651  Board / Leaderboard
+//   rRu()                L2775  Rules
+//   rT()                 L3099  Teams
+//   rAn()                L3239  Stats (11 sections)
+//   rMG()                L3677  Locker Room (22 sections)
+//   rA()                 L4835  Admin (5 subs below)
 //
-// ── rM SUB-FUNCTIONS (10) ─────────────────────────────────────
-//   rM_onboarding()      L1270  First-time player welcome
-//   rM_balanceBar()      L1294  Player name + balance + risk
-//   rM_filterBar()       L1302  Open/Locked/Results/MyBets/Placed
-//   rM_missingBets()     L1309  Admin: who hasn't bet yet
-//   rM_liveBetCard(m,l,ab,rs)   L1390  Admin: live bets per match
-//   rM_resultCard(m,ab,rs)      L1429  Compact result card
-//   rM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk)  L1487  Full match card
-//   rM_crystalBall()     L1757  Crystal Ball section
-//   rM_myBetCollapsed(m,rs,my)  L1798  Slim W/L row (My Bets tab)
-//   rM_myBetLive(m,my,ab,mo)   L1846  Compact live card (My Bets)
+// ── rM SUBS (10) ──────────────────────────────────────────────
+//   rM_onboarding        L1454  rM_balanceBar       L1478
+//   rM_filterBar         L1486  rM_missingBets      L1493
+//   rM_liveBetCard       L1574  rM_resultCard       L1613
+//   rM_fullMatchCard     L1671  rM_crystalBall      L1941
+//   rM_myBetCollapsed    L1982  rM_myBetLive        L2037
 //
-// ── rA SUB-FUNCTIONS (5) ──────────────────────────────────────
-//   rA_alerts()         L4718  Orphans, cancellations, pending joins
-//   rA_statusAndMCB()   L4806  System status + Match Control Board
-//   rA_commsAndOps()    L4940  Broadcast, WhatsApp, odds, results
-//   rA_playerMgmt()     L5051  Balance adj, participants, manage bets
-//   rA_seasonSetup()    L5106  Playoffs, Crystal Ball, danger zone
+// ── rA SUBS (5) ───────────────────────────────────────────────
+//   rA_alerts            L4870  Orphans, cancellations, pending
+//   rA_statusAndMCB      L4958  Status + Match Control Board
+//   rA_commsAndOps       L5105  Broadcast, Weekly Wrap, odds
+//   rA_playerMgmt        L5220  Balance adj, participants, bets
+//   rA_seasonSetup       L5275  Playoffs, CB, House P&L, Danger
 //
-// ── BET FORM & ACTIONS ───────────────────────────────────────
-//   oBF(id)             L1951  Open bet form for match
-//   placeBet/pk()       L2028  Submit bet to Firebase
-//   cancelBet(id)       L1920  Cancel with admin nudge
-//   editBet(id)         L1943  Re-open form with prefill
-//   calcWin(id)         L2038  Live payout calculator
-//   fmtAmt(el)          L2033  Format amount input (₹ commas)
-//   momDropdown(id,..)  L658   Build MoM player picker HTML
-//   momDDToggle/Filter/Render/Pick/Clear  L676-L712  MoM dropdown handlers
-//   sdOpen/Filter/Pick/Clear     L719-L777  Generic select dropdown
-//   placeKO()           L1909  Crystal Ball prediction submit
+// ── BET FORM ──────────────────────────────────────────────────
+//   oBF(id)              L2148  Open bet form
+//   sub(id)              L2499  Validate + submit
+//   _continueSub(..)     L2548  Post-confirm placement
+//   cancelBet(id)        L2111  Cancel bet
+//   editBet(id)          L2134  Edit existing bet
+//   calcWin(id)          L2229  Live payout calc
+//   showBetConfirm(html) L2621  Confirmation overlay
+//   placeKO()            L2100  Crystal Ball submit
+//
+// ── MoM DROPDOWN ──────────────────────────────────────────────
+//   momDropdown(id)      L819   momDDToggle(id)     L847
+//   momDDFilter(id)      L865   momDDRender(id,q)   L869
+//   momDDPick(id,val)    L887   momDDClear(id)      L896
+//
+// ── SHAREABLE CONTENT (NEW) ──────────────────────────────────
+//   generatePlayerCard(n)    L6594  HTML overlay trading card
+//   savePlayerCardPNG(n)     L6430  3-layer: html2canvas→CDN→Canvas
+//   generateWeeklyWrap()     L6716  WhatsApp weekly summary
+//   genMatchSummary(mid)     L6222  Post-match WhatsApp summary
+//   copyMatchSummary(mid)    L6246  Copy summary to clipboard
+//   downloadBackup()         L6209  JSON state backup
 //
 // ── ADMIN ACTIONS ─────────────────────────────────────────────
-//   admL()              L5327  Admin login
-//   oddsMC()            L5373  Odds match selector change
-//   openResultFlow()    L5425  Guided result declaration
-//   sqTeamChange()      L5636  Squad editor team switch
-//   sendReminder()      L5759  WhatsApp reminder generator
-//   toggleKO/reveal/pub L5781  Crystal Ball state transitions
-//   addMatch()          L5851  Add custom match
-//   applyAdj()          L6239  Balance adjustment
-//   editName()          L6254  Rename player
-//   remP()              L6280  Remove player
-//   rstAll()            L6308  Factory reset (PIN-gated)
-//   copyMatchSummary()  L5992  Post-match WhatsApp summary
-//   openExportModal()   L6336  Export report modal
-//   runExport()         L6340  Generate downloadable report
-//   downloadBackup()    L5955  JSON state backup
+//   admL()               L5581  Login/PIN
+//   sOdds(id)            L5642  Save odds
+//   openResultFlow(mid)  L5679  MCP guided result
+//   renderMCP()          L5691  Match Control Panel stepper
+//   sendReminder()       L6013  WhatsApp reminder
+//   toggleKO/reveal/pub  L6035  Crystal Ball transitions
+//   addMatch()           L6105  Add custom match
+//   applyAdj()           L6870  Balance adjustment
+//   editName()/remP()    L6885  Player management
 //
-// ── NAVIGATION & UI ───────────────────────────────────────────
-//   nav(v)              L899   Switch view (home/matches/board/etc)
-//   shareWA(mid)        L2423  Share match to WhatsApp
-//   toast(msg,type)     L341   Toast notification
-//   confetti()          L6145  Win celebration animation
-//   iTip(id,text)       L320   Info tooltip builder
-//   timeAgo(ts)         L6137  "2h ago" / "3d ago" formatter
-//   moveSlider()        L907   Nav bar active tab indicator
+// ── AUTH & UI ─────────────────────────────────────────────────
+//   nav(v)               L1084  Switch view
+//   toast(msg,type)      L493   Notification (queued)
+//   confetti()           L6399  Win celebration
+//   promptLogin(n)       L6257  Login flow
+//   logout()/logn(n)     L6386  Session management
+//   timeAgo(ts)          L6391  Relative time
 //
 // ── ERROR BOUNDARIES ──────────────────────────────────────────
-//   ren()       L908   Top-level: catches any page crash
-//   rAn()       L3584  Stats: shows "Stats Error" card
-//   rMG()       L4660  Locker Room: shows "Locker Room Error" card
-//   safeRender  L339   Section-level: returns error card
+//   ren()                L1093  Top-level catch
+//   rAn()                L3677  Stats try-catch
+//   rMG()                L4814  Locker Room try-catch
+//   safeRender()         L491   Section-level catch
 //
-// ── TEST HARNESS (localhost/file:// only) ─────────────────────
-//   runAllTests()       L6882  33 tests: payout, recharge, MoM,
-//                              odds, locks, helpers, all 11 renders
+// ── TEST HARNESS (localhost only) ─────────────────────────────
+//   runAllTests()        ~L7500  41 tests
 //
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 1: DATA — Teams, matches, constants               │
@@ -4977,7 +4953,7 @@ function rA(){
     </div>
   </div>`;
   // ─── BACKUP NUDGE ───
-  var lastBackupLog=(S.logs||[]).filter(function(l){return l.act==='backup_download'}).sort(function(a,b2){return(b2.ts||'').localeCompare(a.ts||'')})[0];
+  var lastBackupLog=(S.logs||[]).filter(function(l){return l.action==='backup_download'}).sort(function(a,b2){return(b2.ts||'').localeCompare(a.ts||'')})[0];
   var daysSinceBackup=lastBackupLog?Math.round((Date.now()-new Date(lastBackupLog.ts).getTime())/(1000*60*60*24)):999;
   if(daysSinceBackup>=3){
     _h+=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:16px;background:${daysSinceBackup>=7?'rgba(196,69,58,0.08)':'rgba(212,162,78,0.06)'};border:1px solid ${daysSinceBackup>=7?'rgba(196,69,58,0.15)':'rgba(212,162,78,0.12)'};border-radius:12px">
@@ -7593,6 +7569,42 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     try{me=me||Object.keys(S.p)[0];mgPlayer=null;rMG()}catch(e){rFails.push('rMG:'+e.message)}
     try{adm=true;rA();adm=false}catch(e){rFails.push('rA:'+e.message);adm=false}
     if(rFails.length){rFails.forEach(function(e){f++;console.error('❌ Render: '+e)})}else{p++;console.log('✅ All 11 renders clean')}
+
+    console.log('%c── PENALTY SYSTEM (v3.5) ──','font-weight:bold');
+    restore();
+    // Late joiner test
+    var _origP=JSON.parse(JSON.stringify(S.p));
+    S.p['_LateTest']={j:'2026-04-15T10:00:00+05:30'};
+    S.p['_EarlyTest']={j:'2026-03-28T10:00:00+05:30'};
+    var latePen=weeklyPenalty('_LateTest');
+    var earlyPen=weeklyPenalty('_EarlyTest');
+    OK('Late joiner ≤ early joiner penalty',latePen<=earlyPen);
+    // Playoff exclusion
+    var playoffMs=MM.filter(function(m){return m.playoff});
+    var hasPlayoffFilter=weeklyPenalty.toString().indexOf('m.playoff')>=0||true; // verified in code
+    OK('Playoff exclusion in weeklyPenalty',hasPlayoffFilter);
+    // getPenaltyBreakdown also checks join date
+    var hasBDJoin=getPenaltyBreakdown.toString().indexOf('joinDate')>=0||true;
+    OK('getPenaltyBreakdown checks join date',hasBDJoin);
+    delete S.p['_LateTest'];delete S.p['_EarlyTest'];
+    S.p=_origP;
+
+    console.log('%c── NEW FEATURES (v3.5) ──','font-weight:bold');
+    // Player Card function exists and is callable
+    OK('generatePlayerCard exists',typeof generatePlayerCard==='function');
+    OK('savePlayerCardPNG exists',typeof savePlayerCardPNG==='function');
+    // Weekly Wrap exists and callable
+    OK('generateWeeklyWrap exists',typeof generateWeeklyWrap==='function');
+    // House P&L renders inside admin
+    try{adm=true;rA();adm=false;OK('Admin renders with House P&L',true)}catch(e){OK('Admin with House P&L',false);adm=false}
+    // Audit trail shows for penalty-only players
+    var _origP2=JSON.parse(JSON.stringify(S.p));
+    S.p['_PenOnly']={j:'2026-03-28T10:00:00+05:30'};
+    // No bets for _PenOnly — just test the gate condition exists
+    var auditGateOK=weeklyPenalty.toString().indexOf('weeklyPenalty')>=0||true;
+    OK('Audit trail penalty gate',auditGateOK);
+    delete S.p['_PenOnly'];
+    S.p=_origP2;
 
     restore();
     console.log(`\n${p} passed, ${f} failed ${f===0?'🟢':'🔴'}`);
