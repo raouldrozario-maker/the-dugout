@@ -217,7 +217,7 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 </style>
 </head>
 <body>
-<div id="toast"></div>
+<div id="toast" role="alert" aria-live="polite"></div>
 <div id="login-modal-root"></div>
 <div id="app">
 <header><div class="hi"><div class="brand" onclick="nav('home')"><span style="font-size:26px">🏏</span><div><div class="brand-n">THE DUGOUT</div><div class="brand-t">IPL 2026 <span id="mtag" class="mtag" style="background:#D4A24E18;color:var(--acc)">OFFLINE</span></div></div></div><div class="upill" id="hu" style="display:none"><div class="udot" id="ha"></div><span id="hn" style="font-weight:700;font-size:13px;color:#CBD5E1"></span><span id="hb" style="font-weight:800;font-size:13px"></span></div></div>
@@ -473,14 +473,19 @@ function _coreBal(n){
   let b=ST;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
   // Sort by match ID (chronological) so recharge applies between matches
-  const sortedBets=[...userBets].sort((a,b2)=>a.mid-b2.mid);
+  const sortedBets=[...userBets].sort((a,b2)=>(a.mid||0)-(b2.mid||0));
   // Group by match (a player has one bet per match)
   const matchIds=[...new Set(sortedBets.map(bt=>bt.mid))];
   matchIds.forEach(mid=>{
     const bt=sortedBets.find(x=>x.mid===mid);
     if(!bt)return;
+    // Data validation — sanitize corrupted fields
+    if(!bt.am||isNaN(bt.am)||bt.am<0)bt.am=0;
+    if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0;
+    if(!bt.tm)return; // skip bets with no team
     const rs=S.r[bt.mid];
     if(rs&&!rs.voided){
+      if(!rs.w)return; // skip results with no winner
       const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);
       if(w){
         let rawPay=bt.am*(od-1);
@@ -490,20 +495,19 @@ function _coreBal(n){
       }
       else{if(!mh)b-=bt.am}
       // ═══ RECHARGE: After each match result, floor at MINB ═══
-      // If balance dropped below ₹2,000, top up to ₹2,000.
-      // This is REAL money — no invisible debt.
       if(b<MINB)b=MINB;
     }
   });
   let pen=weeklyPenalty(n);
-  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);
+  const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+(parseInt(a.amount)||0),0);
   pen=Math.max(pen-waived,0);
   b-=pen;
-  if(b<MINB)b=MINB; // recharge after penalties too
+  if(b<MINB)b=MINB;
   (S.adj||[]).filter(a=>a.player===n&&a.type!=='waive').forEach(a=>{
-    if(a.type==='add')b+=a.amount;else if(a.type==='deduct')b-=a.amount;
+    var amt=parseInt(a.amount)||0;
+    if(a.type==='add')b+=amt;else if(a.type==='deduct')b-=amt;
   });
-  if(b<MINB)b=MINB; // recharge after adjustments too
+  if(b<MINB)b=MINB;
   return Math.round(b);
 }
 
@@ -5526,9 +5530,9 @@ function rA(){
       </div>`;
     // Match breakdown — collapsible
     if(matchList.length>0){
-      _h+=`<div onclick="var el=$('house-matches');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.hm-chev').textContent=v?'\\u25be':'\\u25b8'}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;margin-bottom:4px">
+      _h+=`<div onclick="var el=$('house-matches');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.hm-chev').textContent=v?'\u25be':'\u25b8'}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;margin-bottom:4px">
         <span style="font-size:11px;font-weight:700;color:var(--t3)">Match-by-Match Breakdown (${matchList.length})</span>
-        <span class="hm-chev" style="color:var(--acc);font-size:12px">\\u25b8</span>
+        <span class="hm-chev" style="color:var(--acc);font-size:12px">\u25b8</span>
       </div>
       <div id="house-matches" style="display:none">`;
       matchList.forEach(function(mm){
@@ -6270,9 +6274,10 @@ function showLoginModal(n,isNew){
   const root=$('login-modal-root');if(!root)return;
   const initial=n[0].toUpperCase();
   document.body.style.overflow='hidden';
+  if(window._loginEscHandler){document.removeEventListener('keydown',window._loginEscHandler)}
   window._loginEscHandler=function(e){if(e.key==='Escape')closeLoginModal()};
   document.addEventListener('keydown',window._loginEscHandler);
-  root.innerHTML=`<div class="login-modal-backdrop" onclick="if(event.target===this)closeLoginModal()">
+  root.innerHTML=`<div class="login-modal-backdrop" role="dialog" aria-modal="true" onclick="if(event.target===this)closeLoginModal()">
     <div class="login-modal" style="position:relative">
       <button class="lm-close" onclick="closeLoginModal()">✕</button>
       <div class="lm-avatar">${initial}</div>
@@ -6328,9 +6333,10 @@ function showRegister(){
   pendingLogin=n;
   const root=$('login-modal-root');if(!root)return;
   document.body.style.overflow='hidden';
+  if(window._loginEscHandler){document.removeEventListener('keydown',window._loginEscHandler)}
   window._loginEscHandler=function(e){if(e.key==='Escape')closeLoginModal()};
   document.addEventListener('keydown',window._loginEscHandler);
-  root.innerHTML=`<div class="login-modal-backdrop" onclick="if(event.target===this)closeLoginModal()">
+  root.innerHTML=`<div class="login-modal-backdrop" role="dialog" aria-modal="true" onclick="if(event.target===this)closeLoginModal()">
     <div class="login-modal" style="position:relative">
       <button class="lm-close" onclick="closeLoginModal()">✕</button>
       <div class="lm-avatar" style="background:linear-gradient(135deg,#3FB08C,#2D8A6A);box-shadow:0 4px 20px rgba(58,175,135,0.3)">🏏</div>
@@ -7511,7 +7517,7 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
     <button style="text-align:left;background:0;border:0;padding:8px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="ruJump('mg-bets');$('mg-sheet').style.display='none'">📜 Bet History</button>
   </div>
 </div>
-<button class="scroll-top" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
+<button class="scroll-top" id="scroll-top-btn" aria-label="Scroll to top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
 <script>
 // ═══ HIDDEN TEST HARNESS — runs on localhost only ═══
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:'){
@@ -7599,27 +7605,45 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     try{adm=true;rA();adm=false}catch(e){rFails.push('rA:'+e.message);adm=false}
     if(rFails.length){rFails.forEach(function(e){f++;console.error('❌ Render: '+e)})}else{p++;console.log('✅ All 11 renders clean')}
 
-    console.log('%c── RENDER QUALITY ──','font-weight:bold');
-    var garbage=['[object Object]','undefined','NaN','null'];
+    console.log('%c── RENDER QUALITY (10 categories) ──','font-weight:bold');
     var garbageFails=[];
     var views={home:'v-home',matches:'v-matches',board:'v-board',rules:'v-rules',teams:'v-teams',analytics:'v-analytics',mygame:'v-mygame',admin:'v-admin'};
     Object.keys(views).forEach(function(vName){
       var el2=$(views[vName]);
       if(!el2||!el2.innerHTML)return;
       var html2=el2.innerHTML;
-      garbage.forEach(function(g){
-        // Skip if inside a script, attribute value, or JSON — only catch visible text
-        // Simple heuristic: check if it appears outside of tags
-        var stripped=html2.replace(/<[^>]*>/g,' ');
-        if(stripped.indexOf(g)>=0&&g==='[object Object]')garbageFails.push(vName+': has '+g);
-        // For undefined/NaN/null, only flag if it appears as standalone word (not inside a variable name)
-        if(g!=='[object Object]'){
-          var re=new RegExp('(^|[\\s>:;,])'+g+'([\\s<:;,]|$)');
-          if(re.test(stripped))garbageFails.push(vName+': has visible "'+g+'"');
-        }
+      var stripped=html2.replace(/<[^>]*>/g,' ');
+      // 1. Raw object
+      if(stripped.indexOf('[object Object]')>=0)garbageFails.push(vName+': [object Object]');
+      // 2. Standalone undefined/NaN/null
+      ['undefined','NaN','null'].forEach(function(g){
+        var re=new RegExp('(^|[\\s>:;,])'+g+'([\\s<:;,]|$)');
+        if(re.test(stripped))garbageFails.push(vName+': standalone "'+g+'"');
       });
+      // 3. Embedded NaN/undefined in formatted text
+      if(/\u20b9\s*NaN|NaN\s*%|NaN\s*\u20b9/.test(stripped))garbageFails.push(vName+': embedded NaN in formatted text');
+      if(/\u20b9\s*undefined|undefined\s*%|undefined\s*\u20b9/.test(stripped))garbageFails.push(vName+': embedded undefined in formatted text');
+      // 4. Escaped unicode as visible text
+      var unicodeEscapes=stripped.match(/\\u[0-9a-fA-F]{4}/g);
+      if(unicodeEscapes)garbageFails.push(vName+': escaped unicode: '+unicodeEscapes.slice(0,3).join(', '));
+      // 5. Boolean as text (true/false) — only flag if excessive
+      var trueCount=(stripped.match(/(^|[\s>:;,])true([\s<:;,]|$)/g)||[]).length;
+      if(trueCount>3)garbageFails.push(vName+': boolean "true" as text ('+trueCount+'x)');
+      var falseCount=(stripped.match(/(^|[\s>:;,])false([\s<:;,]|$)/g)||[]).length;
+      if(falseCount>3)garbageFails.push(vName+': boolean "false" as text ('+falseCount+'x)');
+      // 6. Array dump (4+ comma-separated numbers not in currency format)
+      var arrayDumps=stripped.match(/(?<![\u20b9\d])\d{1,3}(,\d{1,3}){3,}(?!\d)/g);
+      if(arrayDumps)garbageFails.push(vName+': possible array dump: '+arrayDumps[0].substring(0,30));
+      // 7. Empty object
+      if(stripped.indexOf('{}')>=0)garbageFails.push(vName+': empty object "{}"');
+      // 8. Function body as text
+      if(/function\s*\(/.test(stripped))garbageFails.push(vName+': function body as text');
+      // 9. Double-encoded HTML entities
+      if(/&amp;amp;|&amp;lt;|&amp;gt;/.test(html2))garbageFails.push(vName+': double-encoded HTML entities');
+      // 10. Dev placeholders
+      if(/TODO|FIXME|PLACEHOLDER|lorem ipsum/i.test(stripped))garbageFails.push(vName+': dev placeholder text');
     });
-    if(garbageFails.length){garbageFails.forEach(function(e){f++;console.error('❌ Garbage: '+e)})}else{p++;console.log('✅ No [object Object], undefined, NaN in renders')}
+    if(garbageFails.length){garbageFails.forEach(function(e){f++;console.error('\u274c Garbage: '+e)})}else{p++;console.log('\u2705 Render quality: 10 garbage categories clean across 8 views')}
 
     console.log('%c── PENALTY SYSTEM (v3.5) ──','font-weight:bold');
     restore();
