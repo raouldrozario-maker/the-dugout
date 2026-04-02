@@ -628,16 +628,21 @@ function weeklyPenalty(n){
   if(now<firstMatch)return 0;
   // No penalty if no results exist at all (tournament hasn't effectively started)
   if(Object.keys(S.r).length===0)return 0;
+  // Player join date — skip weeks before they joined
+  const joinDate=S.p[n].j?new Date(S.p[n].j):firstMatch;
   let penalty=0;
   let weekStart=new Date('2026-03-26T00:00:00+05:30');
   while(weekStart<now){
     const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
     if(weekEnd>now)break;
-    const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
+    // Skip weeks before the player joined
+    if(weekEnd<=joinDate){weekStart=new Date(weekEnd);continue}
+    // Only count non-playoff league matches for penalty
+    const matchesThisWeek=MM.filter(m=>{if(m.playoff)return false;const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
     // Only penalize if matches happened AND at least one non-voided result was recorded that week
     const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(resultsThisWeek.length>=2){
-      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+      const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(md.playoff)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
       if(!betThisWeek)penalty+=PENALTY_AMOUNT;
     }
     weekStart=new Date(weekEnd);
@@ -658,7 +663,8 @@ function getPenaltyBreakdown(){
   while(weekStart<now){
     const weekEnd=new Date(weekStart);weekEnd.setDate(weekEnd.getDate()+7);
     if(weekEnd>now)break;
-    const matchesThisWeek=MM.filter(m=>{const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
+    // Only count non-playoff league matches
+    const matchesThisWeek=MM.filter(m=>{if(m.playoff)return false;const md=new Date(m.d+'T00:00:00+05:30');return md>=weekStart&&md<weekEnd});
     const resultsThisWeek=matchesThisWeek.filter(m=>S.r[m.id]&&!S.r[m.id].voided);
     if(resultsThisWeek.length>=2){
       weekNum++;
@@ -666,8 +672,11 @@ function getPenaltyBreakdown(){
       const weLabel=new Date(weekEnd.getTime()-86400000).toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'});
       const defaulters=[];
       players.forEach(n=>{
+        // Skip if player hadn't joined yet
+        const joinDate=S.p[n].j?new Date(S.p[n].j):firstMatch;
+        if(weekEnd<=joinDate)return;
         const userBets=Object.values(S.b).filter(x=>x.u===n);
-        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
+        const betThisWeek=userBets.some(bt=>{const md=MM.find(m=>m.id===bt.mid);if(!md)return false;if(md.playoff)return false;if(S.r[bt.mid]?.voided)return false;const d=new Date(md.d+'T00:00:00+05:30');return d>=weekStart&&d<weekEnd});
         if(!betThisWeek){defaulters.push(n);totals[n]=(totals[n]||0)+PENALTY_AMOUNT}
       });
       weeks.push({label:`Week ${weekNum} (${wsLabel} – ${weLabel})`,defaulters,matchCount:matchesThisWeek.length,start:weekStart.toISOString().slice(0,10),end:new Date(weekEnd.getTime()-86400000).toISOString().slice(0,10)});
