@@ -3806,6 +3806,7 @@ function rMG(){
   </div>
   <div style="height:6px;background:var(--inp);border-radius:4px;overflow:hidden"><div style="height:100%;width:${Math.max(Math.min(b/ST*50,100),5)}%;background:${diff>=0?'var(--grn)':'var(--red)'};border-radius:4px;opacity:.6"></div></div>
   <div style="font-size:11px;color:var(--t4);margin-top:6px;text-align:center">Started ₹${ST.toLocaleString()} · ${diff>=0?'Up':'Down'} ${Math.abs(diff).toLocaleString()}</div>
+  <button onclick="generatePlayerCard('${n.replace(/'/g,"\\'")}')" style="width:100%;margin-top:14px;padding:10px;background:linear-gradient(135deg,rgba(212,162,78,0.1),rgba(212,162,78,0.04));border:1px solid rgba(212,162,78,0.2);border-radius:10px;color:var(--acc);font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.5px">🎴 Download Player Card</button>
   </div>`;
 
   
@@ -6418,6 +6419,139 @@ function renderMention(msg){
 
 function hasMention(msg,player){
   return msg.toLowerCase().includes('@'+player.toLowerCase());
+}
+
+// ═══ PLAYER CARD GENERATOR ═══
+function generatePlayerCard(playerName){
+  var n=playerName;if(!S.p[n])return;
+  var b=bal(n),lb=LB(),rank=lb.findIndex(function(x){return x.n===n})+1;
+  var ub=Object.values(S.b).filter(function(x){return x.u===n});
+  var resolved=ub.filter(function(x){return S.r[x.mid]&&!S.r[x.mid].voided});
+  var wins=resolved.filter(function(x){return x.tm===S.r[x.mid].w});
+  var wr=resolved.length?Math.round(wins.length/resolved.length*100):0;
+  var diff=b-ST;
+  // Streak
+  var sorted=[].concat(resolved).sort(function(a,b2){return b2.mid-a.mid});
+  var streak=0,sType='';
+  for(var i=0;i<sorted.length;i++){var w=sorted[i].tm===S.r[sorted[i].mid].w;if(!sType)sType=w?'W':'L';if((w&&sType==='W')||(!w&&sType==='L'))streak++;else break}
+  // MoM accuracy
+  var momP=ub.filter(function(x){return x.mom});
+  var momH=momP.filter(function(x){return S.r[x.mid]&&momMatch(x.mom,S.r[x.mid].mom)});
+  var momAcc=momP.length?Math.round(momH.length/momP.length*100):0;
+  // Best bet
+  var bestBet=null,bestPay=0;
+  resolved.forEach(function(bt){
+    var rs=S.r[bt.mid],won=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt),m=gm(bt.mid);
+    if(won){var py=Math.round(bt.am*(od-1));if(isJackpot(bt,mh))py+=Math.round(bt.am*(od-1));else if(mh)py+=Math.round(ST*MOM_BONUS);if(py>bestPay){bestPay=py;bestBet={team:T[bt.tm]?T[bt.tm].s:bt.tm,vs:(T[m.h]?T[m.h].s:'?')+' vs '+(T[m.a]?T[m.a].s:'?'),pay:py}}}
+  });
+  // Play style
+  var ps=getPersonality(n);
+  var style=ps?ps.label:'Rookie';
+  // Rank medal
+  var medal=rank===1?'\uD83D\uDC51':rank===2?'\uD83E\uDD48':rank===3?'\uD83E\uDD49':'#'+rank;
+  // Team color — most backed team
+  var teamCounts={};ub.forEach(function(bt){teamCounts[bt.tm]=(teamCounts[bt.tm]||0)+1});
+  var favTeam=Object.keys(teamCounts).sort(function(a,b2){return teamCounts[b2]-teamCounts[a]})[0]||'';
+  var teamClr=T[favTeam]?T[favTeam].c:'#D4A24E';
+
+  var card=document.createElement('canvas');
+  card.width=540;card.height=960;
+  var ctx=card.getContext('2d');
+
+  // Background — dark gradient
+  var grad=ctx.createLinearGradient(0,0,540,960);
+  grad.addColorStop(0,'#0A1628');grad.addColorStop(0.5,'#0D1B3E');grad.addColorStop(1,'#0A1222');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,540,960);
+
+  // Border glow
+  ctx.strokeStyle='rgba(212,162,78,0.3)';ctx.lineWidth=2;
+  ctx.roundRect(12,12,516,936,20);ctx.stroke();
+
+  // Inner border
+  ctx.strokeStyle='rgba(212,162,78,0.08)';ctx.lineWidth=1;
+  ctx.roundRect(20,20,500,920,16);ctx.stroke();
+
+  // Top accent line
+  var acGrad=ctx.createLinearGradient(40,0,500,0);
+  acGrad.addColorStop(0,'transparent');acGrad.addColorStop(0.3,teamClr);acGrad.addColorStop(0.7,teamClr);acGrad.addColorStop(1,'transparent');
+  ctx.fillStyle=acGrad;ctx.fillRect(40,30,460,2);
+
+  // Avatar circle
+  var cx=270,ay=140;
+  ctx.beginPath();ctx.arc(cx,ay,52,0,Math.PI*2);
+  var avGrad=ctx.createRadialGradient(cx,ay,20,cx,ay,52);
+  avGrad.addColorStop(0,teamClr);avGrad.addColorStop(1,teamClr+'88');
+  ctx.fillStyle=avGrad;ctx.fill();
+  ctx.strokeStyle=teamClr;ctx.lineWidth=3;ctx.stroke();
+  // Initial
+  ctx.fillStyle='#000';ctx.font='bold 36px Oswald,sans-serif';ctx.textAlign='center';
+  ctx.fillText(n[0].toUpperCase(),cx,ay+12);
+
+  // Rank badge
+  ctx.font='28px sans-serif';ctx.fillText(medal,cx,ay+68);
+
+  // Player name
+  ctx.fillStyle='#FFFFFF';ctx.font='bold 28px Oswald,sans-serif';
+  ctx.fillText(n,cx,ay+110);
+
+  // Play style tag
+  ctx.font='13px sans-serif';
+  var tagW=ctx.measureText(style).width+24;
+  ctx.fillStyle=teamClr+'22';
+  ctx.roundRect(cx-tagW/2,ay+120,tagW,26,8);ctx.fill();
+  ctx.fillStyle=teamClr;ctx.font='bold 12px sans-serif';
+  ctx.fillText(style,cx,ay+137);
+
+  // Stats grid — 2 columns
+  var sy=330;
+  function statBox(x,y,val,label,clr){
+    ctx.fillStyle='rgba(255,255,255,0.03)';
+    ctx.roundRect(x,y,220,72,12);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.roundRect(x,y,220,72,12);ctx.stroke();
+    ctx.fillStyle=clr||'#FFFFFF';ctx.font='bold 26px Oswald,sans-serif';ctx.textAlign='center';
+    ctx.fillText(val,x+110,y+32);
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px sans-serif';
+    ctx.fillText(label,x+110,y+54);
+  }
+  statBox(40,sy,'\u20B9'+b.toLocaleString(),'BALANCE',b>=ST?'#3AB087':'#C4453A');
+  statBox(280,sy,(diff>=0?'+':'')+'\u20B9'+Math.abs(diff).toLocaleString(),'P&L',diff>=0?'#3AB087':'#C4453A');
+  statBox(40,sy+88,wr+'%','WIN RATE',wr>=60?'#3AB087':wr>=40?'#D4A24E':'#C4453A');
+  statBox(280,sy+88,wins.length+'W / '+(resolved.length-wins.length)+'L','RECORD','#FFFFFF');
+  statBox(40,sy+176,momAcc+'%','MOM ACCURACY',momAcc>=30?'#D4A24E':'rgba(255,255,255,0.5)');
+  statBox(280,sy+176,(streak>0?(sType==='W'?'\uD83D\uDD25 ':'\uD83D\uDCC9 ')+streak+sType:'—'),'STREAK',sType==='W'?'#3AB087':'#C4453A');
+
+  // Best bet
+  if(bestBet){
+    var by=sy+280;
+    ctx.fillStyle='rgba(212,162,78,0.06)';ctx.roundRect(40,by,460,60,10);ctx.fill();
+    ctx.strokeStyle='rgba(212,162,78,0.15)';ctx.lineWidth=1;ctx.roundRect(40,by,460,60,10);ctx.stroke();
+    ctx.fillStyle='#D4A24E';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+    ctx.fillText('BEST BET',270,by+20);
+    ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='14px sans-serif';
+    ctx.fillText(bestBet.vs+' \u00b7 +\u20B9'+bestBet.pay.toLocaleString(),270,by+44);
+  }
+
+  // Bottom branding
+  ctx.fillStyle='rgba(212,162,78,0.12)';ctx.fillRect(40,880,460,1);
+  var brandGrad=ctx.createLinearGradient(0,0,540,0);
+  brandGrad.addColorStop(0,'#D4A24E');brandGrad.addColorStop(1,'#F5A623');
+  ctx.fillStyle=brandGrad;ctx.font='bold 16px Oswald,sans-serif';ctx.textAlign='center';
+  ctx.fillText('THE DUGOUT',270,910);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px sans-serif';
+  ctx.fillText('IPL 2026 \u00b7 Betting League',270,930);
+
+  // Bottom accent line
+  ctx.fillStyle=acGrad;ctx.fillRect(40,942,460,2);
+
+  // Download
+  try{
+    var link=document.createElement('a');
+    link.download='dugout-'+n.replace(/\\s+/g,'-').toLowerCase()+'.png';
+    link.href=card.toDataURL('image/png');
+    link.click();
+    toast('Card downloaded! \uD83C\uDFB4');
+  }catch(e){toast('Could not generate card','err')}
 }
 
 function postTrash(){
