@@ -3522,7 +3522,7 @@ function rAn(){
       <div style="font-size:10px;font-weight:700;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px">🎬 Story of the Season</div>
       <div id="race-bars" style="display:flex;flex-direction:column;gap:4px">
         ${raceData.map((d,i)=>`<div style="display:flex;align-items:center;gap:8px">
-          <span style="width:90px;font-size:11px;font-weight:700;color:${d.name===me?'var(--acc)':'var(--t2)'};text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name.split(' ')[0]}</span>
+          <span style="width:60px;font-size:11px;font-weight:700;color:${d.name===me?'var(--acc)':'var(--t2)'};text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.name.split(' ')[0]}</span>
           <div style="flex:1;height:20px;background:var(--inp);border-radius:4px;overflow:hidden"><div id="race-bar-${i}" style="height:100%;width:${Math.round(d.final/maxBal2*100)}%;background:${d.color};border-radius:4px;opacity:0.5;transition:width 0.8s ease-out"></div></div>
           <span id="race-val-${i}" style="width:55px;font-size:11px;font-weight:800;color:var(--t1);font-family:var(--ff);text-align:right">₹${d.final.toLocaleString()}</span>
         </div>`).join('')}
@@ -6317,24 +6317,25 @@ function genMatchSummary(mid){
   const m=gm(mid);if(!m)return'';const rs=S.r[mid];if(!rs||rs.voided)return'';
   const mBets=Object.values(S.b).filter(x=>x.mid===mid);
   const hS=T[m.h]?.s||m.h,aS=T[m.a]?.s||m.a,wS=T[rs.w]?.s||rs.w;
-  let lines=['🏏 *M'+(m.playoff?m.v:'#'+mid)+' Result: '+wS+' beat '+(rs.w===m.h?aS:hS)+'*'];
+  const winsCount=mBets.filter(x=>x.tm===rs.w).length;
+  const lossCount=mBets.length-winsCount;
+  let lines=[];
+  lines.push('🏏 *M#'+mid+' Result: '+wS+' beat '+(rs.w===m.h?aS:hS)+'*');
   if(rs.mom)lines.push('🏅 MoM: '+rs.mom);
   lines.push('━━━━━━━━━━━━━━━━━━');
-  let totalWon=0,totalLost=0;
-  mBets.forEach(bt=>{
-    const od=safeOd(bt),w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom);
-    let change=0,tag='';
-    if(w){change=Math.round(bt.am*(od-1));if(isJackpot(bt,mh)){change+=Math.round(bt.am*(od-1));tag='⭐'}else if(mh){change+=Math.round(ST*MOM_BONUS);tag='🎯'}else{tag='✅'};totalWon+=change}
-    else{if(mh){tag='🛡️';change=0}else{tag='❌';change=-bt.am;totalLost+=bt.am}}
-    const sign=change>0?'+₹'+change.toLocaleString():change<0?'-₹'+Math.abs(change).toLocaleString():'₹0 (saved)';
-    lines.push(tag+' '+rpn(bt.u)+' '+sign+' ('+T[bt.tm]?.s+')');
-  });
-  lines.push('━━━━━━━━━━━━━━━━━━');
   lines.push('💰 *Leaderboard:*');
-  const lb=LB();lb.slice(0,5).forEach((p,i)=>{lines.push((i+1)+'. '+p.n+' ₹'+p.b.toLocaleString())});
-  if(lb.length>5)lines.push('...'+(lb.length-5)+' more');
-  const nx=gms().find(x=>!S.r[x.id]&&x.h!=='TBD'&&x.id>mid);
-  if(nx)lines.push('\n📅 Next: '+T[nx.h]?.s+' vs '+T[nx.a]?.s+' · '+fd(nx.d)+' · '+ft(nx.t));
+  const lb=LB();lb.slice(0,5).forEach(function(p,i){lines.push((i+1)+'. '+p.n+' ₹'+p.b.toLocaleString())});
+  // Next match(es) — detect double header
+  const upcoming=gms().filter(function(x){return !S.r[x.id]&&x.h!=='TBD'&&!lk(x)}).sort(function(a,b){return new Date(a.d+'T'+a.t)-new Date(b.d+'T'+b.t)});
+  if(upcoming.length){
+    var nextDay=upcoming[0].d;
+    var dayMatches=upcoming.filter(function(x){return x.d===nextDay});
+    lines.push('');
+    dayMatches.forEach(function(nx,i){
+      var prefix=dayMatches.length>1?'📅 '+(i+1)+' Next':'📅 Next';
+      lines.push(prefix+': '+(T[nx.h]?.s||nx.h)+' vs '+(T[nx.a]?.s||nx.a)+' · '+fd(nx.d)+' · '+ft(nx.t));
+    });
+  }
   return lines.join('\n');
 }
 function copyMatchSummary(mid){
@@ -7042,7 +7043,11 @@ db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
   if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
   else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
-  db.ref('dugout').on('value',sn=>{const oldR2={...S.r};const d2=sn.val()||{};S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
+  db.ref('dugout').on('value',sn=>{const d2=sn.val()||{};
+      // Timestamp guard — reject incoming data older than local
+      const incomingTs=d2._ts||0;const localTs=S._ts||0;
+      if(incomingTs<localTs){console.log('[Dugout] Skipped stale Firebase push (listener2: remote:'+incomingTs+' < local:'+localTs+')');return}
+      const oldR2={...S.r};S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
       if(adm&&d2.pendingJoins){const pj=Object.keys(d2.pendingJoins||{});if(pj.length>0&&(!window._lastPendingCount||pj.length>window._lastPendingCount)){toast('🔔 '+pj.length+' pending join request'+(pj.length>1?'s':'')+'!');window._lastPendingCount=pj.length}}
       S.pendingJoins=d2.pendingJoins||{};
       localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
