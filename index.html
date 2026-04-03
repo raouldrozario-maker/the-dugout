@@ -4493,15 +4493,17 @@ function rMG(){
 
   
 // ─── GOD MODE: CLUTCH SCORE ───
-  if(resolved.length>=3){
+  {
+    const _clutchResolved=resolved.length>=3;
     const highStake=3000;
-    const clutchBets=resolved.filter(bt=>bt.am>=highStake);
-    const safeBets=resolved.filter(bt=>bt.am<highStake);
-    const clutchWins=clutchBets.filter(bt=>bt.tm===S.r[bt.mid].w).length;
-    const safeWins=safeBets.filter(bt=>bt.tm===S.r[bt.mid].w).length;
-    const clutchWR=clutchBets.length?Math.round(clutchWins/clutchBets.length*100):0;
-    const safeWR=safeBets.length?Math.round(safeWins/safeBets.length*100):0;
-    if(clutchBets.length>=1&&safeBets.length>=1){
+    const clutchBets=_clutchResolved?resolved.filter(bt=>bt.am>=highStake):[];
+    const safeBets=_clutchResolved?resolved.filter(bt=>bt.am<highStake):[];
+    const hasBoth=clutchBets.length>=1&&safeBets.length>=1;
+    if(_clutchResolved&&hasBoth){
+      const clutchWins=clutchBets.filter(bt=>bt.tm===S.r[bt.mid].w).length;
+      const safeWins=safeBets.filter(bt=>bt.tm===S.r[bt.mid].w).length;
+      const clutchWR=clutchBets.length?Math.round(clutchWins/clutchBets.length*100):0;
+      const safeWR=safeBets.length?Math.round(safeWins/safeBets.length*100):0;
       const clutchLabel=clutchWR>=60?'Ice in your veins':clutchWR>=40?'Holds steady':'Folds under pressure';
       const clutchEmoji=clutchWR>=60?'🧊':clutchWR>=40?'😐':'😰';
       h+=`<div id="mg-clutch" style="background:linear-gradient(165deg,#0D1B36,#0F1D30);border:1px solid rgba(212,162,78,0.12);border-radius:18px;padding:20px;margin-bottom:16px">
@@ -4524,6 +4526,13 @@ function rMG(){
             <div style="font-size:11px;color:var(--t3);margin-top:4px">${safeWins}/${safeBets.length} won</div>
           </div>
         </div>
+      </div>`;
+    } else {
+      h+=`<div id="mg-clutch" style="background:linear-gradient(165deg,#0D1B36,#0F1D30);border:1px solid rgba(212,162,78,0.12);border-radius:18px;padding:20px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:20px">🎯</span>
+        <div><div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--acc);letter-spacing:1.5px">CLUTCH SCORE</div>
+        <div style="font-size:10px;color:var(--t4)">Win rate on big bets (₹3K+) vs small bets</div></div></div>
+        <div style="text-align:center;padding:16px 0;color:var(--t4);font-size:13px">${!_clutchResolved?'Need 3+ resolved bets to unlock':'Need both big (₹3K+) and small bets to compare'}</div>
       </div>`;
     }
   }
@@ -7040,6 +7049,17 @@ function runExport(){
       running+=change;if(running<MINB)running=MINB;
       rows.push({mid:bt.mid,match:mLabel,date:m?m.d:'',team:T[bt.tm]?T[bt.tm].s:bt.tm,amount:bt.am,odds:od,mom:bt.mom||'—',status:status,change:change,balAfter:running,ts:bt.ts||'',adm:bt.adminBet?'🔑':''});
     });
+    // Penalties
+    var pen=weeklyPenalty(name);
+    var waived=(S.adj||[]).filter(function(a){return a.type==='waive'&&a.player===name}).reduce(function(s,a){return s+(parseInt(a.amount)||0)},0);
+    var netPen=Math.max(pen-waived,0);
+    if(netPen>0){running-=netPen;if(running<MINB)running=MINB;rows.push({mid:'PEN',match:'Weekly Penalties'+(waived?' (₹'+waived.toLocaleString()+' waived)':''),date:'',team:'—',amount:netPen,odds:'—',mom:'—',status:'⚠️ Penalty',change:-netPen,balAfter:running,ts:'',adm:''})}
+    // Adjustments
+    (S.adj||[]).filter(function(a){return a.player===name&&a.type!=='waive'}).forEach(function(a){
+      var amt=parseInt(a.amount)||0;var adj2=a.type==='add'?amt:-amt;
+      running+=adj2;if(running<MINB)running=MINB;
+      rows.push({mid:'ADJ',match:(a.type==='add'?'Bonus':'Deduction')+': '+(a.reason||'Admin'),date:'',team:'—',amount:Math.abs(amt),odds:'—',mom:'—',status:a.type==='add'?'💰 Bonus':'📉 Deduction',change:adj2,balAfter:running,ts:a.ts||'',adm:'🔑'});
+    });
     return rows;
   }
 
@@ -7157,7 +7177,7 @@ function runExport(){
   sections.weekly=function(){
     var h='<h2>📅 Weekly Engagement</h2>';var pb=getPenaltyBreakdown();
     if(pb&&pb.weeks&&pb.weeks.length){h+='<table><thead><tr><th>Week</th>';
-      L.forEach(function(p){h+='<th>'+esc(p.n).slice(0,6)+'</th>'});h+='</tr></thead><tbody>';
+      L.forEach(function(p){h+='<th style="min-width:60px;font-size:10px">'+esc(p.n)+'</th>'});h+='</tr></thead><tbody>';
       pb.weeks.forEach(function(wk){h+='<tr><td>'+fd(wk.start)+'</td>';L.forEach(function(p){h+='<td style="text-align:center">'+(wk.defaulters.indexOf(p.n)!==-1?'❌':'✅')+'</td>'});h+='</tr>'});
       h+='</tbody></table>'}else{h+='<div class="pc">Season not started.</div>'}return h;
   };
