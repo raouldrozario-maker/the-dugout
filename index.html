@@ -4159,7 +4159,6 @@ function rMG(){
           </defs>
           <!-- Grid -->
           <line x1="${PL}" y1="${zeroY}" x2="${W-PR}" y2="${zeroY}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="4,3"/>
-          <text x="${PL-6}" y="${zeroY+4}" text-anchor="end" fill="var(--t4)" font-size="10">₹0</text>
           ${dataMax>0?`<text x="${PL-6}" y="${yScale(dataMax)+4}" text-anchor="end" fill="var(--grn)" font-size="9">+₹${dataMax>=1000?(dataMax/1000).toFixed(0)+'K':dataMax}</text>`:''}
           ${dataMin<0?`<text x="${PL-6}" y="${yScale(dataMin)+4}" text-anchor="end" fill="var(--red)" font-size="9">-₹${Math.abs(dataMin)>=1000?(Math.abs(dataMin)/1000).toFixed(0)+'K':Math.abs(dataMin)}</text>`:''}
           <!-- Fill area -->
@@ -4172,10 +4171,21 @@ function rMG(){
             const clr=pt.cum>0?'var(--grn)':pt.cum<0?'var(--red)':'var(--t4)';
             const dClr=pt.delta>0?'#3AAF87':pt.delta<0?'#D45B5B':'#D4A24E';
             const dateStr=pt.d?new Date(pt.d+'T12:00:00+05:30').toLocaleDateString('en-IN',{day:'numeric',month:'short',timeZone:'Asia/Kolkata'}):'';
+            // Label strategy: only show labels at KEY points — first, last, peaks, valleys
+            // This eliminates ALL overlap issues regardless of data density
+            const isFirst=i===0;
+            const isLast=i===pts.length-1&&!pt.isPenalty&&!pt.isAdj;
+            const isPeak=i>0&&i<pts.length-1&&pt.cum>pts[i-1].cum&&pt.cum>=(pts[i+1]?pts[i+1].cum:0);
+            const isValley=i>0&&i<pts.length-1&&pt.cum<pts[i-1].cum&&pt.cum<=(pts[i+1]?pts[i+1].cum:pt.cum);
+            const showValLabel=(isFirst||isLast||isPeak||isValley)&&pt.delta!==0&&!pt.isPenalty&&!pt.isAdj;
+            // Place label above for positive, below for negative — simple, no fighting
+            const labelY=pt.cum>=0?y-12:y+16;
+            // X-axis: thin dates for 10+ points
+            const showDateLabel=pts.length<=10||(i%Math.ceil(pts.length/10)===0)||i===pts.length-1;
             return `<g>
               <circle cx="${x}" cy="${y}" r="${pt.isPenalty||pt.isAdj?3:5}" fill="${clr}" stroke="var(--bg)" stroke-width="2"/>
-              ${pt.delta!==0&&!pt.isPenalty&&!pt.isAdj?`<text x="${x}" y="${y-10}" text-anchor="middle" fill="${dClr}" font-size="9" font-weight="700">${pt.delta>0?'+':''}₹${(Math.abs(pt.delta)/1000).toFixed(1)}K</text>`:''}
-              <text x="${x}" y="${H-4}" text-anchor="middle" fill="var(--t4)" font-size="8">${pt.isPenalty?'⚠️':pt.isAdj?'💰':dateStr}</text>
+              ${showValLabel?`<text x="${x}" y="${labelY}" text-anchor="middle" fill="${clr}" font-size="9" font-weight="700">${pt.cum>0?'+':''}₹${(Math.abs(pt.cum)/1000).toFixed(1)}K</text>`:''}
+              ${showDateLabel?`<text x="${x}" y="${H-4}" text-anchor="middle" fill="var(--t4)" font-size="8">${pt.isPenalty?'⚠️':pt.isAdj?'💰':dateStr}</text>`:''}
             </g>`}).join('')}
         </svg>
       </div>
