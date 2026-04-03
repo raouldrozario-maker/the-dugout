@@ -1123,26 +1123,33 @@ function rH(){
     }
   }
 
-  // ─── HERO: Next Match or Countdown ───
+  // ─── HERO: Next Match(es) or Countdown ───
+  // Double header support: show all matches on the same day as the next match
   if(nx&&ns.length){
-    const l=lk(nx);
-    h+=`<div class="hero">
-    <div style="font-size:10px;letter-spacing:5px;color:var(--acc);font-weight:800;margin-bottom:16px">${nx.playoff?'PLAYOFF':'NEXT MATCH'}</div>
+    const nxDay=nx.d;
+    const dayMatches=allMatches.filter(m=>m.d===nxDay&&!S.r[m.id]&&m.h!=='TBD');
+    const isDoubleHeader=dayMatches.length>=2;
+
+    dayMatches.forEach((dm,dmIdx)=>{
+    const l=lk(dm);
+    h+=`<div class="hero"${dmIdx>0?' style="margin-top:12px"':''}>
+    <div style="font-size:10px;letter-spacing:5px;color:var(--acc);font-weight:800;margin-bottom:16px">${dm.playoff?'PLAYOFF':isDoubleHeader?(dmIdx===0?'MATCH 1 — DOUBLE HEADER 🏏🏏':'MATCH 2'):'NEXT MATCH'}</div>
     <div style="display:flex;align-items:center;justify-content:center;gap:12px">
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center">${bdg(nx.h,60,true)}</div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center">${bdg(dm.h,60,true)}</div>
       <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px">
         <div style="font-family:var(--ff);font-size:32px;font-weight:700;color:var(--acc)">VS</div>
-        <div style="font-size:14px;color:var(--t2);font-weight:600">${fd(nx.d)}</div>
-        <div style="font-size:12px;color:var(--t4)">${ft(nx.t)} IST</div>
-        <div style="margin-top:8px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:800;display:inline-block;background:${l?'#C4453A18':'#D4A24E18'};color:${l?'var(--red)':'var(--yel)'}">${l?'🔒 LOCKED':'⏱️ '+cd(nx)}</div>
+        <div style="font-size:14px;color:var(--t2);font-weight:600">${fd(dm.d)}</div>
+        <div style="font-size:12px;color:var(--t4)">${ft(dm.t)} IST</div>
+        <div style="margin-top:8px;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:800;display:inline-block;background:${l?'#C4453A18':'#D4A24E18'};color:${l?'var(--red)':'var(--yel)'}">${l?'🔒 LOCKED':'⏱️ '+cd(dm)}</div>
       </div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center">${bdg(nx.a,60,true)}</div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center">${bdg(dm.a,60,true)}</div>
     </div>
-    <div style="margin-top:14px;font-size:12px;color:var(--t3)">📍 ${nx.v}</div>
-    ${(()=>{const nxBets=Object.values(S.b).filter(x=>x.mid===nx.id);const nxWagered=nxBets.reduce((s,x)=>s+x.am,0);return nxBets.length?`<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:13px;font-weight:700"><span style="color:var(--hot)">🔥 ₹${nxWagered.toLocaleString()} in play</span><span style="color:var(--t2)">⚔️ ${nxBets.length} bet${nxBets.length!==1?'s':''}</span></div>`:''})()}
-    ${(()=>{if(!me)return '';const myBet=S.b[nx.id+'-'+me];if(myBet){const od=safeOd(myBet);const potWin=Math.round(myBet.am*(od-1));return `<div style="margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:10px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;color:var(--t2)">Your bet: <strong style="color:${T[myBet.tm]?.c||'var(--acc)'}">${T[myBet.tm]?.s}</strong> · ₹${myBet.am.toLocaleString()}</div><div style="font-size:12px;font-weight:800;color:var(--grn)">Win +₹${potWin.toLocaleString()}</div></div>`}return ''})()}
-    ${me&&!l&&S.odds[nx.id]&&!S.b[nx.id+'-'+me]?`<button style="margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:12px 28px;color:#000;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 4px 14px rgba(212,162,78,0.22)" onclick="nav('matches')">Bet on ${T[nx.h]?.s||'?'} vs ${T[nx.a]?.s||'?'} →</button>`:''}
+    <div style="margin-top:14px;font-size:12px;color:var(--t3)">📍 ${dm.v}</div>
+    ${(()=>{const nxBets=Object.values(S.b).filter(x=>x.mid===dm.id);const nxWagered=nxBets.reduce((s,x)=>s+x.am,0);return nxBets.length?`<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;font-size:13px;font-weight:700"><span style="color:var(--hot)">🔥 ₹${nxWagered.toLocaleString()} in play</span><span style="color:var(--t2)">⚔️ ${nxBets.length} bet${nxBets.length!==1?'s':''}</span></div>`:''})()}
+    ${(()=>{if(!me)return '';const myBet=S.b[dm.id+'-'+me];if(myBet){const od=safeOd(myBet);const potWin=Math.round(myBet.am*(od-1));return `<div style="margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:10px;display:flex;justify-content:space-between;align-items:center"><div style="font-size:12px;color:var(--t2)">Your bet: <strong style="color:${T[myBet.tm]?.c||'var(--acc)'}">${T[myBet.tm]?.s}</strong> · ₹${myBet.am.toLocaleString()}</div><div style="font-size:12px;font-weight:800;color:var(--grn)">Win +₹${potWin.toLocaleString()}</div></div>`}return ''})()}
+    ${me&&!l&&S.odds[dm.id]&&!S.b[dm.id+'-'+me]?`<button style="margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:12px 28px;color:#000;font-weight:900;cursor:pointer;font-size:15px;box-shadow:0 4px 14px rgba(212,162,78,0.22)" onclick="nav('matches')">Bet on ${T[dm.h]?.s||'?'} vs ${T[dm.a]?.s||'?'} →</button>`:''}
     </div>`;
+    });
   } else if(!ns.length){
     // Welcome hero for empty state
     h+=`<div class="hero" style="padding:40px 20px">
@@ -2359,33 +2366,85 @@ setInterval(()=>{
 }
 function getScoutRec(m){
   if(!m||m.h==='TBD')return null;
-  // Scout's logic: home advantage, historical league data, balanced action targeting
-  const hBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.h).length;
-  const aBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.a).length;
-  const hWins=Object.values(S.r).filter(r=>r.w===m.h).length;
-  const aWins=Object.values(S.r).filter(r=>r.w===m.a).length;
-  // Home team gets slight advantage (lower odds = favourite)
-  // Base: home 1.8, away 2.1 — adjust based on league history
-  let hBase=1.85,aBase=2.10;
-  if(hWins>aWins+1){hBase=1.65;aBase=2.40}
-  else if(aWins>hWins+1){hBase=2.20;aBase=1.75}
-  else if(hWins>aWins){hBase=1.75;aBase=2.20}
-  else if(aWins>hWins){hBase=2.05;aBase=1.85}
+  // Scout's logic: league form, head-to-head, venue, betting action, streaks
+  const allResults=Object.entries(S.r).filter(([k,v])=>!v.voided);
+  const hWins=allResults.filter(([k,v])=>v.w===m.h).length;
+  const aWins=allResults.filter(([k,v])=>v.w===m.a).length;
+  const totalResolved=allResults.length;
+
+  // Head-to-head this season
+  const h2hMs=gms().filter(g=>(g.h===m.h&&g.a===m.a)||(g.h===m.a&&g.a===m.h));
+  const h2hResolved=h2hMs.filter(g=>S.r[g.id]&&!S.r[g.id].voided);
+  const h2hHWins=h2hResolved.filter(g=>S.r[g.id].w===m.h).length;
+  const h2hAWins=h2hResolved.filter(g=>S.r[g.id].w===m.a).length;
+
+  // Recent form (last 5 matches each team)
+  const recentMs=allResults.sort(([a],[b])=>parseInt(b)-parseInt(a));
+  const hRecent=recentMs.filter(([k,v])=>{var g=gm(parseInt(k));return g&&(g.h===m.h||g.a===m.h)}).slice(0,5);
+  const aRecent=recentMs.filter(([k,v])=>{var g=gm(parseInt(k));return g&&(g.h===m.a||g.a===m.a)}).slice(0,5);
+  const hForm=hRecent.filter(([k,v])=>v.w===m.h).length;
+  const aForm=aRecent.filter(([k,v])=>v.w===m.a).length;
+
   // Venue factor
-  const venue=m.v||'';
-  const homeVenue=T[m.h]?.home||'';
-  const isHome=venue&&homeVenue&&venue.toLowerCase().includes(homeVenue.toLowerCase());
-  if(isHome){hBase=Math.max(1.5,hBase-0.1);aBase=Math.min(3.0,aBase+0.15)}
-  // Round to 1 decimal
-  const hOd=Math.round(hBase*10)/10;
-  const aOd=Math.round(aBase*10)/10;
-  const hPct=Math.round(1/hOd*100),aPct=Math.round(1/aOd*100);
-  // Build reason
-  let reasons=[];
-  if(isHome)reasons.push(T[m.h]?.s+' playing at home');
-  if(hWins>aWins)reasons.push(T[m.h]?.s+' has '+hWins+'W vs '+aWins+'W in league');
-  else if(aWins>hWins)reasons.push(T[m.a]?.s+' leads '+aWins+'W to '+hWins+'W in league');
-  reasons.push('Target: ~60/40 split for balanced action');
+  const venue=(m.v||'').toLowerCase();
+  const hHome=(T[m.h]?.home||'').toLowerCase();
+  const aHome=(T[m.a]?.home||'').toLowerCase();
+  const isHHome=venue&&hHome&&venue.includes(hHome);
+  const isAHome=venue&&aHome&&venue.includes(aHome);
+
+  // Current betting action on this match
+  const hBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.h);
+  const aBets=Object.values(S.b).filter(b=>b.mid===m.id&&b.tm===m.a);
+  const hAmt=hBets.reduce((s,b)=>s+b.am,0);
+  const aAmt=aBets.reduce((s,b)=>s+b.am,0);
+
+  // Score system: higher = more likely to win → lower odds (favourite)
+  var hScore=50,aScore=50;
+  // Win rate impact (0-15 pts)
+  if(totalResolved>=3){
+    var hWR=hWins/Math.max(1,hWins+aWins);
+    var aWR=aWins/Math.max(1,hWins+aWins);
+    hScore+=Math.round((hWR-0.5)*30);
+    aScore+=Math.round((aWR-0.5)*30);
+  }
+  // Form impact (0-10 pts)
+  if(hRecent.length>=2){hScore+=(hForm-2.5)*4}
+  if(aRecent.length>=2){aScore+=(aForm-2.5)*4}
+  // H2H impact (0-8 pts)
+  if(h2hResolved.length>=1){hScore+=(h2hHWins-h2hAWins)*4;aScore+=(h2hAWins-h2hHWins)*4}
+  // Venue impact (0-6 pts)
+  if(isHHome){hScore+=6;aScore-=3}
+  if(isAHome){aScore+=6;hScore-=3}
+  // Action balancing — if heavy money on one side, shift odds to attract the other
+  if(hAmt+aAmt>0){var hPctAmt=hAmt/(hAmt+aAmt);if(hPctAmt>0.65){aScore+=5}else if(hPctAmt<0.35){hScore+=5}}
+
+  // Clamp scores
+  hScore=Math.max(20,Math.min(80,hScore));
+  aScore=Math.max(20,Math.min(80,aScore));
+
+  // Convert to odds: higher score = lower odds (favourite)
+  // Map 20-80 score → 2.6-1.4 odds range
+  var hOd=Math.round((3.0-hScore/50)*10)/10;
+  var aOd=Math.round((3.0-aScore/50)*10)/10;
+  // Ensure minimum 1.3, maximum 3.0
+  hOd=Math.max(1.3,Math.min(3.0,hOd));
+  aOd=Math.max(1.3,Math.min(3.0,aOd));
+
+  // Build reasons
+  var reasons=[];
+  if(isHHome)reasons.push((T[m.h]?.s||m.h)+' at home ground');
+  else if(isAHome)reasons.push((T[m.a]?.s||m.a)+' at home ground');
+  if(totalResolved>=3){
+    if(hWins>aWins+1)reasons.push((T[m.h]?.s||m.h)+' dominant: '+hWins+'W vs '+aWins+'W');
+    else if(aWins>hWins+1)reasons.push((T[m.a]?.s||m.a)+' dominant: '+aWins+'W vs '+hWins+'W');
+    else if(hWins!==aWins)reasons.push('Close records: '+(T[m.h]?.s||m.h)+' '+hWins+'W, '+(T[m.a]?.s||m.a)+' '+aWins+'W');
+  }
+  if(hForm>=4&&hRecent.length>=4)reasons.push((T[m.h]?.s||m.h)+' on fire ('+hForm+'/'+hRecent.length+' recent)');
+  else if(aForm>=4&&aRecent.length>=4)reasons.push((T[m.a]?.s||m.a)+' on fire ('+aForm+'/'+aRecent.length+' recent)');
+  if(h2hResolved.length>=1)reasons.push('H2H: '+(T[m.h]?.s||m.h)+' '+h2hHWins+'-'+(T[m.a]?.s||m.a)+' '+h2hAWins);
+  if(hAmt+aAmt>5000){var heavy=hAmt>aAmt?(T[m.h]?.s||m.h):(T[m.a]?.s||m.a);reasons.push('Heavy money on '+heavy+' — odds adjusted')}
+  if(!reasons.length)reasons.push('Early season — limited data');
+  reasons.push('Target: balanced house exposure');
   return{hOd:hOd.toFixed(1),aOd:aOd.toFixed(1),reason:reasons.join(' · ')};
 }
 function buildMatchView(mid){
