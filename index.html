@@ -5198,7 +5198,7 @@ function rA(){
   // ─── SUB: rA_commsAndOps ─── ⚠️ GUARDRAIL: Returns HTML. Broadcast, WhatsApp, odds, results, league snapshot, activity log.
   function rA_commsAndOps(){
     var _h='';
-  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📢</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase">COMMS & SUMMARIES</span><div style="flex:1;height:1px;background:var(--bdr);margin-left:8px"></div></div>`;
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📢</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">COMMS & SUMMARIES</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-broadcast" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
   if(S.announce){_h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
@@ -5258,7 +5258,7 @@ function rA(){
   const oddsMatches=gms().filter(m=>!S.r[m.id]&&m.h!=='TBD');
   const ctrlMatches=gms().filter(m=>m.h!=='TBD');
 
-  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚙️</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase">MATCH OPERATIONS</span><div style="flex:1;height:1px;background:var(--bdr);margin-left:8px"></div></div>`;
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚙️</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">MATCH OPERATIONS</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-odds" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div>
     <select class="bf-i" id="odds-m" onchange="oddsMC()" style="cursor:pointer;font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;appearance:auto">
       <option value="">-- Select match --</option>
@@ -5273,7 +5273,7 @@ function rA(){
     </select>
   </div><div id="adm-f"></div></div>`;
   // Set Playoff Teams
-  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📊</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase">LEAGUE OVERVIEW</span><div style="flex:1;height:1px;background:var(--bdr);margin-left:8px"></div></div>`;
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📊</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">LEAGUE OVERVIEW</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-dash" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📋</span><span class="ct">LEAGUE SNAPSHOT</span></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:16px">
   <div style="background:var(--inp);border-radius:10px;padding:12px;text-align:center"><div style="font-size:20px;font-weight:900;color:var(--acc);font-family:var(--ff)">${resolved}/${totalM}</div><div style="font-size:11px;color:var(--t4)">Matches Done</div></div>
@@ -5313,7 +5313,7 @@ function rA(){
   // ─── SUB: rA_playerMgmt ─── ⚠️ GUARDRAIL: Returns HTML. Balance adj, participants, admin bet, manage bets.
   function rA_playerMgmt(){
     var _h='';
-  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">👥</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase">PLAYER MANAGEMENT</span><div style="flex:1;height:1px;background:var(--bdr);margin-left:8px"></div></div>`;
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">👥</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">PLAYER MANAGEMENT</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-balance" class="card"><div class="ch"><span style="font-size:20px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manually add/deduct points or waive weekly penalties for a player.</div>
   <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="adj-player"><option value="">-- Select --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
@@ -5368,7 +5368,7 @@ function rA(){
   // ─── SUB: rA_seasonSetup ─── ⚠️ GUARDRAIL: Returns HTML. Playoffs, Crystal Ball, danger zone.
   function rA_seasonSetup(){
     var _h='';
-  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">🏏</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--t3);letter-spacing:3px;text-transform:uppercase">SEASON SETUP</span><div style="flex:1;height:1px;background:var(--bdr);margin-left:8px"></div></div>`;
+  _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">🏏</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">SEASON SETUP</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-playoff" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.po-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
@@ -5477,7 +5477,7 @@ function rA(){
   }
   _h+=`</div></div>`;
   // Squad Management
-  _h+=`<div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--t4);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px;padding-left:4px">🛠️ SETUP</div>`;
+  _h+=`<div style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px;padding-left:4px">🛠️ SETUP</div>`;
   _h+=`<div id="adm-squads" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">MANAGE SQUADS</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Update captains, add or remove players from team squads.</div>
   <div class="bf-s"><div class="bf-l">Team</div><select class="bf-i" id="sq-team" onchange="sqTeamChange()"><option value="">-- Select --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n} (${T[k].s})</option>`).join('')}</select></div>
@@ -5505,7 +5505,7 @@ function rA(){
   <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
   </div></div>`;
   // Admin Place Bet (override — bypasses lock and player login)
-  _h+=`<div style="font-family:var(--ff);font-size:11px;font-weight:700;color:var(--t4);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px;padding-left:4px">👥 PLAYER & BET MANAGEMENT</div>`;
+  _h+=`<div style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px;padding-left:4px">👥 PLAYER & BET MANAGEMENT</div>`;
   // ── PLAYER & BETS MANAGEMENT ──
 
   _h+=`<div id="adm-placebet" class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
@@ -5514,7 +5514,8 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
   <div id="ab-form"></div></div>`;
   // Manage Bets
-  _h+=`<div id="adm-bets" class="card"><div class="ch"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span></div>`;
+  _h+=`<div id="adm-bets" class="card"><div class="ch" style="cursor:pointer" onclick="var el=$('adm-bets-body');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.mb-chev').textContent=v?'▾':'▸'}"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span><span class="mb-chev" style="margin-left:auto;color:var(--acc);font-size:16px;font-weight:900">▸</span></div>`;
+  _h+=`<div id="adm-bets-body" style="display:none">`;
   const allBets=Object.entries(S.b);
   if(!allBets.length)_h+=`<div style="color:var(--t3);font-size:13px">No bets yet.</div>`;
   else{
@@ -5544,7 +5545,7 @@ function rA(){
       _h+=`</div></div>`;
     });
   }
-  _h+=`</div>`;
+  _h+=`</div></div>`;
 
   // Broadcast Announcement
   // Manual Balance Adjustment
