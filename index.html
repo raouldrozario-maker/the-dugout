@@ -5326,7 +5326,20 @@ function rA(){
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">👥</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">PLAYER MANAGEMENT</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-balance" class="card"><div class="ch"><span style="font-size:20px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manually add/deduct points or waive weekly penalties for a player.</div>
-  <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="adj-player"><option value="">-- Select --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
+  <div class="bf-s"><div class="bf-l">Player</div>
+  <div style="position:relative">
+    <div onclick="var el=$('adj-player-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;transition:all .15s">
+      <span id="adj-player-label" style="font-size:14px;color:var(--t4)">Select player…</span>
+      <span style="color:var(--t4);font-size:12px">▾</span>
+    </div>
+    <input type="hidden" id="adj-player" value="">
+    <div id="adj-player-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+      ${Object.keys(S.p).sort().map(n=>{var b2=bal(n);return`<div onclick="$('adj-player').value='${n.replace(/'/g,"\\\\'")}';$('adj-player-label').textContent='${n.replace(/'/g,"\\\\'")} (₹${b2.toLocaleString()})';$('adj-player-list').style.display='none'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:10px">${n[0].toUpperCase()}</div><span style="font-weight:700;font-size:13px;color:var(--t1)">${n}</span></div>
+        <span style="font-size:12px;color:${b2>=ST?'var(--grn)':'var(--red)'};font-weight:700;font-family:var(--ff)">₹${b2.toLocaleString()}</span>
+      </div>`}).join('')}
+    </div>
+  </div></div>
   <div class="bf-s"><div class="bf-l">Type</div><div style="display:flex;gap:8px">
   <button class="bf-tb" id="adj-add" style="border-color:var(--grn);color:var(--grn);flex:1;font-size:13px;padding:6px" onclick="adjType='add';$('adj-add').style.background='var(--grn)';$('adj-add').style.color='#000';$('adj-ded').style.background='transparent';$('adj-ded').style.color='var(--red)';$('adj-waive').style.background='transparent';$('adj-waive').style.color='var(--yel)'">➕ Add</button>
   <button class="bf-tb" id="adj-ded" style="border-color:var(--red);color:var(--red);flex:1;font-size:13px;padding:6px" onclick="adjType='deduct';$('adj-ded').style.background='var(--red)';$('adj-ded').style.color='#000';$('adj-add').style.background='transparent';$('adj-add').style.color='var(--grn)';$('adj-waive').style.background='transparent';$('adj-waive').style.color='var(--yel)'">➖ Deduct</button>
@@ -5340,7 +5353,7 @@ function rA(){
   _h+=`</div>`;
   // Participants
 
-  _h+=`<div id="adm-players" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.pl-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
+  _h+=`<div id="adm-players" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.pl-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
   Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;_h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#4B8BE515;border:1px solid #4B8BE544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
   _h+=`</div>`;
   // Final Standings (admin only — includes Crystal Ball)
@@ -5379,7 +5392,7 @@ function rA(){
   function rA_seasonSetup(){
     var _h='';
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">🏏</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">SEASON SETUP</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
-  _h+=`<div id="adm-playoff" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.po-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
+  _h+=`<div id="adm-playoff" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.po-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
     const curH=po.h,curA=po.a;
@@ -5391,7 +5404,7 @@ function rA(){
   });
   _h+=`</div></div>`;
   // Crystal Ball Admin
-  _h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25;padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.cb-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div><span class="cb-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
+  _h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.cb-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div><span class="cb-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
   // ── STEP 1: Set Qualifying Teams ──
   const cbTeams=S.cbTeams||[];
@@ -5490,10 +5503,23 @@ function rA(){
   _h+=`<div style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase;margin:20px 0 10px;padding-left:4px">🛠️ SETUP</div>`;
   _h+=`<div id="adm-squads" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">🏏</span><span class="ct">MANAGE SQUADS</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Update captains, add or remove players from team squads.</div>
-  <div class="bf-s"><div class="bf-l">Team</div><select class="bf-i" id="sq-team" onchange="sqTeamChange()"><option value="">-- Select --</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].n} (${T[k].s})</option>`).join('')}</select></div>
+  <div class="bf-s"><div class="bf-l">Team</div>
+  <div style="position:relative" id="sq-dd-wrap">
+    <div id="sq-dd-trigger" onclick="var el=$('sq-dd-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='var(--bdr2)'">
+      <span id="sq-dd-label" style="font-size:14px;color:var(--t4)">Select team…</span>
+      <span style="color:var(--t4);font-size:12px">▾</span>
+    </div>
+    <input type="hidden" id="sq-team" value="">
+    <div id="sq-dd-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:320px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+      ${Object.keys(T).map(k=>`<div onclick="sqDDPick('${k}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+        <div style="width:28px;height:28px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:10px;flex-shrink:0">${T[k].s}</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--t1)">${T[k].n}</div><div style="font-size:10px;color:var(--t4)">${T[k].s}</div></div>
+      </div>`).join('')}
+    </div>
+  </div></div>
   <div id="sq-panel"></div></div>`;
   // Add Match (Phase 2)
-  _h+=`<div id="adm-addmatch" class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.am-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div><span class="am-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
+  _h+=`<div id="adm-addmatch" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.am-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div><span class="am-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Add Phase 2 matches as BCCI announces them. Currently ${MM.length} matches loaded.</div>
   <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
   <div style="flex:1;min-width:70px"><div class="bf-l">Match #</div><input class="bf-i" type="number" id="nm-id" min="1" placeholder="${MM.length+1}" oninput="if(this.value<1)this.value=1"></div>
@@ -5509,7 +5535,7 @@ function rA(){
   <div class="bf-s"><div class="bf-l">Venue</div>
     <div style="position:relative">
       <input class="bf-i" id="nm-venue" placeholder="Search venue..." autocomplete="off" onfocus="nmVenueOpen()" oninput="nmVenueFilter()">
-      <div id="nm-venue-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:10px;margin-top:4px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 4px 20px #00000066"></div>
+      <div id="nm-venue-dd" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;margin-top:2px;max-height:240px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c"></div>
     </div>
   </div>
   <button class="bp" style="width:100%" onclick="addMatch()">➕ Add Match</button>
@@ -5520,8 +5546,42 @@ function rA(){
 
   _h+=`<div id="adm-placebet" class="card" style="border:1px solid #D4A24E25"><div class="ch"><span style="font-size:20px">🔓</span><span class="ct">ADMIN — PLACE BET FOR PLAYER</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Place or override a bet on behalf of a player. Bypasses lock timer and login. Use for special scenarios only.</div>
-  <div class="bf-s"><div class="bf-l">Player</div><select class="bf-i" id="ab-player"><option value="">-- Select player --</option>${Object.keys(S.p).map(n=>`<option value="${n}">${n} (₹${bal(n).toLocaleString()})</option>`).join('')}</select></div>
-  <div class="bf-s"><div class="bf-l">Match</div><select class="bf-i" id="ab-match" onchange="abMatchChange()"><option value="">-- Select match --</option>${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} (${fd(m.d)})${lk(m)?' 🔒':''}</option>`).join('')}</select></div>
+  <div class="bf-s"><div class="bf-l">Player</div>
+  <div style="position:relative">
+    <div onclick="var el=$('ab-player-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;transition:all .15s">
+      <span id="ab-player-label" style="font-size:14px;color:var(--t4)">Select player…</span>
+      <span style="color:var(--t4);font-size:12px">▾</span>
+    </div>
+    <input type="hidden" id="ab-player" value="">
+    <div id="ab-player-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+      ${Object.keys(S.p).sort().map(n=>{var b2=bal(n);return`<div onclick="$('ab-player').value='${n.replace(/'/g,"\\\\'")}';$('ab-player-label').textContent='${n.replace(/'/g,"\\\\'")} (₹${b2.toLocaleString()})';$('ab-player-list').style.display='none'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:10px"><div style="width:26px;height:26px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;color:#000;font-weight:900;font-size:10px">${n[0].toUpperCase()}</div><span style="font-weight:700;font-size:13px;color:var(--t1)">${n}</span></div>
+        <span style="font-size:12px;color:${b2>=ST?'var(--grn)':'var(--red)'};font-weight:700;font-family:var(--ff)">₹${b2.toLocaleString()}</span>
+      </div>`}).join('')}
+    </div>
+  </div></div>
+  <div class="bf-s"><div class="bf-l">Match</div>
+  <div style="position:relative">
+    <div onclick="var el=$('ab-match-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;transition:all .15s">
+      <span id="ab-match-label" style="font-size:14px;color:var(--t4)">Select match…</span>
+      <span style="color:var(--t4);font-size:12px">▾</span>
+    </div>
+    <input type="hidden" id="ab-match" value="">
+    <div id="ab-match-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+      ${gms().filter(m=>!S.r[m.id]&&m.h!=='TBD').map(m=>{var lkd=lk(m);var hs=T[m.h]?.s||m.h;var as2=T[m.a]?.s||m.a;var dt=fd(m.d);return`<div onclick="abMatchPick(${m.id},'${hs}','${as2}','${dt}',${lkd})" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--t4);font-weight:700;min-width:24px">#${m.id}</span>
+          <span style="font-weight:700;font-size:13px;color:${T[m.h]?.c||'var(--t1)'}">${hs}</span>
+          <span style="font-size:11px;color:var(--t4)">vs</span>
+          <span style="font-weight:700;font-size:13px;color:${T[m.a]?.c||'var(--t1)'}">${as2}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:var(--t3)">${dt}</span>
+          ${lkd?'<span style="font-size:10px">🔒</span>':'<span style="font-size:10px;color:var(--grn)">●</span>'}
+        </div>
+      </div>`}).join('')}
+    </div>
+  </div></div>
   <div id="ab-form"></div></div>`;
   // Manage Bets
   _h+=`<div id="adm-bets" class="card"><div class="ch" style="cursor:pointer" onclick="var el=$('adm-bets-body');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.mb-chev').textContent=v?'▾':'▸'}"><span style="font-size:20px">🎰</span><span class="ct">MANAGE BETS</span><span class="mb-chev" style="margin-left:auto;color:var(--acc);font-size:16px;font-weight:900">▸</span></div>`;
@@ -5646,7 +5706,7 @@ function rA(){
 
   // ── DANGER ZONE ──
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚠️</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--red);letter-spacing:3px;text-transform:uppercase">DANGER ZONE</span><div style="flex:1;height:1px;background:rgba(196,69,58,0.2);margin-left:8px"></div></div>`;
-  _h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25;padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.dz-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><span class="dz-chev" style="color:var(--red);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="display:flex;flex-direction:column;gap:10px">
+  _h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.dz-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><span class="dz-chev" style="color:var(--red);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="display:flex;flex-direction:column;gap:10px">
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL bets?',function(){window._dzUndo={b:JSON.parse(JSON.stringify(S.b))};adminLog('bets_clear_all','All bets cleared');S.b={};sv();toast('All bets cleared — tap Undo to restore');rA()})">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL Crystal Ball predictions?',function(){window._dzUndo={ko:JSON.parse(JSON.stringify(S.ko)),koOpen:S.koOpen,koRevealed:S.koRevealed,koWinner:S.koWinner,koPublished:S.koPublished,cbTeams:[...S.cbTeams]};adminLog('crystal_clear','All predictions cleared');S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;S.cbTeams=[];sv();toast('Crystal Ball cleared — tap Undo to restore');rA()})">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
   <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL match results?',function(){window._dzUndo={r:JSON.parse(JSON.stringify(S.r))};adminLog('results_clear_all','All results cleared');S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared — tap Undo to restore');rA()})">📝 Clear All Results</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all match results. Bets stay — balances recalculate without wins/losses.</div></div>
@@ -5666,7 +5726,7 @@ function rA(){
   h+=rA_seasonSetup();
   el.innerHTML=h;
   // Restore squad team selection and re-render panel
-  if(_sqTeam){var sel=$('sq-team');if(sel){sel.value=_sqTeam;sqTeamChange()}}
+  if(_sqTeam){var sel=$('sq-team');if(sel){sel.value=_sqTeam;sqDDPick(_sqTeam)}}
 }
 
 // Admin sub-functions
@@ -5992,13 +6052,39 @@ function voidMatch(id){if(!adm)return;
 
 function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k]?.sq||[]}
 function getCap(k){return(S.capEdits&&S.capEdits[k])||T[k].cap||''}
+function sqDDPick(k){
+  $('sq-team').value=k;
+  var lbl=$('sq-dd-label');
+  if(lbl&&T[k]){
+    var badge=document.createElement('span');
+    badge.style.cssText='display:inline-block;width:24px;height:24px;border-radius:50%;background:'+T[k].c+';color:#fff;font-weight:900;font-size:10px;text-align:center;line-height:24px;margin-right:10px';
+    badge.textContent=T[k].s;
+    lbl.textContent='';lbl.appendChild(badge);lbl.appendChild(document.createTextNode(T[k].n));
+    lbl.style.color='var(--t1)';
+  }
+  $('sq-dd-list').style.display='none';
+  sqTeamChange();
+}
 function sqTeamChange(){
   const k=$('sq-team').value,p=$('sq-panel');
   if(!k){p.innerHTML='';return}
   const sq=getSquad(k),cap=getCap(k);
   let h=`<div style="margin-top:12px">`;
   // Captain
-  h+=`<div class="bf-s"><div class="bf-l" style="color:var(--acc)">Captain</div><div style="display:flex;gap:8px"><select class="bf-i" id="sq-cap" style="flex:1"><option value="">-- Select captain --</option>${sq.map(p=>`<option value="${p}" ${p===cap?'selected':''}>${p}</option>`).join('')}</select><button class="bp" style="padding:8px 14px" onclick="setCap('${k}')">Set</button></div></div>`;
+  h+=`<div class="bf-s"><div class="bf-l" style="color:var(--acc)">Captain</div><div style="display:flex;gap:8px;align-items:flex-start">
+  <div style="flex:1;position:relative">
+    <div onclick="var el=$('sq-cap-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+      <span id="sq-cap-label" style="font-size:14px;color:${cap?'var(--t1)':'var(--t4)'}">${cap?'👑 '+cap:'Select captain…'}</span>
+      <span style="color:var(--t4);font-size:12px">▾</span>
+    </div>
+    <input type="hidden" id="sq-cap" value="${cap||''}">
+    <div id="sq-cap-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:240px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+      ${sq.map(pl=>`<div onclick="$('sq-cap').value='${pl.replace(/'/g,"\\'")}';$('sq-cap-label').textContent='👑 ${pl.replace(/'/g,"\\'")}';$('sq-cap-label').style.color='var(--t1)';$('sq-cap-list').style.display='none'" style="display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s${pl===cap?';background:rgba(212,162,78,0.08)':''}" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='${pl===cap?'rgba(212,162,78,0.08)':'transparent'}'">
+        <span style="font-size:13px;color:var(--t1);font-weight:${pl===cap?'800':'600'}">${pl===cap?'👑 ':''}${pl}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+  <button class="bp" style="padding:12px 14px" onclick="setCap('${k}')">Set</button></div></div>`;
   // Key Players selector
   var kp=S.keyPlayers&&S.keyPlayers[k]?S.keyPlayers[k]:[];
   h+=`<div style="margin-top:14px;padding:12px;background:var(--inp);border:1px solid var(--bdr);border-radius:10px">`;
@@ -6075,6 +6161,13 @@ function sqRemove(k,name){
   // If removed player was captain, clear captain
   if(getCap(k)===name){if(!S.capEdits)S.capEdits={};S.capEdits[k]='';}
   sv(["squadEdits"]);toast(name+' removed from '+T[k].s);sqTeamChange();
+}
+function abMatchPick(mid,hs,as2,dt,lkd){
+  $('ab-match').value=mid;
+  var lbl=$('ab-match-label');
+  if(lbl){lbl.textContent='#'+mid+' '+hs+' vs '+as2+' · '+dt+(lkd?' 🔒':'');lbl.style.color='var(--t1)'}
+  $('ab-match-list').style.display='none';
+  abMatchChange();
 }
 function abMatchChange(){
   const mid=parseInt($('ab-match').value),f=$('ab-form');
@@ -6206,7 +6299,7 @@ function revealKO(){if(!adm)return;adminLog('crystal_reveal','Predictions reveal
 const IPL_VENUES=['M. Chinnaswamy Stadium, Bengaluru','Wankhede Stadium, Mumbai','MA Chidambaram Stadium, Chennai','Eden Gardens, Kolkata','Arun Jaitley Stadium, Delhi','Rajiv Gandhi Intl Stadium, Hyderabad','Narendra Modi Stadium, Ahmedabad','IS Bindra Stadium, Mohali','Sawai Mansingh Stadium, Jaipur','Bharat Ratna Shri Atal Bihari Vajpayee Ekana Stadium, Lucknow','Himachal Pradesh Cricket Association Stadium, Dharamsala','Dr. DY Patil Sports Academy, Navi Mumbai','Maharashtra Cricket Association Stadium, Pune','Barsapara Cricket Stadium, Guwahati','Holkar Cricket Stadium, Indore','JSCA International Stadium Complex, Ranchi','Greenfield International Stadium, Thiruvananthapuram','ACA-VDCA Cricket Stadium, Visakhapatnam'];
 function nmTeamSync(){const h=$('nm-home').value,aSel=$('nm-away');const cur=aSel.value;aSel.innerHTML='<option value="">--</option>';Object.keys(T).forEach(k=>{if(k!==h)aSel.innerHTML+=`<option value="${k}" ${k===cur?'selected':''}>${T[k].s}</option>`})}
 function nmVenueOpen(){const dd=$('nm-venue-dd');dd.style.display='block';nmVenueFilter();setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&e.target.id!=='nm-venue'){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}
-function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr)" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">${v}</div>`).join(''):'<div style="padding:10px 14px;color:var(--t4);font-size:12px">No venues found</div>'}
+function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:12px 16px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">📍 ${v}</div>`).join(''):'<div style="padding:12px 16px;color:var(--t4);font-size:12px">No venues found</div>'}
 function addMatch(){if(!adm)return;
   const id=parseInt($('nm-id').value)||MM.length+1;
   const day=parseInt($('nm-day').value);
@@ -7537,7 +7630,7 @@ window.addEventListener('resize',moveSlider);
     <div style="font-size:9px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px;padding:10px 10px 2px">🏏 Season Setup</div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-playoff')">🏟️ Playoffs</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-crystal')">🔮 Crystal Ball</button>
-    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-squad')">🏷️ Squad Management</button>
+    <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t1);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-squads')">🏷️ Squad Management</button>
     <div style="border-top:1px solid var(--bdr);margin:6px 0"></div>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--t2);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="toggleAdmSheet();downloadBackup()">💾 Download Backup</button>
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--acc);font-size:13px;cursor:pointer;border-radius:8px;font-weight:700" onclick="toggleAdmSheet();openExportModal()">📤 Export Report</button>
@@ -7743,9 +7836,10 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
       if(trueCount>3)garbageFails.push(vName+': boolean "true" as text ('+trueCount+'x)');
       var falseCount=(stripped.match(/(^|[\s>:;,])false([\s<:;,]|$)/g)||[]).length;
       if(falseCount>3)garbageFails.push(vName+': boolean "false" as text ('+falseCount+'x)');
-      // 6. Array dump (4+ comma-separated numbers not in currency format)
+      // 6. Array dump (4+ comma-separated numbers not in currency format or rgba colors)
       var arrayDumps=stripped.match(/(?<![\u20b9\d])\d{1,3}(,\d{1,3}){3,}(?!\d)/g);
-      if(arrayDumps)garbageFails.push(vName+': possible array dump: '+arrayDumps[0].substring(0,30));
+      if(arrayDumps){arrayDumps=arrayDumps.filter(function(d){return stripped.indexOf('rgba')<0||stripped.indexOf(d)-stripped.lastIndexOf('rgba',stripped.indexOf(d))>20})}
+      if(arrayDumps&&arrayDumps.length)garbageFails.push(vName+': possible array dump: '+arrayDumps[0].substring(0,30));
       // 7. Empty object
       if(stripped.indexOf('{}')>=0)garbageFails.push(vName+': empty object "{}"');
       // 8. Function body as text
