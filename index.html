@@ -2103,6 +2103,15 @@ function rM(){
     // ── Dispatch to card sub-function by mode ──
     if(mf==='livebets'&&adm){h+=rM_liveBetCard(m,l,ab,rs);return}
     if(mf==='results'&&rs){h+=rM_resultCard(m,ab,rs);return}
+    // ── My Bets: voided matches — show with return message ──
+    if(mf==='mybets'&&rs&&my&&rs.voided){
+      h+=`<div class="card" style="border-left:4px solid #64748B;padding:14px 16px;margin-bottom:10px;opacity:0.7">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><div style="font-weight:700;font-size:13px;color:var(--t2)">${T[m.h]?.s} vs ${T[m.a]?.s} · ${fd(m.d)}</div>
+          <div style="font-size:11px;color:var(--t4);margin-top:2px">Your bet: ${T[my.tm]?.s} · ₹${my.am.toLocaleString()}</div></div>
+          <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--t4)">🌧️</div>
+          <div style="font-size:11px;color:var(--t4);font-weight:700">Voided — ₹ returned</div></div>
+        </div></div>`;return}
     // ── My Bets: completed matches get collapsed summary ──
     if(mf==='mybets'&&rs&&my&&!rs.voided){h+=rM_myBetCollapsed(m,rs,my);return}
     // ── My Bets: pending/live matches get compact card ──
@@ -4813,6 +4822,7 @@ function rMG(){
       const rs=S.r[bt.mid],od=safeOd(bt);
       let status='',statusClr='',amount='',barClr='var(--acc)';
       if(!rs){status='⏳ Pending';statusClr='var(--acc)';amount=`₹${bt.am.toLocaleString()}`;barClr='var(--acc)'}
+      else if(rs.voided){status='🌧️ Voided';statusClr='var(--t4)';amount='₹0 — returned';barClr='#64748B'}
       else{
         const w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom);
         if(w){
