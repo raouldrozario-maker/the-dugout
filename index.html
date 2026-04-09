@@ -247,124 +247,303 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <script>
 // ┌─────────────────────────────────────────────────────────────┐
-// │  THE DUGOUT v3.5 — FUNCTION MAP (updated 2 Apr 2026)       │
-// │  7,600+ lines · 621 KB · 17 players · IPL 2026             │
+// │  DEVELOPER BRIEFING — READ THIS FIRST                      │
 // └─────────────────────────────────────────────────────────────┘
 //
-// ── CORE ENGINE ──────────────────────────────────────────────
-//   _coreBal(n)          L496   Deterministic balance (with recharge)
-//   bal(n)               L535   Display balance (floored at ₹2K)
-//   betBal(n)            L538   Bettable balance (= bal)
-//   rawBal(n)            L541   True balance (can be < floor)
-//   atRisk(n)            L610   Sum of pending bets
-//   finalBal(n)          L617   Balance + Crystal Ball delta
-//   weeklyPenalty(n)     L631   Penalty calc (skips pre-join + playoffs)
-//   getPenaltyBreakdown  L662   Week-by-week penalty audit
-//   safeOd(bt)           L455   Odds validator (fallback ×2)
-//   isJackpot(bt,mh)     L457   Jackpot check
-//   momMatch(pick,off)   L475   Fuzzy MoM name matching
-//   dl(m) / lk(m)        L463   Deadline / lock check (40min IST)
-//   gm(id) / gms()       L486   Get match / all matches
+// KNOWN FRAGILE AREAS:
+//   - Template literals in renderLockerRoom: do NOT insert comment
+//     lines inside backtick strings — they corrupt the JS parser.
+//     The rMG label insertion incident (Session 4) broke the catch
+//     block by splitting a string across two lines.
+//   - voidMatch(): preserves bets in S.b (was deleting them until
+//     v3.5.1). _coreBal() skips voided matches automatically.
+//   - Firebase .once() chains: both (L1014 initial load, L7235
+//     setup wizard) MUST have .catch() at the end.
+//   - Custom dropdown onclick: use named functions (sqDDPick,
+//     abMatchPick) not inline innerHTML. Nested quotes in template
+//     literals inside onclick break rendering.
+//   - P&L trendline labels: milestone-only (peak/valley/first/last).
+//     ₹0 axis label removed. Don't re-add it — overlaps with data.
 //
-// ── SAFETY HELPERS ────────────────────────────────────────────
-//   safeT(k)             L489   Safe team lookup → stub
-//   safeRender(fn,lbl)   L491   Try-catch → error card on crash
-//   rpn(name)            L563   Resolve renamed players
-//   fixOrphanBets()      L572   Clean bets for deleted players
-//   getSquad(k)          L5888  Squad with admin edits
-//   adminLog(act,det)    L5641  Admin activity log
-//   $(id)                L469   getElementById shorthand
-//   esc(s)               L470   HTML-safe string
+// STANDING RULES:
+//   - FAB audit: exact ID match via python script, not substring.
+//     Run: extract admSheetJump('xxx') → verify id="xxx" exists.
+//   - Syntax check: test block 4 individually with node --check.
+//     Concatenated test can mask errors.
+//   - After any str_replace: grep ALL named functions still exist.
+//   - Admin action functions: test by CALLING the function directly,
+//     not by manually setting S.r/S.b state. The voidMatch bug was
+//     missed because tests set state instead of calling voidMatch().
+//   - Firebase: grep -c "on('value'" must equal grep -c "incomingTs<localTs"
 //
-// ── ANALYTICS & PERSONALITY ───────────────────────────────────
-//   LB()                 L697   Leaderboard (sorted by balance)
-//   getPersonality(n)    L700   Player archetype
-//   getBalBreakdown(n)   L762   Win/loss/streak/min/max
-//   getBettingSig(n)     L2305  Deep personality card
-//   getScoutRec(m)       L2350  AI odds recommendation
-//   predictPenalty(n)    L2442  Penalty prediction
-//   gameStory(n)         L2465  Match narrative generator
-//   narrateOutcome(bt)   L2405  "What happened" text
-//   crowdInsight(..)     L2415  Crowd patterns
-//   alternateReality(bt) L2424  "What if" scenarios
-//   compareWithLeader(n) L2432  Gap to #1
+// NEVER DO:
+//   - Insert comments inside template literal blocks (` ... `)
+//   - Use innerHTML with HTML tags inside onclick="..." attributes
+//   - Use === for b.mid comparisons (Firebase stores as string)
+//     → normalizeBets() converts at load time, but be defensive
+//   - Delete bets from S.b to "refund" — just mark result as voided
+//   - Assume test data shape matches live Firebase shape
 //
-// ── RENDERERS ─────────────────────────────────────────────────
-//   ren()                L1093  Master dispatch
-//   rH()                 L1099  Home
-//   rM()                 L1431  Matches (10 subs below)
-//   rB()                 L2651  Board / Leaderboard
-//   rRu()                L2775  Rules
-//   rT()                 L3099  Teams
-//   rAn()                L3239  Stats (11 sections)
-//   rMG()                L3677  Locker Room (22 sections)
-//   rA()                 L4835  Admin (5 subs below)
+// SEARCH SHORTCUTS:
+//   grep '▼▼▼ GROUP:'  → rMG section groups (10)
+//   grep '── ADMIN:'   → admin mutation functions (8)
+//   grep 'FUNCTION MAP' → full function index with line numbers
+//   grep 'CHANGELOG'    → version history
+//   grep '/**'          → JSDoc on critical functions (19)
 //
-// ── rM SUBS (10) ──────────────────────────────────────────────
-//   rM_onboarding        L1454  rM_balanceBar       L1478
-//   rM_filterBar         L1486  rM_missingBets      L1493
-//   rM_liveBetCard       L1574  rM_resultCard       L1613
-//   rM_fullMatchCard     L1671  rM_crystalBall      L1941
-//   rM_myBetCollapsed    L1982  rM_myBetLive        L2037
+// ┌─────────────────────────────────────────────────────────────┐
+// │  THE DUGOUT v3.5 — FUNCTION MAP (auto-generated)           │
+// │  204 top-level functions · 7989 lines · 655 KB                     │
+// └─────────────────────────────────────────────────────────────┘
+//   ── CORE ENGINE ──
+//   safeOd()                               L432
+//   isJackpot()                            L434
+//   momMatch()                             L452
+//   safeT()                                L466
+//   _coreBal()                             L473
+//   bal()                                  L516
+//   betBal()                               L519
+//   rawBal()                               L522
+//   normalizeBets()                        L553
+//   fixOrphanBets()                        L556
+//   atRisk()                               L594
+//   weeklyPenalty()                        L615
+//   getPenaltyBreakdown()                  L646
+//   LB()                                   L681
+//   ── NAVIGATION ──
+//   nav()                                  L1068
+//   moveSlider()                           L1076
+//   ren()                                  L1077
+//   uh()                                   L1078
+//   ── RENDERS ──
+//   renderHome()                                   L1083
+//   renderMatches()                                   L1422
+//   renderBoard()                                   L2732
+//   renderRules()                                  L2856
+//   renderTeams()                                   L3184
+//   renderStats()                                  L3324
+//   renderLockerRoom()                                  L3763
+//   renderAdmin()                                   L4952
+//   ── RENDER SUBS (renderMatches) ──
+//   renderM_onboarding()                        L1473
+//   renderM_balanceBar()                        L1497
+//   renderM_filterBar()                         L1505
+//   renderM_missingBets()                       L1512
+//   renderM_liveBetCard()                       L1593
+//   renderM_resultCard()                        L1632
+//   renderM_fullMatchCard()                     L1690
+//   renderM_crystalBall()                       L1960
+//   renderM_myBetCollapsed()                    L2001
+//   renderM_myBetLive()                         L2056
+//   ── RENDER SUBS (renderAdmin) ──
+//   renderA_alerts()                            L5003
+//   renderA_statusAndMCB()                      L5091
+//   renderA_commsAndOps()                       L5238
+//   renderA_playerMgmt()                        L5371
+//   renderA_seasonSetup()                       L5439
+//   ── MATCH HELPERS ──
+//   dl()                                   L440
+//   lk()                                   L441
+//   fd()                                   L442
+//   ft()                                   L443
+//   cd()                                   L444
+//   gm()                                   L463
+//   gms()                                  L469
+//   bdg()                                  L798
+//   getDeadlineStr()                       L2725
+//   getSquad()                             L6143
+//   getCap()                               L6144
+//   ── BETTING FLOW ──
+//   oddsMC()                               L5885
+//   admMC()                                L5906
+//   abMatchChange()                        L6262
+//   ── ADMIN MUTATIONS ──
+//   sv()                                   L965
+//   adminLog()                             L5899
+//   voidMatch()                            L6129
+//   sqTeamChange()                         L6158
+//   setCap()                               L6229
+//   sqAdd()                                L6236
+//   sqRemove()                             L6246
+//   saveCBTeams()                          L6326
+//   publishKO()                            L6376
+//   revealKO()                             L6382
+//   addMatch()                             L6393
+//   setPO()                                L6415
+//   delBet()                               L6417
+//   approveJoin()                          L6660
+//   rejectJoin()                           L6669
+//   applyAdj()                             L7161
+//   ── ADMIN DROPDOWNS ──
+//   sqDDPick()                             L6145
+//   abMatchPick()                          L6255
+//   ── ADD MATCH ──
+//   nmTeamSync()                           L6390
+//   nmVenueOpen()                          L6391
+//   nmVenueFilter()                        L6392
+//   addMatch()                             L6393
+//   ── PLAYER FEATURES ──
+//   getPersonality()                       L684
+//   getBettingSignature()                  L2334
+//   playRace()                             L2359
+//   getScoutRec()                          L2379
+//   narrateOutcome()                       L2486
+//   genMatchSummary()                      L6510
+//   savePlayerCardPNG()                    L6721
+//   generatePlayerCard()                   L6885
+//   generateWeeklyWrap()                   L7007
+//   ── UI ──
+//   tipToggle()                            L448
+//   ruJump()                               L453
+//   toast()                                L470
+//   filterLoginList()                      L6541
+//   promptLogin()                          L6546
+//   confetti()                             L6690
+//   openExportModal()                      L7262
+//   toggleAdmSheet()                       L7732
+//   admSheetJump()                         L7733
+//   ── LOGIN ──
+//   ld()                                   L1004
+//   filterLoginList()                      L6541
+//   promptLogin()                          L6546
+//   ── UNCATEGORIZED ──
+//   cdUrgency()                            L445
+//   esc()                                  L447
+//   iTip()                                 L449
+//   momNorm()                              L451
+//   safeRender()                           L468
+//   rpn()                                  L544
+//   finalBal()                             L601
+//   getBalBreakdown()                      L746
+//   momDropdown()                          L803
+//   momDDToggle()                          L831
+//   momDDFilter()                          L849
+//   momDDRender()                          L853
+//   momDDPick()                            L871
+//   momDDClear()                           L880
+//   sdOpen()                               L888
+//   sdFilter()                             L900
+//   sdPick()                               L936
+//   sdClear()                              L946
+//   placeKO()                              L2128
+//   cancelBet()                            L2139
+//   editBet()                              L2162
+//   oBF()                                  L2176
+//   cancelEdit()                           L2235
+//   pk()                                   L2247
+//   fmtAmt()                               L2252
+//   clsVis()                               L2253
+//   clrAmt()                               L2254
+//   parseAmt()                             L2255
+//   calcWin()                              L2257
+//   buildMatchView()                       L2462
+//   crowdInsight()                         L2496
+//   alternateReality()                     L2505
+//   compareWithLeader()                    L2513
+//   predictPenalty()                       L2523
+//   gameStory()                            L2546
+//   calcToggle()                           L2570
+//   sub()                                  L2580
+//   _continueSub()                         L2629
+//   showBetConfirm()                       L2702
+//   shareWA()                              L2712
+//   tBL()                                  L2727
+//   getTagline()                           L3210
+//   isIndian()                             L3316
+//   admToggle()                            L4937
+//   admSectionHdr()                        L4944
+//   mcbState()                             L5162
+//   admL()                                 L5839
+//   admDDToggle()                          L5841
+//   admDDFilter()                          L5884
+//   sOdds()                                L5900
+//   clearOdds()                            L5904
+//   apw()                                  L5930
+//   openResultFlow()                       L5937
+//   renderMCP()                            L5949
+//   mcpSaveOdds()                          L6110
+//   mcpPickWinner()                        L6111
+//   renderMCPMom()                         L6112
+//   mcpConfirm()                           L6120
+//   guidedSelectWinner()                   L6121
+//   guidedSubmit()                         L6122
+//   sRes()                                 L6124
+//   toggleKeyPlayer()                      L6201
+//   saveKeyPlayers()                       L6222
+//   adminPlaceBet()                        L6281
+//   sendReminder()                         L6301
+//   toggleKO()                             L6323
+//   resetCBTeams()                         L6342
+//   selectKOTeam()                         L6346
+//   editKO()                               L6355
+//   deleteKO()                             L6371
+//   openRuleCalcFAB()                      L6422
+//   openRuleCalc()                         L6426
+//   initRuleCalc()                         L6439
+//   rcToggle()                             L6440
+//   rcStyle()                              L6445
+//   calcRule()                             L6451
+//   downloadBackup()                       L6497
+//   copyMatchSummary()                     L6535
+//   showLoginModal()                       L6553
+//   closeLoginModal()                      L6575
+//   setFirstPin()                          L6583
+//   showLoginPrompt()                      L6595
+//   confirmLogin()                         L6596
+//   showRegister()                         L6607
+//   addP()                                 L6633
+//   logout()                               L6677
+//   logn()                                 L6678
+//   postAnnounce()                         L6680
+//   timeAgo()                              L6682
+//   renderMention()                        L6706
+//   hasMention()                           L6716
+//   tryCDN()                               L6727
+//   downloadCanvas()                       L6741
+//   manualCanvas()                         L6752
+//   fallbackCopy()                         L7088
+//   postTrash()                            L7097
+//   delTrash()                             L7115
+//   mentionAC()                            L7121
+//   insertMention()                        L7147
+//   closeMentionDD()                       L7160
+//   editName()                             L7176
+//   resetPin()                             L7201
+//   remP()                                 L7202
+//   dangerAction()                         L7203
+//   dzUndo()                               L7220
+//   rstAll()                               L7230
+//   cFB()                                  L7232
+//   runExport()                            L7266
+//   playerBalHistory()                     L7286
 //
-// ── rA SUBS (5) ───────────────────────────────────────────────
-//   rA_alerts            L4870  Orphans, cancellations, pending
-//   rA_statusAndMCB      L4958  Status + Match Control Board
-//   rA_commsAndOps       L5105  Broadcast, Weekly Wrap, odds
-//   rA_playerMgmt        L5220  Balance adj, participants, bets
-//   rA_seasonSetup       L5275  Playoffs, CB, House P&L, Danger
+// ┌─────────────────────────────────────────────────────────────┐
+// │  CHANGELOG                                                  │
+// └─────────────────────────────────────────────────────────────┘
+// v3.5.1 (10 Apr 2026)
+//   - voidMatch() now preserves bets (was deleting them)
+//   - normalizeBets() added — Firebase string→int type safety
+//   - 10 custom dropdowns replacing native <select>
+//   - P&L trendline: milestone labels, no ₹0 overlap
+//   - Race chart: absolute balance (matches leaderboard)
+//   - Voided matches visible in My Bets + Bet History
+//   - Firebase .catch() on all .once()/.set() calls
+//   - FAB toast on missing sections
+//   - LR guide: 24 entries (4 new v3.5 sections added)
+//   - Manage Bets collapsible, admin header hierarchy gold
+//   - Samsung logo gold fallback
 //
-// ── BET FORM ──────────────────────────────────────────────────
-//   oBF(id)              L2148  Open bet form
-//   sub(id)              L2499  Validate + submit
-//   _continueSub(..)     L2548  Post-confirm placement
-//   cancelBet(id)        L2111  Cancel bet
-//   editBet(id)          L2134  Edit existing bet
-//   calcWin(id)          L2229  Live payout calc
-//   showBetConfirm(html) L2621  Confirmation overlay
-//   placeKO()            L2100  Crystal Ball submit
+// v3.5 (2 Apr 2026)
+//   - renderMatches()/renderAdmin() sub-function refactoring
+//   - God Mode analytics, Player Card, Weekly Wrap
+//   - Safety net recharge model, penalty system
+//   - Firebase sync race condition fix (dual timestamp guards)
+//   - Scout 6-factor recommendation engine
+//   - Post-match summary redesign
+//   - 42-test harness with 10-category render quality scan
 //
-// ── MoM DROPDOWN ──────────────────────────────────────────────
-//   momDropdown(id)      L819   momDDToggle(id)     L847
-//   momDDFilter(id)      L865   momDDRender(id,q)   L869
-//   momDDPick(id,val)    L887   momDDClear(id)      L896
 //
-// ── SHAREABLE CONTENT (NEW) ──────────────────────────────────
-//   generatePlayerCard(n)    L6594  HTML overlay trading card
-//   savePlayerCardPNG(n)     L6430  3-layer: html2canvas→CDN→Canvas
-//   generateWeeklyWrap()     L6716  WhatsApp weekly summary
-//   genMatchSummary(mid)     L6222  Post-match WhatsApp summary
-//   copyMatchSummary(mid)    L6246  Copy summary to clipboard
-//   downloadBackup()         L6209  JSON state backup
-//
-// ── ADMIN ACTIONS ─────────────────────────────────────────────
-//   admL()               L5581  Login/PIN
-//   sOdds(id)            L5642  Save odds
-//   openResultFlow(mid)  L5679  MCP guided result
-//   renderMCP()          L5691  Match Control Panel stepper
-//   sendReminder()       L6013  WhatsApp reminder
-//   toggleKO/reveal/pub  L6035  Crystal Ball transitions
-//   addMatch()           L6105  Add custom match
-//   applyAdj()           L6870  Balance adjustment
-//   editName()/remP()    L6885  Player management
-//
-// ── AUTH & UI ─────────────────────────────────────────────────
-//   nav(v)               L1084  Switch view
-//   toast(msg,type)      L493   Notification (queued)
-//   confetti()           L6399  Win celebration
-//   promptLogin(n)       L6257  Login flow
-//   logout()/logn(n)     L6386  Session management
-//   timeAgo(ts)          L6391  Relative time
-//
-// ── ERROR BOUNDARIES ──────────────────────────────────────────
-//   ren()                L1093  Top-level catch
-//   rAn()                L3677  Stats try-catch
-//   rMG()                L4814  Locker Room try-catch
-//   safeRender()         L491   Section-level catch
-//
-// ── TEST HARNESS (localhost only) ─────────────────────────────
-//   runAllTests()        ~L7500  41 tests
-//
+
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 1: DATA — Teams, matches, constants               │
 // │  🔒 DO NOT EDIT DURING TOURNAMENT unless adding matches     │
@@ -429,6 +608,7 @@ const LOCK_MINUTES=40;      // minutes before match to lock betting
 // │  atRisk, rawBal, finalBal, weeklyPenalty, LB, momMatch,     │
 // │  dl, lk, cd, cdUrgency, getPersonality, getBalBreakdown     │
 // └─────────────────────────────────────────────────────────────┘
+/** Returns bet odds as a safe number. Falls back to ×2.0 if NaN, string, zero, negative, or <1. */
 function safeOd(bt){const v=parseFloat(bt.od);if(isNaN(v)||v<1){if(typeof console!=='undefined')console.error('⚠️ MISSING/INVALID ODDS — fallback to ×2 for match',bt.mid,'player',bt.u,'raw:',bt.od);try{adminLog('odds_fallback','M#'+bt.mid+' player:'+bt.u+' raw:'+bt.od+' fallback:×2')}catch(e){}bt._fb=true;return 2}return v}
 // Jackpot condition helper — readable shorthand
 function isJackpot(bt,mh){return !!(mh&&bt.mt&&bt.tm&&typeof bt.mt==='string'&&typeof bt.tm==='string'&&bt.mt.trim()&&bt.tm.trim()&&bt.mt!==bt.tm)}
@@ -446,9 +626,12 @@ function cdUrgency(m){const df=dl(m)-new Date();if(df<=0)return 0;if(df<=10*6000
 function $(id){return document.getElementById(id)}
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function tipToggle(el){const body=el.parentElement.querySelector('.dg-tip-body');if(!body)return;const open=body.classList.toggle('open');el.classList.toggle('open',open)}
+/** Toggles a collapsible section. trigger = clicked header element, chevSel = CSS selector for chevron character (e.g. '.po-chev'). Toggles display:none/block and ▸/▾. */
+function toggleCollapse(trigger,chevSel){var el=trigger.nextElementSibling;if(!el)return;var open=el.style.display==='none';el.style.display=open?'block':'none';var ch=trigger.querySelector(chevSel);if(ch)ch.textContent=open?'\u25be':'\u25b8'}
 function iTip(id,text){return `<i class="dg-tip" onclick="tipToggle(this)">i</i><div class="dg-tip-body" id="tip-${id}">${text}</div>`}
 // Fuzzy MoM matching — normalizes names to handle "Rohit Sharma" vs "R. Sharma" vs "rohit sharma"
 function momNorm(s){if(!s)return'';return s.trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ')}
+/** Fuzzy MoM matching — handles exact, case-insensitive, initial (V Kohli → Virat Kohli), dot (V. Kohli). Returns boolean. */
 function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0]&&ap[ap.length-1]===bp[bp.length-1])return true}return false}
 function ruJump(id){const el=$(id);if(!el){toast('Not enough data yet for this section');return}
   // Auto-open Full Rulebook if target is inside it
@@ -470,6 +653,7 @@ function gms(){return MM.map(m=>m.playoff&&S.po&&S.po[m.id]?{...m,h:S.po[m.id].h
 function toast(m,t='ok'){const e=$('toast');if(window._tv){if(!window._tq)window._tq=[];if(window._tq.length>=5){const okIdx=window._tq.findIndex(x=>x[1]!=='err');if(okIdx>=0)window._tq.splice(okIdx,1);else window._tq.shift()}window._tq.push([m,t]);return}e.textContent=m;e.style.background=t==='err'?'#C4453A':'#10B981';e.classList.add('show');window._tv=true;clearTimeout(window._tt);const dur=t==='err'?4000:2000;window._tt=setTimeout(()=>{e.classList.remove('show');window._tv=false;if(window._tq&&window._tq.length){const nx=window._tq.shift();setTimeout(()=>toast(nx[0],nx[1]),150)}},dur)}
 
 // Core balance computation — single source of truth
+/** Calculates player balance from scratch. Starts at ST (₹10,000), applies all resolved bets (wins/losses/MoM), adjustments, and penalties. Returns raw balance BEFORE safety net floor. */
 function _coreBal(n){
   let b=ST;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
@@ -513,12 +697,15 @@ function _coreBal(n){
 }
 
 // Player-facing balance (always equals _coreBal now — recharge is built in)
+/** Display balance — _coreBal floored at MINB (₹2,000). This is what the leaderboard shows. */
 function bal(n){return _coreBal(n)}
 
 // Bettable balance (same as bal — recharge means ₹2K is always real and bettable)
+/** Bettable balance — same as bal(). Player can bet up to this amount. */
 function betBal(n){return _coreBal(n)}
 
 // Raw balance WITHOUT recharge floors — only used to detect if player has been recharged
+/** True balance without floor — can be negative. Used for P&L calculations. */
 function rawBal(n){
   let b=ST;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
@@ -550,6 +737,7 @@ function rpn(storedName){
 }
 
 // Fix orphaned bets where bt.u doesn't match any S.p key (runs on data load)
+/** Firebase type safety — converts all bet.mid and bet.am from string to integer. Called after every Firebase data load to prevent === comparison failures. */
 function normalizeBets(){
   Object.values(S.b).forEach(function(bt){if(typeof bt.mid==='string')bt.mid=parseInt(bt.mid)||bt.mid;if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0});
 }
@@ -612,6 +800,7 @@ function finalBal(n){
 // balResolved removed — bal() now only uses resolved results by default
 
 // Weekly penalty: 20% if no bet placed Wed→Tue
+/** Calculates total penalty for missed bets. ₹2,000 per missed league match per week. Respects join date — no retroactive penalties. Excludes voided and playoff matches. */
 function weeklyPenalty(n){
   if(!S.p[n])return 0;
   const userBets=Object.values(S.b).filter(x=>x.u===n);
@@ -678,6 +867,7 @@ function getPenaltyBreakdown(){
   return {weeks,totals};
 }
 
+/** Leaderboard — returns sorted array [{n: playerName, b: balance}] descending by balance. */
 function LB(){return Object.keys(S.p).map(n=>({n,b:bal(n)})).sort((a,b)=>b.b-a.b)}
 
 // Player Personality System
@@ -962,6 +1152,7 @@ function sdClear(id){
 // ══════════════════════════════════════════════════════════════
 // STORAGE — Granular Firebase sync to prevent multi-user overwrites
 // ══════════════════════════════════════════════════════════════
+/** Saves state to Firebase and localStorage. Optional keys[] param for partial sync (e.g. sv(['b','r']) saves only bets and results). Adds timestamp for sync conflict resolution. */
 function sv(keys){
   // Strip transient _fb flags from bets before persisting
   const cleanB=()=>{if(S.b)Object.values(S.b).forEach(bt=>{delete bt._fb})};
@@ -1059,8 +1250,8 @@ function ld(){
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 5: NAVIGATION + VIEWS — All render functions       │
 // │  ✅ SAFE TO EDIT — UI changes, layout, display logic        │
-// │  rH (Home), rM (Matches), rB (Board), rRu (Rules),         │
-// │  rT (Teams), rAn (Stats), rMG (Locker Room), rA (Admin)    │
+// │  renderHome (Home), renderMatches (Matches), renderBoard (Board), renderRules (Rules),         │
+// │  renderTeams (Teams), renderStats (Stats), renderLockerRoom (Locker Room), renderAdmin (Admin)    │
 // └─────────────────────────────────────────────────────────────┘
 // ══════════════════════════════════════════════════════════════
 // NAVIGATION
@@ -1070,17 +1261,18 @@ function nav(v){
   // Admin access control
   if(v==='admin'){
     if(!adm&&!S.pin){toast('Not allowed','err');return} // no admin system → block entirely
-    // if PIN exists but not logged in → allow through to show login screen (rA handles the gate)
+    // if PIN exists but not logged in → allow through to show login screen (renderAdmin handles the gate)
   }
   vw=v;document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b.dataset.v===v));['home','matches','board','rules','teams','analytics','mygame','admin'].forEach(x=>{$('v-'+x).style.display=x===v?'block':'none'});ren();const rf=$('ru-fab'),rs=$('ru-sheet'),af=$('adm-fab'),as=$('adm-sheet'),tf=$('tm-fab'),ts=$('tm-sheet');if(rf)rf.style.display=v==='rules'?'block':'none';if(rs&&v!=='rules')rs.style.display='none';if(af)af.style.display=v==='admin'&&adm?'block':'none';if(as&&v!=='admin')as.style.display='none';if(tf){tf.style.display=v==='teams'?'block':'none';if(v==='teams'){const tl=$('tm-sheet-list');if(tl){tl.innerHTML='';Object.keys(T).forEach(k=>{tl.innerHTML+=`<button style="text-align:left;background:0;border:0;padding:8px 10px;color:${T[k].c};font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;font-family:var(--ff)" onclick="ruJump('team-${k}');$('tm-sheet').style.display='none'">${T[k].s} <span style="font-weight:400;color:var(--t4);font-family:var(--fb)">${T[k].n}</span></button>`})}}}if(ts&&v!=='teams')ts.style.display='none';const sf=$('st-fab'),ss=$('st-sheet'),mf=$('mg-fab'),ms=$('mg-sheet');if(sf)sf.style.display=v==='analytics'?'block':'none';if(ss&&v!=='analytics')ss.style.display='none';if(mf)mf.style.display=v==='mygame'?'block':'none';if(ms&&v!=='mygame')ms.style.display='none';moveSlider()}
 function moveSlider(){const active=document.querySelector('.nb.on');const slider=$('nav-slider');const navEl=document.querySelector('nav');if(!active||!slider||!navEl)return;const nr=navEl.getBoundingClientRect();const ar=active.getBoundingClientRect();const pad=ar.width*0.15;slider.style.left=(ar.left-nr.left+pad)+'px';slider.style.width=(ar.width-pad*2)+'px'}
-function ren(){if(_uiDDCount>0||_betFormOpen>0)return;try{({home:rH,matches:rM,board:rB,rules:rRu,teams:rT,analytics:rAn,mygame:rMG,admin:rA})[vw]?.()}catch(e){const el=$('v-'+vw);if(el)el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Error loading '+vw+'</strong><br><br><code style="font-size:11px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('ren() crash on '+vw+':',e)}const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length+Object.keys(S.pendingJoins||{}).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
+function ren(){if(_uiDDCount>0||_betFormOpen>0)return;try{({home:renderHome,matches:renderMatches,board:renderBoard,rules:renderRules,teams:renderTeams,analytics:renderStats,mygame:renderLockerRoom,admin:renderAdmin})[vw]?.()}catch(e){const el=$('v-'+vw);if(el)el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Error loading '+vw+'</strong><br><br><code style="font-size:11px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('ren() crash on '+vw+':',e)}const mb=document.querySelector('[data-v="matches"]');if(mb){const hasLive=gms().some(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');mb.classList.toggle('has-live',hasLive)}const abg=$('adm-badge');if(abg){const nc=(S.cancelNudges||[]).length+Object.keys(S.pendingJoins||{}).length;abg.style.display=nc?'block':'none';abg.textContent=nc}}
 function uh(){const e=$('hu');if(me&&S.p[me]){e.style.display='flex';$('ha').textContent=me[0].toUpperCase();$('hn').textContent=me;const b=bal(me);$('hb').textContent='₹'+b.toLocaleString();$('hb').style.color=b>=ST?'var(--grn)':'var(--red)'}else e.style.display='none'}
 
 // ══════════════════════════════════════════════════════════════
 // HOME
 // ══════════════════════════════════════════════════════════════
-function rH(){
+/** Renders the Home tab — next match card, live ticker, player login grid, onboarding. */
+function renderHome(){
   const el=$('v-home'),ns=Object.keys(S.p),L=LB(),allMatches=gms(),nx=allMatches.find(m=>!m.playoff&&!lk(m))||allMatches.find(m=>m.playoff&&m.h!=='TBD'&&!S.r[m.id])||allMatches[allMatches.length-1];
   let h='';
   const totalBets=Object.keys(S.b).length,totalResolved=Object.keys(S.r).length;
@@ -1310,7 +1502,7 @@ function rH(){
         h+=`<div data-player="${esc(lastUser)}" style="display:flex;align-items:center;gap:12px;padding:14px;background:linear-gradient(135deg,rgba(212,162,78,0.08),rgba(212,162,78,0.02));border:1px solid rgba(212,162,78,0.2);border-radius:12px;margin-bottom:14px;cursor:pointer;transition:all .18s" onmouseover="this.style.borderColor='rgba(212,162,78,0.4)'" onmouseout="this.style.borderColor='rgba(212,162,78,0.2)'">
           <div class="ca" style="width:36px;height:36px;font-size:16px">${lastUser[0].toUpperCase()}</div>
           <div style="flex:1"><div style="font-size:11px;color:var(--t4);font-weight:700">⚡ CONTINUE AS</div><div style="font-weight:800;font-size:15px;color:var(--acc)">${lastUser}</div></div>
-          ${adm?`<button onclick="event.stopPropagation();localStorage.removeItem('dg-last-user');me=null;toast('Cleared');rH()" style="background:rgba(196,69,58,0.1);border:1px solid rgba(196,69,58,0.2);border-radius:8px;padding:4px 10px;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0">Forget</button>`:``}
+          ${adm?`<button onclick="event.stopPropagation();localStorage.removeItem('dg-last-user');me=null;toast('Cleared');renderHome()" style="background:rgba(196,69,58,0.1);border:1px solid rgba(196,69,58,0.2);border-radius:8px;padding:4px 10px;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0">Forget</button>`:``}
           <div style="font-size:18px;color:var(--acc);opacity:.5">→</div>
         </div>`;
       }
@@ -1419,7 +1611,8 @@ function rH(){
 // ══════════════════════════════════════════════════════════════
 // MATCHES
 // ══════════════════════════════════════════════════════════════
-function rM(){
+/** Renders the Matches tab. Filters: upcoming, locked, results, mybets (player), livebets/missing (admin). Dispatches to sub-renderers per card type. */
+function renderMatches(){
   const el=$('v-matches');
   if(!me&&!adm){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Pick your name first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
   // Guard: admin-only filters reset for non-admin
@@ -1469,13 +1662,13 @@ function rM(){
   })();
 
 
-  // ─── SUB: rM_onboarding ─── ⚠️ GUARDRAIL: Returns HTML. Do NOT edit without regression.
-  function rM_onboarding(){
+  // ─── SUB: renderM_onboarding ─── ⚠️ GUARDRAIL: Returns HTML. Do NOT edit without regression.
+  function renderM_onboarding(){
     var _h='';
   // ─── FIRST-TIME ONBOARDING ───
   if(myBetCount===0&&!onboardDismissed){
     _h+=`<div style="background:linear-gradient(135deg,#152240,#0E1528);border:1px solid var(--acc);border-radius:16px;padding:20px;margin-bottom:16px;position:relative">
-      <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="position:absolute;top:10px;right:14px;background:0;border:0;color:var(--t4);font-size:18px;cursor:pointer">&times;</button>
+      <button onclick="localStorage.setItem('dg-onboard-done','1');renderMatches()" style="position:absolute;top:10px;right:14px;background:0;border:0;color:var(--t4);font-size:18px;cursor:pointer">&times;</button>
       <div style="font-family:var(--ff);font-size:16px;font-weight:700;color:var(--acc);letter-spacing:1px;margin-bottom:14px">👋 WELCOME TO THE DUGOUT!</div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--t2);line-height:1.5">
         <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:18px;flex-shrink:0">1️⃣</span><span><strong style="color:var(--t1)">Pick a team</strong> — tap the team badge you think will win</span></div>
@@ -1486,30 +1679,30 @@ function rM(){
       <div style="margin-top:14px;padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E18;border-radius:10px;font-size:12px;color:var(--acc)">
         💡 <strong>Tip:</strong> Bet at least once per active week. Pick a Man of the Match for a safety net! Penalty: ₹2,000 penalty. Check the Rules tab for the full playbook.
       </div>
-      <button onclick="localStorage.setItem('dg-onboard-done','1');rM()" style="width:100%;margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px">Got it — let's go! 🏏</button>
+      <button onclick="localStorage.setItem('dg-onboard-done','1');renderMatches()" style="width:100%;margin-top:14px;background:var(--grad);border:0;border-radius:10px;padding:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px">Got it — let's go! 🏏</button>
     </div>`;
   }
 
     return _h;
   }
 
-  // ─── SUB: rM_balanceBar ─── ⚠️ GUARDRAIL: Returns HTML.
-  function rM_balanceBar(){
+  // ─── SUB: renderM_balanceBar ─── ⚠️ GUARDRAIL: Returns HTML.
+  function renderM_balanceBar(){
     var _h='';
   if(me){_h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">${me[0].toUpperCase()}</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Playing as</div><div style="font-weight:800;font-size:15px">${me}</div></div></div><div style="text-align:right"><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Balance</div><div class="bb-a" style="color:${b>=ST?'var(--grn)':'var(--red)'}">₹${b.toLocaleString()}</div>${safetyNet?`<div style="font-size:10px;color:var(--yel);font-weight:700;margin-top:2px">🛡️ Safety net active${iTip('safety','Recharged to ₹2,000 — this is real money. Bet with it and start your comeback!')}</div>`:''}${b!==bAvail?`<div style="font-size:12px;color:var(--t2);font-weight:600">Available: ₹${bAvail.toLocaleString()}</div>`:''}${risk>0?`<div style="font-size:12px;color:var(--acc);font-weight:700;background:#D4A24E08;padding:4px 10px;border-radius:6px;display:inline-block;margin-top:4px">⚡ ₹${risk.toLocaleString()} at risk${iTip('risk','This is the total you could lose if all your pending bets fail. Your bets are locked in — even on double headers, you can bet on both matches.')}</div>`:''}</div></div>`}
   else if(adm){_h+=`<div class="bb"><div style="display:flex;align-items:center;gap:10px"><div class="bb-d">⚙️</div><div><div style="font-size:10px;color:var(--t3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Viewing as</div><div style="font-weight:800;font-size:15px;color:var(--acc)">Admin</div></div></div></div>`}
     return _h;
   }
 
-  // ─── SUB: rM_filterBar ─── ⚠️ GUARDRAIL: Returns HTML.
-  function rM_filterBar(){
+  // ─── SUB: renderM_filterBar ─── ⚠️ GUARDRAIL: Returns HTML.
+  function renderM_filterBar(){
     var _h='';
-  _h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';rM()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';rM()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';rM()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';rM()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';rM()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">Placed</button><button class="fb ${mf==='missing'?'on':''}" onclick="mf='missing';rM()" style="color:${mf==='missing'?'var(--hot)':'var(--t3)'}">No Bets</button>`:''}</div>`;
+  _h+=`<div class="fr"><button class="fb ${mf==='upcoming'?'on':''}" onclick="mf='upcoming';renderMatches()">Open</button><button class="fb ${mf==='locked'?'on':''}" onclick="mf='locked';renderMatches()">Locked</button><button class="fb ${mf==='results'?'on':''}" onclick="mf='results';renderMatches()">Results</button><button class="fb ${mf==='mybets'?'on':''}" onclick="mf='mybets';renderMatches()">My Bets</button>${adm?`<button class="fb ${mf==='livebets'?'on':''}" onclick="mf='livebets';renderMatches()" style="color:${mf==='livebets'?'var(--acc)':'var(--t3)'}">Placed</button><button class="fb ${mf==='missing'?'on':''}" onclick="mf='missing';renderMatches()" style="color:${mf==='missing'?'var(--hot)':'var(--t3)'}">No Bets</button>`:''}</div>`;
     return _h;
   }
 
-  // ─── SUB: rM_missingBets ─── ⚠️ GUARDRAIL: Returns HTML. Admin missing bets panel.
-  function rM_missingBets(){
+  // ─── SUB: renderM_missingBets ─── ⚠️ GUARDRAIL: Returns HTML. Admin missing bets panel.
+  function renderM_missingBets(){
     var _h='';
     const players=Object.keys(S.p).sort();
     const openMatches=allM.filter(m=>!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');
@@ -1540,7 +1733,7 @@ function rM(){
         const statusLabel=l?'🔒 LOCKED':'⏱ '+cd(m);
         const isOpen=!l&&!S.r[m.id];
         _h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden;border-left:3px solid ${missing.length===0?'var(--grn)':'var(--hot)'}">
-          <div style="padding:16px 18px;cursor:pointer" onclick="var el=this.nextElementSibling;var o=el.style.display==='none';el.style.display=o?'block':'none';this.querySelector('.ms-chev').textContent=o?'▾':'▸';if(!window._msOpen)window._msOpen={};window._msOpen[${m.id}]=o">
+          <div style="padding:16px 18px;cursor:pointer" onclick="toggleCollapse(this,'.ms-chev')"if(!window._msOpen)window._msOpen={};window._msOpen[${m.id}]=o">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
               <div style="display:flex;align-items:center;gap:10px">
                 <span class="ms-chev" style="color:var(--acc);font-size:14px;font-weight:700">${window._msOpen&&window._msOpen[m.id]?'▾':'▸'}</span>
@@ -1589,14 +1782,14 @@ function rM(){
     return _h;
   }
 
-  // ─── SUB: rM_liveBetCard ─── ⚠️ GUARDRAIL: Returns HTML for one live bet card.
-  function rM_liveBetCard(m,l,ab,rs){
+  // ─── SUB: renderM_liveBetCard ─── ⚠️ GUARDRAIL: Returns HTML for one live bet card.
+  function renderM_liveBetCard(m,l,ab,rs){
     var _h='';
       const hB=ab.filter(x=>x.tm===m.h),aB=ab.filter(x=>x.tm===m.a);
       const tAm=ab.reduce((s,x)=>s+x.am,0);
       const statusTag=rs?(rs.voided?'🌧️':'✅'):l?'🔒':'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#3FB08C;animation:livePulse 1.5s ease-in-out infinite;vertical-align:middle"></span>';
       _h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="var el=this.nextElementSibling;var o=el.style.display==='none';el.style.display=o?'block':'none';this.querySelector('.lv-chev').textContent=o?'▾':'▸';if(!window._liveOpen)window._liveOpen={};window._liveOpen[${m.id}]=o">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="toggleCollapse(this,'.lv-chev')"if(!window._liveOpen)window._liveOpen={};window._liveOpen[${m.id}]=o">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <span class="lv-chev" style="color:var(--acc);font-size:14px;font-weight:700">${window._liveOpen&&window._liveOpen[m.id]?'▾':'▸'}</span>
             <span style="font-weight:800;font-size:14px;color:var(--t1)">M${m.id} · ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}</span>
@@ -1628,14 +1821,14 @@ function rM(){
     return _h;
   }
 
-  // ─── SUB: rM_resultCard ─── ⚠️ GUARDRAIL: Returns HTML for one result card.
-  function rM_resultCard(m,ab,rs){
+  // ─── SUB: renderM_resultCard ─── ⚠️ GUARDRAIL: Returns HTML for one result card.
+  function renderM_resultCard(m,ab,rs){
     var _h='';
       const winners=ab.filter(x=>x.tm===rs.w),losers=ab.filter(x=>x.tm!==rs.w);
       const tAm=ab.reduce((s,x)=>s+x.am,0);
       const momHits=ab.filter(x=>momMatch(x.mom,rs.mom));
       _h+=`<div class="card" style="padding:0;margin-bottom:10px;overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="var el=this.nextElementSibling;var o=el.style.display==='none';el.style.display=o?'block':'none';this.querySelector('.rs-chev').textContent=o?'▾':'▸';if(!window._resOpen)window._resOpen={};window._resOpen[${m.id}]=o">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer;background:var(--card)" onclick="toggleCollapse(this,'.rs-chev')"if(!window._resOpen)window._resOpen={};window._resOpen[${m.id}]=o">
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
             <span class="rs-chev" style="color:var(--acc);font-size:14px;font-weight:700">${window._resOpen&&window._resOpen[m.id]?'▾':'▸'}</span>
             <span style="font-weight:800;font-size:14px;color:var(--t1)">${T[m.h]?.s} vs ${T[m.a]?.s}</span>
@@ -1686,8 +1879,8 @@ function rM(){
     return _h;
   }
 
-  // ─── SUB: rM_fullMatchCard ─── ⚠️ GUARDRAIL: Returns HTML. Largest sub-function in rM.
-  function rM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk){
+  // ─── SUB: renderM_fullMatchCard ─── ⚠️ GUARDRAIL: Returns HTML. Largest sub-function in renderMatches.
+  function renderM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk){
     var _h='';
 
     const hBets=ab.filter(x=>x.tm===m.h).length,aBets=ab.filter(x=>x.tm===m.a).length;
@@ -1956,8 +2149,8 @@ function rM(){
     return _h;
   }
 
-  // ─── SUB: rM_crystalBall ─── ⚠️ GUARDRAIL: Returns HTML.
-  function rM_crystalBall(){
+  // ─── SUB: renderM_crystalBall ─── ⚠️ GUARDRAIL: Returns HTML.
+  function renderM_crystalBall(){
     var _h='';
   // Crystal Ball section
   if(me&&S.koOpen&&!S.koRevealed){
@@ -1987,18 +2180,18 @@ function rM(){
   }
 
   // ═══ ASSEMBLY ═══ ⚠️ GUARDRAIL: Do NOT reorder sub-function calls without full regression.
-  h+=rM_onboarding();
-  h+=rM_balanceBar();
-  h+=rM_filterBar();
-  if(mf==='missing'&&adm){h+=rM_missingBets();el.innerHTML=h;return}
+  h+=renderM_onboarding();
+  h+=renderM_balanceBar();
+  h+=renderM_filterBar();
+  if(mf==='missing'&&adm){h+=renderM_missingBets();el.innerHTML=h;return}
   if(mf==='livebets'&&adm){
     h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 16px;background:rgba(212,162,78,0.04);border:1px solid rgba(212,162,78,0.12);border-radius:12px">
       <span style="font-size:18px">👁</span>
       <div><div style="font-size:12px;font-weight:800;color:var(--acc);letter-spacing:1px">ADMIN — PLACED BETS</div><div style="font-size:11px;color:var(--t4)">All bets across matches · Only you can see this</div></div>
     </div>`;
   }
-  // ─── SUB: rM_myBetCollapsed ─── Slim summary row for completed bets in My Bets tab
-  function rM_myBetCollapsed(m,rs,my){
+  // ─── SUB: renderM_myBetCollapsed ─── Slim summary row for completed bets in My Bets tab
+  function renderM_myBetCollapsed(m,rs,my){
     var _h='';
     const won=my.tm===rs.w;
     const mh=momMatch(my.mom,rs.mom);
@@ -2046,14 +2239,14 @@ function rM(){
         <span class="mb-chev" style="color:var(--t4);font-size:12px;margin-left:4px;flex-shrink:0">▸</span>
       </div>
       <div id="${uid}" style="display:none">
-        ${rM_fullMatchCard(m,true,rs,my,Object.values(S.b).filter(x=>x.mid===m.id),S.odds[m.id],MM.filter(x=>x.d===m.d).length>1,m.id+'-'+my.u)}
+        ${renderM_fullMatchCard(m,true,rs,my,Object.values(S.b).filter(x=>x.mid===m.id),S.odds[m.id],MM.filter(x=>x.d===m.d).length>1,m.id+'-'+my.u)}
       </div>
     </div>`;
     return _h;
   }
 
-  // ─── SUB: rM_myBetLive ─── Compact card for pending/locked bets in My Bets tab
-  function rM_myBetLive(m,my,ab,mo){
+  // ─── SUB: renderM_myBetLive ─── Compact card for pending/locked bets in My Bets tab
+  function renderM_myBetLive(m,my,ab,mo){
     var _h='';
     const od=safeOd(my);
     const potProfit=Math.round(my.am*(od-1));
@@ -2104,8 +2297,8 @@ function rM(){
     const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>parseInt(x.mid)===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
 
     // ── Dispatch to card sub-function by mode ──
-    if(mf==='livebets'&&adm){h+=rM_liveBetCard(m,l,ab,rs);return}
-    if(mf==='results'&&rs){h+=rM_resultCard(m,ab,rs);return}
+    if(mf==='livebets'&&adm){h+=renderM_liveBetCard(m,l,ab,rs);return}
+    if(mf==='results'&&rs){h+=renderM_resultCard(m,ab,rs);return}
     // ── My Bets: voided matches — show with return message ──
     if(mf==='mybets'&&rs&&my&&rs.voided){
       h+=`<div class="card" style="border-left:4px solid #64748B;padding:14px 16px;margin-bottom:10px;opacity:0.7">
@@ -2116,12 +2309,12 @@ function rM(){
           <div style="font-size:11px;color:var(--t4);font-weight:700">Voided — ₹ returned</div></div>
         </div></div>`;return}
     // ── My Bets: completed matches get collapsed summary ──
-    if(mf==='mybets'&&rs&&my&&!rs.voided){h+=rM_myBetCollapsed(m,rs,my);return}
+    if(mf==='mybets'&&rs&&my&&!rs.voided){h+=renderM_myBetCollapsed(m,rs,my);return}
     // ── My Bets: pending/live matches get compact card ──
-    if(mf==='mybets'&&!rs&&my&&l){h+=rM_myBetLive(m,my,ab,mo);return}
-    h+=rM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk);
+    if(mf==='mybets'&&!rs&&my&&l){h+=renderM_myBetLive(m,my,ab,mo);return}
+    h+=renderM_fullMatchCard(m,l,rs,my,ab,mo,dh,bk);
   });
-  h+=rM_crystalBall();
+  h+=renderM_crystalBall();
   el.innerHTML=h;
 }
 
@@ -2133,7 +2326,7 @@ function placeKO(){
   if(!confirm(`🔒 SECRET BET\n\n${T[team]?.n} to win IPL 2026\n₹${amount.toLocaleString()} (${pct}% of your balance)\n\nThis is permanent — you cannot change it.\nOnly you and the admin will see this until the reveal.\n\nConfirm?`))return;
   if(!S.ko)S.ko={};
   S.ko[me]={team,pct,amount,ts:new Date().toISOString()};
-  sv(['ko']);toast('Crystal Ball prediction locked! 🔮');rM();
+  sv(['ko']);toast('Crystal Ball prediction locked! 🔮');renderMatches();
 }
 
 function cancelBet(id){
@@ -2156,7 +2349,7 @@ function cancelBet(id){
     if(!S.cancelNudges)S.cancelNudges=[];
     S.cancelNudges.push({player:me,team:old.tm,amt:old.am,mid:id,od:old.od,mom:old.mom||null,ts:new Date().toISOString()});
     delete S.b[bk];delete bfs[id];
-    sv(['b','cancelNudges']);toast('Bet cancelled — ₹'+old.am.toLocaleString()+' returned');rM();
+    sv(['b','cancelNudges']);toast('Bet cancelled — ₹'+old.am.toLocaleString()+' returned');renderMatches();
   });
 }
 function editBet(id){
@@ -2331,6 +2524,7 @@ function calcWin(id){
   }
 }
 
+/** Personality engine — analyses betting patterns and returns a play style: sniper, whale, oracle, gambler, fortress, streakRider, comeback, iceman, or wildcard. Each has emoji, title, desc, stats. */
 function getBettingSignature(name){
   const ub=Object.values(S.b).filter(x=>x.u===name);
   const resolved=ub.filter(x=>S.r[x.mid]&&!S.r[x.mid].voided);
@@ -2376,6 +2570,7 @@ setInterval(()=>{
     step++;
   },600);
 }
+/** Scout recommendation engine. 6-factor scoring: win rate (±15), recent form (±10), H2H (±8), venue (±6), betting action (±5). Returns {hOd, aOd, reasons[]}. Odds range 1.3-3.0. */
 function getScoutRec(m){
   if(!m||m.h==='TBD')return null;
   // Scout's logic: league form, head-to-head, venue, betting action, streaks
@@ -2695,7 +2890,7 @@ function _continueSub(id,f,m,od,am,mom,bk,isEditing,b,ai){
       setTimeout(function(){confetti()},200);
       setTimeout(function(){overlay.style.animation='fadeOut .3s ease-in forwards';setTimeout(function(){overlay.remove()},300)},2200);
     })();
-    setTimeout(function(){toast('Locked in! ₹'+am.toLocaleString()+' on '+(T[f.tm]?.s||f.tm)+' 🔒');rM();},2400);
+    setTimeout(function(){toast('Locked in! ₹'+am.toLocaleString()+' on '+(T[f.tm]?.s||f.tm)+' 🔒');renderMatches();},2400);
   });
 }
 
@@ -2729,7 +2924,7 @@ function tBL(id){const e=$('bl-'+id);if(e){const open=e.style.display==='none';e
 // ══════════════════════════════════════════════════════════════
 // LEADERBOARD
 // ══════════════════════════════════════════════════════════════
-function rB(){
+function renderBoard(){
   const el=$('v-board'),L=LB(),rc=Object.keys(S.r).length;
   const hasDiff=L.some(p=>p.b!==ST);
   const maxBal=L.length?Math.max(...L.map(p=>p.b)):ST;
@@ -2853,7 +3048,7 @@ function rB(){
 // ══════════════════════════════════════════════════════════════
 // RULES
 // ══════════════════════════════════════════════════════════════
-function rRu(){
+function renderRules(){
   const el=$('v-rules');
   // Helper builders
   const secH=(num,emoji,title)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><span style="font-family:var(--ff);font-size:13px;font-weight:900;color:var(--t4);letter-spacing:1px">§${num}</span><span style="font-size:20px">${emoji}</span><span class="ct" style="font-size:15px">${title}</span></div>`;
@@ -3181,7 +3376,7 @@ function rRu(){
   // Init calculator
   setTimeout(()=>{initRuleCalc()},50);
 }
-function rT(){
+function renderTeams(){
   const el=$('v-teams');
   const allBets=Object.values(S.b);
   const resolvedBets=allBets.filter(b=>S.r[b.mid]&&!S.r[b.mid].voided);
@@ -3321,7 +3516,7 @@ function isIndian(name){
 // ══════════════════════════════════════════════════════════════
 // ANALYTICS
 // ══════════════════════════════════════════════════════════════
-function rAn(){
+function renderStats(){
   try{
   const el=$('v-analytics');
   const allBets=Object.values(S.b),resolved=Object.keys(S.r),players=Object.keys(S.p);
@@ -3753,14 +3948,15 @@ function rAn(){
   }
 
   el.innerHTML=h;
-  }catch(e){const _el=$('v-analytics');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Stats Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('rAn crash:',e)}
+  }catch(e){const _el=$('v-analytics');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Stats Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('renderStats crash:',e)}
 }
 
 // ══════════════════════════════════════════════════════════════
 // LOCKER ROOM
 // ══════════════════════════════════════════════════════════════
 let mgPlayer=null;
-function rMG(){
+/** Renders Locker Room — 23 sections in 10 groups (Profile, Active, Recent, Charts, Style, Tools, God Mode, Social, History, Endgame). All data is personal to the logged-in player. Admin can view any player via dropdown. */
+function renderLockerRoom(){
   const el=$('v-mygame');
   const ns=Object.keys(S.p).sort();
   if(!me&&!adm){el.innerHTML=`<div class="card" style="text-align:center;padding:48px"><div style="font-size:48px;margin-bottom:12px">👤</div><div style="font-size:18px;font-weight:700;color:var(--acc)">Log in first</div><div style="color:var(--t4)">Go Home → tap your name</div></div>`;return}
@@ -3832,7 +4028,7 @@ function rMG(){
         </div>
         ${sortedPlayers.map((p,i)=>{
           const b=bal(p),pnl=b-ST,isActive=p===n;
-          return `<div class="adm-dd-row" data-name="${p.toLowerCase()}" onclick="mgPlayer='${p.replace(/'/g,"\\\\'")}';$('adm-dd-list').style.display='none';rMG()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.02);${isActive?'background:rgba(212,162,78,0.08)':''}">
+          return `<div class="adm-dd-row" data-name="${p.toLowerCase()}" onclick="mgPlayer='${p.replace(/'/g,"\\\\'")}';$('adm-dd-list').style.display='none';renderLockerRoom()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.02);${isActive?'background:rgba(212,162,78,0.08)':''}">
             <div style="display:flex;align-items:center;gap:10px">
               <div class="ca" style="width:28px;height:28px;font-size:11px;${isActive?'border-color:var(--acc)':''}">${p[0].toUpperCase()}</div>
               <div>
@@ -3849,6 +4045,8 @@ function rMG(){
 
 
 
+
+  // ▼▼▼ GROUP: PROFILE (Personal Story + Balance + Penalty) ▼▼▼
   // ─── PERSONAL STORY HEADER (emotional hook) ───
   {
     let storyIcon='',storyLine='',storyBg='var(--card)',storyBorder='var(--bdr)';
@@ -3911,6 +4109,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: ACTIVE (Exposure + Audit Trail) ▼▼▼
 // ─── TEAM EXPOSURE (pending bets) ───
   const pendingBets=ub.filter(x=>!S.r[x.mid]);
   if(pendingBets.length){
@@ -4049,6 +4248,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: RECENT (Last Result + Report Card) ▼▼▼
 // ─── LAST RESULT HIGHLIGHT ───
   if(sortedResolved.length){
     const last=sortedResolved[0];
@@ -4125,6 +4325,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: CHARTS (P&L Trendline) ▼▼▼
 // ─── P&L TRENDLINE (premium match-by-match chart) ───
   if(resolved.length>=2){
     const sortedR=[...resolved].sort((a,b)=>a.mid-b.mid);
@@ -4225,6 +4426,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: STYLE (Play Style + Risk Insight) ▼▼▼
 // ─── PLAY STYLE TAG ───
   const personality=getPersonality(n);
   if(personality){
@@ -4270,6 +4472,7 @@ function rMG(){
 
 
 
+  // ▼▼▼ GROUP: TOOLS (What If + Achievements + Crystal Ball) ▼▼▼
 // ─── WHAT IF CALCULATOR ───
   if(resolved.length>=1&&rank>3){
     const nxm=gms().find(m=>!lk(m)&&!S.r[m.id]&&S.odds[m.id]&&m.h!=='TBD');
@@ -4432,6 +4635,7 @@ function rMG(){
 
 
 
+  // ▼▼▼ GROUP: GOD MODE (Percentile + Rank + Odds + Clutch + Teams + MoM) ▼▼▼
 // ─── GOD MODE: LEAGUE PERCENTILE ───
   if(resolved.length>=2&&ns.length>=3){
     const allStats=ns.map(pn=>{
@@ -4711,6 +4915,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: SOCIAL (Rival + H2H) ▼▼▼
 // ─── GOD MODE: RIVAL CARD ───
   if(resolved.length>=3){
     const rivals={};
@@ -4813,6 +5018,7 @@ function rMG(){
   } // end h2h gate
   
 
+  // ▼▼▼ GROUP: HISTORY (Bet History) ▼▼▼
 // ─── BET HISTORY ───
   h+=`<div id="mg-bets" class="card" style="padding:0;overflow:hidden;margin-bottom:8px">
     <div onclick="var el=$('bets-body-${n.replace(/\\s/g,'')}');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.bets-chev').textContent=v?'▾':'▸'}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer">
@@ -4869,6 +5075,7 @@ function rMG(){
 
   
 
+  // ▼▼▼ GROUP: ENDGAME (Crystal Ball Results) ▼▼▼
 // ─── CRYSTAL BALL RESULTS (only after admin publishes) ───
   if(S.koPublished&&S.koRevealed&&S.koWinner){
     h+=`<div style="background:linear-gradient(135deg,#0E1220,#0E1528);border:2px solid #D4A24E30;border-radius:20px;padding:24px;margin-top:20px">
@@ -4928,7 +5135,7 @@ function rMG(){
 
 
     el.innerHTML=h;
-}catch(e){const _el=$('v-mygame');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Locker Room Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('rMG crash:',e)}
+}catch(e){const _el=$('v-mygame');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Locker Room Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('renderLockerRoom crash:',e)}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -4949,7 +5156,8 @@ function admSectionHdr(id,icon,title,open){
     +'<div id="'+id+'" style="display:'+(open?'block':'none')+';border:1px solid var(--bdr);border-top:0;padding:0;margin-bottom:12px">';
 }
 
-function rA(){
+/** Renders Admin panel — 5 sub-functions: alerts, statusAndMCB, commsAndOps, playerMgmt, seasonSetup. Gated by PIN authentication. All mutations logged to adminLog. */
+function renderAdmin(){
   const el=$('v-admin');
   if(!adm){const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='none';if(as)as.style.display='none';const isSetup=!S.pin;
   const ns=Object.keys(S.p);const totalBets=Object.keys(S.b).length;const totalResults=Object.keys(S.r).length;
@@ -4999,8 +5207,8 @@ function rA(){
   </div>`;
 
 
-  // ─── SUB: rA_alerts ─── ⚠️ GUARDRAIL: Returns HTML. Orphans, cancellations, pending joins, decision bar.
-  function rA_alerts(){
+  // ─── SUB: renderA_alerts ─── ⚠️ GUARDRAIL: Returns HTML. Orphans, cancellations, pending joins, decision bar.
+  function renderA_alerts(){
     var _h='';
   // ─── ORPHAN CONFLICT ALERT ───
   {
@@ -5018,7 +5226,7 @@ function rA(){
     const cn=S.cancelNudges||[];
     if(cn.length){
       _h+=`<div style="background:linear-gradient(135deg,rgba(196,69,58,0.10),rgba(196,69,58,0.04));border:1px solid rgba(196,69,58,0.25);border-radius:14px;padding:16px 18px;margin-bottom:20px;animation:fadeUp .3s">`;
-      _h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--red);letter-spacing:.5px">🔔 BET CANCELLATIONS (${cn.length})</div><button style="background:rgba(255,255,255,0.06);border:1px solid var(--bdr);border-radius:8px;padding:4px 12px;color:var(--t3);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Dismiss all ${cn.length} cancellation alert(s)?')){S.cancelNudges=[];sv(['cancelNudges']);rA()}">Dismiss All</button></div>`;
+      _h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:var(--ff);font-size:14px;font-weight:700;color:var(--red);letter-spacing:.5px">🔔 BET CANCELLATIONS (${cn.length})</div><button style="background:rgba(255,255,255,0.06);border:1px solid var(--bdr);border-radius:8px;padding:4px 12px;color:var(--t3);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Dismiss all ${cn.length} cancellation alert(s)?')){S.cancelNudges=[];sv(['cancelNudges']);renderAdmin()}">Dismiss All</button></div>`;
       cn.slice().reverse().forEach(function(n,ri){
         const i=cn.length-1-ri;
         const dt=new Date(n.ts);
@@ -5026,7 +5234,7 @@ function rA(){
         const tm=T[n.team]||{s:n.team,c:'var(--t1)'};
         _h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:10px;margin-bottom:6px;gap:10px">`;
         _h+=`<div style="flex:1;min-width:0"><span style="font-weight:800;color:var(--t1)">${n.player}</span> <span style="color:var(--t3);font-size:12px">cancelled bet on</span> <span style="color:${tm.c};font-weight:700">${tm.s}</span> <span style="color:var(--t3);font-size:12px">— ₹${n.amt.toLocaleString()} @ ×${n.od}${n.mom?' · MoM: '+n.mom:''} · M#${n.mid}</span></div>`;
-        _h+=`<div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><span style="font-size:11px;color:var(--t4);white-space:nowrap">${timeStr}</span><button style="background:0;border:0;color:var(--t4);cursor:pointer;font-size:13px;padding:2px 4px" onclick="S.cancelNudges.splice(${i},1);sv(['cancelNudges']);rA()" title="Dismiss">✕</button></div>`;
+        _h+=`<div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><span style="font-size:11px;color:var(--t4);white-space:nowrap">${timeStr}</span><button style="background:0;border:0;color:var(--t4);cursor:pointer;font-size:13px;padding:2px 4px" onclick="S.cancelNudges.splice(${i},1);sv(['cancelNudges']);renderAdmin()" title="Dismiss">✕</button></div>`;
         _h+=`</div>`;
       });
       _h+=`</div>`;
@@ -5087,8 +5295,8 @@ function rA(){
     return _h;
   }
 
-  // ─── SUB: rA_statusAndMCB ─── ⚠️ GUARDRAIL: Returns HTML. System status, MCB, jump strip.
-  function rA_statusAndMCB(){
+  // ─── SUB: renderA_statusAndMCB ─── ⚠️ GUARDRAIL: Returns HTML. System status, MCB, jump strip.
+  function renderA_statusAndMCB(){
     var _h='';
   // ─── SYSTEM STATUS (top strip) ───
   _h+=`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
@@ -5130,7 +5338,7 @@ function rA(){
     var lrHome=lm?(T[lm.h]?T[lm.h].s:lm.h):'?',lrAway=lm?(T[lm.a]?T[lm.a].s:lm.a):'?';
     _h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#3FB08C08;border:1px solid #3FB08C15;border-radius:10px;margin-bottom:12px;font-size:12px">
       <span style="color:var(--t3)">Latest: <strong style="color:var(--t1)">${lrHome} vs ${lrAway}</strong> → <span style="color:var(--grn)">${T[lr.w]?T[lr.w].s:lr.w}</span>${lr.mom?' · 🏅 '+lr.mom:''}</span>
-      <button style="background:0;border:1px solid #C4453A30;border-radius:6px;padding:3px 10px;color:var(--red);font-size:10px;cursor:pointer;font-weight:700" onclick="if(confirm('Undo result for ${lrHome} vs ${lrAway}?\\nBalances will recalculate.')){adminLog('result_undo','M#'+${lastResId});delete S.r[${lastResId}];sv(['r','logs']);toast('Result undone ↩️');rA()}">↩ Undo</button>
+      <button style="background:0;border:1px solid #C4453A30;border-radius:6px;padding:3px 10px;color:var(--red);font-size:10px;cursor:pointer;font-weight:700" onclick="if(confirm('Undo result for ${lrHome} vs ${lrAway}?\\nBalances will recalculate.')){adminLog('result_undo','M#'+${lastResId});delete S.r[${lastResId}];sv(['r','logs']);toast('Result undone ↩️');renderAdmin()}">↩ Undo</button>
     </div>`;
   }
 
@@ -5234,13 +5442,13 @@ function rA(){
     return _h;
   }
 
-  // ─── SUB: rA_commsAndOps ─── ⚠️ GUARDRAIL: Returns HTML. Broadcast, WhatsApp, odds, results, league snapshot, activity log.
-  function rA_commsAndOps(){
+  // ─── SUB: renderA_commsAndOps ─── ⚠️ GUARDRAIL: Returns HTML. Broadcast, WhatsApp, odds, results, league snapshot, activity log.
+  function renderA_commsAndOps(){
     var _h='';
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📢</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">COMMS & SUMMARIES</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-broadcast" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📢</span><span class="ct">BROADCAST</span></div>
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Post an announcement visible to all players on the Home screen.</div>`;
-  if(S.announce){_h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');rA()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
+  if(S.announce){_h+=`<div style="padding:10px 14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px;margin-bottom:12px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="color:var(--yel);font-weight:700">📢 Current:</span><div style="display:flex;gap:6px"><button style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:6px;padding:2px 10px;color:var(--acc);font-size:11px;cursor:pointer;font-weight:700" onclick="var ta=$('adm-announce');if(ta){ta.value=S.announce.msg;ta.focus()}">✏️ Edit</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:2px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Remove announcement?')){adminLog('announcement_remove',S.announce?S.announce.msg:'');delete S.announce;sv(['announce','logs']);toast('Removed');renderAdmin()}">✕ Remove</button></div></div><div style="color:var(--t1);margin-top:6px">${S.announce.msg}</div><div style="color:var(--t3);font-size:11px;margin-top:4px">${new Date(S.announce.ts).toLocaleString('en-IN')}</div></div>`}
   _h+=`<textarea class="inp" id="adm-announce" rows="2" style="width:100%;margin-bottom:8px" placeholder="e.g. Odds for tonight's match are up! Bet before 6:50 PM IST"></textarea>
   <button class="bp" style="width:100%" onclick="postAnnounce()">📢 Post Announcement</button></div>`;
   // ─── WEEKLY WRAP ───
@@ -5367,8 +5575,8 @@ function rA(){
     return _h;
   }
 
-  // ─── SUB: rA_playerMgmt ─── ⚠️ GUARDRAIL: Returns HTML. Balance adj, participants, admin bet, manage bets.
-  function rA_playerMgmt(){
+  // ─── SUB: renderA_playerMgmt ─── ⚠️ GUARDRAIL: Returns HTML. Balance adj, participants, admin bet, manage bets.
+  function renderA_playerMgmt(){
     var _h='';
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">👥</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">PLAYER MANAGEMENT</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-balance" class="card"><div class="ch"><span style="font-size:20px">💰</span><span class="ct">BALANCE ADJUSTMENT</span></div>
@@ -5400,7 +5608,7 @@ function rA(){
   _h+=`</div>`;
   // Participants
 
-  _h+=`<div id="adm-players" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.pl-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
+  _h+=`<div id="adm-players" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="toggleCollapse(this,'.pl-chev')"><div class="ch" style="margin:0"><span style="font-size:20px">👥</span><span class="ct">PARTICIPANTS</span><span style="font-size:12px;color:var(--t3);margin-left:8px">${Object.keys(S.p).length} players</span></div><span class="pl-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px">`;
   Object.keys(S.p).forEach(n=>{const b=bal(n),bc=Object.values(S.b).filter(x=>x.u===n).length,hasPin=!!S.p[n].pin;_h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:6px"><div><span style="color:#CBD5E1;font-weight:700">${n}</span><span style="color:var(--t4);font-size:12px;margin-left:8px">₹${b.toLocaleString()} · ${bc} bets</span>${hasPin?'<span style="color:var(--grn);font-size:11px;margin-left:6px">🔒</span>':'<span style="color:var(--red);font-size:11px;margin-left:6px">No PIN</span>'}</div><div style="display:flex;gap:6px"><button style="background:#4B8BE515;border:1px solid #4B8BE544;border-radius:8px;padding:4px 12px;color:#60A5FA;font-size:12px;cursor:pointer;font-weight:600" onclick="editName('${n.replace(/'/g,"\\'")}')">✏️ Name</button><button style="background:#D4A24E12;border:1px solid #D4A24E30;border-radius:8px;padding:4px 12px;color:var(--acc);font-size:12px;cursor:pointer;font-weight:600" onclick="resetPin('${n.replace(/'/g,"\\'")}')">🔑 Reset</button><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:8px;padding:4px 12px;color:var(--red);font-size:12px;cursor:pointer;font-weight:600" onclick="remP('${n.replace(/'/g,"\\'")}')">Remove</button></div></div>`});
   _h+=`</div>`;
   // Final Standings (admin only — includes Crystal Ball)
@@ -5435,11 +5643,11 @@ function rA(){
     return _h;
   }
 
-  // ─── SUB: rA_seasonSetup ─── ⚠️ GUARDRAIL: Returns HTML. Playoffs, Crystal Ball, danger zone.
-  function rA_seasonSetup(){
+  // ─── SUB: renderA_seasonSetup ─── ⚠️ GUARDRAIL: Returns HTML. Playoffs, Crystal Ball, danger zone.
+  function renderA_seasonSetup(){
     var _h='';
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">🏏</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">SEASON SETUP</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
-  _h+=`<div id="adm-playoff" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.po-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
+  _h+=`<div id="adm-playoff" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="toggleCollapse(this,'.po-chev')"><div class="ch" style="margin:0"><span style="font-size:20px">🏟️</span><span class="ct">SET PLAYOFF TEAMS</span></div><span class="po-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="font-size:14px;color:var(--t4);margin-bottom:14px">Once top 4 are decided, assign teams to playoff matches.</div>`;
   MM.filter(m=>m.playoff).forEach(m=>{
     const po=S.po&&S.po[m.id]?S.po[m.id]:{h:'TBD',a:'TBD'};
     const curH=po.h,curA=po.a;
@@ -5464,7 +5672,7 @@ function rA(){
   });
   _h+=`</div></div>`;
   // Crystal Ball Admin
-  _h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.cb-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div><span class="cb-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
+  _h+=`<div id="adm-crystal" class="card" style="border:1px solid #D4A24E25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="toggleCollapse(this,'.cb-chev')"><div class="ch" style="margin:0"><span style="font-size:20px">🔮</span><span class="ct">CRYSTAL BALL</span></div><span class="cb-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Manage the secret prediction window. Players bet on who wins the IPL — bets stay hidden until you reveal them.</div>`;
   // ── STEP 1: Set Qualifying Teams ──
   const cbTeams=S.cbTeams||[];
@@ -5594,7 +5802,7 @@ function rA(){
   </div></div>
   <div id="sq-panel"></div></div>`;
   // Add Match (Phase 2)
-  _h+=`<div id="adm-addmatch" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.am-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div><span class="am-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
+  _h+=`<div id="adm-addmatch" class="card" style="padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="toggleCollapse(this,'.am-chev')"><div class="ch" style="margin:0"><span style="font-size:18px">➕</span><span class="ct">ADD MATCH</span></div><span class="am-chev" style="color:var(--acc);font-size:14px">\u25b8</span></div><div style="display:none;padding:16px 20px">
   <div style="font-size:14px;color:var(--t4);margin-bottom:14px">Add Phase 2 matches as BCCI announces them. Currently ${MM.length} matches loaded.</div>
   <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
   <div style="flex:1;min-width:70px"><div class="bf-l">Match #</div><input class="bf-i" type="number" id="nm-id" min="1" placeholder="${MM.length+1}" oninput="if(this.value<1)this.value=1"></div>
@@ -5692,7 +5900,7 @@ function rA(){
       const mLabel=m?`${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}`:'Match #'+mid;
       const hasResult=!!S.r[mid];
       _h+=`<div style="margin-bottom:8px;border:1px solid var(--bdr);border-radius:10px;overflow:hidden">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--inp);cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.ab-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--inp);cursor:pointer" onclick="toggleCollapse(this,'.ab-chev')">
           <div style="display:flex;align-items:center;gap:8px">
             <span class="ab-chev" style="color:var(--t4);font-size:12px">\u25b8</span>
             <span style="font-weight:700;font-size:13px;color:var(--t1)">M${mid} \u00b7 ${mLabel}</span>
@@ -5799,11 +6007,11 @@ function rA(){
 
   // ── DANGER ZONE ──
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚠️</span><span style="font-family:var(--ff);font-size:11px;font-weight:800;color:var(--red);letter-spacing:3px;text-transform:uppercase">DANGER ZONE</span><div style="flex:1;height:1px;background:rgba(196,69,58,0.2);margin-left:8px"></div></div>`;
-  _h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="var el=this.nextElementSibling;el.style.display=el.style.display==='block'?'none':'block';this.querySelector('.dz-chev').textContent=el.style.display==='block'?'\u25be':'\u25b8'"><div class="ch" style="margin:0"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><span class="dz-chev" style="color:var(--red);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="display:flex;flex-direction:column;gap:10px">
-  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL bets?',function(){window._dzUndo={b:JSON.parse(JSON.stringify(S.b))};adminLog('bets_clear_all','All bets cleared');S.b={};sv();toast('All bets cleared — tap Undo to restore');rA()})">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
-  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL Crystal Ball predictions?',function(){window._dzUndo={ko:JSON.parse(JSON.stringify(S.ko)),koOpen:S.koOpen,koRevealed:S.koRevealed,koWinner:S.koWinner,koPublished:S.koPublished,cbTeams:[...S.cbTeams]};adminLog('crystal_clear','All predictions cleared');S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;S.cbTeams=[];sv();toast('Crystal Ball cleared — tap Undo to restore');rA()})">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
-  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL match results?',function(){window._dzUndo={r:JSON.parse(JSON.stringify(S.r))};adminLog('results_clear_all','All results cleared');S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared — tap Undo to restore');rA()})">📝 Clear All Results</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all match results. Bets stay — balances recalculate without wins/losses.</div></div>
-  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL trash talk?',function(){window._dzUndo={trash:[...S.trash]};adminLog('trash_clear','All messages cleared');S.trash=[];sv();toast('Trash talk cleared — tap Undo to restore');rA()})">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
+  _h+=`<div id="adm-danger" class="card" style="border:1px solid #C4453A25;padding:0"><div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer" onclick="toggleCollapse(this,'.dz-chev')"><div class="ch" style="margin:0"><span style="font-size:20px">🗑️</span><span class="ct" style="color:var(--red)">DANGER ZONE</span></div><span class="dz-chev" style="color:var(--red);font-size:14px">\u25b8</span></div><div style="display:none;padding:0 20px 16px"><div style="display:flex;flex-direction:column;gap:10px">
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL bets?',function(){window._dzUndo={b:JSON.parse(JSON.stringify(S.b))};adminLog('bets_clear_all','All bets cleared');S.b={};sv();toast('All bets cleared — tap Undo to restore');renderAdmin()})">🎰 Clear All Bets</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes every bet across all matches for all players. Balances reset.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL Crystal Ball predictions?',function(){window._dzUndo={ko:JSON.parse(JSON.stringify(S.ko)),koOpen:S.koOpen,koRevealed:S.koRevealed,koWinner:S.koWinner,koPublished:S.koPublished,cbTeams:[...S.cbTeams]};adminLog('crystal_clear','All predictions cleared');S.ko={};S.koOpen=false;S.koRevealed=false;S.koWinner=null;S.koPublished=false;S.cbTeams=[];sv();toast('Crystal Ball cleared — tap Undo to restore');renderAdmin()})">🔮 Clear Crystal Ball</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Deletes all secret IPL winner predictions and resets reveal state.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL match results?',function(){window._dzUndo={r:JSON.parse(JSON.stringify(S.r))};adminLog('results_clear_all','All results cleared');S.r={};S.koRevealed=false;S.koWinner=null;S.koPublished=false;sv();toast('Results cleared — tap Undo to restore');renderAdmin()})">📝 Clear All Results</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all match results. Bets stay — balances recalculate without wins/losses.</div></div>
+  <div><button style="width:100%;padding:12px;background:#C4453A10;border:1px solid #C4453A25;border-radius:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="dangerAction('Clear ALL trash talk?',function(){window._dzUndo={trash:[...S.trash]};adminLog('trash_clear','All messages cleared');S.trash=[];sv();toast('Trash talk cleared — tap Undo to restore');renderAdmin()})">🗣️ Clear Trash Talk</button><div style="font-size:10px;color:var(--t4);padding:4px 4px 0">Removes all chat messages from the trash talk wall.</div></div>
   <div style="margin-top:12px;padding-top:12px;border-top:2px solid #C4453A25"><button style="width:100%;padding:14px;background:#C4453A25;border:2px solid #C4453A44;border-radius:10px;color:var(--red);font-weight:900;cursor:pointer;font-size:14px;letter-spacing:1px" onclick="rstAll()">💀 RESET EVERYTHING</button><div style="font-size:10px;color:var(--red);padding:4px 4px 0;font-weight:600">Wipes ALL data — players, bets, results, odds, Crystal Ball, squads, admin PIN. Requires PIN confirmation. Cannot be undone.</div></div>
   </div></div></div></div>`;
     return _h;
@@ -5812,11 +6020,11 @@ function rA(){
   // ═══ ASSEMBLY ═══ ⚠️ GUARDRAIL: Do NOT reorder without full regression.
   // Preserve admin state across re-render
   var _sqTeam=$('sq-team')?$('sq-team').value:'';
-  h+=rA_alerts();
-  h+=rA_statusAndMCB();
-  h+=rA_commsAndOps();
-  h+=rA_playerMgmt();
-  h+=rA_seasonSetup();
+  h+=renderA_alerts();
+  h+=renderA_statusAndMCB();
+  h+=renderA_commsAndOps();
+  h+=renderA_playerMgmt();
+  h+=renderA_seasonSetup();
   el.innerHTML=h;
   // Restore squad team selection and re-render panel
   if(_sqTeam){var sel=$('sq-team');if(sel){sel.value=_sqTeam;sqDDPick(_sqTeam)}}
@@ -5836,7 +6044,7 @@ async function hashPin(pin){
   let h=0;for(let i=0;i<pin.length;i++){h=((h<<5)-h)+pin.charCodeAt(i);h|=0}
   return 'fb'+Math.abs(h).toString(16).padStart(8,'0')
 }
-function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');var pinEl=$('adm-pin');if(pinEl){pinEl.style.animation='pinShake .5s ease';setTimeout(function(){pinEl.style.animation=''},600)};return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');rA();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}else{toast('Wrong PIN','err');var pinEl=$('adm-pin');if(pinEl){pinEl.style.borderColor='rgba(196,69,58,0.6)';pinEl.style.animation='pinShake .5s ease';pinEl.value='';setTimeout(function(){pinEl.style.borderColor='rgba(255,255,255,0.08)';pinEl.style.animation='';pinEl.focus()},600)}}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
+function admL(){const p=$('adm-pin').value;if(!S.pin){if(p.length<4){toast('Min 4 digits','err');var pinEl=$('adm-pin');if(pinEl){pinEl.style.animation='pinShake .5s ease';setTimeout(function(){pinEl.style.animation=''},600)};return}hashPin(p).then(h=>{S.pin=h;sv();adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_setup','PIN created');toast('Admin on! 🔑');renderAdmin();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}).catch(e=>{toast('Login error: '+e.message,'err')})}else{hashPin(p).then(h=>{if(h===S.pin){adm=true;sessionStorage.setItem('dg-adm-vis','1');adminLog('admin_login','Login');toast('Welcome! 🔑');renderAdmin();const af=$('adm-fab'),as=$('adm-sheet');if(af)af.style.display='block';if(as)as.style.display='none'}else{toast('Wrong PIN','err');var pinEl=$('adm-pin');if(pinEl){pinEl.style.borderColor='rgba(196,69,58,0.6)';pinEl.style.animation='pinShake .5s ease';pinEl.value='';setTimeout(function(){pinEl.style.borderColor='rgba(255,255,255,0.08)';pinEl.style.animation='';pinEl.focus()},600)}}}).catch(e=>{toast('Login error: '+e.message,'err')})}}
 
 function admDDToggle(ddId){
   var dd=$(ddId);if(!dd)return;
@@ -5896,12 +6104,13 @@ f.innerHTML=`${scRec&&!ex[m.h]?`<div style="background:rgba(212,162,78,0.06);bor
   <div style="font-size:11px;color:var(--t4);line-height:1.4">${scRec.reason}</div>
 </div>`:''}<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.h]?.c}">${T[m.h]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-h-${id}" value="${ex[m.h]||''}" min="1" step="0.5" placeholder="e.g. 2"></div><div style="flex:1;min-width:130px"><div class="bf-l" style="color:${T[m.a]?.c}">${T[m.a]?.s} (×x)</div><input class="bf-i" type="text" inputmode="decimal" id="od-a-${id}" value="${ex[m.a]||''}" min="1" step="0.5" placeholder="e.g. 3"></div></div><div style="display:flex;gap:8px;margin-top:12px"><button class="bp" style="flex:1" onclick="sOdds(${id})">${ex[m.h]?'✏️ Update Odds':'📊 Publish'}</button>${ex[m.h]?`<button style="flex:0;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;padding:10px 20px;color:var(--red);font-size:14px;cursor:pointer;font-weight:700" onclick="clearOdds(${id})">🗑️ Clear</button>`:''}</div>${ex[m.h]?`<div style="margin-top:8px;font-size:12px;color:var(--grn)">✅ Current: ${T[m.h]?.s} ×${ex[m.h]} · ${T[m.a]?.s} ×${ex[m.a]}</div>`:''}`}
 
+// ── ADMIN: Logging ──
 function adminLog(action,detail){if(!S.logs)S.logs=[];S.logs.push({action:action,detail:detail,by:me||"admin",ts:new Date().toISOString()});if(S.logs.length>500)S.logs=S.logs.slice(-500)}
 function sOdds(id){if(!adm){toast("Admin only","err");return}const m=gm(id),hv=parseFloat($('od-h-'+id).value),av=parseFloat($('od-a-'+id).value);if(!hv||!av||hv<1.01||av<1.01||isNaN(hv)||isNaN(av)){toast('Invalid odds — must be > 1.00 for both teams','err');return}
   const existingBets=Object.values(S.b).filter(x=>x.mid===id);
   if(existingBets.length>0&&S.odds[id]){if(!confirm(`⚠️ ${existingBets.length} bet(s) already placed on this match! Changing odds will affect existing bets. Existing bets keep their OLD odds. Continue?`))return}
   S.odds[id]={};S.odds[id][m.h]=hv;S.odds[id][m.a]=av;adminLog('odds_set','M#'+id+' '+T[m.h]?.s+' ×'+hv+' '+T[m.a]?.s+' ×'+av);sv(['odds','logs']);toast('Odds published! 📊');oddsMC()}
-function clearOdds(id){if(!adm)return;const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];adminLog('odds_cleared','M#'+id);sv(['odds','logs']);toast('Odds cleared');oddsMC();rA()}
+function clearOdds(id){if(!adm)return;const bets=Object.values(S.b).filter(x=>x.mid===id);if(bets.length){toast('Can\'t clear — '+bets.length+' bet(s) already placed on this match','err');return}if(!confirm('Clear odds for this match?'))return;delete S.odds[id];adminLog('odds_cleared','M#'+id);sv(['odds','logs']);toast('Odds cleared');oddsMC();renderAdmin()}
 
 function admMC(){const id=parseInt($('adm-m').value),f=$('adm-f');if(!id){f.innerHTML='';return}const m=gm(id);admW={};
 let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><div class="bf-tr">
@@ -5912,16 +6121,16 @@ let h=`<div class="bf-s" style="margin-top:12px"><div class="bf-l">Winner</div><
 <button class="bp" style="width:100%" onclick="sRes(${id})">💾 Save Result</button>
 <button style="width:100%;margin-top:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:12px;padding:10px;color:var(--red);font-weight:700;cursor:pointer;font-size:13px" onclick="voidMatch(${id})">🌧️ Void Match (Washout / No Result)</button>`;
 // Show clear result if already recorded
-if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){adminLog('result_undo','M#'+${id});delete S.r[${id}];sv(['r','logs']);toast('Result cleared');rA()}">↩ Undo Result</button></div>`}
+if(S.r[id]){h+=`<div style="margin-top:8px;padding:8px 12px;background:${S.r[id].voided?'#64748B15':'#3FB08C10'};border:1px solid ${S.r[id].voided?'#64748B30':'#3FB08C1A'};border-radius:8px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:${S.r[id].voided?'var(--t3)':'var(--grn)'}">${S.r[id].voided?'🌧️ Voided — all bets refunded':'✅ Result: '+( T[S.r[id].w]?.s||S.r[id].w)+' won'+(S.r[id].mom?' · MoM: '+S.r[id].mom:'')}</span><button style="background:#C4453A18;border:1px solid var(--hot);border-radius:6px;padding:3px 10px;color:var(--red);font-size:11px;cursor:pointer;font-weight:700" onclick="if(confirm('Clear result for this match? Balances will recalculate.')){adminLog('result_undo','M#'+${id});delete S.r[${id}];sv(['r','logs']);toast('Result cleared');renderAdmin()}">↩ Undo Result</button></div>`}
 const ab=Object.values(S.b).filter(x=>x.mid===id);
 // Lock override + match-level controls
 const isLocked=lk(m);
 h+=`<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">`;
 if(!S.r[id]){
-  h+=`<div style="flex:1"><button style="width:100%;padding:8px;background:${isLocked?'#3FB08C10':'#D4A24E10'};border:1px solid ${isLocked?'#3FB08C25':'#D4A24E25'};border-radius:8px;color:${isLocked?'var(--grn)':'var(--acc)'};font-weight:700;cursor:pointer;font-size:12px" onclick="if(!S.lockOverride)S.lockOverride={};S.lockOverride[${id}]=${isLocked?'false':'true'};adminLog(${isLocked?"'match_unlock'":"'match_lock'"},'M#'+${id});sv();toast('${isLocked?'Match unlocked — bets allowed':'Match force-locked — no new bets'}');rA()">${isLocked?'🔓 Force Unlock':'🔒 Force Lock'}</button><div style="font-size:9px;color:var(--t4);padding:3px 2px 0">${isLocked?'Reopen betting (e.g. match delayed)':'Close betting early before auto-lock'}</div></div>`;
+  h+=`<div style="flex:1"><button style="width:100%;padding:8px;background:${isLocked?'#3FB08C10':'#D4A24E10'};border:1px solid ${isLocked?'#3FB08C25':'#D4A24E25'};border-radius:8px;color:${isLocked?'var(--grn)':'var(--acc)'};font-weight:700;cursor:pointer;font-size:12px" onclick="if(!S.lockOverride)S.lockOverride={};S.lockOverride[${id}]=${isLocked?'false':'true'};adminLog(${isLocked?"'match_unlock'":"'match_lock'"},'M#'+${id});sv();toast('${isLocked?'Match unlocked — bets allowed':'Match force-locked — no new bets'}');renderAdmin()">${isLocked?'🔓 Force Unlock':'🔒 Force Lock'}</button><div style="font-size:9px;color:var(--t4);padding:3px 2px 0">${isLocked?'Reopen betting (e.g. match delayed)':'Close betting early before auto-lock'}</div></div>`;
 }
 if(ab.length){
-  h+=`<button style="flex:1;padding:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:8px;color:var(--red);font-weight:700;cursor:pointer;font-size:12px" onclick="if(confirm('Clear all ${ab.length} bet(s) for this match only?\\n\\nPlayers: ${ab.map(x=>x.u).join(', ')}')){Object.keys(S.b).forEach(k=>{if(S.b[k].mid===${id})delete S.b[k]});sv(['b']);adminLog('bets_clear_match','M#'+${id}+' (${ab.length} bets)');toast('${ab.length} bets cleared for this match');rA()}">🗑️ Clear Match Bets (${ab.length})</button>`;
+  h+=`<button style="flex:1;padding:8px;background:#C4453A10;border:1px solid #C4453A25;border-radius:8px;color:var(--red);font-weight:700;cursor:pointer;font-size:12px" onclick="if(confirm('Clear all ${ab.length} bet(s) for this match only?\\n\\nPlayers: ${ab.map(x=>x.u).join(', ')}')){Object.keys(S.b).forEach(k=>{if(S.b[k].mid===${id})delete S.b[k]});sv(['b']);adminLog('bets_clear_match','M#'+${id}+' (${ab.length} bets)');toast('${ab.length} bets cleared for this match');renderAdmin()}">🗑️ Clear Match Bets (${ab.length})</button>`;
 }
 h+=`</div>`;
 if(ab.length){h+=`<div style="margin-top:12px"><div class="bf-l">Bets (${ab.length}):</div>`;ab.forEach(x=>{h+=`<div class="bi"><span class="bi-u">${rpn(x.u)}</span><span style="color:${T[x.tm]?.c||'var(--acc)'};font-weight:800">${x.tm}</span><span>₹${x.am.toLocaleString()}</span>${x.mom?`<span style="color:var(--yel)">🎯${x.mom}</span>`:''}</div>`});h+=`</div>`}
@@ -5957,7 +6166,7 @@ function renderMCP(){
   const mBets=Object.values(S.b).filter(function(b){return b.mid===mid});
 
   let h=`<div style="max-width:520px;margin:0 auto;padding:20px">
-    <button style="background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;margin-bottom:16px" onclick="rA()">← Back to Admin</button>
+    <button style="background:0;border:0;color:var(--t3);font-size:13px;cursor:pointer;margin-bottom:16px" onclick="renderAdmin()">← Back to Admin</button>
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:11px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:1px">${m.playoff?m.v:'Match #'+m.id} · ${fd(m.d)}</div>
       <div style="font-size:24px;font-weight:900;margin-top:4px"><span style="color:${hc}">${hs}</span> <span style="color:var(--t4);font-size:16px">vs</span> <span style="color:${ac}">${as}</span></div>
@@ -6080,9 +6289,9 @@ function renderMCP(){
       <div style="font-size:14px;color:var(--t2);margin-top:4px">${T[w]?T[w].s:w} won${mom?' · MoM: '+mom:''}</div>
       <div id="mcp-undo-timer" style="font-size:12px;color:var(--acc);margin-top:12px">⏱ Quick undo available for <span id="mcp-undo-sec">10</span>s</div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
-        <button class="bp" style="flex:1;min-width:110px;padding:14px" onclick="rA()">← Admin</button>
-        <button style="flex:1;min-width:110px;padding:14px;background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;color:var(--grn);font-weight:700;cursor:pointer" onclick="var nx=gms().filter(function(m){return !S.r[m.id]&&lk(m)&&m.h!=='TBD'})[0];if(nx){openResultFlow(nx.id)}else{toast('All caught up ✅');rA()}">Next Pending →</button>
-        <button id="mcp-undo-btn" style="flex:1;min-width:110px;padding:14px;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;color:var(--red);font-weight:700;cursor:pointer" onclick="if(confirm('Undo?\\nBalances recalculate.')){adminLog('result_undo','M#'+${mid});delete S.r[${mid}];sv(['r','logs']);toast('Undone ↩️');rA()}">↩ Undo Result</button>
+        <button class="bp" style="flex:1;min-width:110px;padding:14px" onclick="renderAdmin()">← Admin</button>
+        <button style="flex:1;min-width:110px;padding:14px;background:#3FB08C15;border:1px solid #3FB08C30;border-radius:12px;color:var(--grn);font-weight:700;cursor:pointer" onclick="var nx=gms().filter(function(m){return !S.r[m.id]&&lk(m)&&m.h!=='TBD'})[0];if(nx){openResultFlow(nx.id)}else{toast('All caught up ✅');renderAdmin()}">Next Pending →</button>
+        <button id="mcp-undo-btn" style="flex:1;min-width:110px;padding:14px;background:#C4453A18;border:1px solid var(--hot);border-radius:12px;color:var(--red);font-weight:700;cursor:pointer" onclick="if(confirm('Undo?\\nBalances recalculate.')){adminLog('result_undo','M#'+${mid});delete S.r[${mid}];sv(['r','logs']);toast('Undone ↩️');renderAdmin()}">↩ Undo Result</button>
       </div>
     </div>`;
   }
@@ -6124,8 +6333,10 @@ function guidedSubmit(mid){mcpConfirm()}
 function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(!w){toast('Pick winner!','err');return}const m=gm(id);if(m&&(m.h==='TBD'||m.a==='TBD')){toast('Set playoff teams first!','err');return}const momSel=$('amm-'+id);const mom=momSel?momSel.value:'';S.r[id]={w,mom:mom||null,ts:new Date().toISOString()};sv(['r']);const mBets=Object.values(S.b).filter(b=>b.mid===id);const winners=mBets.filter(b=>b.tm===w).length;const losers=mBets.length-winners;const jp=mBets.filter(b=>b.tm===w&&momMatch(b.mom,mom)&&b.mt&&b.mt!==b.tm).length;toast('✅ '+(T[w]?T[w].s:w)+' won'+(mom?' · MoM: '+mom:'')+' · '+winners+'W/'+losers+'L'+(jp?' · '+jp+' jackpot🔥':''));
   // Check for newly triggered penalties after this result
   setTimeout(function(){const penalised=[];Object.keys(S.p).forEach(function(n){const pen=weeklyPenalty(n);const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);const net=Math.max(pen-waived,0);if(net>0){const prevPen=window._lastPenState?window._lastPenState[n]||0:0;if(net>prevPen)penalised.push(n)}});if(penalised.length)toast('⚠️ Inactivity penalty applied: '+penalised.join(', '),'err');window._lastPenState={};Object.keys(S.p).forEach(function(n){const pen=weeklyPenalty(n);const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);window._lastPenState[n]=Math.max(pen-waived,0)})},500);
-  delete admW[id];rA()}
+  delete admW[id];renderAdmin()}
 
+// ── ADMIN: Match Actions (void, result, odds) ──
+/** Voids a match (rain/no result). Marks S.r[id] as voided. Preserves all bets in S.b for history — does NOT delete them. _coreBal skips voided matches, so money is returned automatically. */
 function voidMatch(id){if(!adm)return;
   const m=gm(id);
   const bets=Object.values(S.b).filter(x=>x.mid===id||parseInt(x.mid)===id);
@@ -6137,7 +6348,7 @@ function voidMatch(id){if(!adm)return;
   if(!confirm(msg))return;
   // Mark as voided — bets stay in S.b for history, _coreBal skips voided matches
   S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};adminLog('void_match','M#'+id+' ('+bets.length+' bets preserved)');
-  sv(['r']);toast('Match voided — '+bets.length+' bets refunded 🌧️');rA();
+  sv(['r']);toast('Match voided — '+bets.length+' bets refunded 🌧️');renderAdmin();
 }
 
 function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k]?.sq||[]}
@@ -6155,6 +6366,7 @@ function sqDDPick(k){
   $('sq-dd-list').style.display='none';
   sqTeamChange();
 }
+// ── ADMIN: Squad Management ──
 function sqTeamChange(){
   const k=$('sq-team').value,p=$('sq-panel');
   if(!k){p.innerHTML='';return}
@@ -6296,7 +6508,7 @@ function adminPlaceBet(mid){if(!adm)return;
   const m=gm(mid);
   if(!confirm(`🔓 ADMIN BET OVERRIDE\n\nPlayer: ${player}\nMatch: ${T[m.h]?.s} vs ${T[m.a]?.s}\nTeam: ${T[abTeam]?.n}\nAmount: ₹${am.toLocaleString()} @ ×${od}\nMoM: ${mom||'None'}\nReason: ${reason||'No reason'}\n\nThis bypasses the lock timer.\nConfirm?`))return;
   S.b[mid+'-'+player]={mid,u:player,tm:abTeam,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString(),adminBet:true,reason:reason||null};
-  sv(['b']);toast('Bet placed for '+player+' ✅');abTeam='';rA();
+  sv(['b']);toast('Bet placed for '+player+' ✅');abTeam='';renderAdmin();
 }
 function sendReminder(id,type){
   const m=gm(id),mo=S.odds[id]||{},dl=getDeadlineStr(m);
@@ -6322,14 +6534,15 @@ function sendReminder(id,type){
 }
 function toggleKO(){if(!adm)return;
   if(!S.koOpen&&(!S.cbTeams||S.cbTeams.length!==4)){toast('Set the 4 qualifying teams first!','err');return}
-  S.koOpen=!S.koOpen;adminLog(S.koOpen?'crystal_open':'crystal_close',S.koOpen?'Predictions opened':'Predictions closed');sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');rA()}
+  S.koOpen=!S.koOpen;adminLog(S.koOpen?'crystal_open':'crystal_close',S.koOpen?'Predictions opened':'Predictions closed');sv();toast(S.koOpen?'Crystal Ball betting is OPEN! 🔓':'Crystal Ball betting CLOSED 🔒');renderAdmin()}
+// ── ADMIN: Crystal Ball & Knockout ──
 function saveCBTeams(){
   const picks=[0,1,2,3].map(i=>$('cb-t'+i)?.value||'').filter(Boolean);
   const unique=[...new Set(picks)];
   if(unique.length!==4){toast('Pick exactly 4 different teams!','err');return}
   S.cbTeams=unique;adminLog('crystal_teams_set','Teams: '+unique.join(', '));sv();
   toast('Playoff 4 saved! 🏏 Now open the betting window.');
-  rA();
+  renderAdmin();
   setTimeout(()=>{
     const card=document.getElementById('adm-crystal');
     if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
@@ -6342,7 +6555,7 @@ function saveCBTeams(){
 function resetCBTeams(){
   if(S.koOpen){toast('Close the betting window first!','err');return}
   if(!confirm('Reset the 4 qualifying teams? This will not delete any existing predictions.'))return;
-  S.cbTeams=[];sv();rA()}
+  S.cbTeams=[];sv();renderAdmin()}
 function selectKOTeam(k){
   const inp=$('ko-team');if(!inp)return;
   inp.value=k;
@@ -6365,31 +6578,32 @@ function editKO(name){
   const updatedPct=amt?Math.round(amt/bal(name)*100):k.pct;
   if(!confirm(`Update ${name}'s Crystal Ball:\n\nTeam: ${T[updatedTeam]?.n||updatedTeam}\nAmount: ₹${updatedAmt.toLocaleString()}\n\nConfirm?`))return;
   S.ko[name]={team:updatedTeam,pct:updatedPct,amount:updatedAmt,ts:k.ts,editedByAdmin:true};
-  sv();toast(name+'\'s Crystal Ball updated ✏️');rA();
+  sv();toast(name+'\'s Crystal Ball updated ✏️');renderAdmin();
 }
 
 function deleteKO(name){
   if(!confirm('Delete '+name+'\'s Crystal Ball prediction?\n\nThey will be able to place a new one if the window is still open.'))return;
-  delete S.ko[name];sv();toast(name+'\'s Crystal Ball deleted');rA();
+  delete S.ko[name];sv();toast(name+'\'s Crystal Ball deleted');renderAdmin();
 }
 
 function publishKO(){
   if(!S.koRevealed){toast('Reveal & settle first before publishing','err');return}
   if(!confirm('📢 PUBLISH CRYSTAL BALL RESULTS\n\nThis will show the Crystal Ball results on the Board tab for ALL players to see.\n\nEveryone will see:\n• Each player\'s secret team pick\n• How much they wagered\n• Whether they won or lost\n• Final standings with Crystal Ball impact\n\nThis cannot be undone. Publish now?'))return;
   S.koPublished=true;
-  sv();toast('Crystal Ball results published! 📢 Visible on Board tab.');rA();
+  sv();toast('Crystal Ball results published! 📢 Visible on Board tab.');renderAdmin();
 }
 function revealKO(){if(!adm)return;adminLog('crystal_reveal','Predictions revealed');
   const winner=$('ko-winner').value;
   if(!winner){toast('Select the IPL winner!','err');return}
   if(!confirm(`🔮 REVEAL ALL CRYSTAL BALL PREDICTIONS\n\nIPL 2026 Winner: ${T[winner]?.n}\n\nThis will:\n• Show everyone's secret picks\n• Add/deduct points from balances\n• Cannot be undone!\n\nProceed?`))return;
   S.koWinner=winner;S.koRevealed=true;S.koOpen=false;adminLog('crystal_winner','Winner: '+(T[winner]?T[winner].n:winner));
-  sv();toast('Crystal Balls revealed! 🔮🏆');rA();
+  sv();toast('Crystal Balls revealed! 🔮🏆');renderAdmin();
 }
 const IPL_VENUES=['M. Chinnaswamy Stadium, Bengaluru','Wankhede Stadium, Mumbai','MA Chidambaram Stadium, Chennai','Eden Gardens, Kolkata','Arun Jaitley Stadium, Delhi','Rajiv Gandhi Intl Stadium, Hyderabad','Narendra Modi Stadium, Ahmedabad','IS Bindra Stadium, Mohali','Sawai Mansingh Stadium, Jaipur','Bharat Ratna Shri Atal Bihari Vajpayee Ekana Stadium, Lucknow','Himachal Pradesh Cricket Association Stadium, Dharamsala','Dr. DY Patil Sports Academy, Navi Mumbai','Maharashtra Cricket Association Stadium, Pune','Barsapara Cricket Stadium, Guwahati','Holkar Cricket Stadium, Indore','JSCA International Stadium Complex, Ranchi','Greenfield International Stadium, Thiruvananthapuram','ACA-VDCA Cricket Stadium, Visakhapatnam'];
 function nmTeamSync(){const h=$('nm-home').value,aSel=$('nm-away');const cur=aSel.value;aSel.innerHTML='<option value="">--</option>';Object.keys(T).forEach(k=>{if(k!==h)aSel.innerHTML+=`<option value="${k}" ${k===cur?'selected':''}>${T[k].s}</option>`})}
 function nmVenueOpen(){const dd=$('nm-venue-dd');dd.style.display='block';nmVenueFilter();setTimeout(()=>{const closer=e=>{if(!dd.contains(e.target)&&e.target.id!=='nm-venue'){dd.style.display='none';document.removeEventListener('click',closer)}};document.addEventListener('click',closer)},10)}
 function nmVenueFilter(){const q=($('nm-venue').value||'').toLowerCase();const dd=$('nm-venue-dd');const filtered=IPL_VENUES.filter(v=>!q||v.toLowerCase().includes(q));dd.innerHTML=filtered.length?filtered.map(v=>`<div style="padding:12px 16px;cursor:pointer;font-size:13px;color:var(--t1);border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'" onclick="$('nm-venue').value='${v}';$('nm-venue-dd').style.display='none'">📍 ${v}</div>`).join(''):'<div style="padding:12px 16px;color:var(--t4);font-size:12px">No venues found</div>'}
+// ── ADMIN: Add Match & Playoffs ──
 function addMatch(){if(!adm)return;
   const id=parseInt($('nm-id').value)||MM.length+1;
   const day=parseInt($('nm-day').value);
@@ -6410,11 +6624,12 @@ function addMatch(){if(!adm)return;
   S.customMatches.push({id,d:date,t:time,h:home,a:away,v:venue});
   sv(["customMatches"]);
   toast('Match #'+id+' added! ✅');
-  rA();
+  renderAdmin();
 }
-function setPO(id){if(!adm)return;const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');rA()}
+function setPO(id){if(!adm)return;const h=$('po-h-'+id).value,a=$('po-a-'+id).value;if(h==='TBD'||a==='TBD'){toast('Pick both teams','err');return}if(h===a){toast('Teams must be different','err');return}if(!S.po)S.po={};S.po[id]={h,a};sv(['po']);toast('Playoff teams set! 🏟️');renderAdmin()}
 
-function delBet(k,player,team,amt){const msg=player&&team&&amt?`Delete ${player}'s bet on ${T[team]?.s||team} (₹${parseInt(amt).toLocaleString()})?\n\nThis cannot be undone.`:'Delete this bet?\n\nThis cannot be undone.';if(!confirm(msg))return;adminLog('bet_delete',k);delete S.b[k];sv(['b']);toast('Bet deleted ↩️');rA()}
+// ── ADMIN: Bet Management ──
+function delBet(k,player,team,amt){const msg=player&&team&&amt?`Delete ${player}'s bet on ${T[team]?.s||team} (₹${parseInt(amt).toLocaleString()})?\n\nThis cannot be undone.`:'Delete this bet?\n\nThis cannot be undone.';if(!confirm(msg))return;adminLog('bet_delete',k);delete S.b[k];sv(['b']);toast('Bet deleted ↩️');renderAdmin()}
 
 // Player actions
 let pendingLogin='';
@@ -6507,6 +6722,7 @@ function downloadBackup(){
     toast('💾 Backup downloaded!');
   }catch(e){toast('Backup failed: '+e.message,'err')}
 }
+/** Generates WhatsApp-ready post-match summary text. Includes result, MoM, top 5 leaderboard, and next match(es). Double header aware. */
 function genMatchSummary(mid){
   const m=gm(mid);if(!m)return'';const rs=S.r[mid];if(!rs||rs.voided)return'';
   const mBets=Object.values(S.b).filter(x=>x.mid===mid);
@@ -6657,6 +6873,7 @@ function addP(){
   });
 }
 
+// ── ADMIN: Player Join/Leave ──
 function approveJoin(n){
   const pending=S.pendingJoins||{};
   if(!pending[n]){toast('Not found','err');return}
@@ -6664,7 +6881,7 @@ function approveJoin(n){
   delete S.pendingJoins[n];
   adminLog('player_approved',n+' approved to join');
   sv(['p','pendingJoins','logs']);
-  toast('✅ '+n+' approved!');rA();
+  toast('✅ '+n+' approved!');renderAdmin();
 }
 function rejectJoin(n){
   if(!confirm('Reject '+n+'?'))return;
@@ -6672,12 +6889,12 @@ function rejectJoin(n){
   delete S.pendingJoins[n];
   adminLog('player_rejected',n+' rejected');
   sv(['pendingJoins','logs']);
-  toast('❌ '+n+' rejected');rA();
+  toast('❌ '+n+' rejected');renderAdmin();
 }
 function logout(){me=null;localStorage.removeItem('dg-me');uh();nav('home');toast('Logged out')}
 function logn(n){me=n;localStorage.setItem('dg-me',n);uh();nav('matches')}
 let adjType='add';
-function postAnnounce(){let msg=$('adm-announce').value.trim();msg=msg.replace(/<[^>]*>/g,'').trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};adminLog('announcement_publish',msg);sv(['announce','logs']);toast('Announcement posted! 📢');rA()}
+function postAnnounce(){let msg=$('adm-announce').value.trim();msg=msg.replace(/<[^>]*>/g,'').trim();if(!msg){toast('Type a message','err');return}S.announce={msg,ts:new Date().toISOString()};adminLog('announcement_publish',msg);sv(['announce','logs']);toast('Announcement posted! 📢');renderAdmin()}
 
 function timeAgo(ts){
   const s=Math.floor((Date.now()-new Date(ts).getTime())/1000);
@@ -7109,13 +7326,13 @@ function postTrash(){
   S.trash.push({u:poster,msg,ts:new Date().toISOString()});
   // Keep last 50 messages
   if(S.trash.length>50)S.trash=S.trash.slice(-50);
-  sv(['trash']);inp.value='';rH();
+  sv(['trash']);inp.value='';renderHome();
 }
 
 function delTrash(idx){
   if(!S.trash||!S.trash[idx])return;
   if(!confirm('Delete this message from '+S.trash[idx].u+'?'))return;
-  S.trash.splice(idx,1);sv();toast('Message deleted');rH();
+  S.trash.splice(idx,1);sv();toast('Message deleted');renderHome();
 }
 
 function mentionAC(inp){
@@ -7158,6 +7375,7 @@ function insertMention(name,atIdx){
 }
 
 function closeMentionDD(){const dd=$('tt-dd');if(dd)dd.style.display='none'}
+// ── ADMIN: Balance Adjustment ──
 function applyAdj(){
   const player=$('adj-player').value;if(!player){toast('Pick a player','err');return}
   if(adjType==='waive'){
@@ -7165,13 +7383,13 @@ function applyAdj(){
     if(!S.adj)S.adj=[];
     const reason=$('adj-reason').value.trim()||'Weekly penalty waived by admin';
     S.adj.push({type:'waive',player,amount:pen,reason,ts:new Date().toISOString()});adminLog('balance_waive',player+' waived ₹'+pen+' — '+reason);
-    sv(['adj']);toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);rA();return;
+    sv(['adj']);toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);renderAdmin();return;
   }
   const amt=parseInt($('adj-amt').value);if(!amt||amt<1){toast('Enter amount','err');return}
   const reason=$('adj-reason').value.trim()||'Manual adjustment by admin';
   if(!S.adj)S.adj=[];
   S.adj.push({type:adjType,player,amount:amt,reason,ts:new Date().toISOString()});adminLog('balance_'+adjType,player+' '+adjType+' ₹'+amt+' — '+reason);
-  sv(['adj']);toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);rA();
+  sv(['adj']);toast(`${adjType==='add'?'+':'-'}₹${amt.toLocaleString()} for ${player}`);renderAdmin();
 }
 function editName(old){if(!adm)return;
   const nw=prompt('Edit name for "'+old+'":\n\nEnter new name:',old);
@@ -7196,10 +7414,10 @@ function editName(old){if(!adm)return;
   if(S.adj)(S.adj).forEach(a=>{if(a.player===old)a.player=newName});
   // Update current login if it was this player
   if(me===old){me=newName;localStorage.setItem('dg-me',newName)}adminLog('player_rename',old+' → '+newName)
-  sv();toast(old+' → '+newName+' ✅');rA();
+  sv();toast(old+' → '+newName+' ✅');renderAdmin();
 }
-function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');rA()}
-function remP(n){if(!adm)return;if(!confirm('Remove '+n+' and all their bets?'))return;adminLog('player_remove',n);delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();rA()}
+function resetPin(n){if(!confirm('Reset PIN for '+n+'?\n\nThis will clear their PIN. Next time they log in, they\'ll be asked to create a new one.\n\nYou will NOT see their new PIN.'))return;S.p[n].pin=null;sv();toast(n+'\'s PIN cleared — they\'ll set a new one on next login 🔑');renderAdmin()}
+function remP(n){if(!adm)return;if(!confirm('Remove '+n+' and all their bets?'))return;adminLog('player_remove',n);delete S.p[n];Object.keys(S.b).forEach(k=>{if(S.b[k].u===n)delete S.b[k]});if(S.ko&&S.ko[n])delete S.ko[n];if(S.adj)S.adj=S.adj.filter(a=>a.player!==n);if(me===n){me=null;localStorage.removeItem('dg-me')}sv();renderAdmin()}
 function dangerAction(msg,fn){
   if(!adm){toast('Admin only','err');return}
   if(!confirm('⚠️ '+msg+'\n\nThis action requires your admin PIN.')){return}
@@ -7225,7 +7443,7 @@ function dzUndo(){
   if(u.ko){S.ko=u.ko;S.koOpen=u.koOpen;S.koRevealed=u.koRevealed;S.koWinner=u.koWinner;S.koPublished=u.koPublished;S.cbTeams=u.cbTeams}
   if(u.trash)S.trash=u.trash;
   window._dzUndo=null;
-  sv();toast('↩ Undone successfully');rA();
+  sv();toast('↩ Undone successfully');renderAdmin();
 }
 function rstAll(){if(!adm)return;if(!confirm('⚠️ DELETE EVERYTHING?\n\nThis will wipe ALL players, bets, results, odds, Crystal Ball, adjustments, squads, and admin PIN.\n\nYou will need to set up everything from scratch.\n\nAre you absolutely sure?'))return;const pin=prompt('Enter Admin PIN to confirm:');if(!pin)return;hashPin(pin).then(h=>{if(h!==S.pin){toast('Wrong PIN — reset cancelled','err');return}S={p:{},b:{},r:{},pin:null,odds:{},ko:{},po:{},adj:[],announce:null,customMatches:[],koOpen:false,koRevealed:false,koWinner:null,koPublished:false,squadEdits:{},capEdits:{},trash:[],cbTeams:[]};adm=false;me=null;localStorage.removeItem('dg-me');sv();toast('Everything reset! 💀');nav('home')})}
 
@@ -7887,17 +8105,17 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     console.log('%c── RENDERS ──','font-weight:bold');
     restore();
     var rFails=[];
-    try{rH()}catch(e){rFails.push('rH:'+e.message)}
-    try{me=me||Object.keys(S.p)[0];mf='upcoming';rM()}catch(e){rFails.push('rM:upcoming:'+e.message)}
-    try{mf='locked';rM()}catch(e){rFails.push('rM:locked:'+e.message)}
-    try{mf='results';rM()}catch(e){rFails.push('rM:results:'+e.message)}
-    try{mf='mybets';rM()}catch(e){rFails.push('rM:mybets:'+e.message)}
-    try{rB()}catch(e){rFails.push('rB:'+e.message)}
-    try{rRu()}catch(e){rFails.push('rRu:'+e.message)}
-    try{rT()}catch(e){rFails.push('rT:'+e.message)}
-    try{rAn()}catch(e){rFails.push('rAn:'+e.message)}
-    try{me=me||Object.keys(S.p)[0];mgPlayer=null;rMG()}catch(e){rFails.push('rMG:'+e.message)}
-    try{adm=true;rA();adm=false}catch(e){rFails.push('rA:'+e.message);adm=false}
+    try{renderHome()}catch(e){rFails.push('renderHome:'+e.message)}
+    try{me=me||Object.keys(S.p)[0];mf='upcoming';renderMatches()}catch(e){rFails.push('renderMatches:upcoming:'+e.message)}
+    try{mf='locked';renderMatches()}catch(e){rFails.push('renderMatches:locked:'+e.message)}
+    try{mf='results';renderMatches()}catch(e){rFails.push('renderMatches:results:'+e.message)}
+    try{mf='mybets';renderMatches()}catch(e){rFails.push('renderMatches:mybets:'+e.message)}
+    try{renderBoard()}catch(e){rFails.push('renderBoard:'+e.message)}
+    try{renderRules()}catch(e){rFails.push('renderRules:'+e.message)}
+    try{renderTeams()}catch(e){rFails.push('renderTeams:'+e.message)}
+    try{renderStats()}catch(e){rFails.push('renderStats:'+e.message)}
+    try{me=me||Object.keys(S.p)[0];mgPlayer=null;renderLockerRoom()}catch(e){rFails.push('renderLockerRoom:'+e.message)}
+    try{adm=true;renderAdmin();adm=false}catch(e){rFails.push('renderAdmin:'+e.message);adm=false}
     if(rFails.length){rFails.forEach(function(e){f++;console.error('❌ Render: '+e)})}else{p++;console.log('✅ All 11 renders clean')}
 
     console.log('%c── RENDER QUALITY (10 categories) ──','font-weight:bold');
@@ -7967,7 +8185,7 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     // Weekly Wrap exists and callable
     OK('generateWeeklyWrap exists',typeof generateWeeklyWrap==='function');
     // House P&L renders inside admin
-    try{adm=true;rA();adm=false;OK('Admin renders with House P&L',true)}catch(e){OK('Admin with House P&L',false);adm=false}
+    try{adm=true;renderAdmin();adm=false;OK('Admin renders with House P&L',true)}catch(e){OK('Admin with House P&L',false);adm=false}
     // Audit trail shows for penalty-only players
     var _origP2=JSON.parse(JSON.stringify(S.p));
     S.p['_PenOnly']={j:'2026-03-28T10:00:00+05:30'};
@@ -7981,7 +8199,38 @@ if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.pr
     console.log(`\n${p} passed, ${f} failed ${f===0?'🟢':'🔴'}`);
     return{passed:p,failed:f};
   };
-  console.log('%c[Dugout] Test harness loaded — run: runAllTests()','color:#D4A24E;font-weight:bold');
+
+  // ── VISUAL TEST RUNNER — renders results in a modal overlay ──
+  window.runTestsVisual=function(){
+    var results=runAllTests();
+    // Collect console output by re-running with capture
+    var log=[];var _cl=console.log,_ce=console.error;
+    console.log=function(){log.push({ok:true,msg:Array.from(arguments).join(' ')})};
+    console.error=function(){log.push({ok:false,msg:Array.from(arguments).join(' ')})};
+    runAllTests();
+    console.log=_cl;console.error=_ce;
+    // Build overlay
+    var html='<div style="position:fixed;inset:0;background:#0D1B3Eee;z-index:99999;overflow-y:auto;padding:24px;font-family:Source Sans 3,system-ui,sans-serif">';
+    html+='<div style="max-width:600px;margin:0 auto">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><div style="font-family:Oswald,sans-serif;font-size:20px;font-weight:700;color:#D4A24E;letter-spacing:2px">🐍 VIPER TEST SUITE</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:24px;cursor:pointer">✕</button></div>';
+    html+='<div style="display:flex;gap:12px;margin-bottom:20px"><div style="background:#3AAF8720;border:1px solid #3AAF8740;border-radius:10px;padding:12px 20px;text-align:center;flex:1"><div style="font-size:24px;font-weight:900;color:#3AAF87">'+results.passed+'</div><div style="font-size:11px;color:#3AAF87">PASSED</div></div><div style="background:'+(results.failed?'#C4453A20':'#3AAF8710')+';border:1px solid '+(results.failed?'#C4453A40':'#3AAF8720')+';border-radius:10px;padding:12px 20px;text-align:center;flex:1"><div style="font-size:24px;font-weight:900;color:'+(results.failed?'#C4453A':'#3AAF87')+'">'+results.failed+'</div><div style="font-size:11px;color:'+(results.failed?'#C4453A':'#3AAF87')+'">FAILED</div></div></div>';
+    log.forEach(function(l){if(l.msg.indexOf('──')>=0){html+='<div style="font-size:11px;font-weight:800;color:#D4A24E;letter-spacing:1px;margin:16px 0 6px;text-transform:uppercase">'+l.msg.replace(/%c/g,'')+'</div>'}else{html+='<div style="padding:4px 0;font-size:13px;color:'+(l.ok?'#3AAF87':'#C4453A')+'">'+l.msg.replace(/%c/g,'').replace(/</g,'&lt;')+'</div>'}});
+    html+='<div style="margin-top:20px;text-align:center;font-size:12px;color:#5A6A80">Tests run in real browser DOM — no mocks</div>';
+    html+='</div></div>';
+    var overlay=document.createElement('div');overlay.innerHTML=html;document.body.appendChild(overlay.firstChild);
+  };
+
+  // Add test button to admin FAB (only on localhost)
+  var _origAdmSheet=document.getElementById('adm-sheet');
+  if(_origAdmSheet){
+    var testBtn=document.createElement('button');
+    testBtn.style.cssText='width:100%;text-align:left;background:#D4A24E10;border:1px solid #D4A24E30;padding:8px 10px;color:#D4A24E;font-size:13px;cursor:pointer;border-radius:8px;font-weight:700;margin-top:6px';
+    testBtn.textContent='🐍 Run Viper Tests';
+    testBtn.onclick=function(){runTestsVisual()};
+    _origAdmSheet.appendChild(testBtn);
+  }
+
+  console.log('%c[Dugout] Test harness loaded — run: runAllTests() or runTestsVisual()','color:#D4A24E;font-weight:bold');
 }
 </script>
 </body>
