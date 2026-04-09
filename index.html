@@ -1046,7 +1046,7 @@ function ld(){
         localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}
       });
       if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}
-    });
+    }).catch(function(e){console.error('Initial load err:',e);toast('⚠️ Firebase load failed — using local data','err')});
     $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';
   }catch(e){console.log('FB fail:',e)}}
   if(me&&!S.p[me])me=null;
@@ -3077,23 +3077,27 @@ function rRu(){
         <strong style="color:var(--acc)">What you'll find here:</strong><br>
         🔥 <strong>Personal Story</strong> — your current status at a glance (streak, P&L, comeback mode)<br>
         💰 <strong>Profile & Balance</strong> — your rank, balance, P&L, safety net status, and amount at risk<br>
-        🔍 <strong>Balance Audit Trail</strong> — match-by-match breakdown of how your balance was calculated (collapsible)<br>
+        ⚠️ <strong>Penalty Warning</strong> — shows if you're at risk of a missed-bet penalty this week<br>
         ⚡ <strong>Team Exposure</strong> — your open positions across pending bets<br>
+        🔍 <strong>Balance Audit Trail</strong> — match-by-match breakdown of how your balance was calculated (collapsible)<br>
         📊 <strong>Last Result</strong> — your most recent bet outcome with full breakdown<br>
         📋 <strong>Season Report Card</strong> — visual ring chart of your win rate, key stats, best bet, and favourite team<br>
-        📊 <strong>P&L Trendline</strong> — match-by-match profit chart with per-bet breakdown<br>
+        📊 <strong>P&L Trendline</strong> — match-by-match profit chart with milestone labels at peaks and valleys<br>
         🏷️ <strong>Play Style</strong> — your personality label (Gambler, Safe Player, Sniper, etc.) with betting signature<br>
         🧠 <strong>Risk Insight</strong> — smart observation about your betting pattern (tilt warning, underdog affinity)<br>
         🧮 <strong>What If Calculator</strong> — see 3 scenarios (safe, bold, jackpot) with projected rank movement<br>
         🏅 <strong>Achievements</strong> — unlockable badges for milestones (First Win, On Fire, Jackpot, etc.)<br>
+        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status<br>
         📐 <strong>League Percentile</strong> — how you rank vs the league across 5 metrics<br>
         📉 <strong>Rank Trajectory</strong> — sparkline showing your rank position after each match<br>
+        🎯 <strong>Odds Analysis</strong> — your favourite vs underdog betting split and win rates for each<br>
+        💪 <strong>Clutch Score</strong> — how you perform under pressure (high-stake vs low-stake bets)<br>
         🏏 <strong>Team Performance</strong> — how each team has performed for you (W/L, net P&L)<br>
         🔮 <strong>MoM Deep Dive</strong> — your MoM picking patterns and accuracy (collapsible)<br>
-        🥊 <strong>Rival Card</strong> — your #1 rival and head-to-head record<br>
+        🥊 <strong>Rival Card</strong> — your #1 rival based on closest shared match outcomes<br>
         ⚔️ <strong>Head-to-Head</strong> — your record against every other player (collapsible)<br>
         📜 <strong>Bet History</strong> — every bet grouped by time with color-coded outcomes (collapsible)<br>
-        🔮 <strong>Crystal Ball</strong> — your secret IPL winner prediction and its status<br>
+        🔮 <strong>Crystal Ball Results</strong> — revealed after admin publishes (who picked what, final standings)<br>
         🎴 <strong>Player Card</strong> — download a shareable trading card with your rank, stats, streak, and play style (PNG, Instagram story format)
       </div>
     </div>
@@ -5441,9 +5445,22 @@ function rA(){
     const curH=po.h,curA=po.a;
     _h+=`<div style="margin-bottom:12px;padding:12px;background:var(--inp);border-radius:10px"><div style="font-weight:700;color:var(--acc);margin-bottom:4px">${m.v} (${fd(m.d)})</div>
     ${curH!=='TBD'?`<div style="font-size:12px;color:var(--grn);margin-bottom:8px">✅ ${T[curH]?.s||curH} vs ${T[curA]?.s||curA}</div>`:''}
-    <div style="display:flex;gap:8px"><select class="bf-i" id="po-h-${m.id}" style="flex:1"><option value="TBD">Team 1</option>${Object.keys(T).map(k=>`<option value="${k}" ${curH===k?'selected':''}>${T[k].s}</option>`).join('')}</select>
-    <select class="bf-i" id="po-a-${m.id}" style="flex:1"><option value="TBD">Team 2</option>${Object.keys(T).map(k=>`<option value="${k}" ${curA===k?'selected':''}>${T[k].s}</option>`).join('')}</select>
-    <button class="bp" style="padding:8px 12px" onclick="setPO(${m.id})">Set</button></div></div>`;
+    <div style="display:flex;gap:8px;align-items:flex-start">
+    <div style="flex:1;position:relative">
+      <div onclick="var el=$('po-h-list-${m.id}');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="po-h-label-${m.id}" style="font-size:13px;color:${curH!=='TBD'?T[curH]?.c||'var(--t1)':'var(--t4)'}">${curH!=='TBD'?T[curH]?.s||curH:'Team 1'}</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+      <input type="hidden" id="po-h-${m.id}" value="${curH}">
+      <div id="po-h-list-${m.id}" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${Object.keys(T).map(k=>`<div onclick="$('po-h-${m.id}').value='${k}';$('po-h-label-${m.id}').textContent='${T[k].s}';$('po-h-label-${m.id}').style.color='${T[k].c}';$('po-h-list-${m.id}').style.display='none'" style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'"><div style="width:22px;height:22px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:8px">${T[k].s}</div><span style="font-size:12px;font-weight:700;color:var(--t1)">${T[k].s}</span></div>`).join('')}
+      </div></div>
+    <div style="flex:1;position:relative">
+      <div onclick="var el=$('po-a-list-${m.id}');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="po-a-label-${m.id}" style="font-size:13px;color:${curA!=='TBD'?T[curA]?.c||'var(--t1)':'var(--t4)'}">${curA!=='TBD'?T[curA]?.s||curA:'Team 2'}</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+      <input type="hidden" id="po-a-${m.id}" value="${curA}">
+      <div id="po-a-list-${m.id}" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${Object.keys(T).map(k=>`<div onclick="$('po-a-${m.id}').value='${k}';$('po-a-label-${m.id}').textContent='${T[k].s}';$('po-a-label-${m.id}').style.color='${T[k].c}';$('po-a-list-${m.id}').style.display='none'" style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'"><div style="width:22px;height:22px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:8px">${T[k].s}</div><span style="font-size:12px;font-weight:700;color:var(--t1)">${T[k].s}</span></div>`).join('')}
+      </div></div>
+    <button class="bp" style="padding:10px 12px" onclick="setPO(${m.id})">Set</button></div></div>`;
   });
   _h+=`</div></div>`;
   // Crystal Ball Admin
@@ -5457,7 +5474,13 @@ function rA(){
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-size:16px">⚠️</span><span style="font-weight:800;color:var(--acc);font-size:13px;letter-spacing:.5px">ACTION REQUIRED — DEFINE THE PLAYOFF 4</span></div>
     <div style="font-size:13px;color:var(--t4);margin-bottom:12px">Once the top 4 qualifying teams are known, set them here. Participants will only be able to choose among these 4 teams when placing their Crystal Ball bet.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-      ${[0,1,2,3].map(i=>`<select class="bf-i" id="cb-t${i}" style="min-height:40px"><option value="">Team ${i+1}</option>${Object.keys(T).map(k=>`<option value="${k}" ${cbTeams[i]===k?'selected':''}>${T[k].n}</option>`).join('')}</select>`).join('')}
+      ${[0,1,2,3].map(i=>`<div style="position:relative">
+        <div onclick="var el=$('cb-t${i}-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer;min-height:40px">
+          <span id="cb-t${i}-label" style="font-size:13px;color:${cbTeams[i]?T[cbTeams[i]]?.c||'var(--t1)':'var(--t4)'}">${cbTeams[i]?T[cbTeams[i]]?.s||cbTeams[i]:'Team '+(i+1)}</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+        <input type="hidden" id="cb-t${i}" value="${cbTeams[i]||''}">
+        <div id="cb-t${i}-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+          ${Object.keys(T).map(k=>`<div onclick="$('cb-t${i}').value='${k}';$('cb-t${i}-label').textContent='${T[k].s}';$('cb-t${i}-label').style.color='${T[k].c}';$('cb-t${i}-list').style.display='none'" style="display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'"><div style="width:22px;height:22px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:8px">${T[k].s}</div><span style="font-size:12px;font-weight:700;color:var(--t1)">${T[k].n}</span></div>`).join('')}
+        </div></div>`).join('')}
     </div>
     <button style="width:100%;padding:10px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="saveCBTeams()">✅ Save Qualifying Teams & Unlock Crystal Ball</button>
     </div>`;
@@ -5512,7 +5535,16 @@ function rA(){
     _h+=`<div style="margin-top:16px;padding:14px;background:#D4A24E0C;border:1px solid #D4A24E1A;border-radius:10px">
     <div class="bf-l">REVEAL & SETTLE</div>
     <div style="font-size:12px;color:var(--t4);margin-bottom:10px">After the IPL Final, select the winning team. This settles all Crystal Ball bets internally. Players will only see "settled — announced at event" until you publish.</div>
-    <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div><select class="bf-i" id="ko-winner"><option value="">-- Select champion --</option>${(S.cbTeams&&S.cbTeams.length?S.cbTeams:Object.keys(T)).map(k=>`<option value="${k}">${T[k]?.n||k}</option>`).join('')}</select></div>
+    <div class="bf-s"><div class="bf-l">IPL 2026 Winner</div>
+    <div style="position:relative">
+      <div onclick="var el=$('ko-winner-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="ko-winner-label" style="font-size:14px;color:var(--t4)">Select champion…</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+      <input type="hidden" id="ko-winner" value="">
+      <div id="ko-winner-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:240px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${(S.cbTeams&&S.cbTeams.length?S.cbTeams:Object.keys(T)).map(k=>`<div onclick="$('ko-winner').value='${k}';$('ko-winner-label').textContent='🏆 ${T[k]?.n||k}';$('ko-winner-label').style.color='${T[k]?.c||'var(--acc)'}';$('ko-winner-list').style.display='none'" style="display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+          <div style="width:28px;height:28px;border-radius:50%;background:${T[k]?.c||'#888'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:10px">${T[k]?.s||k}</div>
+          <span style="font-weight:700;font-size:14px;color:var(--t1)">${T[k]?.n||k}</span></div>`).join('')}
+      </div></div></div>
     <button style="width:100%;padding:12px;background:var(--grad);border:0;border-radius:10px;color:#000;font-weight:800;cursor:pointer;font-size:14px" onclick="revealKO()">🔮 Reveal & Settle (Admin Only)</button></div>`;
   }
   if(S.koRevealed&&!S.koPublished){
@@ -5572,8 +5604,26 @@ function rA(){
   <div style="flex:1;min-width:100px"><div class="bf-l">Time (IST)</div><select class="bf-i" id="nm-time"><option value="15:30">3:30 PM</option><option value="19:30" selected>7:30 PM</option></select></div>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:8px">
-  <div style="flex:1"><div class="bf-l">Home Team</div><select class="bf-i" id="nm-home" onchange="nmTeamSync()"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
-  <div style="flex:1"><div class="bf-l">Away Team</div><select class="bf-i" id="nm-away"><option value="">--</option>${Object.keys(T).map(k=>`<option value="${k}">${T[k].s}</option>`).join('')}</select></div>
+  <div style="flex:1"><div class="bf-l">Home Team</div>
+    <div style="position:relative">
+      <div onclick="var el=$('nm-home-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="nm-home-label" style="font-size:13px;color:var(--t4)">--</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+      <input type="hidden" id="nm-home" value="">
+      <div id="nm-home-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:240px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${Object.keys(T).map(k=>`<div onclick="$('nm-home').value='${k}';$('nm-home-label').textContent='${T[k].s}';$('nm-home-label').style.color='${T[k].c}';$('nm-home-list').style.display='none';nmTeamSync()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+          <div style="width:24px;height:24px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:9px">${T[k].s}</div>
+          <span style="font-weight:700;font-size:13px;color:var(--t1)">${T[k].s}</span></div>`).join('')}
+      </div></div></div>
+  <div style="flex:1"><div class="bf-l">Away Team</div>
+    <div style="position:relative">
+      <div onclick="var el=$('nm-away-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="nm-away-label" style="font-size:13px;color:var(--t4)">--</span><span style="color:var(--t4);font-size:12px">▾</span></div>
+      <input type="hidden" id="nm-away" value="">
+      <div id="nm-away-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:240px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${Object.keys(T).map(k=>`<div onclick="$('nm-away').value='${k}';$('nm-away-label').textContent='${T[k].s}';$('nm-away-label').style.color='${T[k].c}';$('nm-away-list').style.display='none'" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+          <div style="width:24px;height:24px;border-radius:50%;background:${T[k].c};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:9px">${T[k].s}</div>
+          <span style="font-weight:700;font-size:13px;color:var(--t1)">${T[k].s}</span></div>`).join('')}
+      </div></div></div>
   </div>
   <div class="bf-s"><div class="bf-l">Venue</div>
     <div style="position:relative">
@@ -7199,7 +7249,7 @@ db.ref('dugout').once('value').then(snap=>{
       S.pendingJoins=d2.pendingJoins||{};
       localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
   if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}
-});
+}).catch(function(e){console.error('Setup load err:',e);toast('⚠️ Firebase connection failed','err')});
 $('mtag').textContent='LIVE';$('mtag').style.background='#3FB08C16';$('mtag').style.color='#3FB08C';toast('Firebase connected! 🔗');
 }catch(e){err.textContent='Invalid JSON'}}
 
