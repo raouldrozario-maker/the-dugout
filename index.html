@@ -6128,19 +6128,16 @@ function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(
 
 function voidMatch(id){if(!adm)return;
   const m=gm(id);
-  const bets=Object.values(S.b).filter(x=>x.mid===id);
+  const bets=Object.values(S.b).filter(x=>x.mid===id||parseInt(x.mid)===id);
   const msg=`🌧️ VOID MATCH — ${T[m.h]?.s||m.h} vs ${T[m.a]?.s||m.a}\n\n` +
     `This will:\n` +
-    `• Delete all ${bets.length} bet(s) on this match\n` +
-    `• Refund all players (bets removed = money back)\n` +
+    `• Refund all ${bets.length} player(s) — bets preserved for history\n` +
     `• Mark the match as "No Result"\n\n` +
     `This cannot be undone. Continue?`;
   if(!confirm(msg))return;
-  // Delete all bets for this match
-  Object.keys(S.b).forEach(k=>{if(S.b[k].mid===id)delete S.b[k]});
-  // Record as voided (so it doesn't show as pending)
-  S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};adminLog('void_match','M#'+id);
-  sv(['r','b']);toast('Match voided — all bets refunded 🌧️');rA();
+  // Mark as voided — bets stay in S.b for history, _coreBal skips voided matches
+  S.r[id]={w:'VOID',mom:null,voided:true,ts:new Date().toISOString()};adminLog('void_match','M#'+id+' ('+bets.length+' bets preserved)');
+  sv(['r']);toast('Match voided — '+bets.length+' bets refunded 🌧️');rA();
 }
 
 function getSquad(k){return(S.squadEdits&&S.squadEdits[k])||T[k]?.sq||[]}
