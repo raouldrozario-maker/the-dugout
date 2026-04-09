@@ -450,7 +450,7 @@ function iTip(id,text){return `<i class="dg-tip" onclick="tipToggle(this)">i</i>
 // Fuzzy MoM matching — normalizes names to handle "Rohit Sharma" vs "R. Sharma" vs "rohit sharma"
 function momNorm(s){if(!s)return'';return s.trim().toLowerCase().replace(/\./g,'').replace(/\s+/g,' ')}
 function momMatch(pick,official){if(!pick||!official)return false;const a=momNorm(pick),b=momNorm(official);if(a===b)return true;const ap=a.split(' '),bp=b.split(' ');if(ap.length>=2&&bp.length>=2&&ap[ap.length-1]===bp[bp.length-1]){if(ap[0]===bp[0])return true;if((ap[0].length<=2||bp[0].length<=2)&&ap[0][0]===bp[0][0]&&ap[ap.length-1]===bp[bp.length-1])return true}return false}
-function ruJump(id){const el=$(id);if(!el)return;
+function ruJump(id){const el=$(id);if(!el){toast('Not enough data yet for this section');return}
   // Auto-open Full Rulebook if target is inside it
   const ruf=$('ru-full');if(ruf&&ruf.contains(el)&&!ruf.classList.contains('open')){ruf.classList.add('open');ruf.style.maxHeight='20000px';const chev=ruf.previousElementSibling?.querySelector('.sq-chev');if(chev)chev.classList.add('open')}
   // Auto-open any collapsed parent (adm sections etc)
@@ -550,6 +550,9 @@ function rpn(storedName){
 }
 
 // Fix orphaned bets where bt.u doesn't match any S.p key (runs on data load)
+function normalizeBets(){
+  Object.values(S.b).forEach(function(bt){if(typeof bt.mid==='string')bt.mid=parseInt(bt.mid)||bt.mid;if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0});
+}
 function fixOrphanBets(){
   let fixed=0;
   const players=Object.keys(S.p);
@@ -994,7 +997,7 @@ window.addEventListener('online',()=>{
       Object.keys(S.b).forEach(k=>{if(!remoteB[k]||!remoteB[k].ts||(S.b[k].ts&&(!remoteB[k].ts||S.b[k].ts>remoteB[k].ts)))remoteB[k]=S.b[k]});
       S.b=remoteB;
       sv(['b']);
-    });
+    }).catch(function(e){console.error('Merge err:',e);toast('⚠️ Sync merge failed','err')});
   }
 });
 
@@ -1014,10 +1017,10 @@ function ld(){
         // Remote has data — use it (don't overwrite with empty local)
         S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];S.cancelNudges=d.cancelNudges||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
-        if(!window._orphanFixed){window._orphanFixed=true;fixOrphanBets()}
+        if(!window._orphanFixed){window._orphanFixed=true;normalizeBets();fixOrphanBets()}
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
-        db.ref('dugout').set(S);
+        db.ref('dugout').set(S).catch(function(e){console.error('Firebase push err:',e);toast('⚠️ Sync failed','err')});
       }
       // Now start real-time listener
       db.ref('dugout').on('value',sn=>{
@@ -1027,7 +1030,7 @@ function ld(){
         const localTs=S._ts||0;
         if(incomingTs<localTs){console.log('[Dugout] Skipped stale Firebase push (remote:'+incomingTs+' < local:'+localTs+')');return}
         const oldR={...S.r};
-        S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
+        S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();
         // Detect new results for logged-in player
         if(me){Object.keys(S.r).forEach(mid=>{
           if(!oldR[mid]&&!S.r[mid].voided){
@@ -1429,7 +1432,7 @@ function rM(){
   // Cache lock state once to prevent race condition between filter and card render
   const _lkCache={};allM.forEach(m=>{_lkCache[m.id]=lk(m)});
   const lkC=m=>_lkCache[m.id]!==undefined?_lkCache[m.id]:lk(m);
-  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lkC(m)):mf==='locked'?allM.filter(m=>lkC(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):mf==='livebets'?allM.filter(m=>Object.values(S.b).some(b=>b.mid===m.id)):allM;
+  let fm=mf==='upcoming'?allM.filter(m=>!S.r[m.id]&&!lkC(m)):mf==='locked'?allM.filter(m=>lkC(m)&&!S.r[m.id]):mf==='results'?allM.filter(m=>S.r[m.id]):mf==='mybets'?allM.filter(m=>S.b[m.id+'-'+(me||'')]):mf==='livebets'?allM.filter(m=>Object.values(S.b).some(b=>parseInt(b.mid)===m.id)):allM;
   // Auto-switch to most relevant filter if current shows nothing
   if(!fm.length&&mf==='upcoming'){const locked=allM.filter(m=>lkC(m)&&!S.r[m.id]);const results=allM.filter(m=>S.r[m.id]);if(locked.length){mf='locked';fm=locked}else if(results.length){mf='results';fm=results}}
   const risk=me?atRisk(me):0;
@@ -2098,7 +2101,7 @@ function rM(){
 
   if(!fm.length)h+=`<div style="text-align:center;color:var(--t3);padding:32px">${mf==='livebets'?'No bets placed yet.':'Nothing here yet.'}</div>`;
   fm.forEach(m=>{
-    const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>x.mid===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
+    const l=lkC(m),bk=me?m.id+'-'+me:null,my=bk?S.b[bk]:null,rs=S.r[m.id],ab=Object.values(S.b).filter(x=>parseInt(x.mid)===m.id),dh=MM.filter(x=>x.d===m.d).length>1,mo=S.odds[m.id];
 
     // ── Dispatch to card sub-function by mode ──
     if(mf==='livebets'&&adm){h+=rM_liveBetCard(m,l,ab,rs);return}
@@ -3523,8 +3526,9 @@ function rAn(){
     const racePlayers=L.slice(0,8);
     const raceData=racePlayers.map(p=>{
       let bal2=ST;const pts=[{mid:0,bal:bal2}];
-      resolvedMids.forEach(mid=>{const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));if(bt){const rs=S.r[mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;bal2+=Math.round(rp)}else if(!mh)bal2-=bt.am}pts.push({mid:parseInt(mid),bal:bal2})});
-      return{name:p.n,pts,final:bal2,color:p.n===me?'var(--acc)':T[Object.values(S.b).find(x=>x.u===p.n)?.tm]?.c||'var(--t2)'};
+      resolvedMids.forEach(mid=>{const bt=Object.values(S.b).find(x=>x.u===p.n&&x.mid===parseInt(mid));if(bt){const rs=S.r[mid],w=bt.tm===rs.w,mh=momMatch(bt.mom,rs.mom),od=safeOd(bt);if(w){let rp=bt.am*(od-1);if(isJackpot(bt,mh))rp+=bt.am*(od-1);else if(mh)rp+=ST*MOM_BONUS;bal2+=Math.round(rp)}else if(!mh)bal2-=bt.am}if(bal2<MINB)bal2=MINB;pts.push({mid:parseInt(mid),bal:bal2})});
+      const finalBal=bal(p.n);
+      return{name:p.n,pts,final:finalBal,color:p.n===me?'var(--acc)':T[Object.values(S.b).find(x=>x.u===p.n)?.tm]?.c||'var(--t2)'};
     }).sort((a,b)=>b.final-a.final);
     const maxBal2=Math.max(...raceData.map(d=>Math.max(...d.pts.map(p=>p.bal))));
     h+=`<div id="st-race" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:18px;margin-bottom:16px">
@@ -3840,6 +3844,7 @@ function rMG(){
   }
 
 
+
   // ─── PERSONAL STORY HEADER (emotional hook) ───
   {
     let storyIcon='',storyLine='',storyBg='var(--card)',storyBorder='var(--bdr)';
@@ -3901,6 +3906,7 @@ function rMG(){
   }
 
   
+
 // ─── TEAM EXPOSURE (pending bets) ───
   const pendingBets=ub.filter(x=>!S.r[x.mid]);
   if(pendingBets.length){
@@ -3938,6 +3944,7 @@ function rMG(){
   }
 
   
+
 // ─── BALANCE AUDIT TRAIL (collapsible) ───
   if(resolved.length>=1||S.adj.filter(a=>a.player===n).length>0||weeklyPenalty(n)>0){
     // Build deterministic match-by-match audit
@@ -4037,6 +4044,7 @@ function rMG(){
   }
 
   
+
 // ─── LAST RESULT HIGHLIGHT ───
   if(sortedResolved.length){
     const last=sortedResolved[0];
@@ -4112,6 +4120,7 @@ function rMG(){
   }
 
   
+
 // ─── P&L TRENDLINE (premium match-by-match chart) ───
   if(resolved.length>=2){
     const sortedR=[...resolved].sort((a,b)=>a.mid-b.mid);
@@ -4211,6 +4220,7 @@ function rMG(){
   }
 
   
+
 // ─── PLAY STYLE TAG ───
   const personality=getPersonality(n);
   if(personality){
@@ -4253,6 +4263,7 @@ function rMG(){
       </div>`;
     }
   }
+
 
 
 // ─── WHAT IF CALCULATOR ───
@@ -4414,6 +4425,7 @@ function rMG(){
     h+=`</div>`;
   }
   } // end crystal ball gate
+
 
 
 // ─── GOD MODE: LEAGUE PERCENTILE ───
@@ -4694,6 +4706,7 @@ function rMG(){
   }
 
   
+
 // ─── GOD MODE: RIVAL CARD ───
   if(resolved.length>=3){
     const rivals={};
@@ -4795,6 +4808,7 @@ function rMG(){
 
   } // end h2h gate
   
+
 // ─── BET HISTORY ───
   h+=`<div id="mg-bets" class="card" style="padding:0;overflow:hidden;margin-bottom:8px">
     <div onclick="var el=$('bets-body-${n.replace(/\\s/g,'')}');if(el){var v=el.style.display==='none';el.style.display=v?'block':'none';this.querySelector('.bets-chev').textContent=v?'▾':'▸'}" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer">
@@ -4850,6 +4864,7 @@ function rMG(){
   h+=`</div></div>`;
 
   
+
 // ─── CRYSTAL BALL RESULTS (only after admin publishes) ───
   if(S.koPublished&&S.koRevealed&&S.koWinner){
     h+=`<div style="background:linear-gradient(135deg,#0E1220,#0E1528);border:2px solid #D4A24E30;border-radius:20px;padding:24px;margin-top:20px">
@@ -5280,17 +5295,35 @@ function rA(){
 
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">⚙️</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">MATCH OPERATIONS</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
   _h+=`<div id="adm-odds" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">📊</span><span class="ct">SET ODDS</span></div><div class="bf-s"><div class="bf-l">Match</div>
-    <select class="bf-i" id="odds-m" onchange="oddsMC()" style="cursor:pointer;font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;appearance:auto">
-      <option value="">-- Select match --</option>
-      ${oddsMatches.map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} — ${fd(m.d)}${S.odds[m.id]?' ✅':''}</option>`).join('')}
-    </select>
+    <div style="position:relative">
+      <div onclick="var el=$('odds-m-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="odds-m-label" style="font-size:14px;color:var(--t4)">Select match…</span>
+        <span style="color:var(--t4);font-size:12px">▾</span>
+      </div>
+      <input type="hidden" id="odds-m" value="">
+      <div id="odds-m-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${oddsMatches.map(m=>`<div onclick="$('odds-m').value='${m.id}';$('odds-m-label').textContent='#${m.id} ${T[m.h]?.s} v ${T[m.a]?.s} — ${fd(m.d)}';$('odds-m-label').style.color='var(--t1)';$('odds-m-list').style.display='none';oddsMC()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--t4);font-weight:700">#${m.id}</span><span style="font-weight:700;font-size:13px;color:${T[m.h]?.c||'var(--t1)'}">${T[m.h]?.s}</span><span style="font-size:11px;color:var(--t4)">v</span><span style="font-weight:700;font-size:13px;color:${T[m.a]?.c||'var(--t1)'}">${T[m.a]?.s}</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">${fd(m.d)}</span>${S.odds[m.id]?'<span style="font-size:10px;color:var(--grn)">✅</span>':''}</div>
+        </div>`).join('')}
+      </div>
+    </div>
   </div><div id="odds-f"></div></div>`;
   // Match Control
   _h+=`<div id="adm-result" class="card" style="margin-bottom:10px"><div class="ch"><span style="font-size:20px">🎮</span><span class="ct">DECLARE RESULT</span></div><div class="bf-s"><div class="bf-l">Match</div>
-    <select class="bf-i" id="adm-m" onchange="admMC()" style="cursor:pointer;font-size:14px;padding:12px 14px;color:var(--t1);background:var(--inp);border:1px solid var(--bdr);border-radius:10px;width:100%;appearance:auto">
-      <option value="">-- Select match --</option>
-      ${ctrlMatches.map(m=>`<option value="${m.id}">${m.playoff?m.v:'#'+m.id} ${T[m.h]?.s} v ${T[m.a]?.s} — ${fd(m.d)}${S.r[m.id]?' ✅':''}</option>`).join('')}
-    </select>
+    <div style="position:relative">
+      <div onclick="var el=$('adm-m-list');el.style.display=el.style.display==='block'?'none':'block'" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--inp);border:1px solid var(--bdr2);border-radius:12px;cursor:pointer">
+        <span id="adm-m-label" style="font-size:14px;color:var(--t4)">Select match…</span>
+        <span style="color:var(--t4);font-size:12px">▾</span>
+      </div>
+      <input type="hidden" id="adm-m" value="">
+      <div id="adm-m-list" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--bdr2);border-radius:0 0 12px 12px;max-height:280px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px #000c">
+        ${ctrlMatches.map(m=>`<div onclick="$('adm-m').value='${m.id}';$('adm-m-label').textContent='#${m.id} ${T[m.h]?.s} v ${T[m.a]?.s} — ${fd(m.d)}';$('adm-m-label').style.color='var(--t1)';$('adm-m-list').style.display='none';admMC()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .12s" onmouseover="this.style.background='rgba(212,162,78,0.06)'" onmouseout="this.style.background='transparent'">
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--t4);font-weight:700">#${m.id}</span><span style="font-weight:700;font-size:13px;color:${T[m.h]?.c||'var(--t1)'}">${T[m.h]?.s}</span><span style="font-size:11px;color:var(--t4)">v</span><span style="font-weight:700;font-size:13px;color:${T[m.a]?.c||'var(--t1)'}">${T[m.a]?.s}</span></div>
+          <div style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">${fd(m.d)}</span>${S.r[m.id]?'<span style="font-size:10px;color:var(--grn)">✅</span>':''}</div>
+        </div>`).join('')}
+      </div>
+    </div>
   </div><div id="adm-f"></div></div>`;
   // Set Playoff Teams
   _h+=`<div style="display:flex;align-items:center;gap:8px;margin:24px 0 12px;padding-left:2px"><span style="font-size:14px">📊</span><span style="font-family:var(--ff);font-size:12px;font-weight:900;color:var(--acc);letter-spacing:3px;text-transform:uppercase">LEAGUE OVERVIEW</span><div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(212,162,78,0.3),transparent);margin-left:8px"></div></div>`;
@@ -7009,7 +7042,7 @@ function generateWeeklyWrap(){
   var preview=document.createElement('div');
   preview.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);padding:20px';
   preview.onclick=function(e){if(e.target===preview)preview.remove()};
-  preview.innerHTML='<div style="background:#0D1B3E;border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#D4A24E;letter-spacing:2px">WEEKLY WRAP PREVIEW</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:20px;cursor:pointer">\u2715</button></div><pre style="white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.7;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0">'+msg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><div style="display:flex;gap:8px;margin-top:16px"><button onclick="navigator.clipboard.writeText(document.querySelector(\'pre\').textContent);toast(\'Copied!\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#F5A623);border:0;border-radius:10px;color:#000;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCCB Copy & Close</button><button onclick="var text=document.querySelector(\'pre\').textContent;window.open(\'https://wa.me/?text=\'+encodeURIComponent(text),\'_blank\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCF2 Share on WhatsApp</button></div></div>';
+  preview.innerHTML='<div style="background:#0D1B3E;border:1px solid rgba(212,162,78,0.2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:700;color:#D4A24E;letter-spacing:2px">WEEKLY WRAP PREVIEW</div><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:0;border:0;color:#888;font-size:20px;cursor:pointer">\u2715</button></div><pre style="white-space:pre-wrap;word-wrap:break-word;font-size:13px;line-height:1.7;color:#CBD5E1;font-family:system-ui,sans-serif;margin:0">'+msg.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><div style="display:flex;gap:8px;margin-top:16px"><button onclick="try{navigator.clipboard.writeText(document.querySelector(\'pre\').textContent)}catch(e){var _ta=document.createElement(\'textarea\');_ta.value=document.querySelector(\'pre\').textContent;document.body.appendChild(_ta);_ta.select();document.execCommand(\'copy\');document.body.removeChild(_ta)}toast(\'Copied!\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:linear-gradient(135deg,#D4A24E,#F5A623);border:0;border-radius:10px;color:#000;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCCB Copy & Close</button><button onclick="var text=document.querySelector(\'pre\').textContent;window.open(\'https://wa.me/?text=\'+encodeURIComponent(text),\'_blank\');this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;font-weight:800;font-size:14px;cursor:pointer">\uD83D\uDCF2 Share on WhatsApp</button></div></div>';
   document.body.appendChild(preview);
   adminLog('weekly_wrap','Week '+weekNum);
 }
@@ -7140,7 +7173,7 @@ function dangerAction(msg,fn){
 function dzUndo(){
   if(!window._dzUndo){toast('Nothing to undo','err');return}
   const u=window._dzUndo;
-  if(u.b)S.b=u.b;
+  if(u.b){S.b=u.b;normalizeBets()}
   if(u.r)S.r=u.r;
   if(u.ko){S.ko=u.ko;S.koOpen=u.koOpen;S.koRevealed=u.koRevealed;S.koWinner=u.koWinner;S.koPublished=u.koPublished;S.cbTeams=u.cbTeams}
   if(u.trash)S.trash=u.trash;
@@ -7155,13 +7188,13 @@ try{const c=JSON.parse(raw);if(!c.databaseURL){err.textContent='Missing database
 // Push local then listen
 db.ref('dugout').once('value').then(snap=>{
   const d=snap.val();
-  if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S)}
+  if(!d||Object.keys(d.p||{}).length===0){db.ref('dugout').set(S).catch(function(e){console.error('Setup push err:',e);toast('⚠️ Sync failed','err')})}
   else{S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)})}
   db.ref('dugout').on('value',sn=>{const d2=sn.val()||{};
       // Timestamp guard — reject incoming data older than local
       const incomingTs=d2._ts||0;const localTs=S._ts||0;
       if(incomingTs<localTs){console.log('[Dugout] Skipped stale Firebase push (listener2: remote:'+incomingTs+' < local:'+localTs+')');return}
-      const oldR2={...S.r};S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
+      const oldR2={...S.r};S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
       if(adm&&d2.pendingJoins){const pj=Object.keys(d2.pendingJoins||{});if(pj.length>0&&(!window._lastPendingCount||pj.length>window._lastPendingCount)){toast('🔔 '+pj.length+' pending join request'+(pj.length>1?'s':'')+'!');window._lastPendingCount=pj.length}}
       S.pendingJoins=d2.pendingJoins||{};
       localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
