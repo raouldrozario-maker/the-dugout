@@ -245,6 +245,20 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 </div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- ORDER MATTERS: DO NOT REARRANGE SCRIPT BLOCKS              -->
+<!--   1. DATA        — Teams, matches, constants               -->
+<!--   2. ENGINE      — Balance, payout, penalty, leaderboard   -->
+<!--   3. HELPERS     — Match state, UI utilities, dropdowns    -->
+<!--   4. LOGIN+BOOT  — Firebase, authentication                -->
+<!--   5. NAV+HOME+MATCHES — Navigation, renderHome, renderMatches -->
+<!--   6. BOARD+RULES+TEAMS — renderBoard, renderRules, renderTeams -->
+<!--   7. STATS+LOCKER — renderStats, renderLockerRoom          -->
+<!--   8. ADMIN RENDER — renderAdmin + 5 sub-functions          -->
+<!--   9. ADMIN ACTIONS — Mutations, features, export           -->
+<!--  10. UI UTILITIES — toggleAdmSheet, admSheetJump           -->
+<!--  11. TEST HARNESS — localhost only                         -->
+<!-- ══════════════════════════════════════════════════════════ -->
 <script>
 // ┌─────────────────────────────────────────────────────────────┐
 // │  DEVELOPER BRIEFING — READ THIS FIRST                      │
@@ -599,7 +613,13 @@ const PENALTY_AMOUNT=2000;  // weekly inactivity penalty
 const LOCK_MINUTES=40;      // minutes before match to lock betting
 </script>
 
+
+<!-- ═══ ORDER 2/11: ENGINE ═══ -->
+<!-- DEPENDS ON: DATA -->
+<!-- EXPORTS: safeOd, isJackpot, momMatch, _coreBal, bal, betBal, rawBal, LB, weeklyPenalty, getPenaltyBreakdown, normalizeBets -->
 <script>
+'use strict';
+
 // Safe odds parser — logs warning instead of silent fallback
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 2: CORE ENGINE — Financial logic, payout math      │
@@ -1144,6 +1164,10 @@ function sdClear(id){
 
 </script>
 
+
+<!-- ═══ ORDER 3/11: HELPERS (match state + UI) ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE -->
+<!-- EXPORTS: lk, dl, fd, ft, gm, gms, toast, bdg, momDropdown -->
 <script>
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 4: STORAGE — Firebase sync, localStorage cache     │
@@ -1246,6 +1270,10 @@ function ld(){
 
 </script>
 
+
+<!-- ═══ ORDER 4/11: LOGIN + FIREBASE BOOT ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE, HELPERS -->
+<!-- EXPORTS: ld, sv, filterLoginList -->
 <script>
 // ┌─────────────────────────────────────────────────────────────┐
 // │  SECTION 5: NAVIGATION + VIEWS — All render functions       │
@@ -2921,6 +2949,13 @@ function getDeadlineStr(m){const d=dl(m);return d.toLocaleTimeString('en-IN',{ho
 
 function tBL(id){const e=$('bl-'+id);if(e){const open=e.style.display==='none';e.style.display=open?'block':'none';if(!window._blOpen)window._blOpen={};window._blOpen[id]=open}}
 
+</script>
+
+<!-- ═══ ORDER 5/11: BOARD + RULES + TEAMS ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE, HELPERS, NAVIGATION -->
+<!-- EXPORTS: renderBoard, renderRules, renderTeams -->
+<script>
+
 // ══════════════════════════════════════════════════════════════
 // LEADERBOARD
 // ══════════════════════════════════════════════════════════════
@@ -3512,6 +3547,13 @@ function isIndian(name){
   const overseas=['Jos Buttler','Glenn Phillips','Tom Banton','Jason Holder','Kagiso Rabada','Rashid Khan','Luke Wood','Matheesha Pathirana','Sunil Narine','Rachin Ravindra','Blessing Muzarabani','Rovman Powell','Finn Allen','Tim Seifert','Cameron Green','Varun Chakaravarthy','Phil Salt','Tim David','Jacob Bethell','Romario Shepherd','Jordan Cox','Josh Hazlewood','Nuwan Thushara','Jacob Duffy','Dewald Brevis','Jamie Overton','Matthew William Short','Zak Foulkes','Noor Ahmad','Akeal Hosein','Matt Henry','Nathan Ellis','David Miller','Ben Duckett','Pathum Nissanka','Tristan Stubbs','Mitchell Starc','Dushmantha Chameera','Lungisani Ngidi','Kyle Jamieson','Aiden Markram','Matthew Breetzke','Nicholas Pooran','Josh Inglis','Mitchell Marsh','Wanindu Hasaranga','Anrich Nortje','Quinton De Kock','Ryan Rickelton','Sherfane Rutherford','Mitchell Santner','Corbin Bosch','Will Jacks','Trent Boult','Allah Ghazanfar','Marcus Stoinis','Marco Jansen','Azmatullah Omarzai','Mitch Owen','Cooper Connolly','Ben Dwarshuis','Lockie Ferguson','Xavier Bartlett','Donovan Ferreira','Lhuan-Dre Pretorius','Shimron Hetmyer','Sam Curran','Jofra Archer','Kwena Maphaka','Nandre Burger','Adam Milne','Heinrich Klaasen','Travis Head','Kamindu Mendis','Brydon Carse','Liam Livingstone','Jack Edwards','Eshan Malinga','Pat Cummins','Mohammad Izhar'];
   return !overseas.includes(name);
 }
+
+</script>
+
+<!-- ═══ ORDER 6/11: STATS + LOCKER ROOM ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE, HELPERS, NAVIGATION -->
+<!-- EXPORTS: renderStats, renderLockerRoom, getBettingSignature, playRace, getScoutRec -->
+<script>
 
 // ══════════════════════════════════════════════════════════════
 // ANALYTICS
@@ -5138,6 +5180,14 @@ function renderLockerRoom(){
 }catch(e){const _el=$('v-mygame');if(_el)_el.innerHTML='<div style="color:var(--red);padding:40px;text-align:center;font-size:14px"><div style="font-size:32px;margin-bottom:10px">⚠️</div><strong>Locker Room Error</strong><br><br><code style="font-size:12px;color:var(--t3);word-break:break-all">'+e.message+'</code></div>';console.error('renderLockerRoom crash:',e)}
 }
 
+</script>
+
+<!-- ═══ ORDER 7/11: ADMIN RENDER ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE, HELPERS, NAVIGATION, all other RENDERS -->
+<!-- EXPORTS: renderAdmin, renderA_alerts, renderA_statusAndMCB,
+     renderA_commsAndOps, renderA_playerMgmt, renderA_seasonSetup -->
+<script>
+
 // ══════════════════════════════════════════════════════════════
 // ADMIN
 // ══════════════════════════════════════════════════════════════
@@ -6334,6 +6384,16 @@ function sRes(id){if(!adm){toast("Admin only","err");return}const w=admW[id];if(
   // Check for newly triggered penalties after this result
   setTimeout(function(){const penalised=[];Object.keys(S.p).forEach(function(n){const pen=weeklyPenalty(n);const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);const net=Math.max(pen-waived,0);if(net>0){const prevPen=window._lastPenState?window._lastPenState[n]||0:0;if(net>prevPen)penalised.push(n)}});if(penalised.length)toast('⚠️ Inactivity penalty applied: '+penalised.join(', '),'err');window._lastPenState={};Object.keys(S.p).forEach(function(n){const pen=weeklyPenalty(n);const waived=(S.adj||[]).filter(a=>a.type==='waive'&&a.player===n).reduce((s,a)=>s+a.amount,0);window._lastPenState[n]=Math.max(pen-waived,0)})},500);
   delete admW[id];renderAdmin()}
+
+</script>
+
+<!-- ═══ ORDER 8/11: ADMIN ACTIONS + FEATURES + EXPORT ═══ -->
+<!-- DEPENDS ON: DATA, ENGINE, HELPERS, all RENDERS, ADMIN RENDER -->
+<!-- EXPORTS: voidMatch, delBet, applyAdj, sqTeamChange, setCap, sqAdd, sqRemove,
+     addMatch, setPO, saveCBTeams, revealKO, publishKO, approveJoin, rejectJoin,
+     genMatchSummary, generatePlayerCard, generateWeeklyWrap, openExportModal -->
+<script>
+'use strict';
 
 // ── ADMIN: Match Actions (void, result, odds) ──
 /** Voids a match (rain/no result). Marks S.r[id] as voided. Preserves all bets in S.b for history — does NOT delete them. _coreBal skips voided matches, so money is returned automatically. */
@@ -7946,6 +8006,10 @@ window.addEventListener('resize',moveSlider);
     <button style="text-align:left;background:0;border:0;padding:6px 10px;color:var(--red);font-size:13px;cursor:pointer;border-radius:8px;font-weight:600" onclick="admSheetJump('adm-danger')">🗑️ Danger Zone</button>
   </div>
 </div>
+
+<!-- ═══ ORDER 9/11: UI UTILITIES ═══ -->
+<!-- DEPENDS ON: all blocks -->
+<!-- EXPORTS: toggleAdmSheet, admSheetJump -->
 <script>
 function toggleAdmSheet(){var s=$('adm-sheet');if(!s)return;s.style.display=s.style.display==='block'?'none':'block'}
 function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTimeout(function(){ruJump(id)},50)}
@@ -8031,6 +8095,10 @@ function admSheetJump(id){var s=$('adm-sheet');if(s)s.style.display='none';setTi
   </div>
 </div>
 <button class="scroll-top" id="scroll-top-btn" aria-label="Scroll to top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
+
+<!-- ═══ ORDER 10/11: TEST HARNESS (localhost only) ═══ -->
+<!-- DEPENDS ON: all blocks -->
+<!-- EXPORTS: runAllTests, runTestsVisual -->
 <script>
 // ═══ HIDDEN TEST HARNESS — runs on localhost only ═══
 if(location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.protocol==='file:'){
