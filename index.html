@@ -766,6 +766,9 @@ function rpn(storedName){
 /** Firebase type safety — converts all bet.mid and bet.am from string to integer. Called after every Firebase data load to prevent === comparison failures. */
 function normalizeBets(){
   Object.values(S.b).forEach(function(bt){if(typeof bt.mid==='string')bt.mid=parseInt(bt.mid)||bt.mid;if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0});
+  // ONE-TIME FIX: M#16 (RR v RCB, 10 Apr) — bet of ₹2,223 bypassed ₹500 validation.
+  // Correcting to ₹2,000 (player's most frequent stake at ×2 odds). Remove after confirmed in Firebase.
+  Object.values(S.b).forEach(function(bt){if(bt.mid===16&&bt.am===2223){bt.am=2000;console.log('🔧 One-time fix: corrected M#16 bet for '+bt.u+' from ₹2,223 → ₹2,000')}});
 
 /** Firebase null safety — removes null entries from S.r and S.b. Firebase can store null for deleted keys. */
 function normalizeResults(){Object.keys(S.r).forEach(function(k){if(S.r[k]===null||S.r[k]===undefined)delete S.r[k]});Object.keys(S.b).forEach(function(k){if(S.b[k]===null||S.b[k]===undefined)delete S.b[k]});Object.keys(S.p).forEach(function(k){if(S.p[k]===null||S.p[k]===undefined)delete S.p[k]})}}
@@ -2358,7 +2361,8 @@ function placeKO(){
   const team=($('ko-team')?.value||'').trim(),pct=parseInt($('ko-pct').value);
   if(!team){toast('Tap a team to pick your champion!','err');return}
   if(!pct||pct<1||pct>100){toast('Enter 1-100%','err');return}
-  const b=betBal(me),amount=Math.round(b*pct/100);
+  const b=betBal(me),rawAmt=Math.round(b*pct/100),amount=Math.max(500,Math.round(rawAmt/500)*500);
+  if(amount>b){toast('Not enough balance for this %','err');return}
   if(!confirm(`🔒 SECRET BET\n\n${T[team]?.n} to win IPL 2026\n₹${amount.toLocaleString()} (${pct}% of your balance)\n\nThis is permanent — you cannot change it.\nOnly you and the admin will see this until the reveal.\n\nConfirm?`))return;
   if(!S.ko)S.ko={};
   S.ko[me]={team,pct,amount,ts:new Date().toISOString()};
@@ -2900,7 +2904,9 @@ function _continueSub(id,f,m,od,am,mom,bk,isEditing,b,ai){
     if(lk(gm(id))){toast('Match just locked!','err');return}
     if(S.r[id]){toast('Result already in!','err');return}
     if(!f.tm||!am||am<=0){toast('Invalid bet data','err');return}
-    if(am>betBal(me)){toast('Balance changed — not enough!','err');return}
+    var reB=betBal(me);
+    if(am>reB){toast('Balance changed — not enough!','err');return}
+    if(am!==reB&&am%500!==0){toast('Amount must be multiples of ₹500','err');return}
     S.b[bk]={mid:id,u:me,tm:f.tm,am,od,mom:mom||null,mt:mt||null,ts:new Date().toISOString()};
     sv(['b']);delete bfs[id];
     // Delight moment: premium confirmation overlay
@@ -6566,6 +6572,8 @@ function adminPlaceBet(mid){if(!adm)return;
   if(!am||am<500){toast('Min ₹500','err');return}
   const b=betBal(player);
   if(am>b){toast(player+' only has ₹'+b.toLocaleString(),'err');return}
+  const abAI=am===b;
+  if(!abAI&&am%500!==0){toast('Multiples of ₹500 (or all-in ₹'+b.toLocaleString()+')','err');return}
   const mo=S.odds[mid];
   const od=parseFloat(mo[abTeam]);
   const momSel=$('ab-mom');
@@ -6640,7 +6648,8 @@ function editKO(name){
   if(teamCode&&!T[teamCode]){toast('Invalid team code: '+teamCode,'err');return}
   const newAmt=prompt('Current amount: ₹'+k.amount.toLocaleString()+' ('+k.pct+'%)\n\nEnter new amount or leave blank to keep:');
   const amt=newAmt?parseInt(newAmt.replace(/,/g,'')):0;
-  if(newAmt&&(!amt||amt<1)){toast('Invalid amount','err');return}
+  if(newAmt&&(!amt||amt<500)){toast('Min ₹500','err');return}
+  if(amt&&amt%500!==0){toast('Use multiples of ₹500','err');return}
   const updatedTeam=teamCode||k.team;
   const updatedAmt=amt||k.amount;
   const updatedPct=amt?Math.round(amt/bal(name)*100):k.pct;
@@ -7454,6 +7463,7 @@ function applyAdj(){
     sv(['adj']);toast(`Waived ₹${pen.toLocaleString()} penalty for ${player} 🛡️`);renderAdmin();return;
   }
   const amt=parseInt($('adj-amt').value);if(!amt||amt<1){toast('Enter amount','err');return}
+  if(amt%500!==0){toast('Use multiples of ₹500 to keep balances clean','err');return}
   const reason=$('adj-reason').value.trim()||'Manual adjustment by admin';
   if(!S.adj)S.adj=[];
   S.adj.push({type:adjType,player,amount:amt,reason,ts:new Date().toISOString()});adminLog('balance_'+adjType,player+' '+adjType+' ₹'+amt+' — '+reason);
