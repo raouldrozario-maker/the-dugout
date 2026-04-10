@@ -305,6 +305,12 @@ select.bf-i{-webkit-appearance:menulist;appearance:auto;cursor:pointer;min-heigh
 //   grep 'CHANGELOG'    → version history
 //   grep '/**'          → JSDoc on critical functions (19)
 //
+// WATCHPOINTS (operate mode — monitor, don't fix until triggered):
+//   W1: HELPERS > 300 lines → split into HELPERS_LOGIC + UI_UTILS
+//   W2: BOOT calls renders or async chains → move BOOT below RENDERS
+//   W3: "Where is this?" moments increase → tighten contracts/naming
+//   W4: Logic feels off but no crash → revisit IIFE/stricter boundaries
+//
 // ┌─────────────────────────────────────────────────────────────┐
 // │  THE DUGOUT v3.5 — FUNCTION MAP (auto-generated)           │
 // │  204 top-level functions · 7989 lines · 655 KB                     │
@@ -760,7 +766,9 @@ function rpn(storedName){
 /** Firebase type safety — converts all bet.mid and bet.am from string to integer. Called after every Firebase data load to prevent === comparison failures. */
 function normalizeBets(){
   Object.values(S.b).forEach(function(bt){if(typeof bt.mid==='string')bt.mid=parseInt(bt.mid)||bt.mid;if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0});
-}
+
+/** Firebase null safety — removes null entries from S.r and S.b. Firebase can store null for deleted keys. */
+function normalizeResults(){Object.keys(S.r).forEach(function(k){if(S.r[k]===null||S.r[k]===undefined)delete S.r[k]});Object.keys(S.b).forEach(function(k){if(S.b[k]===null||S.b[k]===undefined)delete S.b[k]});Object.keys(S.p).forEach(function(k){if(S.p[k]===null||S.p[k]===undefined)delete S.p[k]})}}
 function fixOrphanBets(){
   let fixed=0;
   const players=Object.keys(S.p);
@@ -1232,7 +1240,7 @@ function ld(){
         // Remote has data — use it (don't overwrite with empty local)
         S.p=d.p||{};S.b=d.b||{};S.r=d.r||{};S.pin=d.pin||null;S.odds=d.odds||{};S.ko=d.ko||{};S.koOpen=d.koOpen||false;S.koRevealed=d.koRevealed||false;S.koWinner=d.koWinner||null;S.koPublished=d.koPublished||false;S.po=d.po||{};S.adj=d.adj||[];S.announce=d.announce||null;S.squadEdits=d.squadEdits||{};S.capEdits=d.capEdits||{};S.trash=d.trash||[];S.lockOverride=d.lockOverride||{};S.cbTeams=d.cbTeams||[];S.cancelNudges=d.cancelNudges||[];if(d.customMatches)(d.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});
         localStorage.setItem('dg-s',JSON.stringify(S));
-        if(!window._orphanFixed){window._orphanFixed=true;normalizeBets();fixOrphanBets()}
+        if(!window._orphanFixed){window._orphanFixed=true;normalizeBets();normalizeResults();fixOrphanBets()}
       }else if(Object.keys(S.p).length>0){
         // Remote empty but local has data — push local to remote
         db.ref('dugout').set(S).catch(function(e){console.error('Firebase push err:',e);toast('⚠️ Sync failed','err')});
@@ -1245,10 +1253,10 @@ function ld(){
         const localTs=S._ts||0;
         if(incomingTs<localTs){console.log('[Dugout] Skipped stale Firebase push (remote:'+incomingTs+' < local:'+localTs+')');return}
         const oldR={...S.r};
-        S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();
+        S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();normalizeResults();
         // Detect new results for logged-in player
         if(me){Object.keys(S.r).forEach(mid=>{
-          if(!oldR[mid]&&!S.r[mid].voided){
+          if(!oldR[mid]&&S.r[mid]&&!S.r[mid].voided){
             const myBet=S.b[mid+'-'+me];
             if(myBet){
               const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);
@@ -3591,7 +3599,7 @@ function renderStats(){
   let hottest=null,hottestGain=0;
   players.forEach(n=>{
     const recent=playerResolved[n];
-    const recentMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(b)-parseInt(a)).slice(0,5);
+    const recentMids=Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).sort((a,b)=>parseInt(b)-parseInt(a)).slice(0,5);
     let gain=0;
     recentMids.forEach(mid=>{
       const bt=recent.find(x=>x.mid===parseInt(mid));if(!bt)return;
@@ -3600,7 +3608,7 @@ function renderStats(){
     });
     if(gain>hottestGain){hottestGain=gain;hottest={n,gain}}
   });
-  const resolvedMids=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
+  const resolvedMids=Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
 
   let h='';
 
@@ -3705,7 +3713,7 @@ function renderStats(){
 
   // ═══ GOD MODE: MOMENTUM TRACKER (last 5 form) ═══
   if(resolved.length>=3){
-    const recentMids5=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(b)-parseInt(a)).slice(0,5);
+    const recentMids5=Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).sort((a,b)=>parseInt(b)-parseInt(a)).slice(0,5);
     const form=players.map(n=>{
       const results=recentMids5.map(mid=>{
         const bt=Object.values(S.b).find(x=>x.u===n&&x.mid===parseInt(mid));
@@ -3840,7 +3848,7 @@ function renderStats(){
   if(resolved.length>=3&&players.length>=2&&players.length<=12){
     const h2hMatrix={};
     players.forEach(n=>{h2hMatrix[n]={};players.forEach(n2=>{if(n!==n2)h2hMatrix[n][n2]={w:0,l:0,d:0}})});
-    Object.keys(S.r).filter(mid=>!S.r[mid].voided).forEach(mid=>{
+    Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).forEach(mid=>{
       const rs=S.r[mid];
       const matchBets=Object.values(S.b).filter(x=>x.mid===parseInt(mid));
       matchBets.forEach(bt=>{
@@ -3952,7 +3960,7 @@ function renderStats(){
 
   // ═══ GOD MODE: MATCH IMPACT RANKINGS ═══
   if(resolved.length>=3){
-    const matchImpact=Object.keys(S.r).filter(mid=>!S.r[mid].voided).map(mid=>{
+    const matchImpact=Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).map(mid=>{
       const rs=S.r[mid];const m=gm(parseInt(mid));if(!m)return null;
       const bets=Object.values(S.b).filter(x=>x.mid===parseInt(mid));
       let swing=0;
@@ -4729,7 +4737,7 @@ function renderLockerRoom(){
   
 // ─── GOD MODE: RANK TRAJECTORY ───
   if(resolved.length>=3){
-    const resolvedMids2=Object.keys(S.r).filter(mid=>!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
+    const resolvedMids2=Object.keys(S.r).filter(mid=>S.r[mid]&&!S.r[mid].voided).sort((a,b)=>parseInt(a)-parseInt(b));
     const allPlayers=Object.keys(S.p);
     // Build rank at each resolved match point
     const rankPts=[{mid:0,rank:1,total:allPlayers.length}]; // start: everyone tied
@@ -5382,7 +5390,7 @@ function renderAdmin(){
   }
   // State counters removed — MCB shows this
   // ─── LAST RESULT (quick undo) ───
-  var lastResId=Object.keys(S.r).filter(function(k){return !S.r[k].voided}).sort(function(a,b){return (S.r[b].ts||'').localeCompare(S.r[a].ts||'')})[0];
+  var lastResId=Object.keys(S.r).filter(function(k){return S.r[k]&&!S.r[k].voided}).sort(function(a,b){return (S.r[b].ts||'').localeCompare(S.r[a].ts||'')})[0];
   if(lastResId){
     var lr=S.r[lastResId],lm=gm(parseInt(lastResId));
     var lrHome=lm?(T[lm.h]?T[lm.h].s:lm.h):'?',lrAway=lm?(T[lm.a]?T[lm.a].s:lm.a):'?';
@@ -7519,7 +7527,7 @@ db.ref('dugout').once('value').then(snap=>{
       // Timestamp guard — reject incoming data older than local
       const incomingTs=d2._ts||0;const localTs=S._ts||0;
       if(incomingTs<localTs){console.log('[Dugout] Skipped stale Firebase push (listener2: remote:'+incomingTs+' < local:'+localTs+')');return}
-      const oldR2={...S.r};S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
+      const oldR2={...S.r};S._ts=incomingTs;S.p=d2.p||{};S.b=d2.b||{};S.r=d2.r||{};S.pin=d2.pin||null;S.odds=d2.odds||{};S.ko=d2.ko||{};S.koOpen=d2.koOpen||false;S.koRevealed=d2.koRevealed||false;S.koWinner=d2.koWinner||null;S.koPublished=d2.koPublished||false;S.po=d2.po||{};S.adj=d2.adj||[];S.announce=d2.announce||null;S.squadEdits=d2.squadEdits||{};S.capEdits=d2.capEdits||{};S.trash=d2.trash||[];S.lockOverride=d2.lockOverride||{};S.logs=d2.logs||[];S.keyPlayers=d2.keyPlayers||{};S.cbTeams=d2.cbTeams||[];S.cancelNudges=d2.cancelNudges||[];if(d2.customMatches)(d2.customMatches).forEach(cm=>{if(!MM.find(m=>m.id===cm.id))MM.push(cm)});normalizeBets();normalizeResults();if(me){Object.keys(S.r).forEach(mid=>{if(!oldR2[mid]&&S.r[mid]&&!S.r[mid].voided){const myBet=S.b[mid+'-'+me];if(myBet){const rs=S.r[mid],won=myBet.tm===rs.w,mh=momMatch(myBet.mom,rs.mom),od=safeOd(myBet);if(won){let py=Math.round(myBet.am*(od-1));if(isJackpot(myBet,mh)){py+=Math.round(myBet.am*(od-1))}else if(mh){py+=Math.round(ST*MOM_BONUS)}toast('🎉 +₹'+py.toLocaleString()+' WIN on '+T[myBet.tm]?.s+'!');confetti()}else if(mh){toast('🛡️ MoM saved you! ₹0 loss on '+T[myBet.tm]?.s)}else{toast('😞 -₹'+myBet.am.toLocaleString()+' on '+T[myBet.tm]?.s,'err')}}}})}// Notify admin of new join requests
       if(adm&&d2.pendingJoins){const pj=Object.keys(d2.pendingJoins||{});if(pj.length>0&&(!window._lastPendingCount||pj.length>window._lastPendingCount)){toast('🔔 '+pj.length+' pending join request'+(pj.length>1?'s':'')+'!');window._lastPendingCount=pj.length}}
       S.pendingJoins=d2.pendingJoins||{};
       localStorage.setItem('dg-s',JSON.stringify(S));if(_uiDDCount===0&&_betFormOpen===0){ren();uh()}});
@@ -7557,7 +7565,7 @@ function runExport(){
   var resolvedBets=allBets.filter(function(b){return S.r[b.mid]&&!S.r[b.mid].voided});
   var wins=resolvedBets.filter(function(b){return b.tm===S.r[b.mid].w});
   var totalBet=allBets.reduce(function(s,b){return s+b.am},0);
-  var totalResolved=Object.keys(S.r).filter(function(k){return !S.r[k].voided}).length;
+  var totalResolved=Object.keys(S.r).filter(function(k){return S.r[k]&&!S.r[k].voided}).length;
   var players=Object.keys(S.p);
   var rankEmoji=function(i){return i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)};
 
