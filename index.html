@@ -769,9 +769,10 @@ function normalizeBets(){
   // ONE-TIME FIX: M#16 (RR v RCB, 10 Apr) — bet of ₹2,223 bypassed ₹500 validation.
   // Correcting to ₹2,000 (player's most frequent stake at ×2 odds). Remove after confirmed in Firebase.
   Object.values(S.b).forEach(function(bt){if(bt.mid===16&&bt.am===2223){bt.am=2000;console.log('🔧 One-time fix: corrected M#16 bet for '+bt.u+' from ₹2,223 → ₹2,000')}});
+}
 
 /** Firebase null safety — removes null entries from S.r and S.b. Firebase can store null for deleted keys. */
-function normalizeResults(){Object.keys(S.r).forEach(function(k){if(S.r[k]===null||S.r[k]===undefined)delete S.r[k]});Object.keys(S.b).forEach(function(k){if(S.b[k]===null||S.b[k]===undefined)delete S.b[k]});Object.keys(S.p).forEach(function(k){if(S.p[k]===null||S.p[k]===undefined)delete S.p[k]})}}
+function normalizeResults(){Object.keys(S.r).forEach(function(k){if(S.r[k]===null||S.r[k]===undefined)delete S.r[k]});Object.keys(S.b).forEach(function(k){if(S.b[k]===null||S.b[k]===undefined)delete S.b[k]});Object.keys(S.p).forEach(function(k){if(S.p[k]===null||S.p[k]===undefined)delete S.p[k]})}
 function fixOrphanBets(){
   let fixed=0;
   const players=Object.keys(S.p);
