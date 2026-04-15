@@ -816,15 +816,6 @@ function rpn(storedName){
 /** Firebase type safety — converts all bet.mid and bet.am from string to integer. Called after every Firebase data load to prevent === comparison failures. */
 function normalizeBets(){
   Object.values(S.b).forEach(function(bt){if(typeof bt.mid==='string')bt.mid=parseInt(bt.mid)||bt.mid;if(typeof bt.am==='string')bt.am=parseInt(bt.am)||0});
-  // ONE-TIME FIX: M#16 (RR v RCB, 10 Apr) — bet of ₹2,223 bypassed ₹500 validation.
-  // Correcting to ₹2,000 (player's most frequent stake at ×2 odds). Remove after confirmed in Firebase.
-  var _fixApplied=false;
-  Object.values(S.b).forEach(function(bt){if(bt.mid===16&&bt.am===2223){bt.am=2000;_fixApplied=true;console.log('🔧 One-time fix: corrected M#16 bet for '+bt.u+' from ₹2,223 → ₹2,000')}});
-  if(_fixApplied){try{sv(['b'])}catch(e){console.log('🔧 Fix applied locally — will persist on next save')}}
-  // AUDIT: Flag any non-₹500-multiple bets across all players (admin console only)
-  var _badBets=[];
-  Object.entries(S.b).forEach(function(e){var k=e[0],bt=e[1];if(bt.am&&bt.am%500!==0){_badBets.push({key:k,player:bt.u,mid:bt.mid,amount:bt.am})}});
-  if(_badBets.length){console.warn('⚠️ NON-₹500 BETS FOUND:',_badBets.length);_badBets.forEach(function(b){console.warn('  M#'+b.mid+' '+b.player+' ₹'+b.amount+' ['+b.key+']')})}else{console.log('✅ All bets are valid ₹500 multiples')}
 }
 
 /** Firebase null safety — removes null entries from S.r and S.b. Firebase can store null for deleted keys. */
